@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manager Home</title>
+<link rel="stylesheet" href="./style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+    <nav class="nav-desktop">
+        <a href="/manager.html" class="nav-link active">Home</a>
+        <a href="/spreadsheet.html" class="nav-link">Spreadsheet</a>
+        <a href="/request.html" class="nav-link">Requested Form</a>
+        <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+    </nav>
+</header>
+
+<div class="dashboard-container">
+    <div class="dashtittle">
+      <h1>Evaluation Dashboard</h1>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stats-card">
+        <div class="stats-number" id="totalEvaluations">0</div>
+        <div class="stats-label">Total Evaluations</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-number" id="completeEvaluations">0</div>
+        <div class="stats-label">Complete</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-number" id="progressEvaluations">0</div>
+        <div class="stats-label">In Progress</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="widget map-section">
+        <div class="widget-header">
+          <div class="widget-title">
+            <div class="widget-icon">📍</div>
+            Evaluation Locations
+          </div>
+          <div class="filter-section">
+            <select class="filter-select" id="locationFilter">
+              <option value="all">All Locations</option>
+              <option value="complete">Complete</option>
+              <option value="progress">In Progress</option>
+            </select>
+            <label>From: <input type="date" id="startDate" onchange="applyFilters()"></label>
+            <label>To: <input type="date" id="endDate" onchange="applyFilters()"></label>
+          </div>
+        </div>
+        <div id="map"></div>
+      </div>
+
+      <div class="widget">
+        <div class="widget-header">
+          <div class="widget-title">
+            <div class="widget-icon">📊</div>
+            Product Categories
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="productChart"></canvas>
+        </div>
+      </div>
+
+     <div class="widget">
+        <div class="widget-header">
+          <div class="widget-title">
+            <div class="widget-icon">📋</div>
+            Recent Evaluations
+          </div>
+        </div>
+        <div class="evaluation-list" id="evaluationList"></div>
+      </div>
+    </div>
+
+      <div class="widget">
+        <div class="widget-header">
+          <div class="widget-title">
+            <div class="widget-icon">📅</div>
+            Monthly Progress
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="progressChart"></canvas>
+        </div>
+      </div>
+</div>
+
+<script>
+const { Client, Account, Databases } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1")
+.setProject("68ddd7de00255d4f5c96");
+
+const databases = new Databases(client);
+const account = new Account(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba918c0022d2b9a429";
+
+const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const evalCollectionId    = "68bf9d5600257a20775a";
+const postEvalCollectionId= "68bf9d62002b4f5f7f23";
+
+let evaluationData = [];
+let map;
+let markers = [];
+
+async function checkSession() {
+    try {
+        const user = await account.get();
+        console.log('Logged in as:', user.email);
+        return user;
+    } catch (err) {
+        window.location.href = 'index.html';
+        return null;
+    }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+    try { await account.deleteSession('current'); window.location.href = "/index.html"; }
+    catch { window.location.href = "/index.html"; }
+});
+
+async function getFormStatus(collectionId, formId) {
+    try {
+        const doc = await databases.getDocument(databaseId, collectionId, formId);
+        return doc.status || 'draft';
+    } catch { return 'draft'; }
+}
+
+function computeOverallStatus(pre, evalStatus, post) {
+    const completedForms = [pre, evalStatus, post].filter(s => s === 'complete').length;
+    const formsWithProgress = [pre, evalStatus, post].filter(s => s === 'complete' || s === 'progress').length;
+
+    if (completedForms === 3) return 'complete';
+    if (formsWithProgress > 0) return 'progress';
+    return 'draft';
+}
+
+async function loadEvaluations() {
+    try {
+        const response = await databases.listDocuments(databaseId, collectionId, [
+            Appwrite.Query.limit(1000),
+            Appwrite.Query.orderDesc('$createdAt')
+        ]);
+
+        evaluationData = [];
+
+        for (const doc of response.documents) {
+            let preDoc, evalDoc, postDoc;
+            let preStatus = 'draft', evalStatus = 'draft', postStatus = 'draft';
+
+            try { preDoc = await databases.getDocument(databaseId, preEvalCollectionId, doc.$id); preStatus = preDoc.status || 'draft'; } catch {}
+            try { evalDoc = await databases.getDocument(databaseId, evalCollectionId, doc.$id); evalStatus = evalDoc.status || 'draft'; } catch {}
+            try { postDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.$id); postStatus = postDoc.status || 'draft'; } catch {}
+
+            const overallStatus = computeOverallStatus(preStatus, evalStatus, postStatus);
+
+            let dates = [];
+            if (preDoc?.completedAt) dates.push(new Date(preDoc.completedAt));
+            if (evalDoc?.completedAt) dates.push(new Date(evalDoc.completedAt));
+            if (postDoc?.completedAt) dates.push(new Date(postDoc.completedAt));
+
+            const evalDate = dates.length > 0 ? new Date(Math.max(...dates)) : new Date(doc.$createdAt);
+            let location = null;
+            let locationName = doc.customerCompany || 'Unknown Location';
+
+            if (!doc.location && (doc.customerCompany || doc.customerLocation)) {
+                try {
+                    let queryString = doc.customerCompany || '';
+                    if (doc.customerLocation) {
+                        queryString += ', ' + doc.customerLocation;
+                    }
+
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryString)}&limit=1&addressdetails=1`);
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        location = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                        locationName = data[0].display_name || queryString;
+                        try {
+                            await databases.updateDocument(databaseId, collectionId, doc.$id, {
+                                location,
+                                locationName
+                            });
+                            console.log(`Updated location for ${queryString}:`, location);
+                        } catch (err) {
+                            console.warn("Failed to update location in database", err);
+                        }
+                    } else {
+                        console.log(`No geocoding results found for: ${queryString}`);
+                    }
+                } catch (err) {
+                    console.warn("Geocoding failed for", doc.customerCompany, err);
+                }
+            } else if (doc.location) {
+                if (Array.isArray(doc.location)) location = doc.location;
+                else try {
+                    const parsed = JSON.parse(doc.location);
+                    if (Array.isArray(parsed)) location = parsed;
+                } catch {}
+            }
+
+            evaluationData.push({
+                id: doc.$id,
+                product: doc.prodname || 'Unknown Product',
+                category: doc.productType || 'Other',
+                staff: doc.username || doc.company || 'N/A',
+                company: doc.company || 'N/A',
+                customerCompany: doc.customerCompany || 'N/A',
+                customerLocation: doc.customerLocation || 'N/A', 
+                location,
+                locationName,
+                date: evalDate.toISOString().split('T')[0],
+                timestamp: evalDate.toISOString(),
+                pre_eval: preStatus,
+                eval: evalStatus,
+                post_eval: postStatus,
+                status: overallStatus
+            });
+        }
+
+        updateDashboard();
+    } catch (err) {
+        console.error("Error loading evaluations:", err);
+        document.getElementById('evaluationList').innerHTML =
+            '<div class="error-message">Failed to load evaluations. Refresh the page.</div>';
+    }
+}
+
+function updateDashboard() {
+    updateStats();
+    initCharts();
+    populateEvaluationList();
+    initMap();
+}
+
+function updateStats() {
+    document.getElementById('totalEvaluations').textContent = evaluationData.length;
+    document.getElementById('completeEvaluations').textContent = evaluationData.filter(e => e.status==='complete').length;
+    document.getElementById('progressEvaluations').textContent = evaluationData.filter(e => e.status==='progress').length;
+}
+
+function initCharts() {
+    const productCounts = {};
+    evaluationData.forEach(item => productCounts[item.category] = (productCounts[item.category]||0)+1);
+
+    const productCtx = document.getElementById('productChart');
+    if(window.productChartInstance) window.productChartInstance.destroy();
+
+    window.productChartInstance = new Chart(productCtx, {
+        type:'doughnut',
+        data:{ labels:Object.keys(productCounts), datasets:[{ data:Object.values(productCounts), backgroundColor:['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6'] }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } } }
+    });
+
+    const monthlyData = getMonthlyProgressData();
+    const progressCtx = document.getElementById('progressChart');
+    if(window.progressChartInstance) window.progressChartInstance.destroy();
+
+    window.progressChartInstance = new Chart(progressCtx,{
+        type:'line',
+        data:{
+            labels: monthlyData.labels,
+            datasets:[
+                { label:'Completed', data:monthlyData.completed, borderColor:'#2ecc71', backgroundColor:'rgba(46,204,113,0.1)', fill:true, tension:0.4, pointBackgroundColor:'#2ecc71', pointRadius:5 },
+                { label:'Total', data:monthlyData.total, borderColor:'#3498db', backgroundColor:'rgba(52,152,219,0.1)', fill:false, tension:0.4, pointBackgroundColor:'#3498db', pointRadius:5 }
+            ]
+        },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'top' } }, scales:{ y:{ beginAtZero:true } } }
+    });
+}
+
+function getMonthlyProgressData() {
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const currentYear = new Date().getFullYear();
+    const stats = {};
+    monthNames.forEach(m => stats[m]={total:0,completed:0});
+
+    evaluationData.forEach(e=>{
+        const date = new Date(e.date);
+        if(date.getFullYear()===currentYear){
+            const m = monthNames[date.getMonth()];
+            stats[m].total++;
+            if(e.status==='complete') stats[m].completed++;
+        }
+    });
+
+    return { labels:monthNames, completed:monthNames.map(m=>stats[m].completed), total:monthNames.map(m=>stats[m].total) };
+}
+
+function populateEvaluationList() {
+    const listContainer = document.getElementById('evaluationList');
+    if (!listContainer) return;
+
+    const recentEvaluations = evaluationData
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, 8);
+
+    if (recentEvaluations.length === 0) {
+        listContainer.innerHTML = '<div class="empty-state">No evaluations found</div>';
+        return;
+    }
+
+    listContainer.innerHTML = recentEvaluations.map(e => {
+        const getStatusColor = (status) => {
+            if (status === 'complete') return '#28a745';
+            if (status === 'progress') return '#ffc107';
+            return '#dc3545';
+        };
+
+        return `
+            <div class="evaluation-item">
+                <div class="evaluation-info">
+                    <div class="evaluation-product">${e.product}</div>
+                    <div class="evaluation-details">
+                        👤 ${e.staff} • 🏢 ${e.customerCompany} • 📅 ${e.date}
+                    </div>
+                    <div class="form-progress" style="margin-top:4px;">
+                        <small>
+                            <span style="color: ${getStatusColor(e.pre_eval)}; font-weight: 500;">Pre-evaluation</span> | 
+                            <span style="color: ${getStatusColor(e.eval)}; font-weight: 500;">Evaluation</span> | 
+                            <span style="color: ${getStatusColor(e.post_eval)}; font-weight: 500;">Post-evaluation</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="evaluation-status">
+                    <span class="status-badge" style="background:${getStatusColor(e.status)};">
+                        ${e.status === 'complete' ? '✅ Complete' : e.status === 'progress' ? '⏳ In Progress' : '📝 Draft'}
+                    </span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function initMap() {
+    if(map) map.remove();
+    map = L.map('map').setView([20, 0], 3);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap contributors', maxZoom:18 }).addTo(map);
+    updateMapMarkers();
+}
+
+function updateMapMarkers(){
+    if(!map) return;
+    markers.forEach(m=>map.removeLayer(m));
+    markers = [];
+    const data = getFilteredData();
+    data.forEach(e=>{
+        if (e.location && Array.isArray(e.location) && e.location.length === 2) {
+            const color = e.status==='complete'?'#28a745': e.status==='progress'?'#ffc107':'#dc3545';
+            const icon = L.divIcon({className:'custom-marker', html:`<div style="background:${color};width:20px;height:20px;border-radius:50%;border:3px solid white;"></div>`, iconSize:[20,20], iconAnchor:[10,10]});
+            const marker = L.marker(e.location,{icon}).addTo(map);
+            marker.bindPopup(`<b>${e.product}</b><br>👤 ${e.staff}<br>📅 ${e.date}<br>🏢 ${e.customerCompany}<br>`);
+            markers.push(marker);
+        }
+    });
+    if(markers.length>0){ const group=L.featureGroup(markers); map.fitBounds(group.getBounds(),{padding:[20,20]}); }
+    else { 
+        map.setView([20, 0], 3);
+    }
+}
+
+function getFilteredData() {
+    const filter = document.getElementById('locationFilter')?.value || 'all';
+    const start = document.getElementById("startDate").value?new Date(document.getElementById("startDate").value):null;
+    const end = document.getElementById("endDate").value?new Date(document.getElementById("endDate").value):null;
+
+    return evaluationData.filter(e=>{
+        if(filter!=='all' && e.status!==filter) return false;
+        const d = new Date(e.date);
+        if(start && d<start) return false;
+        if(end){ const eCopy=new Date(end); eCopy.setHours(23,59,59,999); if(d>eCopy) return false; }
+        return true;
+    });
+}
+
+function applyFilters(){ updateMapMarkers(); }
+
+function setupRealTimeUpdates(){
+    client.subscribe(`databases.${databaseId}.collections.${collectionId}.documents`,()=>loadEvaluations());
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+    const user = await checkSession();
+    if(user){
+        await loadEvaluations();
+        setupRealTimeUpdates();
+        document.getElementById('locationFilter').addEventListener('change',updateMapMarkers);
+        document.getElementById('startDate').addEventListener('change',applyFilters);
+        document.getElementById('endDate').addEventListener('change',applyFilters);
+    }
+});
+</script>
+
+
+<footer class="footer">
+<span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+
+</body>
+</html>

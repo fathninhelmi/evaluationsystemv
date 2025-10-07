@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./style.css">
+  <title>Evaluation Spreadsheet</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+    <nav class="nav-desktop">
+        <a href="/manager.html" class="nav-link">Home</a>
+        <a href="/spreadsheet.html" class="nav-link active">Spreadsheet</a>
+        <a href="/request.html" class="nav-link">Requested Form</a>
+        <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+    </nav>
+</header>
+
+<div class="main-content">
+  <h1>📊 Evaluation Spreadsheet</h1>
+  <div class="search-bar-wrapper">
+    <div class="search-input">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search by product or company name">
+    </div>
+  </div>
+
+  <div id="spreadsheet" class="tab-content active">
+    <div class="table-container">
+      <table class="spreadsheet-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product Name</th>
+            <th>Company</th>
+            <th>Evaluation Date</th>
+            <th>Pre Evaluation</th>
+            <th>Evaluation</th>
+            <th>Post Evaluation</th>
+          </tr>
+        </thead>
+        <tbody id="spreadsheetBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const { Client, Account, Databases } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255d4f5c96");
+
+const databases = new Databases(client);
+const account = new Account(client);
+
+  const databaseId = "68ba8a9c001f17064e15";
+  const collectionId = "68ba918c0022d2b9a429";
+  const preEvalCollectionId = "68c7ced6001bd14d08f4";
+  const evalCollectionId    = "68bf9d5600257a20775a";
+  const postEvalCollectionId= "68bf9d62002b4f5f7f23";
+
+
+  function getStatusBadge(status) {
+    let text = "Draft";
+    if(status === "progress") text = "In Progress";
+    else if(status === "complete") text = "Complete";
+    return `<span class="status-badge ${status}">${text}</span>`;
+  }
+
+  function getOpenButton(status, link) {
+    if(status === "complete") return `<a href="${link}" class="open-btn enabled">View</a>`;
+    return `<a href="#" class="open-btn disabled">View</a>`;
+  }
+
+  function getPreEvalPage(productType, docId) {
+    if (!productType) return `preeval.html?id=${docId}`;
+    
+    const productTypeLower = productType.toLowerCase().trim();
+    
+    switch (productTypeLower) {
+      case "xs":
+      case "smart code reader (xs)":
+        return `preevalXS.html?id=${docId}`;
+      case "xc":
+      case "smart camera (xc)":
+        return `preevalXC.html?id=${docId}`;
+      default:
+        return `preeval.html?id=${docId}`;
+    }
+  }
+
+  async function getFormStatus(collectionId, formId) {
+    try {
+      const doc = await databases.getDocument(databaseId, collectionId, formId);
+      return doc.status || "draft";
+    } catch {
+      return "draft";
+    }
+  }
+
+  let allRows = [];
+
+  async function loadSpreadsheet() {
+    try {
+      const response = await databases.listDocuments(
+        databaseId, 
+        collectionId,
+        [Appwrite.Query.limit(1000), Appwrite.Query.orderDesc('$createdAt')]
+      );
+
+      const tbody = document.getElementById("spreadsheetBody");
+      tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;color:#666;'>Loading data...</td></tr>";
+
+      allRows = [];
+
+      for(let i = 0; i < response.documents.length; i++){
+        const doc = response.documents[i];
+
+        let preDoc, evalDoc, postDoc;
+        let preStatus = "draft", evalStatus = "draft", postStatus = "draft";
+        
+        try { preDoc = await databases.getDocument(databaseId, preEvalCollectionId, doc.$id); preStatus = preDoc.status || "draft"; } catch {}
+        try { evalDoc = await databases.getDocument(databaseId, evalCollectionId, doc.$id); evalStatus = evalDoc.status || "draft"; } catch {}
+        try { postDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.$id); postStatus = postDoc.status || "draft"; } catch {}
+
+        let evalDate;
+        if (preDoc && preDoc.evalDate) {
+          evalDate = new Date(preDoc.evalDate);
+        } else {
+          const dates = [];
+          if(preDoc?.completedAt) dates.push(new Date(preDoc.completedAt));
+          if(evalDoc?.completedAt) dates.push(new Date(evalDoc.completedAt));
+          if(postDoc?.completedAt) dates.push(new Date(postDoc.completedAt));
+          evalDate = dates.length > 0 ? new Date(Math.max(...dates)) : new Date(doc.$createdAt);
+        }
+
+        const companyName = doc.customerCompany || "N/A";
+        const prodname = doc.prodname || "N/A";
+        const productType = doc.productType || "";
+
+        allRows.push({
+          index: i + 1,
+          prodname,
+          companyName,
+          evalDate: evalDate.toISOString().split("T")[0],
+          preStatus,
+          evalStatus,
+          postStatus,
+          docId: doc.$id,
+          productType
+        });
+      }
+
+      renderTable(allRows);
+
+    } catch (err) {
+      console.error("Failed to load spreadsheet:", err);
+      document.getElementById("spreadsheetBody").innerHTML = 
+        `<tr><td colspan="7" style="text-align:center;color:red;">Error loading data</td></tr>`;
+    }
+  }
+
+  function renderTable(rows) {
+    const tbody = document.getElementById("spreadsheetBody");
+    tbody.innerHTML = "";
+    rows.forEach(row => {
+      const preEvalLink = getPreEvalPage(row.productType, row.docId);
+      
+      const tableRow = `
+        <tr id="row-${row.docId}">
+          <td>${row.index}.</td>
+          <td>${row.prodname}</td>
+          <td>${row.companyName}</td>
+          <td>${row.evalDate}</td>
+          <td>${getStatusBadge(row.preStatus)}<br>${getOpenButton(row.preStatus, preEvalLink)}</td>
+          <td>${getStatusBadge(row.evalStatus)}<br>${getOpenButton(row.evalStatus, `eval.html?id=${row.docId}`)}</td>
+          <td>${getStatusBadge(row.postStatus)}<br>${getOpenButton(row.postStatus, `posteval.html?id=${row.docId}`)}</td>
+        </tr>
+      `;
+      tbody.insertAdjacentHTML("beforeend", tableRow);
+    });
+  }
+
+  function filterTable(searchTerm) {
+    const filtered = allRows.filter(row =>
+      row.prodname.toLowerCase().includes(searchTerm) ||
+      row.companyName.toLowerCase().includes(searchTerm)
+    );
+    renderTable(filtered);
+  }
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    try { await account.deleteSession("current"); window.location.href = "/index.html"; }
+    catch { window.location.href = "/index.html"; }
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadSpreadsheet();
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("keyup", e => {
+      filterTable(e.target.value.trim().toLowerCase());
+    });
+  });
+</script>
+
+<footer class="footer-regis">
+  <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+</body>
+</html>

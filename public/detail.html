@@ -1,0 +1,172 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluation Form Details</title>
+<link rel="stylesheet" href="./style.css">
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+</header>
+
+<div id="eventCard" class="card">
+  <p>Loading event</p>
+</div>
+
+<script>
+const { Client, Databases } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255d4f5c96");
+
+const databases = new Databases(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const mainCollectionId = "68ba918c0022d2b9a429";
+const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const evalCollectionId = "68bf9d5600257a20775a";
+const postEvalCollectionId = "68bf9d62002b4f5f7f23";
+
+const params = new URLSearchParams(window.location.search);
+const eventId = params.get("id");
+
+const eventCard = document.getElementById("eventCard");
+
+const getStepClass = (status) => {
+    switch (status) {
+        case "draft": return "pending";
+        case "in progress": return "active";
+        case "complete": return "completed";
+        default: return "pending";
+    }
+};
+
+async function loadEvent() {
+    try {
+        const ev = await databases.getDocument(databaseId, mainCollectionId, eventId);
+        console.log('Loaded event:', ev);
+        
+        const preEvalStatus = await getFormStatus(preEvalCollectionId, eventId);
+        const evalStatus = await getFormStatus(evalCollectionId, eventId);
+        const postEvalStatus = await getFormStatus(postEvalCollectionId, eventId);
+
+        console.log('Form statuses:', { preEvalStatus, evalStatus, postEvalStatus });
+
+        eventCard.innerHTML = `
+            <h1>${ev.prodname} (${ev.createDate ? formatDate(ev.createDate) : ""})</h1>
+            <div class="wizard">
+              <div class="step-container">
+                <div class="step ${getStepClass(preEvalStatus)}" onclick="goToStep('preeval.html', '${eventId}')">1</div>
+                <div class="step-label">Pre Evaluation</div>
+              </div>
+              <div class="step-container">
+                <div class="step ${getStepClass(evalStatus)}" onclick="goToStep('eval.html', '${eventId}')">2</div>
+                <div class="step-label">Evaluation</div>
+              </div>
+              <div class="step-container">
+                <div class="step ${getStepClass(postEvalStatus)}" onclick="goToStep('posteval.html', '${eventId}')">3</div>
+                <div class="step-label">Post Evaluation</div>
+              </div>
+            </div>
+            <button class="back-btn" onclick="goBack()">Back</button>
+        `;
+    } catch (err) {
+        console.error("Failed to load event:", err);
+        eventCard.innerHTML = "<p>Event not found.</p>";
+    }
+}
+
+async function getFormStatus(collectionId, eventId) {
+    try {
+        const doc = await databases.getDocument(databaseId, collectionId, eventId);
+        return doc.status || "draft";
+    } catch (err) {
+        if (err.message.includes("Document with the requested ID could not be found")) {
+            return "draft";
+        }
+        console.warn("Error checking form status:", err);
+        return "draft";
+    }
+}
+
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+function goBack() { 
+   window.location.href = "createform.html";
+}
+
+async function goToStep(page, eventId) {
+    try {
+        const mainDoc = await databases.getDocument(databaseId, mainCollectionId, eventId);
+        console.log("Product Type from database:", mainDoc.productType); 
+        
+        let collectionId;
+        if (page.includes("preeval")) collectionId = preEvalCollectionId;
+        else if (page.includes("eval.html")) collectionId = evalCollectionId;
+        else if (page.includes("posteval")) collectionId = postEvalCollectionId;
+
+        let formDoc;
+        try {
+            formDoc = await databases.getDocument(databaseId, collectionId, eventId);
+            console.log("Form document exists:", formDoc);
+        } catch (err) {
+            if (err.message.includes("Document with the requested ID could not be found")) {
+                console.log("Creating new form document with ID:", eventId);
+                formDoc = await databases.createDocument(databaseId, collectionId, eventId, {
+                    status: "draft",
+                    username: (mainDoc.username && typeof mainDoc.username === "string") ? mainDoc.username : "Unknown",
+                    email: (mainDoc.email && typeof mainDoc.email === "string") ? mainDoc.email : "no-email@system.local",
+                    customerCompany: mainDoc.customerCompany || "",
+                    prodname: mainDoc.prodname || "",
+                    productType: mainDoc.productType || ""
+                });
+                console.log("Created new form document:", formDoc);
+            } else {
+                throw err;
+            }
+        }
+
+        if (page.includes("preeval")) {
+            let preevalPage;
+            const productType = (mainDoc.productType || "").toLowerCase().trim();
+            console.log("Processed product type:", productType); 
+            
+            switch (productType) {
+                case "xs":
+                case "smart code reader (xs)": 
+                    preevalPage = "preevalXS.html";
+                    console.log("Redirecting to XS pre-eval");
+                    break;
+                case "xc":
+                case "smart camera (xc)": 
+                    preevalPage = "preevalXC.html";
+                    console.log("Redirecting to XC pre-eval");
+                    break;
+                default:
+                    preevalPage = "preeval.html";
+                    console.log("Redirecting to default pre-eval");
+            }
+            page = preevalPage;
+        }
+        console.log("Final page to navigate to:", page); 
+        window.location.href = `${page}?id=${eventId}`;
+
+    } catch (err) {
+        console.error("Failed to navigate to step:", err);
+        alert("Error: " + err.message);
+    }
+}
+
+loadEvent();
+</script>
+
+<footer class="footer-regis">
+    <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+</body>
+</html>

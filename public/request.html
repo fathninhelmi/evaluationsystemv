@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Requested Form</title>
+<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+    <nav class="nav-desktop">
+        <a href="/manager.html" class="nav-link">Home</a>
+        <a href="/spreadsheet.html" class="nav-link">Spreadsheet</a>
+        <a href="/request.html" class="nav-link active">Requested Form</a>
+        <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+    </nav>
+</header>
+
+<div class="req-contain">
+  <h1>Requested Form List</h1>
+  <div class="reqcontainer" id="requestContainer"></div>
+</div>
+
+<script>
+const { Client, Account, Databases } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255d4f5c96");
+
+const databases = new Databases(client);
+const account = new Account(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const requestListId = "68db7c5d000007c7fd7e";
+const collectionId = "68ba918c0022d2b9a429";
+const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const evalCollectionId    = "68bf9d5600257a20775a";
+const postEvalCollectionId= "68bf9d62002b4f5f7f23";
+
+const requestContainer = document.getElementById('requestContainer');
+
+// Check login session
+async function checkSession() {
+    try {
+        const user = await account.get();
+        return user;
+    } catch {
+        window.location.href = '/index.html';
+    }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+    try {
+        await account.deleteSession('current');
+        window.location.href = "/index.html";
+    } catch {
+        window.location.href = "/index.html";
+    }
+});
+
+async function loadRequests() {
+    try {
+        const res = await databases.listDocuments(databaseId, requestListId);
+        const pendingRequests = res.documents.map(doc => {
+            let formattedDate = doc.evalDate || 'N/A';
+            if (doc.evalDate && doc.evalDate !== 'N/A') {
+                try {
+                    const date = new Date(doc.evalDate);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = String(date.getFullYear()).slice(-2);
+                    formattedDate = `${day}/${month}/${year}`;
+                } catch (err) {
+                    console.warn('Error formatting date:', err);
+                }
+            }
+            
+            return {
+                id: doc.$id,
+                formId: doc.formId,
+                username: doc.username || 'Unknown User',
+                prodname: doc.prodname || 'Untitled',
+                customerCompany: doc.customerCompany || 'N/A',
+                evalDate: formattedDate,
+                statusReq: doc.statusReq || 'pending'
+            };
+        });
+
+        renderRequests(pendingRequests);
+    } catch (err) {
+        console.error('Error loading requests:', err);
+        requestContainer.innerHTML = '<p style="text-align:center; padding:20px;">Error loading requests</p>';
+    }
+}
+
+function renderRequests(pendingRequests) {
+    requestContainer.innerHTML = '';
+    if (pendingRequests.length === 0) {
+        requestContainer.innerHTML = '<p style="text-align:center; padding:20px;">No pending requests</p>';
+        return;
+    }
+
+    pendingRequests.forEach(request => {
+        const item = document.createElement('div');
+        item.className = 'request-item';
+        
+        let actionButtons = '';
+        if (request.statusReq === 'approved') {
+            actionButtons = `
+                <button class="status-badge approved" disabled style="cursor: not-allowed; opacity: 0.7;">
+                    <i class="fas fa-check"></i> Approved
+                </button>
+            `;
+        } else if (request.statusReq === 'rejected') {
+            actionButtons = `
+                <button class="status-badge rejected" disabled style="cursor: not-allowed; opacity: 0.7;">
+                    <i class="fas fa-times"></i> Rejected
+                </button>
+            `;
+        } else {
+            actionButtons = `
+                <button class="status-badge approved" onclick="approveRequest('${request.id}')">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="status-badge rejected" onclick="declineRequest('${request.id}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+        }
+        
+        item.innerHTML = `
+            <div class="user-info">
+                <strong>${request.username}</strong> has requested 
+                <a href="#" onclick="viewRequestedForm('${request.formId}'); return false;" 
+                   style="color: #007bff; text-decoration: underline; cursor: pointer; font-weight: 500;">
+                    ${request.prodname}
+                </a>, ${request.customerCompany} (${request.evalDate})
+            </div>
+            <div class="actions">
+                ${actionButtons}
+            </div>
+        `;
+        requestContainer.appendChild(item);
+    });
+}
+
+async function viewRequestedForm(formId) {
+    window.location.href = `posteval.html?id=${formId}&mode=view&showNavigation=true`;
+}
+
+async function approveRequest(id) {
+    try {
+        await databases.updateDocument(databaseId, requestListId, id, {
+            statusReq: 'approved'
+        });
+        
+        alert('Request approved successfully!');
+        loadRequests();
+    } catch (err) {
+        console.error('Error approving request:', err);
+        console.error('Full error:', err.message);
+        alert(`Failed to approve request: ${err.message}`);
+    }
+}
+
+async function declineRequest(id) {
+    try {
+        await databases.updateDocument(databaseId, requestListId, id, {
+            statusReq: 'rejected'
+        });
+        
+        alert('Request rejected.');
+        loadRequests();
+    } catch (err) {
+        console.error('Error rejecting request:', err);
+        console.error('Full error:', err.message);
+        alert(`Failed to reject request: ${err.message}`);
+    }
+}
+
+checkSession();
+loadRequests();
+</script>
+
+<footer class="footer-regis">
+  <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+</body>
+</html>

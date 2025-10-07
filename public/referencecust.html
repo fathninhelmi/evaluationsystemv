@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reference Details Management</title>
+<link rel="stylesheet" href="./style.css">
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+    <nav class="nav-desktop">
+        <a href="approveduser.html" class="nav-link">Approved Users</a>
+        <a href="manageform.html" class="nav-link">Manage Forms</a>
+        <a href="referencecust.html" class="nav-link active">References Details</a>
+        <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+    </nav>
+</header>
+
+<main class="main-content-ref">
+    <div class="page-header">
+        <h1>Reference Details Management</h1>
+    </div>
+
+    <div class="controls-ref">
+        <div class="search-box-ref">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by category name">
+        </div>
+    </div>
+
+    <div id="loadingIndicator" class="loading">
+        <div class="spinner"></div>
+        <p>Loading references</p>
+    </div>
+
+    <div id="referenceGrid" class="reference-grid-ref" style="display: none;"></div>
+</main>
+
+<div id="editModal" class="modal-ref">
+    <div class="modal-overlay-ref" onclick="closeModal()"></div>
+    <div class="modal-content-ref">
+        <div class="modal-header-ref">
+            <h2><i class="fas fa-cog"></i> Manage Options</h2>
+            <button class="close-btn" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="editForm">
+            <div class="form-group-ref">
+                <label><i class="fas fa-tag"></i> Category - Feature</label>
+                <input type="text" id="editTitle" readonly class="readonly-input-ref">
+            </div>
+            
+            <div class="form-group-ref">
+                <label><i class="fas fa-plus-circle"></i> Add New Option</label>
+                <div class="options-editor-ref">
+                    <div class="option-input-row-ref">
+                        <input type="text" id="newOptionInput" placeholder="Enter brand (e.g., Dell OptiPlex 7080)">
+                        <textarea id="newOptionDesc" placeholder="Enter details for this option"></textarea>
+                        <button type="button" class="add-option-btn-ref" onclick="addOption()">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+
+                    <div class="current-options-ref">
+                        <h4><i class="fas fa-list"></i> Current Options (<span id="optionCount">0</span>)</h4>
+                        <div id="optionsList" class="options-list-container-ref">
+                            <p class="empty-state-ref">No options added yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions-ref">
+                <button type="button" class="btn-ref btn-cancel-ref" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="submit" class="btn-ref btn-save-ref">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer class="footer">
+    <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+
+<script>
+const { Client, Account, Databases } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255d4f5c96");
+
+const databases = new Databases(client);
+const account = new Account(client);
+const databaseId = "68ba8a9c001f17064e15";
+const referenceCollectionId = "68da1d5f002142be75df";
+
+const categoryFeatures = {
+    'V-Library': [
+        { id: 'system_gt_32gb_ram', name: 'System >32GB RAM' },
+        { id: 'server', name: 'Server' }
+    ],
+    'AI Programming': [
+        { id: 'vayo_accelerator', name: 'Vayo Accelerator' },
+        { id: 'mentor_graphics_opm', name: 'Mentor Graphics OPM' }
+    ],
+    'VVTS': [
+        { id: 'vvts_license', name: 'License' },
+        { id: 'vvts_pc', name: 'PC' },
+        { id: 'vvts_one_aoi', name: 'One AOI to Multiple' }
+    ],
+    'AI VVTS': [
+        { id: 'ai_vvts_license', name: 'License' },
+        { id: 'ai_vvts_pc', name: 'PC' },
+        { id: 'ai_vvts_one_aoi', name: 'One AOI to Multiple' }
+    ],
+    'VDSPC 2.0': [
+        { id: 'vdspc_license', name: 'License' },
+        { id: 'vdspc_server', name: 'Server' }
+    ],
+    'V-One': [
+        { id: 'vone_license', name: 'License' },
+        { id: 'vone_server', name: 'Server' }
+    ],
+    'V-Accelerator': [
+        { id: 'v_acc_license', name: 'License / Dongle' }
+    ],
+    'V-Tune': [
+        { id: 'v_tune_system32', name: 'System >32GB RAM' }
+    ],
+    'Minitab': [
+        { id: 'minitab_license', name: 'License' },
+        { id: 'minitab_server', name: 'Server' },
+        { id: 'minitab_500gb', name: 'Additional >500GB Hard Drive' }
+    ],
+    'One-View': [
+        { id: 'one_view_license', name: 'License' },
+        { id: 'one_view_drive_ram', name: 'Additional >500GB Drive, 16GB RAM' }
+    ],
+    'MES': [
+        { id: 'mes_available', name: 'Available Feature' },
+        { id: 'mes_develop', name: 'Need to Develop/Enhance' }
+    ],
+    'Barcode Related': [
+        { id: 'barcode_available', name: 'Available Feature' },
+        { id: 'barcode_develop', name: 'Need to Develop/Enhance' }
+    ]
+};
+
+let references = {};
+let currentEditId = null;
+let currentEditCategory = null;
+let currentOptions = [];
+let currentDetails = [];
+let currentUser = null;
+let selectedFeatures = {};
+
+async function loadReferences() {
+    try {
+        document.getElementById('loadingIndicator').style.display = 'flex';
+        document.getElementById('referenceGrid').style.display = 'none';
+
+        currentUser = await account.get();
+        console.log('Logged in as:', currentUser.email);
+
+        try {
+            const response = await databases.listDocuments(databaseId, referenceCollectionId);
+            console.log('Loaded references:', response.documents.length);
+            response.documents.forEach(doc => {
+                references[doc.referenceId] = {
+                    options: doc.options || [],
+                    detail: doc.detail || [],
+                    category: doc.category || '',
+                    docId: doc.$id
+                };
+            });
+        } catch (error) {
+            console.log('No existing references found:', error);
+        }
+        Object.keys(categoryFeatures).forEach(category => {
+            if (categoryFeatures[category].length > 0) {
+                selectedFeatures[category] = categoryFeatures[category][0].id;
+            }
+        });
+        
+        displayReferences();
+        
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('referenceGrid').style.display = 'grid';
+    } catch (error) {
+        console.error('Error loading references:', error);
+        showNotification('Error loading references. Please refresh the page.', 'warning');
+        window.location.href = 'index.html';
+    }
+}
+
+function displayReferences(searchFilter = '') {
+    const grid = document.getElementById('referenceGrid');
+    grid.innerHTML = '';
+
+    const categories = Object.keys(categoryFeatures).filter(category => {
+        return !searchFilter || category.toLowerCase().includes(searchFilter.toLowerCase());
+    });
+
+    if (categories.length === 0) {
+        grid.innerHTML = '<div class="empty-state-ref"><i class="fas fa-inbox"></i><p>No categories found</p></div>';
+        return;
+    }
+
+    categories.forEach(category => {
+        const features = categoryFeatures[category];
+        const selectedFeatureId = selectedFeatures[category] || features[0].id;
+        const selectedFeature = features.find(f => f.id === selectedFeatureId);
+        const refData = references[selectedFeatureId];
+        const options = refData ? refData.options : [];
+        const details = refData ? refData.detail || [] : [];
+
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        
+        let optionsHtml = '';
+        if (options.length > 0) {
+            optionsHtml = `<div class="options-list-ref">`;
+            options.forEach((option, i) => {
+                const name = option || '';
+                const desc = details[i] || '';
+                optionsHtml += `
+                    <div class="option-item-ref">
+                        <span class="option-number-ref">${i + 1}.</span>
+                        <span class="option-text-ref"><strong>${name}</strong><br><small>${desc}</small></span>
+                    </div>
+                `;
+            });
+            optionsHtml += `</div>`;
+        } else {
+            optionsHtml = '<div class="no-options-ref"><i class="fas fa-inbox"></i><span>No options configured yet</span></div>';
+        }
+
+        card.innerHTML = `
+            <div class="card-header-cat">
+                <h3 class="category-title">
+                    <i class="fas fa-folder-open"></i> ${category}
+                </h3>
+                <select class="feature-selector" onchange="changeFeature('${category}', this.value)">
+                    ${features.map(f => `
+                        <option value="${f.id}" ${f.id === selectedFeatureId ? 'selected' : ''}>
+                            ${f.name}
+                        </option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="card-body-cat">
+                <div class="options-display">
+                    ${optionsHtml}
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-ref btn-manage" onclick="openEditModal('${selectedFeatureId}', '${category}', '${selectedFeature.name.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-cog"></i> Manage Options
+                    </button>
+                    <button class="btn-ref btn-delete" onclick="deleteAllOptions('${selectedFeatureId}', '${category}', '${selectedFeature.name.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-trash-alt"></i> Delete All
+                    </button>
+                </div>
+            </div>
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
+function changeFeature(category, featureId) {
+    selectedFeatures[category] = featureId;
+    displayReferences(document.getElementById('searchInput').value);
+}
+
+function openEditModal(id, category, name) {
+    currentEditId = id;
+    currentEditCategory = category;
+    const refData = references[id];
+    currentOptions = refData ? [...refData.options] : [];
+    currentDetails = refData ? [...refData.detail] : [];
+    
+    document.getElementById('editTitle').value = `${category} - ${name}`;
+    document.getElementById('newOptionInput').value = '';
+    document.getElementById('newOptionDesc').value = '';
+    updateOptionsList();
+    
+    document.getElementById('editModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function updateOptionsList() {
+    const optionsList = document.getElementById('optionsList');
+    const optionCount = document.getElementById('optionCount');
+    
+    optionCount.textContent = currentOptions.length;
+
+    if (currentOptions.length === 0) {
+        optionsList.innerHTML = '<p class="empty-state-ref">No options added yet</p>';
+        return;
+    }
+
+    optionsList.innerHTML = '';
+    currentOptions.forEach((opt, i) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'modal-option-item-ref';
+        optionDiv.innerHTML = `
+            <div class="option-number-ref">${i + 1}</div>
+            <span class="option-text-ref"><strong>${opt}</strong> - ${currentDetails[i] || ''}</span>
+            <button type="button" class="delete-option-btn-ref" onclick="removeOption(${i})" title="Delete option">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        `;
+        optionsList.appendChild(optionDiv);
+    });
+}
+
+async function saveOptionsToDatabase() {
+    try {
+        const refData = references[currentEditId];
+        const docId = refData ? refData.docId : null;
+
+        const data = {
+            referenceId: currentEditId,
+            category: currentEditCategory,
+            options: currentOptions, 
+            detail: currentDetails,   
+            username: currentUser.name || currentUser.email
+        };
+
+        let updatedDoc;
+        if (docId) {
+            updatedDoc = await databases.updateDocument(databaseId, referenceCollectionId, docId, data);
+        } else {
+            updatedDoc = await databases.createDocument(databaseId, referenceCollectionId, 'unique()', data);
+        }
+
+        references[currentEditId] = {
+            options: currentOptions,
+            detail: currentDetails,
+            category: currentEditCategory,
+            docId: updatedDoc.$id
+        };
+
+        displayReferences(document.getElementById('searchInput').value);
+    } catch (error) {
+        console.error("Error saving options:", error);
+        showNotification("Error saving options: " + error.message, "warning");
+    }
+}
+
+function addOption() {
+    const nameInput = document.getElementById('newOptionInput');
+    const descInput = document.getElementById('newOptionDesc');
+
+    const name = nameInput.value.trim();
+    const desc = descInput.value.trim();
+
+    if (!name) {
+        showNotification('Please enter a brand name', 'warning');
+        return;
+    }
+
+    if (currentOptions.includes(name)) {
+        showNotification('This option already exists', 'warning');
+        return;
+    }
+
+    currentOptions.push(name);
+    currentDetails.push(desc || "");
+
+    nameInput.value = '';
+    descInput.value = '';
+
+    updateOptionsList();
+    saveOptionsToDatabase();
+    showNotification('Option added successfully', 'success');
+}
+
+async function removeOption(index) {
+    if (confirm('Are you sure you want to remove this option?')) {
+        currentOptions.splice(index, 1);
+        currentDetails.splice(index, 1);
+        updateOptionsList();
+        await saveOptionsToDatabase();
+        showNotification('Option removed', 'info');
+    }
+}
+
+async function deleteAllOptions(id, category, name) {
+    if (!confirm(`Are you sure you want to delete ALL options for "${category} - ${name}"?\n\nThis action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const refData = references[id];
+        if (refData && refData.docId) {
+            await databases.deleteDocument(databaseId, referenceCollectionId, refData.docId);
+            delete references[id];
+            currentOptions = [];
+            currentDetails = [];
+            showNotification('All options deleted successfully', 'success');
+        } else {
+            showNotification('No options to delete', 'info');
+        }
+        displayReferences(document.getElementById('searchInput').value);
+    } catch (error) {
+        console.error('Error deleting options:', error);
+        showNotification('Error deleting options: ' + error.message, 'warning');
+    }
+}
+
+function closeModal() {
+    document.getElementById('editModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    currentEditId = null;
+    currentEditCategory = null;
+    currentOptions = [];
+    currentDetails = [];
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification-ref ${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (currentOptions.length === 0) {
+        showNotification('Please add at least one option', 'warning');
+        return;
+    }
+    await saveOptionsToDatabase();
+    closeModal();
+    showNotification('Options updated successfully!', 'success');
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    displayReferences(e.target.value);
+});
+
+document.getElementById('newOptionInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addOption();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('editModal').classList.contains('active')) {
+        closeModal();
+    }
+});
+
+async function logout() {
+    try { 
+        await account.deleteSession("current");
+        console.log('Logged out successfully');
+        window.location.href = "index.html"; 
+    } catch (err) { 
+        console.error("Logout failed:", err); 
+        window.location.href = "index.html"; 
+    }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    logout();
+});
+loadReferences();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./style.css">
+<title>Post Evaluation Form</title>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+</header>
+
+<div class="card-eval">
+    <div class="form-header">
+        <h1 id="formTitle">Post Evaluation Form</h1>
+        <span id="statusBadge" class="status-badge"></span>
+    </div>
+
+    <div id="loadingIndicator" class="loading" style="display: none;">
+        Loading form data
+    </div>
+
+    <form id="postEvalForm" style="display: none;">
+
+        <!-- Performance Scoring Section -->
+        <div class="form-section">
+            <div class="section-title">Performance Scoring</div>
+            <div class="form-group-eval">
+                <label>Score :</label>
+                <input type="text" name="score" id="score" required>
+            </div>
+        </div>
+
+        <!-- Competitor Information Section -->
+        <div class="form-section">
+            <div class="section-title">Competitor Information/Analysis</div>
+            <div class="table-section">
+                <table class="eval-table" id="competitorTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Competitor Info</th>
+                        </tr>
+                    </thead>
+                    <tbody id="competitorTableBody">
+                        <tr>
+                            <td class="row-number">1</td>
+                            <td class="input-row-content">
+                                <input type="text" name="competitorInfo_1" class="table-input" required>
+                                <button type="button" class="delete-row-btn" onclick="deleteCompetitorRow(this)" style="display: none;">&times;</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addCompetitorRow()">+ Add Info</button>
+            </div>
+        </div>
+
+        <!-- Keyword Section -->
+        <div class="form-section">
+            <div class="section-title">Keyword Form</div>
+            <div class="table-section">
+                <table class="eval-table" id="keywordTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Keyword</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keywordTableBody">
+                        <tr>
+                            <td class="row-number">1</td>
+                            <td class="input-row-content">
+                                <input type="text" name="keyword_1" class="table-input" required>
+                                <button type="button" class="delete-row-btn" onclick="deleteKeywordRow(this)" style="display: none;">&times;</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addKeywordRow()">+ Add Keyword</button>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="goBack()">Back</button>
+            <button type="button" id="preEvalBtn" class="btn btn-secondary" onclick="viewPreEval()" style="display: none;">
+                <i class="fas fa-clipboard-list"></i> View Pre-Evaluation Form
+            </button>
+            <button type="button" id="evalBtn" class="btn btn-secondary" onclick="viewEval()" style="display: none;">
+                <i class="fas fa-chart-line"></i> View Evaluation Form
+            </button>
+            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')">Save as Draft</button>
+            <button type="submit" class="btn btn-success submit-btn">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+const client = new Appwrite.Client()
+    .setEndpoint("https://fra.cloud.appwrite.io/v1")
+    .setProject("68ddd7de00255d4f5c96");
+
+const databases = new Appwrite.Databases(client);
+const account = new Appwrite.Account(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const postEvalCollectionId = "68bf9d62002b4f5f7f23";
+const mainCollectionId = "68ba918c0022d2b9a429";
+
+const params = new URLSearchParams(window.location.search);
+const eventId = params.get("id");
+const viewMode = params.get("mode") === "view";
+const showNavigation = params.get("showNavigation") === "true";
+
+let evDoc = null;
+let currentStatus = "draft";
+let competitorRowCount = 1;
+let keywordRowCount = 1;
+
+async function initForm() {
+    try {
+        document.getElementById("loadingIndicator").style.display = "block";
+
+        if (!eventId) {
+            alert("No event ID found. Please start from the Details page.");
+            window.location.href = "/createform.html";
+            return;
+        }
+        if (showNavigation) {
+            document.getElementById("preEvalBtn").style.display = "inline-block";
+            document.getElementById("evalBtn").style.display = "inline-block";
+        }
+        await loadForm();
+
+        if (viewMode) setViewMode();
+
+        document.getElementById("loadingIndicator").style.display = "none";
+        document.getElementById("postEvalForm").style.display = "block";
+    } catch (error) {
+        console.error("Error initializing form:", error);
+        document.getElementById("loadingIndicator").style.display = "none";
+        alert("Error loading form. Redirecting to detail page.");
+        window.location.href = "/createform.html";
+    }
+}
+
+async function loadForm() {
+    try {
+        evDoc = await databases.getDocument(databaseId, postEvalCollectionId, eventId);
+        console.log("Loaded post-eval document:", evDoc);
+        if (evDoc.score !== undefined && evDoc.score !== null) {
+            document.getElementById('score').value = evDoc.score;
+        }
+        if (Array.isArray(evDoc.competitorInfo) && evDoc.competitorInfo.length > 0) {
+            const tbody = document.getElementById("competitorTableBody");
+            tbody.innerHTML = "";
+            evDoc.competitorInfo.forEach((info, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="row-number">${index + 1}</td>
+                    <td class="input-row-content">
+                        <input type="text" name="competitorInfo_${index + 1}" class="table-input" required value="${escapeHtml(info)}">
+                        <button type="button" class="delete-row-btn" onclick="deleteCompetitorRow(this)" ${index === 0 ? 'style="display: none;"' : ''}>&times;</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            competitorRowCount = evDoc.competitorInfo.length;
+            updateCompetitorRowNumbers();
+        }
+        if (Array.isArray(evDoc.keyword) && evDoc.keyword.length > 0) {
+            const tbody = document.getElementById("keywordTableBody");
+            tbody.innerHTML = "";
+            evDoc.keyword.forEach((keyword, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="row-number">${index + 1}</td>
+                    <td class="input-row-content">
+                        <input type="text" name="keyword_${index + 1}" class="table-input" required value="${escapeHtml(keyword)}">
+                        <button type="button" class="delete-row-btn" onclick="deleteKeywordRow(this)" ${index === 0 ? 'style="display: none;"' : ''}>&times;</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            keywordRowCount = evDoc.keyword.length;
+            updateKeywordRowNumbers();
+        }
+
+        currentStatus = evDoc.status || "draft";
+        updateFormDisplay();
+    } catch (err) {
+        console.log("Form document not found or error loading:", err);
+        currentStatus = "draft";
+        updateFormDisplay();
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function setViewMode() {
+    const form = document.getElementById("postEvalForm");
+    const inputs = form.querySelectorAll('input, textarea, select, button[type="submit"], button[type="button"]:not(.btn-secondary)');
+    inputs.forEach(input => {
+        if (input.type === 'submit' || input.classList.contains('add-row-btn') || input.classList.contains('draft-btn') || input.classList.contains('delete-row-btn')) {
+            input.style.display = 'none';
+        } else {
+            input.disabled = true;
+        }
+    });
+    document.getElementById("formTitle").textContent = "Post Evaluation Form (View Mode)";
+}
+
+function updateCompetitorRowNumbers() {
+    const tbody = document.getElementById("competitorTableBody");
+    const rows = tbody.querySelectorAll("tr");
+    
+    rows.forEach((row, index) => {
+        const rowNumberCell = row.querySelector(".row-number");
+        if (rowNumberCell) {
+            rowNumberCell.textContent = index + 1;
+        }
+        const input = row.querySelector("input");
+        if (input) {
+            input.name = `competitorInfo_${index + 1}`;
+        }
+        const deleteBtn = row.querySelector(".delete-row-btn");
+        if (deleteBtn) {
+            deleteBtn.style.display = index === 0 ? "none" : "flex";
+        }
+    });
+    
+    competitorRowCount = rows.length;
+}
+
+function updateKeywordRowNumbers() {
+    const tbody = document.getElementById("keywordTableBody");
+    const rows = tbody.querySelectorAll("tr");
+    
+    rows.forEach((row, index) => {
+        const rowNumberCell = row.querySelector(".row-number");
+        if (rowNumberCell) {
+            rowNumberCell.textContent = index + 1;
+        }
+        const input = row.querySelector("input");
+        if (input) {
+            input.name = `keyword_${index + 1}`;
+        }
+        const deleteBtn = row.querySelector(".delete-row-btn");
+        if (deleteBtn) {
+            deleteBtn.style.display = index === 0 ? "none" : "flex";
+        }
+    });
+    
+    keywordRowCount = rows.length;
+}
+
+function addCompetitorRow() {
+    competitorRowCount++;
+    const tbody = document.getElementById("competitorTableBody");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td class="row-number">${competitorRowCount}</td>
+        <td class="input-row-content">
+            <input type="text" name="competitorInfo_${competitorRowCount}" class="table-input" required>
+            <button type="button" class="delete-row-btn" onclick="deleteCompetitorRow(this)">&times;</button>
+        </td>
+    `;
+    tbody.appendChild(row);
+    updateCompetitorRowNumbers();
+}
+
+function addKeywordRow() {
+    keywordRowCount++;
+    const tbody = document.getElementById("keywordTableBody");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td class="row-number">${keywordRowCount}</td>
+        <td class="input-row-content">
+            <input type="text" name="keyword_${keywordRowCount}" class="table-input" required>
+            <button type="button" class="delete-row-btn" onclick="deleteKeywordRow(this)">&times;</button>
+        </td>
+    `;
+    tbody.appendChild(row);
+    updateKeywordRowNumbers();
+}
+
+function deleteCompetitorRow(button) {
+    const tbody = document.getElementById("competitorTableBody");
+    const rows = tbody.querySelectorAll("tr");
+    if (rows.length <= 1) {
+        alert("At least one competitor information entry must be present.");
+        return;
+    }
+    const row = button.closest("tr");
+    row.remove();
+    updateCompetitorRowNumbers();
+}
+
+function deleteKeywordRow(button) {
+    const tbody = document.getElementById("keywordTableBody");
+    const rows = tbody.querySelectorAll("tr");
+    if (rows.length <= 1) {
+        alert("At least one keyword must be present.");
+        return;
+    }
+    const row = button.closest("tr");
+    row.remove();
+    updateKeywordRowNumbers();
+}
+
+function validateForm(status) {
+    const scoreValue = document.getElementById('score').value.trim();
+    const competitorInputs = document.querySelectorAll('[name^="competitorInfo_"]');
+    const competitorInfoArray = Array.from(competitorInputs)
+        .map(input => input.value.trim())
+        .filter(v => v !== '');
+
+    const keywordInputs = document.querySelectorAll('[name^="keyword_"]');
+    const keywordArray = Array.from(keywordInputs)
+        .map(input => input.value.trim())
+        .filter(v => v !== '');
+    if (status === "complete") {
+        if (!scoreValue) {
+            alert("Score is required for submission.");
+            document.getElementById('score').focus();
+            return false;
+        }
+        if (competitorInfoArray.length === 0) {
+            alert("At least one competitor information entry is required for submission.");
+            const firstCompetitorInput = document.querySelector('[name^="competitorInfo_"]');
+            if (firstCompetitorInput) firstCompetitorInput.focus();
+            return false;
+        }
+        if (keywordArray.length === 0) {
+            alert("At least one keyword is required for submission.");
+            const firstKeywordInput = document.querySelector('[name^="keyword_"]');
+            if (firstKeywordInput) firstKeywordInput.focus();
+            return false;
+        }
+    }
+    return { scoreValue, competitorInfoArray, keywordArray };
+}
+
+async function saveForm(status = "draft") {
+    const validationResult = validateForm(status);
+    if (!validationResult) return;
+
+    const { scoreValue, competitorInfoArray, keywordArray } = validationResult;
+    const data = {
+        status: status
+    };
+
+    if (scoreValue) data.score = scoreValue;
+    if (competitorInfoArray.length > 0) data.competitorInfo = competitorInfoArray;
+    if (keywordArray.length > 0) data.keyword = keywordArray;
+
+    console.log("Saving data:", data);
+
+    try {
+        try {
+            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
+            console.log("Form updated successfully");
+        } catch (updateError) {
+            if (updateError.message.includes("Document with the requested ID could not be found")) {
+                const createdDoc = await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
+                evDoc = createdDoc;
+                console.log("Form created successfully with event ID:", eventId);
+            } else {
+                throw updateError;
+            }
+        }
+
+        currentStatus = status;
+        updateFormDisplay();
+
+        const message = status === "complete" ? "Form submitted successfully!" : "Form saved as draft!";
+        alert(message);
+        if (status === "complete") {
+            window.location.href = `detail.html?id=${eventId}`;
+        }
+    } catch (err) {
+        console.error("Failed to save document:", err);
+        console.error("Error details:", err.message);
+
+        if (err.message.includes("Invalid document structure")) {
+            alert(`Database schema error: ${err.message}\n\nPlease check if your database fields are configured correctly:\n- score: string\n- status: enum\n- competitorInfo: string[]\n- keyword: string[]`);
+        } else if (err.message.includes("Missing required attribute")) {
+            alert(`Missing required field: ${err.message}`);
+        } else if (err.message.includes("Invalid enum value")) {
+            alert(`Invalid status value. Expected values for status enum might be: draft, complete, pending, etc.`);
+        } else {
+            alert(`Error saving form: ${err.message}\n\nPlease try again or contact support if the issue persists.`);
+        }
+    }
+}
+
+async function getPreEvalPage(formId) {
+    try {
+        const mainDoc = await databases.getDocument(databaseId, mainCollectionId, formId);
+        const productType = (mainDoc.productType || "").toLowerCase().trim();
+        
+        switch (productType) {
+            case "xs":
+            case "smart code reader (xs)":
+                return "/preevalXS.html";
+            case "xc":
+            case "smart camera (xc)":
+                return "/preevalXC.html";
+            default:
+                return "/preeval.html";
+        }
+    } catch (err) {
+        console.error("Error getting product type:", err);
+        return "/preeval.html";
+    }
+}
+
+async function viewPreEval() {
+    const preEvalPage = await getPreEvalPage(eventId);
+    window.open(`${preEvalPage}?id=${eventId}&mode=view`, '_blank');
+}
+
+function viewEval() {
+    window.open(`eval.html?id=${eventId}&mode=view`, '_blank');
+}
+
+function updateFormDisplay() {
+    const statusBadge = document.getElementById("statusBadge");
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const saveBtn = document.querySelector('.draft-btn');
+
+    statusBadge.textContent = currentStatus;
+    statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
+
+    if (viewMode) {
+        formTitle.textContent = "Post Evaluation Form (View Mode)";
+        document.querySelectorAll('input, select, button:not(.btn-secondary)').forEach(el => el.disabled = true);
+        if (submitBtn) submitBtn.style.display = 'none';
+        if (saveBtn) saveBtn.style.display = 'none';
+    } else {
+        formTitle.textContent = "Post Evaluation Form";
+        if (currentStatus === "complete" && submitBtn) {
+            submitBtn.style.display = 'none';
+        }
+    }
+}
+
+function goBack() {
+  window.history.back();
+}
+
+document.getElementById("postEvalForm").addEventListener("submit", e => {
+    e.preventDefault();
+    saveForm("complete");
+});
+
+document.addEventListener("DOMContentLoaded", initForm);
+</script>
+
+<footer class="footer">
+    <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+</body>
+</html>

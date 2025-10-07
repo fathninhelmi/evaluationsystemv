@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="./style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Evaluation Form</title>
+</head>
+<body>
+
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+    <nav class="nav-desktop">
+        <a href="staff.html" class="nav-link">Home</a>
+        <a href="createform.html" class="nav-link active">Create Form</a>
+        <a href="notifications.html" class="nav-link">Notifications</a>
+        <a href="index.html" class="nav-link" id="logoutBtn">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+  <h1>Create Evaluation Form</h1>
+  <form id="eventForm">
+    <div class="form-sectioncr two-column">
+      <div class="form-group">
+        <select id="productType" required>
+          <option value="" disabled selected>Select Product Type</option>
+          <option value="SPI">SPI</option>
+          <option value="AOI">AOI</option>
+          <option value="AXI">AXI</option>
+          <option value="ARV">ARV</option>
+          <option value="XC">Smart Camera (XC)</option>
+          <option value="XS">Smart Code Reader (XS)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="text" id="eventName" placeholder="Enter product name" required>
+      </div>
+      <div class="form-group">
+        <input type="text" id="customerCompany" placeholder="Enter customer company name" required>
+      </div>
+      <div class="form-group">
+        <input type="text" id="customerLocation" placeholder="Enter customer company region" required>
+      </div>
+      <button type="submit" class="btn" style="grid-column: span 2;">Create Form</button>
+    </div>
+  </form>
+
+  <h2>All Evaluation Forms</h2>
+  <div id="eventsList"><p>Loading</p></div>
+</div>
+
+<script type="module">
+const { Client, Account, Databases, Query, ID } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1")
+.setProject("68ddd7de00255d4f5c96");
+
+const account = new Account(client);
+const databases = new Databases(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba918c0022d2b9a429";
+const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const evalCollectionId = "68bf9d5600257a20775a";
+const postEvalCollectionId = "68bf9d62002b4f5f7f23";
+
+let currentUser = null;
+
+async function getOverallStatus(eventId) {
+  const statuses = await Promise.all([
+    getFormStatus(preEvalCollectionId, eventId),
+    getFormStatus(evalCollectionId, eventId),
+    getFormStatus(postEvalCollectionId, eventId)
+  ]);
+
+  const [preStatus, evalStatus, postStatus] = statuses;
+
+  if (preStatus === "complete" && evalStatus === "complete" && postStatus === "complete") {
+    return { status: "complete", color: "#2a9d8f" };
+  }
+
+  if (preStatus !== "draft" || evalStatus !== "draft" || postStatus !== "draft") {
+    return { status: "in progress", color: "#f4a261" };
+  }
+
+  return { status: "draft", color: "#e76f51" };
+}
+
+async function getFormStatus(collectionId, eventId) {
+  try {
+    const doc = await databases.getDocument(databaseId, collectionId, eventId);
+    return doc.status || "draft";
+  } catch (err) {
+    if (err.message.includes("Document with the requested ID could not be found")) {
+      return "draft"; 
+    }
+    console.warn("Error checking form status:", err);
+    return "draft";
+  }
+}
+
+async function loadForms() {
+  const list = document.getElementById("eventsList");
+  list.innerHTML = "<p>Loading</p>";
+
+  try {
+    const res = await databases.listDocuments(databaseId, collectionId, [
+      Query.equal("email", currentUser.email),
+      Query.limit(100),
+      Query.orderDesc("$createdAt")
+    ]);
+
+    if (res.documents.length === 0) {
+      list.innerHTML = "<p>No evaluation forms yet.</p>";
+      return;
+    }
+
+    list.innerHTML = "";
+
+    for (const doc of res.documents) {
+      const div = document.createElement("div");
+      div.className = "event-item";
+
+      const statusInfo = await getOverallStatus(doc.$id);
+
+      div.style.backgroundColor = statusInfo.color;
+      div.style.color = "white";
+      div.style.padding = "10px";
+      div.style.marginBottom = "8px";
+      div.style.borderRadius = "5px";
+      div.style.display = "flex";
+      div.style.justifyContent = "space-between";
+      div.style.alignItems = "center";
+
+      const span = document.createElement("span");
+      span.textContent = `${doc.prodname || "Untitled"} (${formatDate(doc.createDate)})`;
+      span.style.cursor = "pointer";
+      span.onclick = () => window.location.href = `detail.html?id=${doc.$id}`;
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "delete-btn";
+      delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+      delBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete '${doc.prodname}'?`)) {
+          try {
+            await databases.deleteDocument(databaseId, collectionId, doc.$id);
+            try { await databases.deleteDocument(databaseId, preEvalCollectionId, doc.$id); } catch {}
+            try { await databases.deleteDocument(databaseId, evalCollectionId, doc.$id); } catch {}
+            try { await databases.deleteDocument(databaseId, postEvalCollectionId, doc.$id); } catch {}
+            loadForms();
+          } catch (err) {
+            alert("Failed to delete form");
+            console.error(err);
+          }
+        }
+      };
+      div.appendChild(span);
+      div.appendChild(delBtn);
+      list.appendChild(div);
+    }
+
+  } catch (err) {
+    console.error("Error loading forms:", err);
+    list.innerHTML = "<p>Failed to load forms.</p>";
+  }
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  try {
+    await account.deleteSession("current");
+    window.location.href = "index.html";
+  } catch (err) {
+    console.error("Logout failed:", err);
+    window.location.href = "index.html";
+  }
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    currentUser = await account.get();
+    loadForms();
+  } catch (err) {
+    console.error("Failed to get user:", err);
+    alert("You must be logged in");
+    window.location.href = "index.html";
+  }
+});
+
+document.getElementById("eventForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const productType = document.getElementById("productType").value;
+  const eventName = document.getElementById("eventName").value.trim();
+  const customerCompany = document.getElementById("customerCompany").value.trim();
+  const customerLocation = document.getElementById("customerLocation").value.trim();
+
+  if (!productType || !eventName || !customerCompany || !customerLocation) {
+    alert("Please fill out all fields");
+    return;
+  }
+
+  try {
+    const mainForm = await databases.createDocument(databaseId, collectionId, ID.unique(), {
+      productType,
+      prodname: eventName,
+      customerCompany,
+      customerLocation,
+      username: currentUser.name || currentUser.email,
+      email: currentUser.email,
+      createDate: new Date().toISOString(),
+      status: "draft"
+    });
+    await databases.createDocument(databaseId, preEvalCollectionId, mainForm.$id, { status: "draft" });
+    await databases.createDocument(databaseId, evalCollectionId, mainForm.$id, { status: "draft" });
+    await databases.createDocument(databaseId, postEvalCollectionId, mainForm.$id, { status: "draft" });
+
+    alert("Evaluation form created successfully!");
+    document.getElementById("eventForm").reset();
+    loadForms();
+
+  } catch (err) {
+    console.error("Failed to create form:", err);
+    alert("Error creating form");
+  }
+});
+
+</script>
+
+<footer class="footer">
+  <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Home</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+  <nav class="nav-desktop">
+    <a href="staff.html" class="nav-link active">Home</a>
+    <a href="createform.html" class="nav-link">Create Form</a>
+    <a href="notifications.html" class="nav-link">Notifications</a>
+    <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+  </nav>
+</header>
+
+<div id="notificationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+  <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+    <h2 style="margin-top: 0; color: #333;"><i class="fas fa-bell"></i> Request Updates</h2>
+    <div id="notificationContent" style="margin: 20px 0; max-height: 400px; overflow-y: auto;"></div>
+    <button onclick="closeNotificationModal()" style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+      <i class="fas fa-check"></i> Got it!
+    </button>
+  </div>
+</div>
+
+<main class="main-content">
+  <div class="container">
+    <div class="welcome-section">
+      <div class="welcome-content">
+        <h1>Welcome back!</h1>
+      </div>
+      <div class="quick-actions">
+        <button class="btn btn-primary" onclick="createNewForm()">
+          <i class="fas fa-plus"></i>
+          Create New Form
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon draft"><i class="fas fa-edit"></i></div>
+        <div class="stat-content">
+          <div class="stat-number" id="draftCount">0</div>
+          <div class="stat-label">Draft Forms</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon complete"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-content">
+          <div class="stat-number" id="completeCount">0</div>
+          <div class="stat-label">Complete Forms</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon browse"><i class="fas fa-globe"></i></div>
+        <div class="stat-content">
+          <div class="stat-number" id="publicCount">0</div>
+          <div class="stat-label">Public Forms</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-tabs">
+      <div class="tab-headers">
+        <button class="tab-header active" onclick="switchTab('my-forms')">
+          <i class="fas fa-user"></i> My Forms
+        </button>
+        <button class="tab-header" onclick="switchTab('browse-forms')">
+          <i class="fas fa-search"></i> Browse Public Forms
+        </button>
+      </div>
+
+      <div id="my-forms-tab" class="tab-content active">
+        <div class="section-header">
+          <h2>My Forms</h2>
+          <div class="search-filter">
+            <div class="search-inputst">
+              <i class="fas fa-search"></i>
+              <input type="text" id="myFormsSearch" placeholder="Search my forms" onkeyup="filterMyForms()">
+            </div>
+          </div>
+        </div>
+        <div class="forms-grid" id="myFormsGrid"></div>
+        <div id="myFormsEmpty" class="empty-state" style="display:none;">
+          <i class="fas fa-file-alt"></i>
+          <h3>No forms found</h3>
+          <p>You haven't created any forms yet.</p>
+          <button class="btn btn-primary" onclick="createNewForm()">Create Your First Form</button>
+        </div>
+      </div>
+      
+      <div id="browse-forms-tab" class="tab-content">
+        <div class="section-header">
+          <h2>Browse Public Forms</h2>
+          <div class="search-filter">
+            <div class="search-input-st" style="position: relative;">
+              <i class="fas fa-search"></i>
+              <input type="text" id="publicFormsSearch" placeholder="Search by product name, type, company or keyword" 
+                     onkeyup="filterPublicForms()" 
+                     onfocus="showDropdown()" 
+                     onblur="hideDropdownDelayed()">
+              <div id="searchDropdown" class="search-dropdown" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="forms-grid" id="publicFormsGrid"></div>
+        <div id="publicFormsEmpty" class="empty-state" style="display:none;">
+          <i class="fas fa-search"></i>
+          <h3>No forms found</h3>
+          <p>No completed forms match your search criteria.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const { Client, Account, Databases, Query, ID } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255d4f5c96");
+const account = new Account(client);
+const databases = new Databases(client);
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba918c0022d2b9a429";
+const requestListId = "68db7c5d000007c7fd7e";
+const preEvalCollectionId = "68c7ced6001bd14d08f4";
+
+let myForms = [];
+let publicForms = [];
+let allPublicForms = [];
+let filteredMyForms = [];
+let filteredPublicForms = [];
+let currentUser = null;
+let userCompany = null;
+let userRequests = {}; 
+
+async function checkSession() {
+  try {
+    currentUser = await account.get();
+    console.log('Logged in as:', currentUser.email);
+    await checkRequestNotifications();
+    await loadForms();
+  } catch (err) {
+    console.error('No active session:', err);
+    window.location.href = "index.html";
+  }
+}
+
+async function checkRequestNotifications() {
+  try {
+    const requests = await databases.listDocuments(databaseId, requestListId, [
+      Query.equal('username', currentUser.name || currentUser.email)
+    ]);
+    const statusChanges = [];
+    const seenKey = 'seenRequests_' + (currentUser.name || currentUser.email);
+    const seenRequests = JSON.parse(localStorage.getItem(seenKey) || '{}');
+    
+    for (const req of requests.documents) {
+      const statusReq = req.statusReq || 'pending';
+      const reqId = req.$id;
+      if ((statusReq === 'approved' || statusReq === 'rejected') && !seenRequests[reqId]) {
+        statusChanges.push({
+          id: reqId,
+          formId: req.formId,
+          prodname: req.prodname || 'Untitled',
+          company: req.customerCompany || 'N/A',
+          statusReq: statusReq,
+          username: req.username || 'Unknown'
+        });
+        seenRequests[reqId] = true;
+      }
+    }
+    
+    if (statusChanges.length > 0) {
+      localStorage.setItem(seenKey, JSON.stringify(seenRequests));
+      showNotificationModal(statusChanges);
+    }
+  } catch (err) {
+    console.error('Error checking notifications:', err);
+  }
+}
+
+function showNotificationModal(changes) {
+  const modal = document.getElementById('notificationModal');
+  const content = document.getElementById('notificationContent');
+  let html = '';
+  changes.forEach(change => {
+    const icon = change.statusReq === 'approved' 
+      ? '<i class="fas fa-check-circle" style="color: #28a745;"></i>' 
+      : '<i class="fas fa-times-circle" style="color: #dc3545;"></i>';
+    const statusText = change.statusReq === 'approved' ? 'APPROVED' : 'REJECTED';
+    const statusColor = change.statusReq === 'approved' ? '#28a745' : '#dc3545';
+    html += `
+      <div style="padding: 15px; margin-bottom: 10px; border-left: 4px solid ${statusColor}; background: #f8f9fa; border-radius: 5px;">
+        ${icon}
+        <strong style="color: ${statusColor}; margin-left: 8px;">${statusText}</strong>
+        <p style="margin: 10px 0 5px 28px; color: #333;">
+          <strong>${change.prodname}</strong> (${change.company})
+        </p>
+        ${change.statusReq === 'approved' ? `
+          <button onclick="viewApprovedForm('${change.formId}')" style="margin-left: 28px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 8px;">
+            <i class="fas fa-eye"></i> View Form
+          </button>
+        ` : ''}
+      </div>
+    `;
+  });
+  content.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function closeNotificationModal() {
+  document.getElementById('notificationModal').style.display = 'none';
+  loadForms();
+}
+
+function viewApprovedForm(formId) {
+  closeNotificationModal();
+  window.location.href = `posteval.html?id=${formId}&mode=view&showNavigation=true`;
+}
+
+checkSession();
+
+document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  try {
+    await account.deleteSession("current");
+    console.log('Logged out successfully');
+    window.location.href = "index.html";
+  } catch(err) {
+    console.error("Logout failed:", err);
+    window.location.href = "index.html";
+  }
+});
+
+async function loadUserRequests(currentUser) {
+  try {
+    if (!currentUser) {
+      console.warn("No currentUser passed to loadUserRequests");
+      return;
+    }
+    const response = await databases.listDocuments(databaseId, requestListId);
+    userRequests = {};
+    response.documents.forEach(req => {
+      if (req.username === currentUser.name || req.username === currentUser.email) {
+        userRequests[req.formId] = req.statusReq || "pending";
+      }
+    });
+    console.log('Loaded user requests:', Object.keys(userRequests).length);
+  } catch (error) {
+    console.error("Error loading user requests:", error);
+  }
+}
+
+async function loadForms() {
+  try {
+    if (!currentUser) {
+      console.warn("No user logged in");
+      return;
+    }
+    await loadUserRequests(currentUser);
+    const res = await databases.listDocuments(databaseId, collectionId, [Query.limit(100)]);
+    const allForms = res.documents;
+    console.log('Loaded forms:', allForms.length);
+    for (const form of allForms) {
+      form.subforms = {
+        pre_eval: await getFormStatus("68c7ced6001bd14d08f4", form.$id),
+        eval: await getFormStatus("68bf9d5600257a20775a", form.$id),
+        post_eval: await getFormStatus("68bf9d62002b4f5f7f23", form.$id)
+      };
+      if (form.subforms.post_eval === "complete") {
+        form.postEvalData = await getPostEvalData(form.$id);
+      }
+    }
+    myForms = allForms.filter(doc =>
+      doc.username === currentUser.name || doc.username === currentUser.email || doc.email === currentUser.email
+    );
+    if (myForms.length > 0) {
+      userCompany = myForms[0].customerCompany;
+    }
+    filteredMyForms = [...myForms];
+    allPublicForms = allForms.filter(f => f.subforms.post_eval === "complete");
+    publicForms = allPublicForms.filter(f => f.customerCompany === userCompany);
+    filteredPublicForms = [...publicForms];
+    renderMyForms(filteredMyForms);
+    renderPublicForms(filteredPublicForms);
+    updateStats();
+  } catch (err) {
+    console.error("Error loading forms:", err);
+  }
+}
+
+async function getFormStatus(collectionId, formId) {
+  try {
+    const doc = await databases.getDocument(databaseId, collectionId, formId);
+    return doc.status || "draft";
+  } catch {
+    return "draft";
+  }
+}
+
+async function getPostEvalData(formId) {
+  try {
+    const doc = await databases.getDocument(databaseId, "68bf9d62002b4f5f7f23", formId);
+    let formattedKeyword = '';
+    if (Array.isArray(doc.keyword)) {
+      formattedKeyword = doc.keyword.join(', ');
+    } else if (typeof doc.keyword === 'string') {
+      formattedKeyword = doc.keyword.replace(/,\s*/g, ', ');
+    }
+    return { keyword: formattedKeyword || 'No keyword' };
+  } catch {
+    return { keyword: 'No keyword' };
+  }
+}
+
+function filterMyForms() {
+  const searchTerm = document.getElementById("myFormsSearch").value.toLowerCase().trim();
+  filteredMyForms = myForms.filter(form => {
+    const searchableText = [form.prodname || '', form.customerCompany || '', form.username || ''].join(' ').toLowerCase();
+    return searchableText.includes(searchTerm);
+  });
+  renderMyForms(filteredMyForms);
+}
+
+function filterPublicForms() {
+  const searchTerm = document.getElementById("publicFormsSearch").value.toLowerCase().trim();
+  if (!searchTerm) {
+    filteredPublicForms = publicForms;
+    updateDropdown([]);
+  } else {
+    const allMatches = allPublicForms.filter(form => {
+      const searchableText = [form.prodname || '', form.productType || '', form.customerCompany || '', form.postEvalData?.keyword || ''].join(' ').toLowerCase();
+      return searchableText.includes(searchTerm);
+    });
+    filteredPublicForms = allMatches.filter(form => form.customerCompany === userCompany);
+    updateDropdown(allMatches);
+  }
+  renderPublicForms(filteredPublicForms);
+}
+
+let dropdownTimeout;
+function showDropdown() {
+  clearTimeout(dropdownTimeout);
+  const searchTerm = document.getElementById("publicFormsSearch").value.toLowerCase().trim();
+  if (searchTerm) {
+    document.getElementById("searchDropdown").style.display = "block";
+  }
+}
+
+function hideDropdownDelayed() {
+  dropdownTimeout = setTimeout(() => {
+    document.getElementById("searchDropdown").style.display = "none";
+  }, 200);
+}
+
+function updateDropdown(forms) {
+  const dropdown = document.getElementById("searchDropdown");
+  if (forms.length === 0) {
+    dropdown.style.display = "none";
+    return;
+  }
+  dropdown.innerHTML = "";
+  const limitedForms = forms.slice(0, 10);
+  limitedForms.forEach(form => {
+    const isSameCompany = form.customerCompany === userCompany;
+    const requestStatus = userRequests[form.$id];
+    const item = document.createElement("div");
+    item.className = "dropdown-item";
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "dropdown-item-content";
+    if (isSameCompany) {
+      contentDiv.onclick = () => selectDropdownItem(form.$id);
+    }
+    contentDiv.innerHTML = `
+      <div class="dropdown-item-title">
+        ${form.prodname || 'Untitled'}
+        ${!isSameCompany ? '<span style="color: #ff6b6b; font-size: 0.85em; margin-left: 6px;">(Other Company)</span>' : ''}
+      </div>
+      <div class="dropdown-item-meta">
+        <span><i class="fas fa-building"></i> ${form.customerCompany || 'N/A'}</span>
+        <span><i class="fas fa-cog"></i> ${form.productType || 'N/A'}</span>
+        ${form.postEvalData?.keyword ? `<span><i class="fas fa-tags"></i> ${form.postEvalData.keyword}</span>` : ''}
+      </div>
+    `;
+    item.appendChild(contentDiv);
+    if (!isSameCompany) {
+      const requestBtn = document.createElement("button");
+      requestBtn.className = "dropdown-request-btn";
+      if (requestStatus === 'approved') {
+        requestBtn.innerHTML = '<i class="fas fa-eye"></i> View';
+        requestBtn.style.background = '#28a745';
+        requestBtn.onclick = () => viewApprovedForm(form.$id);
+      } else if (requestStatus === 'pending') {
+        requestBtn.innerHTML = '<i class="fas fa-clock"></i> Requested';
+        requestBtn.style.background = '#ffc107';
+        requestBtn.style.color = '#000';
+        requestBtn.disabled = true;
+        requestBtn.style.cursor = 'not-allowed';
+      } else {
+        requestBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Request';
+        requestBtn.onclick = () => requestAccessFromDropdown(form.$id);
+      }
+      item.appendChild(requestBtn);
+    }
+    dropdown.appendChild(item);
+  });
+  if (forms.length > 10) {
+    const moreItem = document.createElement("div");
+    moreItem.className = "dropdown-no-results";
+    moreItem.textContent = `+${forms.length - 10} more results`;
+    dropdown.appendChild(moreItem);
+  }
+  dropdown.style.display = "block";
+}
+
+function selectDropdownItem(formId) {
+  const form = publicForms.find(f => f.$id === formId);
+  if (!form) return;
+  document.getElementById("publicFormsSearch").value = form.prodname || '';
+  document.getElementById("searchDropdown").style.display = "none";
+  filteredPublicForms = [form];
+  renderPublicForms(filteredPublicForms);
+}
+
+async function requestAccessFromDropdown(formId) {
+  await requestAccess(formId);
+  document.getElementById("publicFormsSearch").value = '';
+  document.getElementById("searchDropdown").style.display = "none";
+  filteredPublicForms = publicForms.filter(f => f.customerCompany === userCompany);
+  renderPublicForms(filteredPublicForms);
+}
+
+function switchTab(tab){
+  document.querySelectorAll(".tab-header").forEach(h=>h.classList.remove("active"));
+  document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add("active");
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+  document.getElementById(`${tab}-tab`).classList.add("active");
+}
+
+function formatFormType(type) {
+  switch (type) {
+    case "pre_eval": return "Pre-Evaluation";
+    case "eval": return "Evaluation";
+    case "post_eval": return "Post Evaluation";
+    default: return type;
+  }
+}
+
+function renderMyForms(forms) {
+  const grid = document.getElementById("myFormsGrid");
+  grid.innerHTML = "";
+  let totalEntries = 0;
+  forms.forEach(form => {
+    ["pre_eval","eval","post_eval"].forEach(type => {
+      if (form.subforms?.[type]) totalEntries++;
+    });
+  });
+  if (totalEntries === 0) {
+    document.getElementById("myFormsEmpty").style.display = "block";
+    return;
+  }
+  document.getElementById("myFormsEmpty").style.display = "none";
+  forms.forEach(form => {
+    ["pre_eval","eval","post_eval"].forEach(type => {
+      const status = form.subforms?.[type];
+      if (!status) return;
+      const card = document.createElement("div");
+      card.className = "form-card";
+      card.innerHTML = `
+        <div class="form-header">
+          <div class="form-title">${form.prodname || 'Untitled'} (${formatFormType(type)})</div>
+          <span class="status-badge ${status}">${status}</span>
+        </div>
+        <div class="form-meta">
+          <div class="form-user"><i class="fas fa-building"></i> ${form.customerCompany || 'N/A'}</div>
+          <div class="form-user"><i class="fas fa-calendar"></i> Created ${formatDate(form.createDate)}</div>
+        </div>
+        <div class="form-actions">
+          ${status === "draft" ? `<button class="btn btn-primary" onclick="editForm('${form.$id}','${type}')"><i class="fas fa-edit"></i> Edit</button>` : `<button class="btn btn-secondary" onclick="viewForm('${form.$id}','${type}')"><i class="fas fa-eye"></i> View</button>`}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  });
+}
+
+function renderPublicForms(forms) {
+  const grid = document.getElementById("publicFormsGrid");
+  grid.innerHTML = "";
+  if (forms.length === 0) {
+    document.getElementById("publicFormsEmpty").style.display = "block";
+    return;
+  }
+  document.getElementById("publicFormsEmpty").style.display = "none";
+  forms.forEach(form => {
+    const isSameCompany = form.customerCompany === userCompany;
+    const requestStatus = userRequests[form.$id]; 
+    const card = document.createElement("div");
+    card.className = "form-card public";
+    let actionButtons = '';
+    if (isSameCompany) {
+      actionButtons = `
+        <button class="btn btn-secondary" onclick="viewPostEvalWithNavigation('${form.$id}')"><i class="fas fa-eye"></i> Summary</button>
+        <button class="btn btn-outline" onclick="viewFormDirect('${form.$id}', 'pre_eval')"><i class="fas fa-clipboard-list"></i> Pre - Evaluation</button>
+        <button class="btn btn-outline" onclick="viewFormDirect('${form.$id}', 'eval')"><i class="fas fa-clipboard-list"></i> Evaluation</button>
+      `;
+    } else {
+      if (requestStatus === 'approved') {
+        actionButtons = `<button class="btn btn-secondary" onclick="viewApprovedForm('${form.$id}')"><i class="fas fa-eye"></i> View Form</button>`;
+      } else if (requestStatus === 'pending') {
+        actionButtons = `<button class="btn btn-primary" disabled style="cursor: not-allowed; opacity: 0.7; background: #ffc107; border-color: #ffc107; color: #000;"><i class="fas fa-clock"></i> Requested</button>`;
+      } else {
+        actionButtons = `<button class="btn btn-primary" onclick="requestAccess('${form.$id}')"><i class="fas fa-paper-plane"></i> Request Access</button>`;
+      }
+    }
+    card.innerHTML = `
+      <div class="form-header">
+        <div class="form-title">${form.prodname || 'Untitled'}</div>
+        <div class="form-user"><i class="fas fa-user"></i> ${form.username || 'Unknown User'}</div>
+      </div>
+      <div class="form-meta">
+        <div class="form-user"><i class="fas fa-cog"></i> ${form.productType || 'N/A'}</div>
+        <div class="form-user"><i class="fas fa-building"></i> ${form.customerCompany || 'N/A'}</div>
+        <div class="form-user"><i class="fas fa-tags"></i> ${form.postEvalData?.keyword || 'No keyword'}</div>
+        <div class="form-user"><i class="fas fa-calendar-check"></i> Completed ${formatDate(form.createDate)}</div>
+      </div>
+      <div class="form-actions">${actionButtons}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function requestAccess(formId) {
+  try {
+    const form = allPublicForms.find(f => f.$id === formId);
+    if (!form) {
+      alert('Form not found.');
+      return;
+    }
+    
+    const existingRequests = await databases.listDocuments(databaseId, requestListId, [
+      Query.equal('formId', formId),
+      Query.equal('username', currentUser.name || currentUser.email)
+    ]);
+    
+    if (existingRequests.documents.length > 0) {
+      alert('You have already requested access to this form.');
+      return;
+    }
+    
+    let evalDate = 'N/A';
+    try {
+      const preEvalForm = await databases.getDocument(databaseId, preEvalCollectionId, formId);
+      if (preEvalForm.evalDate) {
+        evalDate = preEvalForm.evalDate;
+      }
+    } catch (err) {
+      console.warn('Could not fetch eval date:', err);
+    }
+
+    await databases.createDocument(databaseId, requestListId, ID.unique(), {
+      formId: formId,
+      username: currentUser.name || currentUser.email,
+      prodname: form.prodname || 'Untitled',
+      customerCompany: form.customerCompany || 'N/A',
+      evalDate: evalDate,
+      statusReq: 'pending'
+    });
+    
+    alert(`Access request sent for ${form.prodname}. Please wait for manager approval.`);
+    await loadForms();
+  } catch (err) {
+    console.error('Error requesting access:', err);
+    console.error('Full error:', err.message);
+    alert(`Failed to send request: ${err.message}`);
+  }
+}
+
+function updateStats() {
+  let draftCount = 0;
+  myForms.forEach(form => {
+    ["pre_eval","eval","post_eval"].forEach(type => {
+      if (form.subforms?.[type] === "draft") draftCount++;
+    });
+  });
+  const completeCount = myForms.filter(f =>
+    f.subforms.pre_eval === "complete" && f.subforms.eval === "complete" && f.subforms.post_eval === "complete"
+  ).length;
+  const publicCount = publicForms.filter(f => f.customerCompany === userCompany).length;
+  document.getElementById("draftCount").textContent = draftCount;
+  document.getElementById("completeCount").textContent = completeCount;
+  document.getElementById("publicCount").textContent = publicCount;
+}
+
+function formatDate(dateStr){
+  if (!dateStr) return 'N/A';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"});
+}
+
+function createNewForm(){ window.location.href = "createform.html"; }
+
+async function getPreEvalPage(formId) {
+  try {
+    const mainDoc = await databases.getDocument(databaseId, collectionId, formId);
+    const productType = (mainDoc.productType || "").toLowerCase().trim();
+    switch (productType) {
+      case "xs":
+      case "smart code reader (xs)":
+        return "preevalXS.html";
+      case "xc":
+      case "smart camera (xc)":
+        return "preevalXC.html";
+      default:
+        return "preeval.html";
+    }
+  } catch (err) {
+    console.error("Error getting product type:", err);
+    return "preeval.html";
+  }
+}
+
+async function editForm(id, type) {
+  switch(type) {
+    case 'pre_eval':
+      const editPage = await getPreEvalPage(id);
+      window.location.href = `${editPage}?id=${id}`;
+      break;
+    case 'eval':
+      window.location.href = `eval.html?id=${id}`;
+      break;
+    case 'post_eval':
+      window.location.href = `posteval.html?id=${id}`;
+      break;
+    default:
+      console.error('Unknown form type:', type);
+  }
+}
+
+async function viewForm(id, type) {
+  switch(type) {
+    case 'pre_eval':
+      const viewPage = await getPreEvalPage(id);
+      window.location.href = `${viewPage}?id=${id}&mode=view`;
+      break;
+    case 'eval':
+      window.location.href = `eval.html?id=${id}&mode=view`;
+      break;
+    case 'post_eval':
+      window.location.href = `posteval.html?id=${id}&mode=view`;
+      break;
+    default:
+      console.error('Unknown form type:', type);
+  }
+}
+
+function viewPostEvalWithNavigation(id) {
+  window.location.href = `posteval.html?id=${id}&mode=view&showNavigation=true`;
+}
+
+async function viewFormDirect(id, type) {
+  switch(type) {
+    case 'pre_eval':
+      const viewPage = await getPreEvalPage(id);
+      window.location.href = `${viewPage}?id=${id}&mode=view`;
+      break;
+    case 'eval':
+      window.location.href = `eval.html?id=${id}&mode=view`;
+      break;
+    default:
+      console.error('Unknown form type:', type);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadForms);
+</script>
+
+<footer class="footer">
+  <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+
+</body>
+</html>

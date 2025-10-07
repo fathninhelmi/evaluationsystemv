@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./style.css">
+<title>Pre Evaluation Form</title>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+</header>
+
+<div class="card-eval">
+    <div class="form-header">
+        <h1 id="formTitle">Pre-Evaluation Form</h1>
+        <span id="statusBadge" class="status-badge"></span>
+    </div>
+    
+    <div id="loadingIndicator" class="loading" style="display: none;">
+        Loading form data
+    </div>
+    
+    <form id="preEvalForm" style="display: none;">
+
+        <!-- Section 1 -->
+        <div class="form-section two-column">
+            <div class="section-title">1. GENERAL</div>
+            <div class="form-group-evalxc-compact">
+                <label>Customer Company Name :</label>
+                <input type="text" id="customerCompany" name="customerCompany" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Customer Tech Champion :</label>
+                <input type="text" id="custTechChamp" name="custTechChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Existing customer? :</label>
+                <select id="existcust" name="existcust">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Evaluation Date :</label>
+                <input type="date" id="evalDate" name="evalDate" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Competitor(s) if any :</label>
+                <input type="text" id="competitor" name="competitor">
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Competitor machine model :</label>
+                <input type="text" id="compModel" name="compModel">
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Venue :</label>
+                <select id="venue" name="venue">
+                    <option value="">Select</option>
+                    <option value="customer_site">Customer site</option>
+                    <option value="in_house">In House</option>
+                    <option value="si_office">SI office</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="form-section two-column">
+            <div class="section-title">2. RESOURCES</div>
+            <div class="form-group-evalxc-compact">
+                <label>SI Sales Champion :</label>
+                <input type="text" id="sisalesChamp" name="sisalesChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>SI Technical Champion :</label>
+                <input type="text" id="sitechChamp" name="sitechChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>VTech BD Sales Champion :</label>
+                <input type="text" id="vtechsalesChamp" name="vtechsalesChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>VisionXpert BD Sales Champion :</label>
+                <input type="text" id="vxpertsalesChamp" name="vxpertsalesChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>ViTrox Technical Champion :</label>
+                <input type="text" id="vitroxtechChamp" name="vitroxtechChamp" required>
+            </div>
+        </div>
+        
+        <!-- Section 3 -->
+        <div class="form-section two-column">
+            <div class="section-title" style="grid-column: span 2;">3. OBJECT & INSPECTION DETAILS</div>
+            <div class="subsection-title" style="grid-column: span 2;">Object Dimensions & Shape</div>
+            
+            <div class="form-group-evalxc-compact">
+                <label>L x W x H (mm) :</label>
+                <input type="text" id="objectSize" name="objectSize" required>
+            </div>
+
+            <div class="checkbox-grid-xc" style="grid-column: span 2;">
+                <div class="requirement-xc">Object Shape Description :</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="objectShape" value="flat"> Flat</label>
+                    <label><input type="checkbox" name="objectShape" value="cylindrical"> Cylindrical</label>
+                    <label><input type="checkbox" name="objectShape" value="complex_geometry"> Complex Geometry</label>
+                    <label><input type="checkbox" name="objectShape" value="other"> Others</label>
+                </div>
+                <div class="requirement-xc">Material :</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="objectMaterial" value="metal"> Metal</label>
+                    <label><input type="checkbox" name="objectMaterial" value="plastic"> Plastic</label>
+                    <label><input type="checkbox" name="objectMaterial" value="paper"> Paper</label>
+                    <label><input type="checkbox" name="objectMaterial" value="other"> Others</label>
+                </div>
+                <div class="requirement-xc">Surface Type :</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="surfaceType" value="glossy"> Glossy</label>
+                    <label><input type="checkbox" name="surfaceType" value="matte"> Matte</label>
+                    <label><input type="checkbox" name="surfaceType" value="transparent"> Transparent</label>
+                    <label><input type="checkbox" name="surfaceType" value="other"> Others</label>
+                </div>
+            </div>
+
+            <div class="form-group-evalxc">
+                <label>Height Consistency :</label>
+                <select id="heightConsistency" name="heightConsistency">
+                    <option value="">Select</option>
+                    <option value="consistent">Height are consistent</option>
+                    <option value="vary">Height vary</option>
+                </select>
+            </div>
+
+            <div class="form-group-evalxc">
+                <label class="sub-ques">If they vary, describe range :</label>
+                <input type="text" id="heightVariation" name="heightVariation">
+            </div>
+
+            <div class="subsection-title" style="grid-column: span 2;">Inspection Criteria & Defects</div>
+            
+            <div class="checkbox-grid-xc" style="grid-column: span 2;">
+                <div class="requirement-xc">Primary Inspection Task :</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="primaryInspectionTask" value="defect_detection">Defect Detection</label>
+                    <label><input type="checkbox" name="primaryInspectionTask" value="measurement">Measurement</label>
+                    <label><input type="checkbox" name="primaryInspectionTask" value="counting">Counting</label>
+                    <label><input type="checkbox" name="primaryInspectionTask" value="barcode_ocr">Barcode/ OCR</label>
+                    <label><input type="checkbox" name="primaryInspectionTask" value="absence_presence">Absence/ Presence</label>
+                </div>
+            </div>
+
+            <div class="form-group-evalxc-compact">
+                <label>Defect/Feature Description :</label>
+                <input type="text" id="defectDescription" name="defectDescription">
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Smallest Defect Size (mm) :</label>
+                <input type="text" id="smallestDefectSize" name="smallestDefectSize">
+            </div>
+            
+            <div class="form-group-evalxc">
+                <label>Samples Provided :</label>
+                <select id="samplesProvided" name="samplesProvided">
+                    <option value="">Select</option>
+                    <option value="good_bad_samples">Client can provide both good and bad samples</option>
+                    <option value="defects_labeled">Defects are clearly labeled on the samples</option>
+                </select>
+            </div>
+
+            <div class="subsection-title" style="grid-column: span 2;">Current Process & Performance Goals</div>
+            
+            <div class="form-group-evalxc">
+                <label>Current Inspection Method :</label>
+                <select id="currentInspectionMethod" name="currentInspectionMethod">
+                    <option value="">Select</option>
+                    <option value="manual_inspection">Manual Inspection</option>
+                    <option value="automated_system">Automated System</option>
+                    <option value="no_current_method">No current inspection method</option>
+                </select>
+            </div>
+
+            <div class="form-group-evalxc">
+                <label class="sub-ques">If answer is Automated System, please specify brand/model :</label>
+                <input type="text" id="automatedSystemDetails" name="automatedSystemDetails">
+            </div>
+
+            <div class="subsection-title" style="grid-column: span 2;">Current Performance</div>
+            <div class="form-group-evalxc">
+                <label>Challenges Met :</label>
+                <input type="text" id="currentChallenges" name="currentChallenges">
+            </div>
+
+            
+            <div class="subsection-title" style="grid-column: span 2;">Target Performance Goals</div>
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <div class="requirement-wrapperxs">
+                <div class="requirement-xc">Required Throughput :</div>
+                <div class="requirement-subinfo">How many units per minute (UPM) or units per hour (UPH) do you need to inspect?</div>
+            </div>
+                <input type="text" name="requiredThroughput" id="requiredThroughput">
+            </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="form-section two-column">
+            <div class="section-title" style="grid-column: span 2;">4. TECHNICAL ENVIRONMENT</div>
+
+            <div class="form-group-evalxc">
+                <label>Physical Setup :</label>
+                <input type="text" id="physicalSetup" name="physicalSetup" required>
+            </div>
+            <div class="form-group-evalxc">
+                <label>Working Distance (mm) :</label>
+                <input type="text" id="workingDistance" name="workingDistance" required>
+            </div>
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <div class="requirement-wrapperxs">
+                <div class="requirement-xc">Field of View (mm) :</div>
+                <div class="requirement-subinfo">Size of the area the camera must inspect</div>
+            </div>
+                <input type="text" name="fieldOfView" id="fieldOfView">
+            </div>
+
+            <div class="form-group-evalxc">
+                <label>Object Movement :</label>
+                <select id="objectMovement" name="objectMovement">
+                    <option value="">Select</option>
+                    <option value="static_jig">Static Jig or Station</option>
+                    <option value="moving_conveyor">Moving Conveyor</option>
+                </select>
+            </div>
+
+            <div class="form-group-evalxc">
+                <label class="sub-ques">If moving, what is the conveyor speed (m/s) :</label>
+                <input type="text" id="conveyorSpeed" name="conveyorSpeed">
+            </div>
+
+            <div class="form-group-evalxc">
+                <label>Object Orientation :</label>
+                <select id="objectOrientation" name="objectOrientation">
+                    <option value="">Select</option>
+                    <option value="will_move">Object will tilt, rotate, or move</option>
+                    <option value="fixed">Object orientation is fixed</option>
+                </select>
+            </div>
+
+            <div class="form-group-evalxc">
+                <label class="sub-ques">If not fixed, please describe the movement :</label>
+                <input type="text" id="orientationMovement" name="orientationMovement">
+            </div>
+
+            <div class="checkbox-grid-xc" style="grid-column: span 2;">
+                <div class="requirement-xc">Environmental Factors :</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="environmentalFactors" value="heat">Heat</label>
+                    <label><input type="checkbox" name="environmentalFactors" value="vapors">Vapors</label>
+                    <label><input type="checkbox" name="environmentalFactors" value="dust">Dust</label>
+                    <label><input type="checkbox" name="environmentalFactors" value="vibration">Vibration</label>
+                </div>
+            </div>
+
+            <div class="subsection-title" style="grid-column: span 2;">Lighting Conditions</div>
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <div class="requirement-wrapperxs">
+                <div class="requirement-xc">Current Lighting Type :</div>
+                <div class="requirement-subinfo">e.g., fluorescent, LED, natural light</div>
+            </div>
+                <input type="text" id="currentLightingType" name="currentLightingType">
+            </div>
+            
+
+            <div class="checkbox-grid-xc" style="grid-column: span 2;">
+                <div class="requirement-xc">Issues Present :</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="lightingIssues" value="reflections_glare">Reflections/Glare</label>
+                    <label><input type="checkbox" name="lightingIssues" value="shadows">Shadows</label>
+                    <label><input type="checkbox" name="lightingIssues" value="backlight_present">Backlight Present</label>
+                </div>
+            </div>
+
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <label>External Lighting Needed? :</label>
+                <select id="externalLightingNeeded" name="externalLightingNeeded">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+
+            <div class="form-group-evalxc">
+                <label>Background Contrast :</label>
+                <select id="backgroundContrast" name="backgroundContrast">
+                    <option value="">Select</option>
+                    <option value="sufficient_contrast">Object color have sufficient contrast to the background</option>
+                    <option value="similar_to_background">Object color is similar to the background</option>
+                </select>
+            </div>
+
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <label class="sub-ques">If object color is similar to the background, can the background be changed to improve contrast?:</label>
+                <select id="backgroundChangeable" name="backgroundChangeable">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="form-section">
+            <div class="section-title">5. COMMERCIAL & TIMELINE</div>
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Budget Status :</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="budgetStatus" value="allocated">Budget has been allocated</label>
+                    <label><input type="checkbox" name="budgetStatus" value="approval_process">Budget is in the approval process</label>
+                    <label><input type="checkbox" name="budgetStatus" value="not_discussed">Budget has not been discussed yet</label>
+                </div>
+            </div>
+
+            <div class="form-group-evalxc">
+                <label class="sub-ques">If allocated, what is the range? :</label>
+                <input type="text" id="budgetRange" name="budgetRange">
+            </div>
+
+            <div class="subsection-title">Project Timeline</div>
+            <div class="form-group-evalxc">
+                <label>Target Deployment Date :</label>
+                <input type="date" id="targetDeploymentDate" name="targetDeploymentDate" required>
+            </div>
+        </div>
+
+        <!-- Section 6 -->
+        <div class="form-section">
+            <div class="section-title">6. NEXT STEPS & FOLLOW-UP</div>
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Recommended Next Steps :</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="nextSteps" value="followup_call">Schedule a follow-up call with technical team</label>
+                    <label><input type="checkbox" name="nextSteps" value="sample_submission">Request sample submission</label>
+                    <label><input type="checkbox" name="nextSteps" value="site_visit">Site visit required</label>
+                    <label><input type="checkbox" name="nextSteps" value="remote_demo">Live remote demo</label>
+                </div>
+            </div>
+
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <label>Notes & Action Items :</label>
+                <textarea id="notesActionItems" name="notesActionItems" rows="4"></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="goBack()">Back</button>
+            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
+            <button type="submit" class="btn btn-success submit-btn" id="submitBtn">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+const client = new Appwrite.Client()
+    .setEndpoint("https://fra.cloud.appwrite.io/v1") 
+    .setProject("68ddd7de00255d4f5c96");
+
+const databases = new Appwrite.Databases(client);
+const account = new Appwrite.Account(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba918c0022d2b9a429";
+const preEvalCollectionId = "68c7ced6001bd14d08f4";
+
+const params = new URLSearchParams(window.location.search);
+const eventId = params.get("id"); 
+const viewMode = params.get("mode") === "view";
+
+let currentUser = null;
+let formData = null;
+let referenceDocData = null;
+let currentStatus = "draft";
+
+async function initForm() {
+    try {
+        currentUser = await account.get();
+        console.log("Current user:", currentUser);
+        
+        if (!eventId) {
+            alert("No event ID found. Please start from the Details page.");
+            window.location.href = "/createform.html";
+            return;
+        }
+
+        await loadExistingForm();
+        if (viewMode) setViewMode();
+    } catch (error) {
+        console.error("Error initializing form:", error);
+        alert("Error loading form. Redirecting to dashboard.");
+        window.location.href = "/createform.html";
+    }
+}
+
+async function loadExistingForm() {
+    try {
+        document.getElementById("loadingIndicator").style.display = "block";
+        
+        // Load the reference document from main collection (created in createform)
+        try {
+            referenceDocData = await databases.getDocument(databaseId, collectionId, eventId);
+            console.log("Loaded reference data from main collection:", referenceDocData);
+        } catch (err) {
+            console.log("Reference document not found in main collection:", err);
+        }
+        
+        // Load pre-eval form data if it exists
+        try {
+            formData = await databases.getDocument(databaseId, preEvalCollectionId, eventId);
+            console.log("Loaded pre-eval form data:", formData);
+        } catch (err) {
+            console.log("Pre-eval form not found, will create new one:", err);
+        }
+        
+        // Populate form with data from both sources
+        populateForm(formData, referenceDocData);
+        currentStatus = (formData && formData.status) || "draft";
+        
+        updateFormDisplay();
+        document.getElementById("loadingIndicator").style.display = "none";
+        document.getElementById("preEvalForm").style.display = "block";
+    } catch (error) {
+        console.log("Error loading form:", error);
+        document.getElementById("loadingIndicator").style.display = "none";
+        document.getElementById("preEvalForm").style.display = "block";
+        updateFormDisplay();
+    }
+}
+
+function populateForm(preEvalData, referenceData) {
+    const data = preEvalData || {};
+    
+    // Get company name from reference data (main collection) - this comes from createform
+    const customerCompanyElement = document.getElementById('customerCompany');
+    if (customerCompanyElement) {
+        if (referenceData && referenceData.customerCompany) {
+            customerCompanyElement.value = referenceData.customerCompany;
+            console.log("Populated company from reference data:", referenceData.customerCompany);
+        } else if (data.customerCompany) {
+            customerCompanyElement.value = data.customerCompany;
+        }
+    }
+    
+    const textFields = [
+        'custTechChamp', 'competitor', 'compModel', 
+        'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
+        'objectSize', 'heightVariation', 'defectDescription', 'smallestDefectSize', 'automatedSystemDetails', 
+        'currentChallenges', 'requiredThroughput', 'physicalSetup', 'workingDistance', 'fieldOfView', 
+        'conveyorSpeed', 'orientationMovement', 'currentLightingType', 'budgetRange', 'notesActionItems'
+    ];
+
+    textFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element && data[fieldId]) {
+            if (element.type === "date") {
+                element.value = data[fieldId].split("T")[0]; 
+            } else {
+                element.value = data[fieldId];
+            }
+        }
+    });
+
+    const selectFields = [
+        'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
+        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable'
+    ];
+
+    selectFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element && data[fieldId]) {
+            element.value = data[fieldId];
+        }
+    });
+
+    const dateFields = ['evalDate', 'targetDeploymentDate'];
+    dateFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element && data[fieldId]) {
+            element.value = new Date(data[fieldId]).toISOString().split("T")[0];
+        }
+    });
+
+    if (data.heightConsistency) {
+        const radio = document.querySelector(`input[name="heightConsistency"][value="${data.heightConsistency}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    const multiChoiceFields = [
+        'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
+        'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
+    ];
+
+    multiChoiceFields.forEach(fieldName => {
+        if (data[fieldName] && Array.isArray(data[fieldName])) {
+            data[fieldName].forEach(value => {
+                const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+    });
+}
+
+function setViewMode() {
+    const form = document.getElementById("preEvalForm");
+    const inputs = form.querySelectorAll('input, textarea, select, button[type="submit"], button[type="button"]:not(.btn-secondary)');
+    inputs.forEach(input => {
+        if (input.type === 'submit' || input.classList.contains('add-row-btn') || input.classList.contains('draft-btn')) {
+            input.style.display = 'none';
+        } else {
+            input.disabled = true;
+        }
+    });
+    document.getElementById("formTitle").textContent = "Pre-Evaluation Form (View Mode)";
+}
+
+function goBack() {
+  window.history.back();
+}
+
+function updateFormDisplay() {
+    const statusBadge = document.getElementById("statusBadge");
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.getElementById("submitBtn");
+    const saveProgressBtn = document.getElementById("saveProgressBtn");
+    
+    statusBadge.textContent = currentStatus;
+    statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
+    
+    if (viewMode) {
+        formTitle.textContent = `Pre-Evaluation Form (Viewing)`;
+        document.querySelectorAll('input, textarea, select, button[type="button"]:not(.btn-secondary)').forEach(el => el.disabled = true);
+        if (submitBtn) submitBtn.style.display = 'none';
+        if (saveProgressBtn) saveProgressBtn.style.display = 'none';
+    } else {
+        formTitle.textContent = `Pre-Evaluation Form`;
+        if (currentStatus === "complete" && submitBtn) {
+            submitBtn.style.display = 'none';
+        }
+    }
+}
+
+function collectFormData() {
+    const data = {};
+    const textFields = [
+        'customerCompany', 'custTechChamp', 'competitor', 'compModel',
+        'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
+        'objectSize', 'heightVariation', 'defectDescription', 'smallestDefectSize', 'automatedSystemDetails', 
+        'currentChallenges', 'requiredThroughput', 'physicalSetup', 'workingDistance', 'fieldOfView', 
+        'conveyorSpeed', 'orientationMovement', 'currentLightingType', 'budgetRange', 'notesActionItems'
+    ];
+    
+    textFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            data[fieldId] = element.value.trim();
+        }
+    });
+
+    ['evalDate', 'targetDeploymentDate'].forEach(dateField => {
+        const element = document.getElementById(dateField);
+        if (element && element.value) {
+            data[dateField] = new Date(element.value + "T00:00:00Z").toISOString();
+        }
+    });
+
+    const selectFields = [
+        'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
+        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable'
+    ];
+
+    selectFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element && element.value) {
+            data[fieldId] = element.value;
+        }
+    });
+
+    const heightRadio = document.querySelector('input[name="heightConsistency"]:checked');
+    if (heightRadio) data.heightConsistency = heightRadio.value;
+    
+    const multiChoiceFields = [
+        'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
+        'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
+    ];
+
+    multiChoiceFields.forEach(fieldName => {
+        const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
+        const values = Array.from(checkboxes).map(cb => cb.value);
+        if (values.length > 0) data[fieldName] = values;
+    });
+    
+    return data;
+}
+
+async function saveForm(status = "draft") {
+    try {
+        const collectedData = collectFormData();
+        if (status === "complete") {
+            const requiredFields = [
+                'customerCompany', 'custTechChamp', 'evalDate','sisalesChamp', 'sitechChamp', 
+                'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp', 'targetDeploymentDate'
+            ];
+            
+            const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
+            if (missingFields.length > 0) {
+                alert("Please fill in all required fields before submitting.");
+                return;
+            }
+        }
+
+        const saveData = {
+            ...collectedData,
+            status: status
+        };
+
+        for (const key in saveData) {
+            if (Array.isArray(saveData[key])) {
+                saveData[key] = saveData[key].filter(v => v !== "" && v !== null && v !== undefined);
+                if (saveData[key].length === 0) delete saveData[key];
+            }
+        }
+
+        console.log("Data to save:", saveData);
+
+        try {
+            await databases.updateDocument(databaseId, preEvalCollectionId, eventId, saveData);
+            console.log("Form updated successfully");
+        } catch (updateError) {
+            if (updateError.message.includes("Document with the requested ID could not be found")) {
+                await databases.createDocument(databaseId, preEvalCollectionId, eventId, saveData);
+                console.log("Form created successfully with event ID:", eventId);
+            } else {
+                console.error("Error updating document:", updateError);
+                throw updateError;
+            }
+        }
+
+        currentStatus = status;
+        updateFormDisplay();
+        alert(status === "complete" ? "Form submitted successfully!" : "Form saved as draft!");
+        window.location.href = `detail.html?id=${eventId}`;
+
+    } catch (error) {
+        console.error("Error saving form:", error);
+        alert(`Error saving form: ${error.message}. Please try again.`);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    initForm();
+
+    document.getElementById("preEvalForm").addEventListener("submit", e => {
+        e.preventDefault();
+        saveForm("complete");
+    });
+});
+</script>
+
+<footer class="footer">
+    <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+
+</body>
+</html>

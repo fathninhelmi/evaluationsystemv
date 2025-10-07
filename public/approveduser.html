@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Approved User</title>
+<link rel="stylesheet" href="./style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+    <nav class="nav-desktop">
+        <a href="approveduser.html" class="nav-link active">Approved Users</a>
+        <a href="manageform.html" class="nav-link">Manage Forms</a>
+        <a href="referencecust.html" class="nav-link">References Details</a>
+        <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+    </nav>
+</header>
+
+<main class="main-content-ad">
+    <h1>Welcome, Admin</h1>
+    <div class="container-ad">
+        <div class="controls-bar">
+            <div class="search-filters">
+                <div class="search-input">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search users by username or email" onkeyup="filterUsers()">
+                </div>
+                <div class="filter-group">
+                    <select id="statusFilter" onchange="filterUsers()" class="filter-select">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <select id="roleFilter" onchange="filterUsers()" class="filter-select">
+                        <option value="all">All Roles</option>
+                        <option value="staff">Staff</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid-ad">
+            <div class="stat-card-ad">
+                <div class="stat-icon-ad pending">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="pendingCount">0</div>
+                    <div class="stat-label-ad">Pending Approval</div>
+                </div>
+            </div>
+            <div class="stat-card-ad">
+                <div class="stat-icon-ad approved">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="approvedCount">0</div>
+                    <div class="stat-label-ad">Approved Users</div>
+                </div>
+            </div>
+            <div class="stat-card-ad">
+                <div class="stat-icon-ad rejected">
+                    <i class="fas fa-times"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="rejectedCount">0</div>
+                    <div class="stat-label-ad">Rejected Users</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Registration Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+            </table>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-users"></i>
+                <h3>No users found</h3>
+                <p>Try adjusting your search criteria or filters.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="userModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>User Details</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<div id="confirmModal" class="modal" style="display: none;">
+    <div class="modal-content small">
+        <div class="modal-header">
+            <h3 id="confirmTitle">Confirm Action</h3>
+            <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-danger" id="confirmBtn" onclick="confirmAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const { Client, Account, Databases, Query } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1")
+.setProject("68ddd7de00255d4f5c96");
+
+const account = new Account(client);
+const database = new Databases(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba8c240002116fa647";
+
+let users = [];
+let filteredUsers = [];
+let selectedUsers = [];
+let currentPage = 1;
+const perPage = 20;
+
+async function checkSession() {
+    try {
+        const user = await account.get();
+        console.log('Logged in as:', user.email);
+        document.querySelector('h1').textContent = `Welcome, ${user.name || 'Admin'}`;
+    } catch (err) {
+        console.error('Session check error:', err);
+        console.warn('No active session, redirecting');
+        window.location.href = 'index.html';
+    }
+}
+
+async function logout() {
+    try {
+        await account.deleteSession('current');
+        console.log('Logged out successfully');
+    } catch (err) {
+        console.warn('Could not delete session (maybe already logged out):', err);
+    } finally {
+        window.location.href = 'index.html';
+    }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    logout();
+});
+setInterval(() => {
+    fetchUsers();
+}, 30000);
+
+async function fetchUsers() {
+    try {
+        const res = await database.listDocuments(
+            databaseId, 
+            collectionId, 
+            [Query.limit(1000)]
+        );
+        users = res.documents.map(doc => ({
+            id: doc.$id,
+            name: doc.username || doc.name || '',
+            email: doc.email || '',
+            role: doc.role || 'staff',
+            status: doc.status || 'pending',
+            registrationDate: doc.registerDate || doc.$createdAt,
+            isVitrox: doc.email?.endsWith('@vitrox.com') || false
+        })).sort((a, b) => new Date(b.registrationDate) - new Date(a.registrationDate));
+
+        filteredUsers = [...users];
+        renderUsers();
+        updateStats();
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        showNotification('Failed to load users', 'error');
+    }
+}
+
+async function updateUserField(userId, field, value) {
+    try {
+        await database.updateDocument(databaseId, collectionId, userId, { [field]: value });
+        const user = users.find(u => u.id === userId);
+        if (user) user[field] = value;
+        renderUsers();
+        updateStats();
+        showNotification(`${field} updated for ${user.name}`, 'success');
+    } catch (err) {
+        console.error(err);
+        showNotification("Update failed", "error");
+    }
+}
+
+function approveUser(userId) { updateUserField(userId, 'status', 'approved'); }
+function rejectUser(userId) { updateUserField(userId, 'status', 'rejected'); }
+function changeUserRole(userId, newRole) { updateUserField(userId, 'role', newRole); }
+
+async function deleteUser(userId) {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    
+    try {
+        await database.deleteDocument(databaseId, collectionId, userId);
+        users = users.filter(u => u.id !== userId);
+        renderUsers();
+        updateStats();
+        showNotification("User deleted", "success");
+    } catch (err) {
+        console.error(err);
+        showNotification("Delete failed", "error");
+    }
+}
+
+function renderUsers() {
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+    const start = (currentPage - 1) * perPage;
+    const end = start + perPage;
+    const pageUsers = filteredUsers.slice(start, end);
+    
+    if (pageUsers.length === 0) {
+        document.getElementById('emptyState').style.display = 'block';
+        return;
+    } else {
+        document.getElementById('emptyState').style.display = 'none';
+    }
+    
+    pageUsers.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+        <td><input type="checkbox" class="user-checkbox" value="${user.id}" onchange="updateSelection()"></td>
+        <td>${user.name || '-'}</td>
+        <td>${user.email} ${user.isVitrox ? '<i class="fas fa-shield-alt"></i>' : ''}</td>
+        <td>
+            <select onchange="changeUserRole('${user.id}', this.value)" ${user.status !== 'approved' ? 'disabled' : ''}>
+                <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>Staff</option>
+                <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option>
+                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+        </td>
+        <td><span class="status-badge ${user.status}">${getStatusText(user.status)}</span></td>
+        <td>${formatDate(user.registrationDate)}</td>
+        <td>
+        <div class="action-buttons">
+            <button class="btn-icon" onclick="viewUser('${user.id}')" title="View Details">
+                <i class="fas fa-eye"></i>
+            </button>
+            ${user.status === 'pending' ? `
+                <button class="btn-icon success" onclick="approveUser('${user.id}')" title="Approve">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="btn-icon danger" onclick="rejectUser('${user.id}')" title="Reject">
+                    <i class="fas fa-times"></i>
+                </button>
+            ` : ''}
+            ${user.status === 'suspended' ? `
+                <button class="btn-icon success" onclick="reactivateUser('${user.id}')" title="Reactivate">
+                    <i class="fas fa-play"></i>
+                </button>
+            ` : ''}
+            <button class="btn-icon danger" onclick="deleteUser('${user.id}')" title="Delete">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function viewUser(userId) {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+        const modalBody = document.getElementById('modalBody');
+        modalBody.innerHTML = generateUserDetailsHTML(user);
+        document.querySelector('#userModal h2').textContent = user.name || "User Details";
+        document.getElementById('userModal').style.display = 'flex';
+    }
+}
+
+window.onclick = function(event) {
+    const userModal = document.getElementById('userModal');
+    if (event.target === userModal) {
+        closeModal();
+    }
+};
+
+function generateUserDetailsHTML(user) {
+    return `
+        <div class="details-grid">
+            <div class="detail-item">
+                <label>Username:</label>
+                <span>${user.name || '-'}</span>
+            </div>
+            <div class="detail-item">
+                <label>Email:</label>
+                <span>${user.email}</span>
+            </div>
+            <div class="detail-item">
+                <label>Role:</label>
+                <span class="role-badge ${user.role}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
+            </div>
+            <div class="detail-item">
+                <label>Status:</label>
+                <span class="status-badge ${user.status}">${getStatusText(user.status)}</span>
+            </div>
+            <div class="detail-item">
+                <label>Registration Date:</label>
+                <span>${formatDate(user.registrationDate)}</span>
+            </div>
+            <div class="detail-item">
+                <label>Email Type:</label>
+                <span>${user.isVitrox ? 'Vitrox Corporate' : 'External'}</span>
+            </div>
+        </div>
+    `;
+}
+
+function closeModal() {
+    document.getElementById('userModal').style.display = 'none';
+}
+
+function previousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderUsers();
+    }
+}
+
+function nextPage() {
+    if (currentPage * perPage < filteredUsers.length) {
+        currentPage++;
+        renderUsers();
+    }
+}
+
+function filterUsers() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const role = document.getElementById('roleFilter').value;
+
+    filteredUsers = users.filter(u => {
+        const matchSearch = (u.name || '').toLowerCase().includes(search) || (u.email || '').toLowerCase().includes(search);
+        const matchStatus = status === 'all' || u.status === status;
+        const matchRole = role === 'all' || u.role === role;
+        return matchSearch && matchStatus && matchRole;
+    });
+
+    currentPage = 1;
+    renderUsers();
+}
+
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
+function getStatusText(status) {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function updateStats() {
+    document.getElementById('pendingCount').textContent = users.filter(u => u.status === 'pending').length;
+    document.getElementById('approvedCount').textContent = users.filter(u => u.status === 'approved').length;
+    document.getElementById('rejectedCount').textContent = users.filter(u => u.status === 'rejected').length;
+}
+
+function updateSelection() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    selectedUsers = Array.from(checkboxes).map(cb => cb.value);
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = selectAll.checked);
+    updateSelection();
+}
+
+function showNotification(msg, type) {
+    const notif = document.createElement('div');
+    notif.className = `notification ${type}`;
+    notif.innerHTML = `<span>${msg}</span>`;
+    document.body.appendChild(notif);
+    setTimeout(() => { notif.remove(); }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkSession();
+    await fetchUsers();
+});
+</script>
+
+<footer class="footer">
+    <div>
+        <span>© 2025 ViTrox. All rights reserved.</span>
+    </div>
+</footer>
+</body>
+</html>

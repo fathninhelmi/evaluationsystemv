@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+  <nav class="nav-desktop">
+    <a href="staff.html" class="nav-link">Home</a>
+    <a href="createform.html" class="nav-link">Create Form</a>
+    <a href="notifications.html" class="nav-link active">Notifications</a>
+    <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+  </nav>
+</header>
+
+<div class="req-contain">
+  <h1>Notifications</h1>
+  <div class="reqcontainer" id="notificationsContainer"></div>
+</div>
+
+<footer class="footer-regis">
+  <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+
+<script>
+const { Client, Account, Databases, Query } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1")
+.setProject("68ddd7de00255d4f5c96");
+
+const account = new Account(client);
+const databases = new Databases(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba918c0022d2b9a429";
+const requestListId = "68db7c5d000007c7fd7e";
+
+let currentUser = null;
+
+async function checkSession() {
+  try {
+    currentUser = await account.get();
+    console.log('Logged in as:', currentUser.name || currentUser.email);
+    await loadNotifications();
+  } catch (err) {
+    console.error('No active session:', err);
+    window.location.href = "index.html";
+  }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  try {
+    await account.deleteSession("current");
+    console.log('Logged out successfully');
+    window.location.href = "index.html";
+  } catch(err) {
+    console.error("Logout failed:", err);
+    window.location.href = "index.html";
+  }
+});
+
+async function loadNotifications() {
+  try {
+    const requests = await databases.listDocuments(databaseId, requestListId, [
+      Query.equal('username', currentUser.name || currentUser.email),
+      Query.orderDesc('$createdAt')
+    ]);
+
+    console.log('Loaded notifications:', requests.documents.length);
+    const notifications = requests.documents.map(req => {
+      let formattedDate = req.evalDate || 'N/A';
+      if (req.evalDate && req.evalDate !== 'N/A') {
+        try {
+          const date = new Date(req.evalDate);
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = String(date.getFullYear()).slice(-2);
+          formattedDate = `${day}/${month}/${year}`;
+        } catch (err) {
+          console.warn('Error formatting date:', err);
+        }
+      }
+      
+      return {
+        id: req.$id,
+        formId: req.formId,
+        prodname: req.prodname || 'Untitled',
+        company: req.customerCompany || 'N/A',
+        submittedBy: req.username || 'Unknown',
+        evalDate: formattedDate,
+        status: req.statusReq || 'pending',
+        createdAt: req.$createdAt,
+        rejectionReason: req.rejectionReason || null
+      };
+    });
+
+    renderNotifications(notifications);
+  } catch (err) {
+    console.error('Error loading notifications:', err);
+    document.getElementById('notificationsContainer').innerHTML = 
+      '<p style="text-align:center; padding:20px;">Error loading notifications</p>';
+  }
+}
+
+function renderNotifications(notifications) {
+  const container = document.getElementById('notificationsContainer');
+  container.innerHTML = '';
+  
+  if (notifications.length === 0) {
+    container.innerHTML = '<p style="text-align:center; padding:20px;">No notifications</p>';
+    return;
+  }
+
+  notifications.forEach(notification => {
+    const item = document.createElement('div');
+    item.className = 'request-item';
+    
+    let actionButton = '';
+    if (notification.status === 'approved') {
+      actionButton = `
+        <button class="status-badge approved" onclick="viewForm('${notification.formId}')" 
+                style="cursor: pointer;">
+          <i class="fas fa-eye"></i> View
+        </button>
+      `;
+    } else if (notification.status === 'rejected') {
+      actionButton = `
+        <button class="status-badge rejected" disabled style="cursor: default; opacity: 1;">
+          <i class="fas fa-times"></i> Rejected
+        </button>
+      `;
+    } else {
+      actionButton = `
+        <button class="status-badge pending" disabled style="cursor: default; opacity: 1;">
+          <i class="fas fa-clock"></i> Pending
+        </button>
+      `;
+    }
+    
+    item.innerHTML = `
+      <div class="user-info">
+        Your request for 
+        <strong>${notification.prodname}</strong>, ${notification.company} (${notification.evalDate}) 
+        ${notification.status === 'approved' ? 'has been approved' : 
+          notification.status === 'rejected' ? 'has been rejected' : 
+          'is pending approval'}
+        ${notification.rejectionReason ? `<br><span style="color: #dc3545; font-style: italic; font-size: 0.9em;">Reason: ${notification.rejectionReason}</span>` : ''}
+      </div>
+      <div class="actions">
+        ${actionButton}
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function viewForm(formId) {
+  window.location.href = `posteval.html?id=${formId}&mode=view&showNavigation=true`;
+}
+
+checkSession();
+</script>
+
+</body>
+</html>

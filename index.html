@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body class="login-page">
+    <div class="wrapper">
+        <div class="intro">
+            <h1>Evaluation System</h1>
+            <p>
+                Welcome to the ViTrox Evaluation System.<br>
+                This platform helps manage evaluations, track performance and improve efficiency.
+            </p>
+        </div>
+
+        <div class="card login-container" id="loginContainer">
+            <div class="logo">
+                <h2>Login</h2>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+
+                <button type="submit" id="loginBtn">Login</button>
+
+                <div class="register-link">
+                    <p>Need to register an account? <a href="/register.html">Register here</a></p>
+                </div>
+
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Authenticating</p>
+                </div>
+
+                <div class="message error" id="errorMessage"></div>
+                <div class="message success" id="successMessage"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+
+    <script>
+        let client, account, databases;
+        
+        try {
+            if (typeof window.Appwrite === 'undefined') {
+                throw new Error('Appwrite SDK not loaded');
+            }
+            
+            const { Client, Account, Databases } = window.Appwrite;
+            client = new Client();
+            client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255d4f5c96");
+            account = new Account(client);
+            databases = new Databases(client);
+            
+            console.log("Appwrite initialized successfully");
+        } catch (error) {
+            console.error("Appwrite initialization failed:", error.message);
+        }
+
+        const loginForm = document.getElementById("loginForm");
+        const loading = document.getElementById("loading");
+        const errorMessage = document.getElementById("errorMessage");
+        const successMessage = document.getElementById("successMessage");
+
+        function clearMessages() {
+            errorMessage.textContent = "";
+            errorMessage.style.display = "none";
+            successMessage.textContent = "";
+            successMessage.style.display = "none";
+        }
+
+        function showError(message) {
+            clearMessages();
+            errorMessage.textContent = message;
+            errorMessage.style.display = "block";
+        }
+
+        function showSuccess(message) {
+            clearMessages();
+            successMessage.textContent = message;
+            successMessage.style.display = "block";
+        }
+
+        function showLoading(show) {
+            loading.style.display = show ? "block" : "none";
+            document.getElementById("loginBtn").disabled = show;
+        }
+
+        async function checkUserApprovalStatus() {
+            try {
+                const user = await account.get();
+
+                if (user.email === "admin@vitrox.com") {
+                return {
+                    status: "approved",
+                    role: "admin",
+                    username: user.name || "Admin"
+                };
+                }
+
+                try {
+                const userDoc = await databases.getDocument(
+                    "68ba8a9c001f17064e15",
+                    "68ba8c240002116fa647", 
+                    user.$id
+                );
+
+                return {
+                    status: userDoc.status || "pending",
+                    role: userDoc.role || "staff",
+                    username: userDoc.username || user.name
+                };
+                } catch (dbError) {
+                console.error("Error fetching user from database:", dbError);
+                
+                const prefs = user.prefs || {};
+                if (prefs.status) {
+                    return {
+                    status: prefs.status,
+                    role: prefs.role || "staff",
+                    username: prefs.username || user.name
+                    };
+                }
+
+                return {
+                    status: "pending", 
+                    role: "staff",
+                    username: user.name
+                };
+        }
+        } catch (err) {
+            console.error("Error checking user:", err);
+            return null;
+        }
+        } 
+
+        function redirectUser(role, username) {
+            console.log(`Redirecting user ${username} with role: ${role}`);
+            
+            let redirectUrl;
+            let message;
+            
+            switch (role.toLowerCase()) {
+                case 'admin':
+                    redirectUrl = '/approveduser.html';
+                    message = `Welcome ${username}! Redirecting to Admin Page`;
+                    break;
+                case 'manager':
+                    redirectUrl = '/manager.html';
+                    message = `Welcome ${username}! Redirecting to Manager Page`;
+                    break;
+                case 'staff':
+                default:
+                    redirectUrl = '/staff.html';
+                    message = `Welcome ${username}! Redirecting to Staff Page`;
+                    break;
+            }
+            
+            showSuccess(message);
+            
+            setTimeout(() => {
+                console.log(`Redirecting to: ${redirectUrl}`);
+                window.location.href = redirectUrl;
+            }, 1500);
+        }
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showError('Please enter both email and password');
+                return;
+            }
+            
+            showLoading(true);
+            clearMessages();
+            
+            try {
+                console.log('Attempting login for:', email);
+                const session = await account.createEmailSession(email, password);
+                console.log('Login successful:', session);
+                const userStatus = await checkUserApprovalStatus(session.userId);
+                console.log('User status:', userStatus);
+                
+                if (userStatus.status === 'pending') {
+                    await account.deleteSession('current');
+                    showError('Your account is pending approval. Please wait for admin approval before logging in.');
+                    return;
+                } else if (userStatus.status === 'rejected') {
+                    await account.deleteSession('current');
+                    showError('Your account has been rejected. Please contact an administrator.');
+                    return;
+                } else if (userStatus.status === 'approved') {
+                    redirectUser(userStatus.role, userStatus.username);
+                } else {
+                    console.log('Unknown status, defaulting to approved');
+                    redirectUser(userStatus.role, userStatus.username);
+                }
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                
+                let errorMsg;
+                if (error.code === 401) {
+                    errorMsg = "Invalid email or password. Please check your credentials and try again.";
+                } else if (error.code === 429) {
+                    errorMsg = "Too many login attempts. Please try again later.";
+                } else if (error.message.includes('Invalid email')) {
+                    errorMsg = "Please enter a valid email address.";
+                } else if (error.message.includes('network')) {
+                    errorMsg = "Network error. Please check your connection and try again.";
+                } else {
+                    errorMsg = `Login failed: ${error.message}`;
+                }
+                
+                showError(errorMsg);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        window.addEventListener('load', async () => {
+            try {
+                const user = await account.get();
+                if (user) {
+                    console.log('User already logged in:', user.email);
+                    const userStatus = await checkUserApprovalStatus(user.$id);
+            
+                    if (userStatus.status === 'approved' || userStatus.status === 'active') {
+                        redirectUser(userStatus.role, userStatus.username);
+                    } else {
+                        await account.deleteSession('current');
+                        console.log('User not approved, logged out');
+                        if (userStatus.status === 'pending') {
+                            showError('Your account is pending approval.');
+                        } else if (userStatus.status === 'rejected' || userStatus.status === 'denied') {
+                            showError('Your account has been rejected.');
+                        } else if (userStatus.status === 'suspended') {
+                            showError('Your account has been suspended.');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('No active session found');
+            }
+        });
+    </script>
+
+    <footer class="footer-regis">
+        <span>© 2025 ViTrox. All rights reserved.</span>
+    </footer>
+</body>
+</html>

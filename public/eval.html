@@ -1,0 +1,570 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./style.css">
+<title>Evaluation Form</title>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+</header>
+
+<div class="card-eval">
+    <div class="form-header">
+        <h1 id="formTitle">Evaluation Form</h1>
+        <span id="statusBadge" class="status-badge"></span>
+    </div>
+    
+    <form id="evalForm">
+        <!-- Technical Requirements Section -->
+        <div class="form-section">
+            <div class="section-title">Technical Requirement Fulfillment</div>
+            <div class="checkbox-grid">
+                <div class="header-eval">Requirement</div>
+                <div class="header-eval">Below Expectation</div>
+                <div class="header-eval">Meeting Expectation</div>
+                <div class="header-eval">Well Above Expectation</div>
+
+                <div class="requirement">Inspection / Cycle time</div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_inspection_cycle_below" id="tech_inspection_cycle_below"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_inspection_cycle_medium" id="tech_inspection_cycle_medium"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_inspection_cycle_above" id="tech_inspection_cycle_above"></div>
+
+                <div class="requirement">Programming Time</div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_programming_time_below" id="tech_programming_time_below"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_programming_time_medium" id="tech_programming_time_medium"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_programming_time_above" id="tech_programming_time_above"></div>
+
+                <div class="requirement">False Call PPM</div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_false_call_below" id="tech_false_call_below"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_false_call_medium" id="tech_false_call_medium"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_false_call_above" id="tech_false_call_above"></div>
+
+                <div class="requirement">Escape PPM</div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_escape_ppm_below" id="tech_escape_ppm_below"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_escape_ppm_medium" id="tech_escape_ppm_medium"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_escape_ppm_above" id="tech_escape_ppm_above"></div>
+
+                <div class="requirement">FPY</div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_fpy_below" id="tech_fpy_below"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_fpy_medium" id="tech_fpy_medium"></div>
+                <div class="checkbox-container"><input type="checkbox" name="tech_fpy_above" id="tech_fpy_above"></div>
+            </div>
+        </div>
+
+        <!-- Issues Section -->
+        <div class="form-section">
+            <div class="section-title">Issues</div>
+            <div class="table-section">
+                <table class="eval-table" id="issuesTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Issue</th>
+                            <th>Priority</th>
+                            <th>Proposed Solution</th>
+                            <th>Person In Charge</th>
+                            <th>Close Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="issuesTableBody">
+                        <tr>
+                            <td class="row-number">1</td>
+                            <td class="issue-row-content">
+                                <input type="text" name="issue_1" class="issue-input">
+                                <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)" style="display:none;">&times;</button>
+                            </td>
+                            <td>
+                                <select name="issue_priority_1">
+                                    <option value="">Select Priority</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </td>
+                            <td><input type="text" name="issue_solution_1"></td>
+                            <td><input type="text" name="issue_pic_1"></td>
+                            <td><input type="date" name="issue_close_date_1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addIssueRow()">+ Add Issue</button>
+            </div>
+        </div>
+
+        <!-- Customer Feedback/Request Section -->
+        <div class="form-section">
+            <div class="section-title">Customer Feedback/Request</div>
+            <div class="table-section">
+                <table class="eval-table" id="feedbackTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Customer Feedback/Request</th>
+                            <th>Priority</th>
+                            <th>Proposed Solution</th>
+                            <th>Person In Charge</th>
+                            <th>Close Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedbackTableBody">
+                        <tr>
+                            <td class="row-number">1</td>
+                            <td class="feedback-row-content">
+                                <input type="text" name="feedback-input">
+                                <button type="button" class="delete-row-btn" onclick="deleteFeedbackRow(this)" style="display:none;">&times;</button>
+                            </td>
+                            <td>
+                                <select name="feedback_priority_1">
+                                    <option value="">Select Priority</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </td>
+                            <td><input type="text" name="feedback_solution_1"></td>
+                            <td><input type="text" name="feedback_pic_1"></td>
+                            <td><input type="date" name="feedback_close_date_1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addFeedbackRow()">+ Add Feedback</button>
+            </div>
+        </div>
+
+        <!-- Customer's Good Comment Section -->
+        <div class="form-section">
+            <div class="section-title">Customer's Good Comment</div>
+            <div class="table-section">
+                <table class="eval-table" id="commentTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Customer's Good Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="commentTableBody">
+                        <tr>
+                            <td class="row-number">1</td>
+                            <td class="comment-row-content">
+                                <input type="text" name="comment-input">
+                                <button type="button" class="delete-row-btn" onclick="deleteCommentRow(this)" style="display:none;">&times;</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn" onclick="addCommentRow()">+ Add Comment</button>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="goBack()">Back</button>
+            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
+            <button type="submit" class="btn btn-success submit-btn" id="submitBtn">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+const client = new Appwrite.Client()
+    .setEndpoint("https://fra.cloud.appwrite.io/v1")
+    .setProject("68ddd7de00255d4f5c96"); 
+
+const databases = new Appwrite.Databases(client);
+const account = new Appwrite.Account(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const evalCollectionId = "68bf9d5600257a20775a";
+const params = new URLSearchParams(window.location.search);
+const eventId = params.get("id");
+const viewMode = params.get("mode") === "view";
+
+let evDoc = null;
+let currentStatus = "draft";
+let issueRowCount = 1;
+let feedbackRowCount = 1;
+let commentRowCount = 1;
+
+function updateRowNumbers(tbodyId, prefix) {
+    const rows = document.querySelectorAll(`#${tbodyId} tr`);
+    rows.forEach((row, index) => {
+        row.querySelector(".row-number").textContent = index + 1;
+        const input = row.querySelector(`input[name^='${prefix}_']`);
+        if (input) input.name = `${prefix}_${index + 1}`;
+        const select = row.querySelector(`select[name^='${prefix}_priority_']`);
+        if (select) select.name = `${prefix}_priority_${index + 1}`;
+    });
+    if (prefix === "issue") issueRowCount = rows.length;
+    if (prefix === "feedback") feedbackRowCount = rows.length;
+    if (prefix === "comment") commentRowCount = rows.length;
+}
+
+function addIssueRow() {
+    issueRowCount++;
+    const tbody = document.getElementById('issuesTableBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td class="row-number">${issueRowCount}</td>
+        <td class="issue-row-content">
+            <input type="text" name="issue_${issueRowCount}">
+            <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)">&times;</button>
+        </td>
+        <td>
+            <select name="issue_priority_${issueRowCount}">
+                <option value="">Select Priority</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </td>
+        <td><input type="text" name="issue_solution_${issueRowCount}"></td>
+        <td><input type="text" name="issue_pic_${issueRowCount}"></td>
+        <td><input type="date" name="issue_close_date_${issueRowCount}"></td>
+    `;
+    tbody.appendChild(newRow);
+    updateRowNumbers("issuesTableBody", "issue");
+}
+function deleteIssueRow(btn) {
+    const tbody = document.getElementById("issuesTableBody");
+    if (tbody.rows.length <= 1) {
+        alert("At least one issue must be present.");
+        return;
+    }
+    btn.closest("tr").remove();
+    updateRowNumbers("issuesTableBody", "issue");
+}
+
+function addFeedbackRow() {
+    feedbackRowCount++;
+    const tbody = document.getElementById('feedbackTableBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td class="row-number">${feedbackRowCount}</td>
+        <td class="feedback-row-content">
+            <input type="text" name="feedback_${feedbackRowCount}">
+            <button type="button" class="delete-row-btn" onclick="deleteFeedbackRow(this)">&times;</button>
+        </td>
+        <td>
+            <select name="feedback_priority_${feedbackRowCount}">
+                <option value="">Select Priority</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </td>
+        <td><input type="text" name="feedback_solution_${feedbackRowCount}"></td>
+        <td><input type="text" name="feedback_pic_${feedbackRowCount}"></td>
+        <td><input type="date" name="feedback_close_date_${feedbackRowCount}"></td>
+    `;
+    tbody.appendChild(newRow);
+    updateRowNumbers("feedbackTableBody", "feedback");
+}
+function deleteFeedbackRow(btn) {
+    const tbody = document.getElementById("feedbackTableBody");
+    if (tbody.rows.length <= 1) {
+        alert("At least one feedback must be present.");
+        return;
+    }
+    btn.closest("tr").remove();
+    updateRowNumbers("feedbackTableBody", "feedback");
+}
+
+function addCommentRow() {
+    commentRowCount++;
+    const tbody = document.getElementById('commentTableBody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td class="row-number">${commentRowCount}</td>
+        <td class="comment-row-content">
+            <input type="text" name="comment_${commentRowCount}">
+            <button type="button" class="delete-row-btn" onclick="deleteCommentRow(this)">&times;</button>
+        </td>
+    `;
+    tbody.appendChild(newRow);
+    updateRowNumbers("commentTableBody", "comment");
+}
+function deleteCommentRow(btn) {
+    const tbody = document.getElementById("commentTableBody");
+    if (tbody.rows.length <= 1) {
+        alert("At least one comment must be present.");
+        return;
+    }
+    btn.closest("tr").remove();
+    updateRowNumbers("commentTableBody", "comment");
+}
+
+function setupCheckboxGroups() {
+    const groups = [
+        ['tech_inspection_cycle_above','tech_inspection_cycle_medium','tech_inspection_cycle_below'],
+        ['tech_programming_time_above','tech_programming_time_medium','tech_programming_time_below'],
+        ['tech_false_call_above','tech_false_call_medium','tech_false_call_below'],
+        ['tech_escape_ppm_above','tech_escape_ppm_medium','tech_escape_ppm_below'],
+        ['tech_fpy_above','tech_fpy_medium','tech_fpy_below']
+    ];
+
+    groups.forEach(group => {
+        group.forEach(checkboxId => {
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        group.forEach(id => {
+                            if (id !== checkboxId) {
+                                const otherCheckbox = document.getElementById(id);
+                                if (otherCheckbox) otherCheckbox.checked = false;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+}
+
+async function loadForm() {
+    if (!eventId) {
+        console.log("No event ID provided");
+        updateFormDisplay();
+        return;
+    }
+
+    try {
+        evDoc = await databases.getDocument(databaseId, evalCollectionId, eventId);
+        console.log("Loaded eval document:", evDoc);
+        [
+            'tech_inspection_cycle_above','tech_inspection_cycle_medium','tech_inspection_cycle_below',
+            'tech_programming_time_above','tech_programming_time_medium','tech_programming_time_below',
+            'tech_false_call_above','tech_false_call_medium','tech_false_call_below',
+            'tech_escape_ppm_above','tech_escape_ppm_medium','tech_escape_ppm_below',
+            'tech_fpy_above','tech_fpy_medium','tech_fpy_below'
+        ].forEach(key => {
+            const checkbox = document.getElementById(key);
+            if (checkbox) checkbox.checked = !!evDoc[key];
+        });
+
+        const tbodyIssues = document.getElementById('issuesTableBody');
+        tbodyIssues.innerHTML = '';
+        issueRowCount = 0;
+
+        const descrip_issue = evDoc.descrip_issue || [];
+        const priority_issue = evDoc.priority_issue || [];
+        const sol_issue = evDoc.sol_issue || [];
+        const pic_issue = evDoc.pic_issue || [];
+        const closeDate_issue = evDoc.closeDate_issue || [];
+
+        descrip_issue.forEach((description, index) => {
+            if (!description || !description.trim()) return;
+            issueRowCount++;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="row-number">${issueRowCount}</td>
+                <td><input type="text" name="issue_${issueRowCount}" value="${description}"></td>
+                <td>
+                    <select name="issue_priority_${issueRowCount}">
+                        <option value="">Select Priority</option>
+                        <option value="High" ${priority_issue[index] === 'High' ? 'selected' : ''}>High</option>
+                        <option value="Medium" ${priority_issue[index] === 'Medium' ? 'selected' : ''}>Medium</option>
+                        <option value="Low" ${priority_issue[index] === 'Low' ? 'selected' : ''}>Low</option>
+                    </select>
+                </td>
+                <td><input type="text" name="issue_solution_${issueRowCount}" value="${sol_issue[index] || ''}"></td>
+                <td><input type="text" name="issue_pic_${issueRowCount}" value="${pic_issue[index] || ''}"></td>
+                <td>
+                    <input type="date" name="issue_close_date_${issueRowCount}" 
+                        value="${closeDate_issue[index] ? closeDate_issue[index].split('T')[0] : ''}">
+                </td>
+
+            `;
+            tbodyIssues.appendChild(row);
+        });
+
+        const tbodyFeedback = document.getElementById('feedbackTableBody');
+        tbodyFeedback.innerHTML = '';
+        feedbackRowCount = 0;
+
+        const descrip_fed = evDoc.descrip_fed || [];
+        const priority_fed = evDoc.priority_fed || [];
+        const sol_fed = evDoc.sol_fed || [];
+        const pic_fed = evDoc.pic_fed || [];
+        const closeDate_fed = evDoc.closeDate_fed || [];
+
+        descrip_fed.forEach((description, index) => {
+            if (!description || !description.trim()) return;
+            feedbackRowCount++;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="row-number">${feedbackRowCount}</td>
+                <td><input type="text" name="feedback_${feedbackRowCount}" value="${description}"></td>
+                <td>
+                    <select name="feedback_priority_${feedbackRowCount}">
+                        <option value="">Select Priority</option>
+                        <option value="High" ${priority_fed[index] === 'High' ? 'selected' : ''}>High</option>
+                        <option value="Medium" ${priority_fed[index] === 'Medium' ? 'selected' : ''}>Medium</option>
+                        <option value="Low" ${priority_fed[index] === 'Low' ? 'selected' : ''}>Low</option>
+                    </select>
+                </td>
+                <td><input type="text" name="feedback_solution_${feedbackRowCount}" value="${sol_fed[index] || ''}"></td>
+                <td><input type="text" name="feedback_pic_${feedbackRowCount}" value="${pic_fed[index] || ''}"></td>
+                <td>
+                    <input type="date" name="feedback_close_date_${feedbackRowCount}" 
+                        value="${closeDate_fed[index] ? closeDate_fed[index].split('T')[0] : ''}">
+                </td>
+            `;
+            tbodyFeedback.appendChild(row);
+        });
+
+        const tbodyComments = document.getElementById('commentTableBody');
+        tbodyComments.innerHTML = '';
+        commentRowCount = 0;
+
+        const commentArr = evDoc.comment || [];
+        commentArr.forEach((comment, index) => {
+            if (!comment || !comment.trim()) return;
+            commentRowCount++;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="row-number">${commentRowCount}</td>
+                <td><input type="text" name="comment_${commentRowCount}" value="${comment}"></td>
+            `;
+            tbodyComments.appendChild(row);
+        });
+
+        currentStatus = evDoc.status || "draft";
+        updateFormDisplay();
+
+    } catch (err) {
+        console.log("Form document not found or error loading:", err);
+        updateFormDisplay();
+    }
+}
+
+function updateFormDisplay() {
+    const statusBadge = document.getElementById("statusBadge");
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.getElementById("submitBtn");
+    const saveProgressBtn = document.getElementById("saveProgressBtn");
+    
+    statusBadge.textContent = currentStatus;
+    statusBadge.className = `status-badge ${currentStatus.replace(' ', '-')}`;
+    
+    if (viewMode) {
+        formTitle.textContent = `Evaluation Form (View Mode)`;
+        document.querySelectorAll('input, textarea, select, button[type="button"]:not(.btn-secondary)').forEach(el => el.disabled = true);
+        document.querySelectorAll('.add-row-btn').forEach(btn => btn.style.display = 'none');
+        submitBtn.style.display = 'none';
+        saveProgressBtn.style.display = 'none';
+    } else {
+        formTitle.textContent = `Evaluation Form`;
+        if (currentStatus === "complete") {
+            submitBtn.style.display = 'none';
+        }
+    }
+}
+
+async function saveForm(status = "draft") {
+    console.log("Starting save process...");
+
+    const saveData = {
+        tech_inspection_cycle_above: document.getElementById('tech_inspection_cycle_above').checked,
+        tech_inspection_cycle_medium: document.getElementById('tech_inspection_cycle_medium').checked,
+        tech_inspection_cycle_below: document.getElementById('tech_inspection_cycle_below').checked,
+        tech_programming_time_above: document.getElementById('tech_programming_time_above').checked,
+        tech_programming_time_medium: document.getElementById('tech_programming_time_medium').checked,
+        tech_programming_time_below: document.getElementById('tech_programming_time_below').checked,
+        tech_false_call_above: document.getElementById('tech_false_call_above').checked,
+        tech_false_call_medium: document.getElementById('tech_false_call_medium').checked,
+        tech_false_call_below: document.getElementById('tech_false_call_below').checked,
+        tech_escape_ppm_above: document.getElementById('tech_escape_ppm_above').checked,
+        tech_escape_ppm_medium: document.getElementById('tech_escape_ppm_medium').checked,
+        tech_escape_ppm_below: document.getElementById('tech_escape_ppm_below').checked,
+        tech_fpy_above: document.getElementById('tech_fpy_above').checked,
+        tech_fpy_medium: document.getElementById('tech_fpy_medium').checked,
+        tech_fpy_below: document.getElementById('tech_fpy_below').checked,
+
+        descrip_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_${i+1}"]`)?.value || ''),
+        priority_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`select[name="issue_priority_${i+1}"]`)?.value || ''),
+        sol_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_solution_${i+1}"]`)?.value || ''),
+        pic_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_pic_${i+1}"]`)?.value || ''),
+        closeDate_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_close_date_${i+1}"]`)?.value || ''),
+
+        descrip_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_${i+1}"]`)?.value || ''),
+        priority_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`select[name="feedback_priority_${i+1}"]`)?.value || ''),
+        sol_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_solution_${i+1}"]`)?.value || ''),
+        pic_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_pic_${i+1}"]`)?.value || ''),
+        closeDate_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_close_date_${i+1}"]`)?.value || ''),
+
+        comment: Array.from({ length: commentRowCount }, (_, i) => document.querySelector(`input[name="comment_${i+1}"]`)?.value || ''),
+
+        status: status
+    };
+
+    for (const key in saveData) {
+        if (Array.isArray(saveData[key])) {
+            saveData[key] = saveData[key].filter(v => v !== "" && v !== null && v !== undefined);
+            if (saveData[key].length === 0) {
+                delete saveData[key];
+            }
+        }
+    }
+
+    const enumFields = ["priority_issue", "priority_fed", "status"];
+    enumFields.forEach(field => {
+        if (saveData[field] === "") {
+            delete saveData[field];
+        }
+    });
+
+    console.log("Data to save:", saveData);
+
+    try {
+        try {
+            await databases.updateDocument(databaseId, evalCollectionId, eventId, saveData);
+            console.log("Form updated successfully in database");
+        } catch (updateError) {
+            if (updateError.message.includes("Document with the requested ID could not be found")) {
+                await databases.createDocument(databaseId, evalCollectionId, eventId, saveData);
+                console.log("Form created successfully in database with ID:", eventId);
+            } else {
+                console.error("Error updating document:", updateError);
+                throw updateError;
+            }
+        }
+
+        currentStatus = status;
+        updateFormDisplay();
+        console.log("Save successful");
+        alert(`Form ${status === "complete" ? "submitted" : "saved"} successfully!`);
+
+        if (status === "complete") {
+            window.location.href = `detail.html?id=${eventId}`;
+        }
+    } catch (err) {
+        console.error("Failed to save:", err);
+        console.error("Error details:", err.message);
+        alert(`Failed to save: ${err.message}`);
+    }
+}
+
+document.getElementById('evalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveForm("complete");
+});
+
+function goBack() {
+  window.history.back();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    setupCheckboxGroups();
+    loadForm();
+});
+</script>
+
+<footer class="footer">
+    <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+
+</body>
+</html>
