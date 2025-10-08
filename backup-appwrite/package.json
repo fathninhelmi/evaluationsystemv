@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "name": "backup-appwrite",
+  "version": "1.0.0",
+  "description": "Appwrite database backup to CSV",
+  "main": "backup.js",
+  "dependencies": {
+    "appwrite": "latest",
+    "json2csv": "latest",
+    "node-appwrite": "^20.0.0"
+  }
+}
