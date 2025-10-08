@@ -1,4 +1,0 @@
-"username","email","role","status","registerDate","$id","$sequence","$createdAt","$updatedAt","$permissions","$databaseId","$collectionId"
-"Admin","admin@vitrox.com","admin","approved",,"68dddd07002cdafd3bcc",1,"2025-10-02T02:01:44.086+00:00","2025-10-02T02:01:44.086+00:00","[]","68ba8a9c001f17064e15","68ba8c240002116fa647"
-"Manager","manager@vitrox.com","manager","approved",,"68dddd2900242ee458da",2,"2025-10-02T02:02:18.005+00:00","2025-10-02T02:02:18.005+00:00","[]","68ba8a9c001f17064e15","68ba8c240002116fa647"
-"Staff","staff@vitrox.com","staff","approved",,"68dddd42000ea13a9e74",3,"2025-10-02T02:02:43.324+00:00","2025-10-02T02:02:43.324+00:00","[]","68ba8a9c001f17064e15","68ba8c240002116fa647"
