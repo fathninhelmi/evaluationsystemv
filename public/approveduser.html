@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Approved User</title>
+<title>User Management</title>
 <link rel="stylesheet" href="./style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
@@ -12,7 +12,7 @@
 <header class="header">
     <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
     <nav class="nav-desktop">
-        <a href="approveduser.html" class="nav-link active">Approved Users</a>
+        <a href="approveduser.html" class="nav-link active">User Management</a>
         <a href="manageform.html" class="nav-link">Manage Forms</a>
         <a href="referencecust.html" class="nav-link">References Details</a>
         <a href="#" class="nav-link" id="logoutBtn">Logout</a>
@@ -29,12 +29,6 @@
                     <input type="text" id="searchInput" placeholder="Search users by username or email" onkeyup="filterUsers()">
                 </div>
                 <div class="filter-group">
-                    <select id="statusFilter" onchange="filterUsers()" class="filter-select">
-                        <option value="all">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
                     <select id="roleFilter" onchange="filterUsers()" class="filter-select">
                         <option value="all">All Roles</option>
                         <option value="staff">Staff</option>
@@ -47,30 +41,39 @@
 
         <div class="stats-grid-ad">
             <div class="stat-card-ad">
-                <div class="stat-icon-ad pending">
-                    <i class="fas fa-clock"></i>
+                <div class="stat-icon-ad approved">
+                    <i class="fas fa-users"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-number" id="pendingCount">0</div>
-                    <div class="stat-label-ad">Pending Approval</div>
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label-ad">Total Users</div>
                 </div>
             </div>
             <div class="stat-card-ad">
-                <div class="stat-icon-ad approved">
-                    <i class="fas fa-check"></i>
+                <div class="stat-icon-ad pending">
+                    <i class="fas fa-user-tie"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-number" id="approvedCount">0</div>
-                    <div class="stat-label-ad">Approved Users</div>
+                    <div class="stat-number" id="staffCount">0</div>
+                    <div class="stat-label-ad">Staff</div>
+                </div>
+            </div>
+            <div class="stat-card-ad">
+                <div class="stat-icon-ad">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="managerCount">0</div>
+                    <div class="stat-label-ad">Managers</div>
                 </div>
             </div>
             <div class="stat-card-ad">
                 <div class="stat-icon-ad rejected">
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-user-shield"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-number" id="rejectedCount">0</div>
-                    <div class="stat-label-ad">Rejected Users</div>
+                    <div class="stat-number" id="adminCount">0</div>
+                    <div class="stat-label-ad">Admins</div>
                 </div>
             </div>
         </div>
@@ -83,7 +86,6 @@
                         <th>Username</th>
                         <th>Email</th>
                         <th>Role</th>
-                        <th>Status</th>
                         <th>Registration Date</th>
                         <th>Actions</th>
                     </tr>
@@ -171,6 +173,7 @@ document.getElementById("logoutBtn").addEventListener("click", (e) => {
     e.preventDefault();
     logout();
 });
+
 setInterval(() => {
     fetchUsers();
 }, 30000);
@@ -187,7 +190,7 @@ async function fetchUsers() {
             name: doc.username || doc.name || '',
             email: doc.email || '',
             role: doc.role || 'staff',
-            status: doc.status || 'pending',
+            status: doc.status || 'approved',
             registrationDate: doc.registerDate || doc.$createdAt,
             isVitrox: doc.email?.endsWith('@vitrox.com') || false
         })).sort((a, b) => new Date(b.registrationDate) - new Date(a.registrationDate));
@@ -208,26 +211,26 @@ async function updateUserField(userId, field, value) {
         if (user) user[field] = value;
         renderUsers();
         updateStats();
-        showNotification(`${field} updated for ${user.name}`, 'success');
+        showNotification(`${field} updated successfully`, 'success');
     } catch (err) {
         console.error(err);
         showNotification("Update failed", "error");
     }
 }
 
-function approveUser(userId) { updateUserField(userId, 'status', 'approved'); }
-function rejectUser(userId) { updateUserField(userId, 'status', 'rejected'); }
-function changeUserRole(userId, newRole) { updateUserField(userId, 'role', newRole); }
+function changeUserRole(userId, newRole) { 
+    updateUserField(userId, 'role', newRole); 
+}
 
 async function deleteUser(userId) {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
     
     try {
         await database.deleteDocument(databaseId, collectionId, userId);
         users = users.filter(u => u.id !== userId);
         renderUsers();
         updateStats();
-        showNotification("User deleted", "success");
+        showNotification("User deleted successfully", "success");
     } catch (err) {
         console.error(err);
         showNotification("Delete failed", "error");
@@ -255,33 +258,19 @@ function renderUsers() {
         <td>${user.name || '-'}</td>
         <td>${user.email} ${user.isVitrox ? '<i class="fas fa-shield-alt"></i>' : ''}</td>
         <td>
-            <select onchange="changeUserRole('${user.id}', this.value)" ${user.status !== 'approved' ? 'disabled' : ''}>
+            <select class="role-select" onchange="changeUserRole('${user.id}', this.value)">
                 <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>Staff</option>
                 <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option>
                 <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
             </select>
         </td>
-        <td><span class="status-badge ${user.status}">${getStatusText(user.status)}</span></td>
         <td>${formatDate(user.registrationDate)}</td>
         <td>
         <div class="action-buttons">
             <button class="btn-icon" onclick="viewUser('${user.id}')" title="View Details">
                 <i class="fas fa-eye"></i>
             </button>
-            ${user.status === 'pending' ? `
-                <button class="btn-icon success" onclick="approveUser('${user.id}')" title="Approve">
-                    <i class="fas fa-check"></i>
-                </button>
-                <button class="btn-icon danger" onclick="rejectUser('${user.id}')" title="Reject">
-                    <i class="fas fa-times"></i>
-                </button>
-            ` : ''}
-            ${user.status === 'suspended' ? `
-                <button class="btn-icon success" onclick="reactivateUser('${user.id}')" title="Reactivate">
-                    <i class="fas fa-play"></i>
-                </button>
-            ` : ''}
-            <button class="btn-icon danger" onclick="deleteUser('${user.id}')" title="Delete">
+            <button class="btn-icon danger" onclick="deleteUser('${user.id}')" title="Delete User">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
@@ -324,10 +313,6 @@ function generateUserDetailsHTML(user) {
                 <span class="role-badge ${user.role}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
             </div>
             <div class="detail-item">
-                <label>Status:</label>
-                <span class="status-badge ${user.status}">${getStatusText(user.status)}</span>
-            </div>
-            <div class="detail-item">
                 <label>Registration Date:</label>
                 <span>${formatDate(user.registrationDate)}</span>
             </div>
@@ -341,6 +326,10 @@ function generateUserDetailsHTML(user) {
 
 function closeModal() {
     document.getElementById('userModal').style.display = 'none';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
 }
 
 function previousPage() {
@@ -359,14 +348,12 @@ function nextPage() {
 
 function filterUsers() {
     const search = document.getElementById('searchInput').value.toLowerCase();
-    const status = document.getElementById('statusFilter').value;
     const role = document.getElementById('roleFilter').value;
 
     filteredUsers = users.filter(u => {
         const matchSearch = (u.name || '').toLowerCase().includes(search) || (u.email || '').toLowerCase().includes(search);
-        const matchStatus = status === 'all' || u.status === status;
         const matchRole = role === 'all' || u.role === role;
-        return matchSearch && matchStatus && matchRole;
+        return matchSearch && matchRole;
     });
 
     currentPage = 1;
@@ -381,14 +368,11 @@ function formatDate(dateStr) {
     return `${day}/${month}/${year}`;
 }
 
-function getStatusText(status) {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
 function updateStats() {
-    document.getElementById('pendingCount').textContent = users.filter(u => u.status === 'pending').length;
-    document.getElementById('approvedCount').textContent = users.filter(u => u.status === 'approved').length;
-    document.getElementById('rejectedCount').textContent = users.filter(u => u.status === 'rejected').length;
+    document.getElementById('totalCount').textContent = users.length;
+    document.getElementById('staffCount').textContent = users.filter(u => u.role === 'staff').length;
+    document.getElementById('managerCount').textContent = users.filter(u => u.role === 'manager').length;
+    document.getElementById('adminCount').textContent = users.filter(u => u.role === 'admin').length;
 }
 
 function updateSelection() {
