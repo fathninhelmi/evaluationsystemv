@@ -163,10 +163,15 @@ async function loadEvaluations() {
         for (const doc of response.documents) {
             let preDoc, evalDoc, postDoc;
             let preStatus = 'draft', evalStatus = 'draft', postStatus = 'draft';
+            let winLoseStatus = null;
 
             try { preDoc = await databases.getDocument(databaseId, preEvalCollectionId, doc.$id); preStatus = preDoc.status || 'draft'; } catch {}
             try { evalDoc = await databases.getDocument(databaseId, evalCollectionId, doc.$id); evalStatus = evalDoc.status || 'draft'; } catch {}
-            try { postDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.$id); postStatus = postDoc.status || 'draft'; } catch {}
+            try { 
+                postDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.$id); 
+                postStatus = postDoc.status || 'draft';
+                winLoseStatus = postDoc.winlose || postDoc.winLose || null;
+            } catch {}
 
             const overallStatus = computeOverallStatus(preStatus, evalStatus, postStatus);
 
@@ -229,7 +234,8 @@ async function loadEvaluations() {
                 pre_eval: preStatus,
                 eval: evalStatus,
                 post_eval: postStatus,
-                status: overallStatus
+                status: overallStatus,
+                winlose: winLoseStatus
             });
         }
 
@@ -255,16 +261,57 @@ function updateStats() {
 }
 
 function initCharts() {
-    const productCounts = {};
-    evaluationData.forEach(item => productCounts[item.category] = (productCounts[item.category]||0)+1);
+    const productStats = {};
+    evaluationData.forEach(item => {
+        const cat = item.category;
+        if (!productStats[cat]) {
+            productStats[cat] = { total: 0, win: 0, lose: 0 };
+        }
+        productStats[cat].total++;
+        
+        if (item.winlose) {
+            const status = item.winlose.toLowerCase();
+            if (status === 'win') productStats[cat].win++;
+            else if (status === 'lose' || status === 'loss') productStats[cat].lose++;
+        }
+    });
 
     const productCtx = document.getElementById('productChart');
     if(window.productChartInstance) window.productChartInstance.destroy();
 
+    const labels = Object.keys(productStats).map(cat => 
+        `${cat}\n(W:${productStats[cat].win} L:${productStats[cat].lose})`
+    );
+
     window.productChartInstance = new Chart(productCtx, {
         type:'doughnut',
-        data:{ labels:Object.keys(productCounts), datasets:[{ data:Object.values(productCounts), backgroundColor:['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6'] }] },
-        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } } }
+        data:{ 
+            labels: labels,
+            datasets:[{ 
+                data: Object.values(productStats).map(s => s.total), 
+                backgroundColor:['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'] 
+            }] 
+        },
+        options:{ 
+            responsive:true, 
+            maintainAspectRatio:false, 
+            plugins:{ 
+                legend:{ position:'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const cat = Object.keys(productStats)[context.dataIndex];
+                            const stats = productStats[cat];
+                            return [
+                                `${cat}: ${stats.total}`,
+                                `Win: ${stats.win}`,
+                                `Lose: ${stats.lose}`
+                            ];
+                        }
+                    }
+                }
+            } 
+        }
     });
 
     const monthlyData = getMonthlyProgressData();
