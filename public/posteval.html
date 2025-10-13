@@ -23,6 +23,18 @@
     </div>
 
     <form id="postEvalForm" style="display: none;">
+        <!-- Win/Lose -->
+        <div class="form-section">
+            <div class="section-title">Win / Lose</div>
+            <div class="form-group-eval">
+                <label>Score :</label>
+                <div class="score-buttons">
+                    <button type="button" class="score-btn" data-score="win">Win</button>
+                    <button type="button" class="score-btn" data-score="lose">Lose</button>
+                </div>
+                <input type="hidden" name="score" id="score" required>
+            </div>
+        </div>
 
         <!-- Performance Scoring Section -->
         <div class="form-section">
@@ -468,4 +480,5 @@ document.addEventListener("DOMContentLoaded", initForm);
     <span>© 2025 ViTrox. All rights reserved.</span>
 </footer>
 </body>
+
 </html>
