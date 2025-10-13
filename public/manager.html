@@ -177,7 +177,7 @@ async function loadEvaluations() {
             try { 
                 postDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.$id); 
                 postStatus = postDoc.status || 'draft';
-                winLoseStatus = postDoc.winlose || postDoc.winLose || null;
+                winLoseStatus = postDoc.result || postDoc.winlose || postDoc.winLose || null;
             } catch {}
 
             const overallStatus = computeOverallStatus(preStatus, evalStatus, postStatus);
