@@ -70,8 +70,15 @@
             Product Categories
           </div>
         </div>
-        <div class="chart-container">
-          <canvas id="productChart"></canvas>
+        <div class="chart-container" style="display: flex; gap: 10px;">
+          <div style="flex: 1;">
+            <h4 style="text-align: center; margin-bottom: 10px; color: #2ecc71;">Win</h4>
+            <canvas id="winChart"></canvas>
+          </div>
+          <div style="flex: 1;">
+            <h4 style="text-align: center; margin-bottom: 10px; color: #e74c3c;">Lose</h4>
+            <canvas id="loseChart"></canvas>
+          </div>
         </div>
       </div>
 
@@ -276,37 +283,64 @@ function initCharts() {
         }
     });
 
-    const productCtx = document.getElementById('productChart');
-    if(window.productChartInstance) window.productChartInstance.destroy();
+    const categories = Object.keys(productStats);
+    const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
-    const labels = Object.keys(productStats).map(cat => 
-        `${cat}\n(W:${productStats[cat].win} L:${productStats[cat].lose})`
-    );
+    // Win Chart
+    const winCtx = document.getElementById('winChart');
+    if(window.winChartInstance) window.winChartInstance.destroy();
 
-    window.productChartInstance = new Chart(productCtx, {
+    window.winChartInstance = new Chart(winCtx, {
         type:'doughnut',
         data:{ 
-            labels: labels,
+            labels: categories,
             datasets:[{ 
-                data: Object.values(productStats).map(s => s.total), 
-                backgroundColor:['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'] 
+                data: categories.map(cat => productStats[cat].win), 
+                backgroundColor: colors
             }] 
         },
         options:{ 
             responsive:true, 
             maintainAspectRatio:false, 
             plugins:{ 
-                legend:{ position:'bottom' },
+                legend:{ position:'bottom', labels: { font: { size: 10 } } },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const cat = Object.keys(productStats)[context.dataIndex];
-                            const stats = productStats[cat];
-                            return [
-                                `${cat}: ${stats.total}`,
-                                `Win: ${stats.win}`,
-                                `Lose: ${stats.lose}`
-                            ];
+                            const cat = categories[context.dataIndex];
+                            const wins = productStats[cat].win;
+                            return `${cat}: ${wins} win${wins !== 1 ? 's' : ''}`;
+                        }
+                    }
+                }
+            } 
+        }
+    });
+
+    // Lose Chart
+    const loseCtx = document.getElementById('loseChart');
+    if(window.loseChartInstance) window.loseChartInstance.destroy();
+
+    window.loseChartInstance = new Chart(loseCtx, {
+        type:'doughnut',
+        data:{ 
+            labels: categories,
+            datasets:[{ 
+                data: categories.map(cat => productStats[cat].lose), 
+                backgroundColor: colors
+            }] 
+        },
+        options:{ 
+            responsive:true, 
+            maintainAspectRatio:false, 
+            plugins:{ 
+                legend:{ position:'bottom', labels: { font: { size: 10 } } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const cat = categories[context.dataIndex];
+                            const loses = productStats[cat].lose;
+                            return `${cat}: ${loses} loss${loses !== 1 ? 'es' : ''}`;
                         }
                     }
                 }
