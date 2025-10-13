@@ -131,6 +131,7 @@ const postEvalCollectionId= "68bf9d62002b4f5f7f23";
 let evaluationData = [];
 let map;
 let markers = [];
+let locationCache = {}; // Cache geocoded locations in memory
 
 async function checkSession() {
     try {
@@ -162,6 +163,30 @@ function computeOverallStatus(pre, evalStatus, post) {
     if (completedForms === 3) return 'complete';
     if (formsWithProgress > 0) return 'progress';
     return 'draft';
+}
+
+async function geocodeLocation(queryString) {
+    // Check cache first
+    if (locationCache[queryString]) {
+        return locationCache[queryString];
+    }
+
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryString)}&limit=1&addressdetails=1`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+            const result = {
+                location: [parseFloat(data[0].lat), parseFloat(data[0].lon)],
+                locationName: data[0].display_name || queryString
+            };
+            // Cache the result
+            locationCache[queryString] = result;
+            return result;
+        }
+    } catch (err) {
+        console.warn("Geocoding failed for", queryString, err);
+    }
+    return null;
 }
 
 async function loadEvaluations() {
@@ -197,39 +222,21 @@ async function loadEvaluations() {
             let location = null;
             let locationName = doc.customerCompany || 'Unknown Location';
 
-            if (!doc.location && (doc.customerCompany || doc.customerLocation)) {
-                try {
-                    let queryString = doc.customerCompany || '';
-                    if (doc.customerLocation) {
-                        queryString += ', ' + doc.customerLocation;
-                    }
-
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryString)}&limit=1&addressdetails=1`);
-                    const data = await res.json();
-                    if (data && data.length > 0) {
-                        location = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-                        locationName = data[0].display_name || queryString;
-                        try {
-                            await databases.updateDocument(databaseId, collectionId, doc.$id, {
-                                location,
-                                locationName
-                            });
-                            console.log(`Updated location for ${queryString}:`, location);
-                        } catch (err) {
-                            console.warn("Failed to update location in database", err);
-                        }
-                    } else {
-                        console.log(`No geocoding results found for: ${queryString}`);
-                    }
-                } catch (err) {
-                    console.warn("Geocoding failed for", doc.customerCompany, err);
+            // Try to geocode using customerLocation (primary) or customerCompany
+            if (doc.customerLocation) {
+                const geoResult = await geocodeLocation(doc.customerLocation);
+                if (geoResult) {
+                    location = geoResult.location;
+                    locationName = geoResult.locationName;
+                    console.log(`Geocoded location for ${doc.customerLocation}:`, location);
                 }
-            } else if (doc.location) {
-                if (Array.isArray(doc.location)) location = doc.location;
-                else try {
-                    const parsed = JSON.parse(doc.location);
-                    if (Array.isArray(parsed)) location = parsed;
-                } catch {}
+            } else if (doc.customerCompany) {
+                const geoResult = await geocodeLocation(doc.customerCompany);
+                if (geoResult) {
+                    location = geoResult.location;
+                    locationName = geoResult.locationName;
+                    console.log(`Geocoded location for ${doc.customerCompany}:`, location);
+                }
             }
 
             evaluationData.push({
@@ -275,6 +282,9 @@ function updateStats() {
 
 function initCharts() {
     const productStats = {};
+    let totalWins = 0;
+    let totalLoses = 0;
+
     evaluationData.forEach(item => {
         const cat = item.category;
         if (!productStats[cat]) {
@@ -284,69 +294,61 @@ function initCharts() {
         
         if (item.winlose) {
             const status = item.winlose.toLowerCase();
-            if (status === 'win') productStats[cat].win++;
-            else if (status === 'lose' || status === 'loss') productStats[cat].lose++;
+            if (status === 'win') {
+                productStats[cat].win++;
+                totalWins++;
+            } else if (status === 'lose' || status === 'loss') {
+                productStats[cat].lose++;
+                totalLoses++;
+            }
         }
     });
+
+    // Update win/lose totals
+    document.getElementById('totalWins').textContent = totalWins;
+    document.getElementById('totalLoses').textContent = totalLoses;
+
+    // Update category breakdown
+    const breakdownHTML = Object.entries(productStats)
+        .map(([cat, stats]) => `${cat}: ${stats.win}W / ${stats.lose}L`)
+        .join(' • ');
+    document.getElementById('categoryBreakdown').innerHTML = breakdownHTML;
 
     const categories = Object.keys(productStats);
     const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
-    // Win Chart
-    const winCtx = document.getElementById('winChart');
-    if(window.winChartInstance) window.winChartInstance.destroy();
+    // Product Chart (combined wins and losses)
+    const productCtx = document.getElementById('productChart');
+    if (!productCtx) {
+        console.error('productChart canvas not found');
+        return;
+    }
 
-    window.winChartInstance = new Chart(winCtx, {
-        type:'doughnut',
-        data:{ 
+    if (window.productChartInstance) window.productChartInstance.destroy();
+
+    window.productChartInstance = new Chart(productCtx, {
+        type: 'doughnut',
+        data: { 
             labels: categories,
-            datasets:[{ 
-                data: categories.map(cat => productStats[cat].win), 
+            datasets: [{ 
+                label: 'Evaluations by Category',
+                data: categories.map(cat => productStats[cat].total), 
                 backgroundColor: colors
             }] 
         },
-        options:{ 
-            responsive:true, 
-            maintainAspectRatio:false, 
-            plugins:{ 
-                legend:{ position:'bottom', labels: { font: { size: 10 } } },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+                legend: { position: 'bottom', labels: { font: { size: 10 } } },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             const cat = categories[context.dataIndex];
+                            const total = productStats[cat].total;
                             const wins = productStats[cat].win;
-                            return `${cat}: ${wins} win${wins !== 1 ? 's' : ''}`;
-                        }
-                    }
-                }
-            } 
-        }
-    });
-
-    // Lose Chart
-    const loseCtx = document.getElementById('loseChart');
-    if(window.loseChartInstance) window.loseChartInstance.destroy();
-
-    window.loseChartInstance = new Chart(loseCtx, {
-        type:'doughnut',
-        data:{ 
-            labels: categories,
-            datasets:[{ 
-                data: categories.map(cat => productStats[cat].lose), 
-                backgroundColor: colors
-            }] 
-        },
-        options:{ 
-            responsive:true, 
-            maintainAspectRatio:false, 
-            plugins:{ 
-                legend:{ position:'bottom', labels: { font: { size: 10 } } },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const cat = categories[context.dataIndex];
                             const loses = productStats[cat].lose;
-                            return `${cat}: ${loses} loss${loses !== 1 ? 'es' : ''}`;
+                            return `${cat}: ${total} (${wins}W/${loses}L)`;
                         }
                     }
                 }
@@ -354,20 +356,49 @@ function initCharts() {
         }
     });
 
+    // Monthly Progress Chart
     const monthlyData = getMonthlyProgressData();
     const progressCtx = document.getElementById('progressChart');
-    if(window.progressChartInstance) window.progressChartInstance.destroy();
+    if (!progressCtx) {
+        console.error('progressChart canvas not found');
+        return;
+    }
 
-    window.progressChartInstance = new Chart(progressCtx,{
-        type:'line',
-        data:{
+    if (window.progressChartInstance) window.progressChartInstance.destroy();
+
+    window.progressChartInstance = new Chart(progressCtx, {
+        type: 'line',
+        data: {
             labels: monthlyData.labels,
-            datasets:[
-                { label:'Completed', data:monthlyData.completed, borderColor:'#2ecc71', backgroundColor:'rgba(46,204,113,0.1)', fill:true, tension:0.4, pointBackgroundColor:'#2ecc71', pointRadius:5 },
-                { label:'Total', data:monthlyData.total, borderColor:'#3498db', backgroundColor:'rgba(52,152,219,0.1)', fill:false, tension:0.4, pointBackgroundColor:'#3498db', pointRadius:5 }
+            datasets: [
+                { 
+                    label: 'Completed', 
+                    data: monthlyData.completed, 
+                    borderColor: '#2ecc71', 
+                    backgroundColor: 'rgba(46,204,113,0.1)', 
+                    fill: true, 
+                    tension: 0.4, 
+                    pointBackgroundColor: '#2ecc71', 
+                    pointRadius: 5 
+                },
+                { 
+                    label: 'Total', 
+                    data: monthlyData.total, 
+                    borderColor: '#3498db', 
+                    backgroundColor: 'rgba(52,152,219,0.1)', 
+                    fill: false, 
+                    tension: 0.4, 
+                    pointBackgroundColor: '#3498db', 
+                    pointRadius: 5 
+                }
             ]
         },
-        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'top' } }, scales:{ y:{ beginAtZero:true } } }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { legend: { position: 'top' } }, 
+            scales: { y: { beginAtZero: true } } 
+        }
     });
 }
 
@@ -492,7 +523,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     }
 });
 </script>
-
 
 <footer class="footer">
 <span>© 2025 ViTrox. All rights reserved.</span>
