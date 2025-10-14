@@ -1,0 +1,10 @@
+For clone coding & backup database:
+ -> git clone https://github.com/fathninhelmi/evaluationsystemv.git
+-> cd evaluationsystemv/backup-appwrite
+-> npm install
+-> node backup.js
+
+For backup database:
+-> npm install
+-> node backup.js
+open in sheet or excel to view database in table
