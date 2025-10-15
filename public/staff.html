@@ -88,6 +88,10 @@
             </div>
           </div>
         </div>
+        <div id="myFormsLoading" class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <h3>Loading forms, please wait...</h3>
+        </div>
         <div class="forms-grid" id="myFormsGrid"></div>
         <div id="myFormsEmpty" class="empty-state" style="display:none;">
           <i class="fas fa-file-alt"></i>
@@ -110,6 +114,10 @@
               <div id="searchDropdown" class="search-dropdown" style="display: none;"></div>
             </div>
           </div>
+        </div>
+        <div id="publicFormsLoading" class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <h3>Loading forms, please wait...</h3>
         </div>
         <div class="forms-grid" id="publicFormsGrid"></div>
         <div id="publicFormsEmpty" class="empty-state" style="display:none;">
@@ -457,50 +465,71 @@ function formatFormType(type) {
 
 function renderMyForms(forms) {
   const grid = document.getElementById("myFormsGrid");
+  const loading = document.getElementById("myFormsLoading");
+  const empty = document.getElementById("myFormsEmpty");
+  
+  loading.style.display = "none";
   grid.innerHTML = "";
-  let totalEntries = 0;
-  forms.forEach(form => {
-    ["pre_eval","eval","post_eval"].forEach(type => {
-      if (form.subforms?.[type]) totalEntries++;
-    });
-  });
-  if (totalEntries === 0) {
-    document.getElementById("myFormsEmpty").style.display = "block";
+  
+  if (forms.length === 0) {
+    empty.style.display = "block";
     return;
   }
-  document.getElementById("myFormsEmpty").style.display = "none";
+  empty.style.display = "none";
+  
   forms.forEach(form => {
+    const card = document.createElement("div");
+    card.className = "form-card";
+    
+    let subformsHTML = '';
     ["pre_eval","eval","post_eval"].forEach(type => {
-      const status = form.subforms?.[type];
-      if (!status) return;
-      const card = document.createElement("div");
-      card.className = "form-card";
-      card.innerHTML = `
-        <div class="form-header">
-          <div class="form-title">${form.prodname || 'Untitled'} (${formatFormType(type)})</div>
-          <span class="status-badge ${status}">${status}</span>
-        </div>
-        <div class="form-meta">
-          <div class="form-user"><i class="fas fa-building"></i> ${form.customerCompany || 'N/A'}</div>
-          <div class="form-user"><i class="fas fa-calendar"></i> Created ${formatDate(form.createDate)}</div>
-        </div>
-        <div class="form-actions">
-          ${status === "draft" ? `<button class="btn btn-primary" onclick="editForm('${form.$id}','${type}')"><i class="fas fa-edit"></i> Edit</button>` : `<button class="btn btn-secondary" onclick="viewForm('${form.$id}','${type}')"><i class="fas fa-eye"></i> View</button>`}
+      const status = form.subforms?.[type] || "not created";
+      const statusClass = status === "not created" ? "draft" : status;
+      const actionBtn = status === "draft" 
+        ? `<button class="btn-mini btn-primary" onclick="editForm('${form.$id}','${type}')"><i class="fas fa-edit"></i> Edit</button>`
+        : status === "complete"
+        ? `<button class="btn-mini btn-secondary" onclick="viewForm('${form.$id}','${type}')"><i class="fas fa-eye"></i> View</button>`
+        : `<button class="btn-mini btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">Not Created</button>`;
+      
+      subformsHTML += `
+        <div class="subform-row">
+          <div class="subform-info">
+            <span class="subform-name">${formatFormType(type)}</span>
+            <span class="status-badge-small ${statusClass}">${status}</span>
+          </div>
+          ${actionBtn}
         </div>
       `;
-      grid.appendChild(card);
     });
+    
+    card.innerHTML = `
+      <div class="form-header">
+        <div class="form-title">${form.prodname || 'Untitled'}</div>
+      </div>
+      <div class="form-meta">
+        <div class="form-user"><i class="fas fa-building"></i> ${form.customerCompany || 'N/A'}</div>
+        <div class="form-user"><i class="fas fa-calendar"></i> Created ${formatDate(form.createDate)}</div>
+      </div>
+      <div class="subforms-container">
+        ${subformsHTML}
+      </div>
+    `;
+    grid.appendChild(card);
   });
 }
 
 function renderPublicForms(forms) {
   const grid = document.getElementById("publicFormsGrid");
+  const loading = document.getElementById("publicFormsLoading");
+  const empty = document.getElementById("publicFormsEmpty");
+  
+  loading.style.display = "none";
   grid.innerHTML = "";
   if (forms.length === 0) {
-    document.getElementById("publicFormsEmpty").style.display = "block";
+    empty.style.display = "block";
     return;
   }
-  document.getElementById("publicFormsEmpty").style.display = "none";
+  empty.style.display = "none";
   forms.forEach(form => {
     const isSameCompany = form.customerCompany === userCompany;
     const requestStatus = userRequests[form.$id]; 
