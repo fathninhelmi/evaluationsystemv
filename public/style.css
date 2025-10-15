@@ -3721,7 +3721,6 @@ label {
   transform: translateY(-1px);
 }
 
-/* Status badge */
 .status-badge-small {
   padding: 4px 12px;
   border-radius: 12px;
@@ -3731,6 +3730,7 @@ label {
   letter-spacing: 0.5px;
   border: 1px solid transparent;
   display: inline-block;
+  margin-left: 40px;
 }
 
 .status-badge-small.draft {
@@ -3744,3 +3744,4 @@ label {
   color: #2a9d8f;
   border-color: #2a9d8f;
 }
+
