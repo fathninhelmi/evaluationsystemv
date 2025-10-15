@@ -3652,91 +3652,95 @@ label {
    margin: 0;
    color: #dcdcdc;
 }
-.subforms-container {
-   margin-top: 15px;
-   padding-top: 15px;
-   border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
 .subform-row {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   padding: 10px 0;
-   gap:15px;
-   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
+
 .subform-row:last-child {
-   border-bottom: none;
+  border-bottom: none;
 }
+
+/* Left section: name */
 .subform-info {
-   display: flex;
-   align-items: center;
-   gap: 10px;
-   flex: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
+
 .subform-name {
-   font-weight: 500;
-   color: #dcdcdc;
-   font-size: 14px;
-   white-space: nowrap;
+  font-weight: 500;
+  color: #dcdcdc;
+  font-size: 14px;
+  white-space: nowrap;
 }
-.status-badge-small {
-   padding: 4px 12px;
-   border-radius: 12px;
-   font-size: 11px;
-   font-weight: 600;
-   text-transform: uppercase;
-   letter-spacing: 0.5px;
-   margin-left: 200px;
+
+/* Right section: status + buttons */
+.subform-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* consistent spacing between status + buttons */
 }
-.status-badge-small.draft {
-      background: rgba(244, 162, 97, 0.2);
-      color: #f4a261;
-      border: 1px solid #f4a261;
- }
-.status-badge-small.complete {
-      background: rgba(42, 157, 143, 0.2);
-      color: #2a9d8f;
-      border: 1px solid #2a9d8f;
-}
+
+/* Buttons uniform size */
 .btn-mini {
-      padding: 4px 8px;
-      font-size: 13px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      text-allign: center;
-      gap: 5px;
-      font-weight: 600;
+  padding: 6px 14px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  width: 90px; /* force same width */
+  text-align: center;
 }
+
 .btn-mini.btn-primary {
-      background: #3498db;
-      color: white;
-      width: auto;
-      text-allign: center;
+  background: #3498db;
+  color: white;
 }
+
 .btn-mini.btn-primary:hover {
-      background: #2980b9;
-      transform: translateY(-1px);
- }
-.btn-mini.btn-secondary {
-      background: #6c757d;
-      color: white;
-      width: auto;
-      text-allign: center;
- }
-.btn-mini.btn-secondary:hover {
-      background: #545b62;
-      transform: translateY(-1px);
+  background: #2980b9;
+  transform: translateY(-1px);
 }
-.btn-mini i {
-      font-size: 11px;
-      align-items: center;
- }
 
+.btn-mini.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
 
+.btn-mini.btn-secondary:hover {
+  background: #545b62;
+  transform: translateY(-1px);
+}
 
+/* Status badge */
+.status-badge-small {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+  display: inline-block;
+}
 
+.status-badge-small.draft {
+  background: rgba(244, 162, 97, 0.2);
+  color: #f4a261;
+  border-color: #f4a261;
+}
 
+.status-badge-small.complete {
+  background: rgba(42, 157, 143, 0.2);
+  color: #2a9d8f;
+  border-color: #2a9d8f;
+}
