@@ -3707,9 +3707,9 @@ label {
       transition: all 0.3s ease;
       display: inline-flex;
       allign-item: center;
+      text-allign: center;
       gap: 5px;
       font-weight: 600;
-      color: #000;
       width: 20%;
 }
 .btn-mini.btn-primary {
@@ -3730,5 +3730,7 @@ label {
 }
 .btn-mini i {
       font-size: 11px;
+      align-items: center;
  }
+
 
