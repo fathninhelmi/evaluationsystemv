@@ -3635,3 +3635,95 @@ label {
     cursor: not-allowed;
     opacity: 0.6;
 }
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #aaa;
+    }
+    .loading-state i {
+      font-size: 48px;
+      color: #4ea8de;
+      margin-bottom: 20px;
+      display: block;
+    }
+    .loading-state h3 {
+      font-size: 20px;
+      font-weight: 500;
+      margin: 0;
+      color: #dcdcdc;
+    }
+    .subforms-container {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .subform-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .subform-row:last-child {
+      border-bottom: none;
+    }
+    .subform-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .subform-name {
+      font-weight: 500;
+      color: #dcdcdc;
+      font-size: 14px;
+    }
+    .status-badge-small {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-badge-small.draft {
+      background: rgba(244, 162, 97, 0.2);
+      color: #f4a261;
+      border: 1px solid #f4a261;
+    }
+    .status-badge-small.complete {
+      background: rgba(42, 157, 143, 0.2);
+      color: #2a9d8f;
+      border: 1px solid #2a9d8f;
+    }
+    .btn-mini {
+      padding: 6px 12px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600;
+    }
+    .btn-mini.btn-primary {
+      background: #3498db;
+      color: white;
+    }
+    .btn-mini.btn-primary:hover {
+      background: #2980b9;
+      transform: translateY(-1px);
+    }
+    .btn-mini.btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-mini.btn-secondary:hover {
+      background: #545b62;
+      transform: translateY(-1px);
+    }
+    .btn-mini i {
+      font-size: 11px;
+    }
