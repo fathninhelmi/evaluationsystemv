@@ -3678,6 +3678,7 @@ label {
    font-weight: 500;
    color: #dcdcdc;
    font-size: 14px;
+   white-space: nowrap;
 }
 .status-badge-small {
    padding: 4px 12px;
@@ -3732,5 +3733,6 @@ label {
       font-size: 11px;
       align-items: center;
  }
+
 
 
