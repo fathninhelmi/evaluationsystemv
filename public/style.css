@@ -3652,11 +3652,39 @@ label {
    margin: 0;
    color: #dcdcdc;
 }
-/* Subform Actions Container */
+/* Subform Row - Main Container */
+.subform-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.subform-row:last-child {
+  border-bottom: none;
+}
+
+/* Left section: Form name */
+.subform-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.subform-name {
+  font-weight: 500;
+  color: #dcdcdc;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Right section: Status badge + Button */
 .subform-actions {
   display: flex;
   align-items: center;
-  gap: 12px; 
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 /* Status Badge Styling */
@@ -3668,10 +3696,13 @@ label {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border: 1px solid transparent;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
-  min-width: 80px;
+  min-width: 100px;
   text-align: center;
+  height: 32px;
 }
 
 .status-badge-small.draft {
@@ -3697,11 +3728,17 @@ label {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   font-weight: 600;
-  min-width: 90px;
+  min-width: 100px;
   height: 32px;
   text-align: center;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-mini i {
+  font-size: 12px;
 }
 
 .btn-mini.btn-primary {
@@ -3722,4 +3759,14 @@ label {
 .btn-mini.btn-secondary:hover {
   background: #545b62;
   transform: translateY(-1px);
+}
+
+.btn-mini:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-mini:disabled:hover {
+  transform: none !important;
 }
