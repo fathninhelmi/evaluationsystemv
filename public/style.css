@@ -3686,7 +3686,7 @@ label {
    font-weight: 600;
    text-transform: uppercase;
    letter-spacing: 0.5px;
-   margin-left: 300px;
+   margin-left: 200px;
 }
 .status-badge-small.draft {
       background: rgba(244, 162, 97, 0.2);
@@ -3731,3 +3731,4 @@ label {
 .btn-mini i {
       font-size: 11px;
  }
+
