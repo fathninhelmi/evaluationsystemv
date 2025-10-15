@@ -346,8 +346,16 @@ function setViewMode() {
     const form = document.getElementById("postEvalForm");
     const inputs = form.querySelectorAll('input, textarea, select, button[type="submit"], button[type="button"]:not(.btn-secondary)');
     inputs.forEach(input => {
-        if (input.type === 'submit' || input.classList.contains('add-row-btn') || input.classList.contains('draft-btn') || input.classList.contains('delete-row-btn') || input.classList.contains('result-btn')) {
+        if (
+            input.type === 'submit' ||
+            input.classList.contains('add-row-btn') ||
+            input.classList.contains('draft-btn') ||
+            input.classList.contains('delete-row-btn')
+        ) {
             input.style.display = 'none';
+        } else if (input.classList.contains('result-btn')) {
+            // keep visible but disable clicking
+            input.disabled = true;
         } else {
             input.disabled = true;
         }
@@ -616,3 +624,4 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
