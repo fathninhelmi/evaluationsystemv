@@ -491,13 +491,16 @@ function renderMyForms(forms) {
         ? `<button class="btn-mini btn-secondary" onclick="viewForm('${form.$id}','${type}')"><i class="fas fa-eye"></i> View</button>`
         : `<button class="btn-mini btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">Not Created</button>`;
       
+      // FIXED: Status badge moved to subform-actions
       subformsHTML += `
         <div class="subform-row">
           <div class="subform-info">
             <span class="subform-name">${formatFormType(type)}</span>
-            <span class="status-badge-small ${statusClass}">${status}</span>
           </div>
-          ${actionBtn}
+          <div class="subform-actions">
+            <span class="status-badge-small ${statusClass}">${status}</span>
+            ${actionBtn}
+          </div>
         </div>
       `;
     });
@@ -517,7 +520,7 @@ function renderMyForms(forms) {
     grid.appendChild(card);
   });
 }
-
+  
 function renderPublicForms(forms) {
   const grid = document.getElementById("publicFormsGrid");
   const loading = document.getElementById("publicFormsLoading");
@@ -720,5 +723,6 @@ document.addEventListener("DOMContentLoaded", loadForms);
 </body>
 
 </html>
+
 
 
