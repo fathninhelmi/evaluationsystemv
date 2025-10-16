@@ -35,6 +35,13 @@
                         <option value="manager">Manager</option>
                         <option value="admin">Admin</option>
                     </select>
+                    <select id="regionFilter" onchange="filterUsers()" class="filter-select">
+                        <option value="all">All Regions</option>
+                        <option value="Asia">Asia</option>
+                        <option value="China">China</option>
+                        <option value="America">America</option>
+                        <option value="Malaysia">Malaysia</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -83,10 +90,16 @@
                 <thead>
                     <tr>
                         <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
-                        <th>Username</th>
-                        <th>Email</th>
+                        <th onclick="sortTable('name')" style="cursor: pointer;">
+                            Username <i class="fas fa-sort"></i>
+                        </th>
+                        <th onclick="sortTable('email')" style="cursor: pointer;">
+                            Email <i class="fas fa-sort"></i>
+                        </th>
                         <th>Role</th>
-                        <th>Registration Date</th>
+                        <th onclick="sortTable('registrationDate')" style="cursor: pointer;">
+                            Registration Date <i class="fas fa-sort"></i>
+                        </th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -97,6 +110,22 @@
                 <i class="fas fa-users"></i>
                 <h3>No users found</h3>
                 <p>Try adjusting your search criteria or filters.</p>
+            </div>
+
+            <div class="pagination" id="pagination" style="display: none;">
+                <button class="btn-pagination" onclick="firstPage()" id="firstBtn">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="btn-pagination" onclick="previousPage()" id="prevBtn">
+                    <i class="fas fa-angle-left"></i> Previous
+                </button>
+                <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                <button class="btn-pagination" onclick="nextPage()" id="nextBtn">
+                    Next <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="btn-pagination" onclick="lastPage()" id="lastBtn">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -138,14 +167,37 @@
             <p>Please select the region this manager will be in charge of:</p>
             <select id="regionSelect" class="region-select-modal">
                 <option value="">-- Select Region --</option>
-                <option value="North">Asia</option>
-                <option value="South">China</option>
-                <option value="East">America</option>
-                <option value="West">Malaysia</option>
+                <option value="Asia">Asia</option>
+                <option value="China">China</option>
+                <option value="America">America</option>
+                <option value="Malaysia">Malaysia</option>
             </select>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeRegionModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="confirmRegionSelection()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editRegionModal" class="modal" style="display: none;">
+    <div class="modal-content small">
+        <div class="modal-header">
+            <h3>Edit Manager Region</h3>
+            <button class="modal-close" onclick="closeEditRegionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Update the region for this manager:</p>
+            <select id="editRegionSelect" class="region-select-modal">
+                <option value="">-- Select Region --</option>
+                <option value="Asia">Asia</option>
+                <option value="China">China</option>
+                <option value="America">America</option>
+                <option value="Malaysia">Malaysia</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeEditRegionModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmEditRegion()">Update</button>
             </div>
         </div>
     </div>
@@ -168,6 +220,8 @@ let filteredUsers = [];
 let selectedUsers = [];
 let currentPage = 1;
 const perPage = 20;
+let sortDirection = { name: 'asc', email: 'asc', registrationDate: 'desc' };
+let currentSortField = 'registrationDate';
 
 async function checkSession() {
     try {
@@ -217,8 +271,9 @@ async function fetchUsers() {
             region: doc.region || '',
             registrationDate: doc.registerDate || doc.$createdAt,
             isVitrox: doc.email?.endsWith('@vitrox.com') || false
-        })).sort((a, b) => new Date(b.registrationDate) - new Date(a.registrationDate));
+        }));
 
+        applySorting();
         filteredUsers = [...users];
         renderUsers();
         updateStats();
@@ -233,9 +288,10 @@ async function updateUserField(userId, field, value) {
         await database.updateDocument(databaseId, collectionId, userId, { [field]: value });
         const user = users.find(u => u.id === userId);
         if (user) user[field] = value;
-        renderUsers();
+        applySorting();
+        filterUsers();
         updateStats();
-        showNotification(`${field} updated successfully`, 'success');
+        showNotification(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully`, 'success');
     } catch (err) {
         console.error(err);
         showNotification("Update failed", "error");
@@ -247,6 +303,7 @@ function changeUserRole(userId, newRole) {
 }
 
 let pendingRoleChange = null;
+let pendingRegionEdit = null;
 
 function handleRoleChange(userId, newRole, currentRole) {
     if (newRole === 'manager') {
@@ -266,10 +323,24 @@ function handleRoleChange(userId, newRole, currentRole) {
     }
 }
 
+function editManagerRegion(userId) {
+    const user = users.find(u => u.id === userId);
+    if (user && user.role === 'manager') {
+        pendingRegionEdit = userId;
+        document.getElementById('editRegionSelect').value = user.region || '';
+        document.getElementById('editRegionModal').style.display = 'flex';
+    }
+}
+
 function closeRegionModal() {
     document.getElementById('regionModal').style.display = 'none';
     pendingRoleChange = null;
     renderUsers();
+}
+
+function closeEditRegionModal() {
+    document.getElementById('editRegionModal').style.display = 'none';
+    pendingRegionEdit = null;
 }
 
 async function confirmRegionSelection() {
@@ -290,7 +361,8 @@ async function confirmRegionSelection() {
                 user.role = 'manager';
                 user.region = region;
             }
-            renderUsers();
+            applySorting();
+            filterUsers();
             updateStats();
             showNotification('Manager role and region assigned successfully', 'success');
             closeRegionModal();
@@ -301,19 +373,62 @@ async function confirmRegionSelection() {
     }
 }
 
+async function confirmEditRegion() {
+    const region = document.getElementById('editRegionSelect').value;
+    if (!region) {
+        showNotification('Please select a region', 'error');
+        return;
+    }
+    
+    if (pendingRegionEdit) {
+        await updateUserField(pendingRegionEdit, 'region', region);
+        closeEditRegionModal();
+    }
+}
+
 async function deleteUser(userId) {
     if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
     
     try {
         await database.deleteDocument(databaseId, collectionId, userId);
         users = users.filter(u => u.id !== userId);
-        renderUsers();
+        applySorting();
+        filterUsers();
         updateStats();
         showNotification("User deleted successfully", "success");
     } catch (err) {
         console.error(err);
         showNotification("Delete failed", "error");
     }
+}
+
+function sortTable(field) {
+    currentSortField = field;
+    sortDirection[field] = sortDirection[field] === 'asc' ? 'desc' : 'asc';
+    applySorting();
+    filterUsers();
+}
+
+function applySorting() {
+    const field = currentSortField;
+    const direction = sortDirection[field];
+    
+    users.sort((a, b) => {
+        let aVal = a[field];
+        let bVal = b[field];
+        
+        if (field === 'registrationDate') {
+            aVal = new Date(aVal);
+            bVal = new Date(bVal);
+        } else if (typeof aVal === 'string') {
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+        }
+        
+        if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
 }
 
 function renderUsers() {
@@ -325,9 +440,13 @@ function renderUsers() {
     
     if (pageUsers.length === 0) {
         document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('pagination').style.display = 'none';
         return;
     } else {
         document.getElementById('emptyState').style.display = 'none';
+        if (filteredUsers.length > perPage) {
+            document.getElementById('pagination').style.display = 'flex';
+        }
     }
     
     pageUsers.forEach(user => {
@@ -335,14 +454,18 @@ function renderUsers() {
         tr.innerHTML = `
         <td><input type="checkbox" class="user-checkbox" value="${user.id}" onchange="updateSelection()"></td>
         <td>${user.name || '-'}</td>
-        <td>${user.email} ${user.isVitrox ? '<i class="fas fa-shield-alt"></i>' : ''}</td>
+        <td>${user.email} ${user.isVitrox ? '<i class="fas fa-shield-alt" style="color: #4CAF50;" title="Vitrox Email"></i>' : ''}</td>
         <td>
             <select class="role-select" onchange="handleRoleChange('${user.id}', this.value, '${user.role}')">
                 <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>Staff</option>
                 <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option>
                 <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
             </select>
-            ${user.role === 'manager' && user.region ? `<span class="region-badge">${user.region}</span>` : ''}
+            ${user.role === 'manager' && user.region ? `
+                <span class="region-badge" onclick="editManagerRegion('${user.id}')" style="cursor: pointer;" title="Click to edit region">
+                    ${user.region} <i class="fas fa-edit" style="font-size: 0.8em;"></i>
+                </span>
+            ` : ''}
         </td>
         <td>${formatDate(user.registrationDate)}</td>
         <td>
@@ -358,6 +481,18 @@ function renderUsers() {
         `;
         tbody.appendChild(tr);
     });
+    
+    updatePaginationInfo();
+}
+
+function updatePaginationInfo() {
+    const totalPages = Math.ceil(filteredUsers.length / perPage);
+    document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+    
+    document.getElementById('firstBtn').disabled = currentPage === 1;
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+    document.getElementById('lastBtn').disabled = currentPage >= totalPages;
 }
 
 function viewUser(userId) {
@@ -372,8 +507,15 @@ function viewUser(userId) {
 
 window.onclick = function(event) {
     const userModal = document.getElementById('userModal');
+    const regionModal = document.getElementById('regionModal');
+    const editRegionModal = document.getElementById('editRegionModal');
+    
     if (event.target === userModal) {
         closeModal();
+    } else if (event.target === regionModal) {
+        closeRegionModal();
+    } else if (event.target === editRegionModal) {
+        closeEditRegionModal();
     }
 };
 
@@ -418,6 +560,11 @@ function closeConfirmModal() {
     document.getElementById('confirmModal').style.display = 'none';
 }
 
+function firstPage() {
+    currentPage = 1;
+    renderUsers();
+}
+
 function previousPage() {
     if (currentPage > 1) {
         currentPage--;
@@ -426,20 +573,29 @@ function previousPage() {
 }
 
 function nextPage() {
-    if (currentPage * perPage < filteredUsers.length) {
+    const totalPages = Math.ceil(filteredUsers.length / perPage);
+    if (currentPage < totalPages) {
         currentPage++;
         renderUsers();
     }
 }
 
+function lastPage() {
+    const totalPages = Math.ceil(filteredUsers.length / perPage);
+    currentPage = totalPages;
+    renderUsers();
+}
+
 function filterUsers() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     const role = document.getElementById('roleFilter').value;
+    const region = document.getElementById('regionFilter').value;
 
     filteredUsers = users.filter(u => {
         const matchSearch = (u.name || '').toLowerCase().includes(search) || (u.email || '').toLowerCase().includes(search);
         const matchRole = role === 'all' || u.role === role;
-        return matchSearch && matchRole;
+        const matchRegion = region === 'all' || (u.role === 'manager' && u.region === region);
+        return matchSearch && matchRole && matchRegion;
     });
 
     currentPage = 1;
