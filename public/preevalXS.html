@@ -148,7 +148,7 @@
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Sample Provided :</div>
                 <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="xs_samplesProvided" > Client can provide code samples</label>
+                    <label><input type="checkbox" name="xs_samplesProvided" value="client_can_provide"> Client can provide code samples</label>
                 </div>
             </div>
         </div>
@@ -412,9 +412,9 @@ function populateForm(preEvalData, referenceData) {
         'custTechChamp', 'existcust', 'evalDate', 'competitor', 'compModel', 'venue',
         'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
         'codeTypeOtherDetails', 'codeMinSize', 'externalLightingNeeded', 'currentBrandModel', 
-        'readingSpeed', 'codesPerItem', 'workingDistance', 'heightVariation', 'movementSpeed', 
-        'maxFieldOfView', 'dataUsageOtherDetails', 'protocolOtherDetails', 'budgetRange', 
-        'targetDeploymentDate', 'notesActionItems'
+        'readingSpeed', 'codesPerItem', 'workingDistance', 'heightConsistency', 'heightVariation', 
+        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 
+        'protocolOtherDetails', 'controlSystem', 'budgetRange', 'targetDeploymentDate', 'notesActionItems'
     ];
 
     textFields.forEach(fieldId => {
@@ -428,15 +428,20 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    const checkboxArrayFields = [
-        'codeType', 'objectMaterial', 'surfaceConditions', 'samplesProvided', 
-        'currentInspectionMethod', 'heightConsistency', 'objectMovement', 
-        'codeDataUsage', 'protocolsRequired', 'controlSystem', 'budgetStatus', 'nextSteps'
+    // Handle checkbox fields - these are now stored as comma-separated strings
+    const checkboxFields = [
+        'codeType', 'printMaterial', 'surfaceConditions', 'xs_samplesProvided', 
+        'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
     ];
 
-    checkboxArrayFields.forEach(fieldName => {
-        if (data[fieldName] && Array.isArray(data[fieldName])) {
-            data[fieldName].forEach(value => {
+    checkboxFields.forEach(fieldName => {
+        if (data[fieldName]) {
+            // Handle both array format (old data) and comma-separated string format (new data)
+            const values = Array.isArray(data[fieldName]) 
+                ? data[fieldName] 
+                : data[fieldName].split(',').map(v => v.trim()).filter(v => v);
+            
+            values.forEach(value => {
                 const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
                 if (checkbox) checkbox.checked = true;
             });
@@ -489,9 +494,9 @@ function collectFormData() {
         'customerCompany', 'custTechChamp', 'existcust', 'evalDate', 'competitor', 'compModel', 'venue',
         'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
         'codeTypeOtherDetails', 'codeMinSize', 'externalLightingNeeded', 'currentBrandModel', 
-        'readingSpeed', 'codesPerItem', 'workingDistance', 'heightVariation', 'movementSpeed', 
-        'maxFieldOfView', 'dataUsageOtherDetails', 'protocolOtherDetails', 'budgetRange', 
-        'targetDeploymentDate', 'notesActionItems'
+        'readingSpeed', 'codesPerItem', 'workingDistance', 'heightConsistency', 'heightVariation', 
+        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 
+        'protocolOtherDetails', 'controlSystem', 'budgetRange', 'targetDeploymentDate', 'notesActionItems'
     ];
     
     textFields.forEach(fieldId => {
@@ -507,15 +512,17 @@ function collectFormData() {
         }
     });
 
-    const checkboxArrayFields = [
-        'codeType', 'objectMaterial', 'surfaceConditions', 'samplesProvided', 
-        'currentInspectionMethod', 'heightConsistency', 'objectMovement', 
-        'codeDataUsage', 'protocolsRequired', 'controlSystem', 'budgetStatus', 'nextSteps'
+    // Collect checkbox fields as comma-separated strings (not arrays)
+    const checkboxFields = [
+        'codeType', 'printMaterial', 'surfaceConditions', 'xs_samplesProvided', 
+        'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
     ];
 
-    checkboxArrayFields.forEach(fieldName => {
+    checkboxFields.forEach(fieldName => {
         const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
-        data[fieldName] = Array.from(checkboxes).map(cb => cb.value);
+        const values = Array.from(checkboxes).map(cb => cb.value);
+        // Store as comma-separated string to fit string field type (max 255 chars)
+        data[fieldName] = values.length > 0 ? values.join(', ') : '';
     });
     
     return data;
@@ -543,17 +550,13 @@ async function saveForm(status = "draft") {
             status: status
         };
 
+        // Clean up empty fields
         for (const key in saveData) {
-            if (Array.isArray(saveData[key])) {
-                saveData[key] = saveData[key].filter(v => v !== "" && v !== null && v !== undefined);
-                if (saveData[key].length === 0) delete saveData[key];
+            // Convert empty strings to null for optional fields
+            if (saveData[key] === "") {
+                delete saveData[key];
             }
         }
-
-        const enumFields = ["existcust", "venue", "externalLightingNeeded"];
-        enumFields.forEach(field => {
-            if (saveData[field] === "") delete saveData[field];
-        });
 
         console.log("Data to save:", saveData);
 
