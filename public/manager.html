@@ -10,6 +10,38 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+<style>
+  #map {
+    height: 500px;
+    width: 100%;
+    border-radius: 8px;
+  }
+  .map-status {
+    padding: 10px;
+    font-size: 12px;
+    color: #666;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .legend {
+    display: flex;
+    gap: 15px;
+    font-size: 11px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+</style>
 </head>
 <body>
 
@@ -61,8 +93,22 @@
           </div>
         </div>
         <div id="map"></div>
-        <div style="padding: 10px; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0;">
+        <div class="map-status">
           <span id="mapStatus">Loading map data...</span>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #28a745;"></div>
+              <span>Complete</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #ffc107;"></div>
+              <span>In Progress</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #dc3545;"></div>
+              <span>Draft</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -134,9 +180,7 @@ const postEvalCollectionId= "68bf9d62002b4f5f7f23";
 let evaluationData = [];
 let map;
 let markers = [];
-let locationCache = {}; // Cache geocoded locations in memory
-let geocodeQueue = []; // Queue for geocoding requests
-let isGeocoding = false;
+let locationCache = {};
 
 async function checkSession() {
     try {
@@ -170,73 +214,53 @@ function computeOverallStatus(pre, evalStatus, post) {
     return 'draft';
 }
 
+// Improved geocoding with multiple attempts and better formatting
 async function geocodeLocation(queryString) {
-    // Check cache first
     if (locationCache[queryString]) {
-        console.log(`✅ Using cached location for: ${queryString}`);
+        console.log(`✅ Cache: ${queryString}`);
         return locationCache[queryString];
     }
 
-    try {
-        // Add delay to respect Nominatim usage policy (1 request per second)
-        await new Promise(resolve => setTimeout(resolve, 1100));
-        
-        console.log(`🔍 Geocoding: ${queryString}`);
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryString)}&limit=1&addressdetails=1`);
-        const data = await res.json();
-        
-        if (data && data.length > 0) {
-            const result = {
-                location: [parseFloat(data[0].lat), parseFloat(data[0].lon)],
-                locationName: data[0].display_name || queryString
-            };
-            // Cache the result
-            locationCache[queryString] = result;
-            console.log(`✅ Geocoded: ${queryString} -> [${result.location[0]}, ${result.location[1]}]`);
-            return result;
-        } else {
-            console.warn(`⚠️ No results found for: ${queryString}`);
-        }
-    } catch (err) {
-        console.error("❌ Geocoding failed for", queryString, err);
-    }
-    return null;
-}
+    // Clean and format the address
+    const cleanAddress = queryString.trim();
+    
+    // Try multiple search strategies
+    const searchQueries = [
+        cleanAddress, // Original
+        `${cleanAddress}, Malaysia`, // Add country if not present
+        cleanAddress.split(',')[0] + ', Malaysia' // Just city/area + country
+    ];
 
-// Process geocoding queue one at a time
-async function processGeocodeQueue() {
-    if (isGeocoding || geocodeQueue.length === 0) return;
-    
-    isGeocoding = true;
-    const updateStatus = document.getElementById('mapStatus');
-    
-    while (geocodeQueue.length > 0) {
-        const item = geocodeQueue.shift();
-        updateStatus.textContent = `Geocoding locations... ${geocodeQueue.length} remaining`;
-        
-        let geoResult = null;
-        if (item.doc.customerLocation) {
-            geoResult = await geocodeLocation(item.doc.customerLocation);
-        }
-        
-        // Fallback to company name if primary location fails
-        if (!geoResult && item.doc.customerCompany) {
-            geoResult = await geocodeLocation(item.doc.customerCompany);
-        }
-        
-        if (geoResult) {
-            item.evaluation.location = geoResult.location;
-            item.evaluation.locationName = geoResult.locationName;
+    for (const query of searchQueries) {
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            console.log(`🔍 Searching: ${query}`);
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/search?` +
+                `format=json&q=${encodeURIComponent(query)}` +
+                `&limit=1&addressdetails=1&countrycodes=my,sg,cn,th,vn,id,ph`
+            );
+            
+            const data = await res.json();
+            
+            if (data && data.length > 0) {
+                const result = {
+                    location: [parseFloat(data[0].lat), parseFloat(data[0].lon)],
+                    locationName: data[0].display_name || queryString
+                };
+                
+                locationCache[queryString] = result;
+                console.log(`✅ Found: ${query} -> [${result.location[0].toFixed(4)}, ${result.location[1].toFixed(4)}]`);
+                return result;
+            }
+        } catch (err) {
+            console.warn(`⚠️ Error searching: ${query}`, err);
         }
     }
-    
-    isGeocoding = false;
-    updateStatus.textContent = `📍 Showing ${evaluationData.filter(e => e.location).length} of ${evaluationData.length} locations`;
-    
-    // Update map after all geocoding is complete
-    if (map) {
-        updateMapMarkers();
-    }
+
+    console.error(`❌ Not found: ${queryString}`);
+    return null;
 }
 
 async function loadEvaluations() {
@@ -247,8 +271,6 @@ async function loadEvaluations() {
         ]);
 
         evaluationData = [];
-        geocodeQueue = [];
-
         console.log(`📊 Loading ${response.documents.length} evaluations...`);
 
         for (const doc of response.documents) {
@@ -272,19 +294,17 @@ async function loadEvaluations() {
             if (postDoc?.completedAt) dates.push(new Date(postDoc.completedAt));
 
             const evalDate = dates.length > 0 ? new Date(Math.max(...dates)) : new Date(doc.$createdAt);
-            let location = null;
-            let locationName = doc.customerCompany || 'Unknown Location';
 
-            const evaluation = {
+            evaluationData.push({
                 id: doc.$id,
                 product: doc.prodname || 'Unknown Product',
                 category: doc.productType || 'Other',
                 staff: doc.username || doc.company || 'N/A',
                 company: doc.company || 'N/A',
                 customerCompany: doc.customerCompany || 'N/A',
-                customerLocation: doc.customerLocation || 'N/A', 
+                customerLocation: doc.customerLocation || 'N/A',
                 location: null,
-                locationName,
+                locationName: doc.customerCompany || 'Unknown Location',
                 date: evalDate.toISOString().split('T')[0],
                 timestamp: evalDate.toISOString(),
                 pre_eval: preStatus,
@@ -292,28 +312,56 @@ async function loadEvaluations() {
                 post_eval: postStatus,
                 status: overallStatus,
                 winlose: winLoseStatus
-            };
-
-            evaluationData.push(evaluation);
-            
-            // Add to geocoding queue
-            geocodeQueue.push({ doc, evaluation });
+            });
         }
 
-        // Update dashboard immediately with data (without locations yet)
         updateStats();
         initCharts();
         populateEvaluationList();
         initMap();
         
-        // Start geocoding in background
-        processGeocodeQueue();
+        // Geocode locations in background
+        geocodeLocations();
 
     } catch (err) {
         console.error("Error loading evaluations:", err);
         document.getElementById('evaluationList').innerHTML =
             '<div class="error-message">Failed to load evaluations. Refresh the page.</div>';
     }
+}
+
+async function geocodeLocations() {
+    const updateStatus = document.getElementById('mapStatus');
+    let processed = 0;
+    const total = evaluationData.length;
+
+    for (const evaluation of evaluationData) {
+        processed++;
+        updateStatus.textContent = `Geocoding locations... ${processed}/${total}`;
+
+        // Skip if already has location
+        if (evaluation.location) continue;
+
+        // Try customerLocation first
+        let geoResult = null;
+        if (evaluation.customerLocation && evaluation.customerLocation !== 'N/A') {
+            geoResult = await geocodeLocation(evaluation.customerLocation);
+        }
+
+        // Fallback to customerCompany
+        if (!geoResult && evaluation.customerCompany && evaluation.customerCompany !== 'N/A') {
+            geoResult = await geocodeLocation(evaluation.customerCompany);
+        }
+
+        if (geoResult) {
+            evaluation.location = geoResult.location;
+            evaluation.locationName = geoResult.locationName;
+        }
+    }
+
+    const locatedCount = evaluationData.filter(e => e.location).length;
+    updateStatus.textContent = `📍 Showing ${locatedCount} of ${total} locations`;
+    updateMapMarkers();
 }
 
 function updateStats() {
@@ -346,11 +394,9 @@ function initCharts() {
         }
     });
 
-    // Update win/lose totals
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
-    // Update category breakdown
     const breakdownHTML = Object.entries(productStats)
         .map(([cat, stats]) => `${cat}: ${stats.win}W / ${stats.lose}L`)
         .join(' • ');
@@ -359,12 +405,8 @@ function initCharts() {
     const categories = Object.keys(productStats);
     const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
-    // Product Chart (combined wins and losses)
     const productCtx = document.getElementById('productChart');
-    if (!productCtx) {
-        console.error('productChart canvas not found');
-        return;
-    }
+    if (!productCtx) return;
 
     if (window.productChartInstance) window.productChartInstance.destroy();
 
@@ -398,13 +440,9 @@ function initCharts() {
         }
     });
 
-    // Monthly Progress Chart
     const monthlyData = getMonthlyProgressData();
     const progressCtx = document.getElementById('progressChart');
-    if (!progressCtx) {
-        console.error('progressChart canvas not found');
-        return;
-    }
+    if (!progressCtx) return;
 
     if (window.progressChartInstance) window.progressChartInstance.destroy();
 
@@ -509,114 +547,143 @@ function populateEvaluationList() {
 
 function initMap() {
     if(map) map.remove();
-    map = L.map('map').setView([20, 0], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ 
-        attribution:'© OpenStreetMap contributors', 
-        maxZoom:18 
-    }).addTo(map);
     
-    updateMapMarkers();
+    map = L.map('map').setView([4.2105, 101.9758], 6);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(map);
 }
 
-function updateMapMarkers(){
-    if(!map) return;
-    
-    markers.forEach(m=>map.removeLayer(m));
+function updateMapMarkers() {
+    if (!map) return;
+
+    markers.forEach(m => map.removeLayer(m));
     markers = [];
+    
     const data = getFilteredData();
-    
-    console.log(`🗺️ Displaying ${data.length} evaluations on map`);
-    let markersWithLocation = 0;
-    
-    data.forEach(e=>{
+    const bounds = L.latLngBounds([]);
+    let hasMarkers = false;
+
+    console.log(`🗺️ Updating map with ${data.length} evaluations`);
+
+    data.forEach(e => {
         if (e.location && Array.isArray(e.location) && e.location.length === 2) {
-            const color = e.status==='complete'?'#28a745': e.status==='progress'?'#ffc107':'#dc3545';
+            const color = e.status === 'complete' ? '#28a745' : 
+                         e.status === 'progress' ? '#ffc107' : '#dc3545';
+
             const icon = L.divIcon({
-                className:'custom-marker', 
-                html:`<div style="background:${color};width:26px;height:26px;border-radius:50%;border:3px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.4);cursor:pointer;"></div>`, 
-                iconSize:[26,26], 
-                iconAnchor:[13,13]
+                className: 'custom-marker',
+                html: `<div style="
+                    background: ${color};
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    border: 3px solid white;
+                    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                "></div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
             });
-            const marker = L.marker(e.location,{icon}).addTo(map);
+
+            const marker = L.marker(e.location, { icon }).addTo(map);
+            
             marker.bindPopup(`
-                <div style="min-width:220px; font-family: Arial, sans-serif;">
-                    <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#333;">${e.product}</div>
-                    <div style="font-size:12px; color:#666; line-height:1.6;">
-                        <div>📦 <strong>Category:</strong> ${e.category}</div>
-                        <div>👤 <strong>Staff:</strong> ${e.staff}</div>
-                        <div>🏢 <strong>Company:</strong> ${e.customerCompany}</div>
-                        <div>📍 <strong>Location:</strong> ${e.customerLocation}</div>
-                        <div>📅 <strong>Date:</strong> ${e.date}</div>
+                <div style="min-width: 240px; font-family: Arial, sans-serif;">
+                    <div style="font-weight: bold; font-size: 15px; margin-bottom: 10px; color: #333; border-bottom: 2px solid ${color}; padding-bottom: 5px;">
+                        ${e.product}
                     </div>
-                    <div style="margin-top:8px; padding-top:8px; border-top:1px solid #eee;">
-                        <span style="display:inline-block; padding:4px 8px; background:${color}; color:white; border-radius:4px; font-size:11px; font-weight:bold;">
-                            ${e.status.toUpperCase()}
+                    <div style="font-size: 13px; line-height: 1.8; color: #555;">
+                        <div><strong>📦 Category:</strong> ${e.category}</div>
+                        <div><strong>👤 Staff:</strong> ${e.staff}</div>
+                        <div><strong>🏢 Company:</strong> ${e.customerCompany}</div>
+                        <div><strong>📍 Location:</strong> ${e.customerLocation}</div>
+                        <div><strong>📅 Date:</strong> ${e.date}</div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #eee; text-align: center;">
+                        <span style="
+                            display: inline-block;
+                            padding: 6px 12px;
+                            background: ${color};
+                            color: white;
+                            border-radius: 5px;
+                            font-size: 12px;
+                            font-weight: bold;
+                            text-transform: uppercase;
+                        ">
+                            ${e.status === 'complete' ? '✅ Complete' : 
+                              e.status === 'progress' ? '⏳ In Progress' : '📝 Draft'}
                         </span>
                     </div>
                 </div>
             `);
+
+            // Add hover effect
+            marker.on('mouseover', function() {
+                this.getElement().querySelector('div').style.transform = 'scale(1.2)';
+            });
+            marker.on('mouseout', function() {
+                this.getElement().querySelector('div').style.transform = 'scale(1)';
+            });
+
             markers.push(marker);
-            markersWithLocation++;
-        } else {
-            console.warn(`⚠️ No location for: ${e.customerCompany} - ${e.customerLocation}`);
+            bounds.extend(e.location);
+            hasMarkers = true;
         }
     });
-    
-    console.log(`✅ ${markersWithLocation} markers displayed on map`);
-    
-    const updateStatus = document.getElementById('mapStatus');
-    if (updateStatus) {
-        updateStatus.textContent = `📍 Showing ${markersWithLocation} of ${data.length} locations on map`;
-    }
-    
-    if(markers.length>0){ 
-        const group=L.featureGroup(markers); 
-        const bounds = group.getBounds();
-        
-        // Set max zoom level to prevent zooming too close when markers are nearby
+
+    if (hasMarkers) {
         map.fitBounds(bounds, {
             padding: [50, 50],
-            maxZoom: 11  // Prevent zooming closer than zoom level 11
+            maxZoom: 12
         });
-    } else { 
-        console.warn('⚠️ No markers to display on map');
-        map.setView([4.5, 101], 6); // Default to Malaysia view
+    } else {
+        map.setView([4.2105, 101.9758], 6);
     }
+
+    console.log(`✅ ${markers.length} markers displayed`);
 }
 
 function getFilteredData() {
     const filter = document.getElementById('locationFilter')?.value || 'all';
-    const start = document.getElementById("startDate").value?new Date(document.getElementById("startDate").value):null;
-    const end = document.getElementById("endDate").value?new Date(document.getElementById("endDate").value):null;
+    const start = document.getElementById("startDate").value ? new Date(document.getElementById("startDate").value) : null;
+    const end = document.getElementById("endDate").value ? new Date(document.getElementById("endDate").value) : null;
 
-    return evaluationData.filter(e=>{
-        if(filter!=='all' && e.status!==filter) return false;
+    return evaluationData.filter(e => {
+        if (filter !== 'all' && e.status !== filter) return false;
         const d = new Date(e.date);
-        if(start && d<start) return false;
-        if(end){ const eCopy=new Date(end); eCopy.setHours(23,59,59,999); if(d>eCopy) return false; }
+        if (start && d < start) return false;
+        if (end) {
+            const eCopy = new Date(end);
+            eCopy.setHours(23, 59, 59, 999);
+            if (d > eCopy) return false;
+        }
         return true;
     });
 }
 
-function applyFilters(){ 
-    updateMapMarkers(); 
+function applyFilters() {
+    updateMapMarkers();
 }
 
-function setupRealTimeUpdates(){
-    client.subscribe(`databases.${databaseId}.collections.${collectionId}.documents`,()=>{
-        console.log('📡 Real-time update received, reloading evaluations...');
+function setupRealTimeUpdates() {
+    client.subscribe(`databases.${databaseId}.collections.${collectionId}.documents`, () => {
+        console.log('📡 Real-time update received');
         loadEvaluations();
     });
 }
 
-document.addEventListener('DOMContentLoaded', async ()=>{
+document.addEventListener('DOMContentLoaded', async () => {
     const user = await checkSession();
-    if(user){
+    if (user) {
         await loadEvaluations();
         setupRealTimeUpdates();
-        document.getElementById('locationFilter').addEventListener('change',updateMapMarkers);
-        document.getElementById('startDate').addEventListener('change',applyFilters);
-        document.getElementById('endDate').addEventListener('change',applyFilters);
+        document.getElementById('locationFilter').addEventListener('change', updateMapMarkers);
+        document.getElementById('startDate').addEventListener('change', applyFilters);
+        document.getElementById('endDate').addEventListener('change', applyFilters);
     }
 });
 </script>
