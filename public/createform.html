@@ -7,6 +7,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create Evaluation Form</title>
+<style>
+  .location-hint {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  }
+  .location-preview {
+    margin-top: 8px;
+    padding: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    font-size: 12px;
+    display: none;
+  }
+  .location-preview.active {
+    display: block;
+  }
+</style>
 </head>
 <body>
 
@@ -43,7 +61,7 @@
       </div>
       <div class="form-group">
         <input type="text" id="customerLocation" placeholder="e.g., Bayan Lepas, Penang, Malaysia" required>
-        <div class="location-hint">💡 Include city, state, and country for better map accuracy</div>
+        <div class="location-hint">💡 <strong>Important:</strong> Enter the specific area/city where the company is located (e.g., "Bayan Lepas, Penang" or "Kulim Hi-Tech Park, Kedah"). The system will combine this with the company name for accurate mapping.</div>
         <div id="locationPreview" class="location-preview"></div>
       </div>
       <button type="submit" class="btn" style="grid-column: span 2;">Create Form</button>
