@@ -9,6 +9,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
 <style>
   #map {
@@ -40,6 +43,12 @@
     height: 12px;
     border-radius: 50%;
     border: 2px solid white;
+  }
+  .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+    background-color: rgba(52, 152, 219, 0.6) !important;
+  }
+  .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+    background-color: rgba(52, 152, 219, 0.8) !important;
   }
 </style>
 </head>
@@ -179,7 +188,7 @@ const postEvalCollectionId= "68bf9d62002b4f5f7f23";
 
 let evaluationData = [];
 let map;
-let markers = [];
+let markerClusterGroup;
 let locationCache = {};
 
 async function checkSession() {
@@ -214,32 +223,32 @@ function computeOverallStatus(pre, evalStatus, post) {
     return 'draft';
 }
 
-// Improved geocoding with multiple attempts and better formatting
-async function geocodeLocation(queryString) {
-    if (locationCache[queryString]) {
-        console.log(`✅ Cache: ${queryString}`);
-        return locationCache[queryString];
+// IMPROVED: Search with company name + location for accurate results
+async function geocodeLocation(companyName, locationString) {
+    const cacheKey = `${companyName}|${locationString}`;
+    
+    if (locationCache[cacheKey]) {
+        console.log(`✅ Cache: ${cacheKey}`);
+        return locationCache[cacheKey];
     }
 
-    // Clean and format the address
-    const cleanAddress = queryString.trim();
-    
-    // Try multiple search strategies
+    // Create search queries with company name for better accuracy
     const searchQueries = [
-        cleanAddress, // Original
-        `${cleanAddress}, Malaysia`, // Add country if not present
-        cleanAddress.split(',')[0] + ', Malaysia' // Just city/area + country
-    ];
+        `${companyName}, ${locationString}`, // Company + Location (BEST)
+        `${companyName}, ${locationString}, Malaysia`, // Company + Location + Country
+        `${locationString}, Malaysia`, // Just location + country (fallback)
+        locationString // Just location (last resort)
+    ].filter(q => q && q.trim() && q !== ', ' && q !== ', Malaysia');
 
     for (const query of searchQueries) {
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1100));
             
-            console.log(`🔍 Searching: ${query}`);
+            console.log(`🔍 Searching: "${query}"`);
             const res = await fetch(
                 `https://nominatim.openstreetmap.org/search?` +
                 `format=json&q=${encodeURIComponent(query)}` +
-                `&limit=1&addressdetails=1&countrycodes=my,sg,cn,th,vn,id,ph`
+                `&limit=1&addressdetails=1`
             );
             
             const data = await res.json();
@@ -247,19 +256,23 @@ async function geocodeLocation(queryString) {
             if (data && data.length > 0) {
                 const result = {
                     location: [parseFloat(data[0].lat), parseFloat(data[0].lon)],
-                    locationName: data[0].display_name || queryString
+                    locationName: data[0].display_name || query,
+                    searchQuery: query
                 };
                 
-                locationCache[queryString] = result;
-                console.log(`✅ Found: ${query} -> [${result.location[0].toFixed(4)}, ${result.location[1].toFixed(4)}]`);
+                locationCache[cacheKey] = result;
+                console.log(`✅ FOUND: "${query}" -> [${result.location[0].toFixed(6)}, ${result.location[1].toFixed(6)}]`);
+                console.log(`   Address: ${result.locationName}`);
                 return result;
+            } else {
+                console.warn(`⚠️ No results for: "${query}"`);
             }
         } catch (err) {
-            console.warn(`⚠️ Error searching: ${query}`, err);
+            console.error(`❌ Error searching: "${query}"`, err);
         }
     }
 
-    console.error(`❌ Not found: ${queryString}`);
+    console.error(`❌ FAILED to geocode: Company="${companyName}", Location="${locationString}"`);
     return null;
 }
 
@@ -305,6 +318,7 @@ async function loadEvaluations() {
                 customerLocation: doc.customerLocation || 'N/A',
                 location: null,
                 locationName: doc.customerCompany || 'Unknown Location',
+                searchQuery: null,
                 date: evalDate.toISOString().split('T')[0],
                 timestamp: evalDate.toISOString(),
                 pre_eval: preStatus,
@@ -333,34 +347,49 @@ async function loadEvaluations() {
 async function geocodeLocations() {
     const updateStatus = document.getElementById('mapStatus');
     let processed = 0;
+    let successCount = 0;
     const total = evaluationData.length;
+
+    console.log(`\n🌍 Starting geocoding for ${total} evaluations...\n`);
 
     for (const evaluation of evaluationData) {
         processed++;
-        updateStatus.textContent = `Geocoding locations... ${processed}/${total}`;
+        updateStatus.textContent = `Geocoding locations... ${processed}/${total} (${successCount} found)`;
 
         // Skip if already has location
-        if (evaluation.location) continue;
-
-        // Try customerLocation first
-        let geoResult = null;
-        if (evaluation.customerLocation && evaluation.customerLocation !== 'N/A') {
-            geoResult = await geocodeLocation(evaluation.customerLocation);
+        if (evaluation.location) {
+            successCount++;
+            continue;
         }
 
-        // Fallback to customerCompany
-        if (!geoResult && evaluation.customerCompany && evaluation.customerCompany !== 'N/A') {
-            geoResult = await geocodeLocation(evaluation.customerCompany);
+        const companyName = evaluation.customerCompany !== 'N/A' ? evaluation.customerCompany : '';
+        const locationStr = evaluation.customerLocation !== 'N/A' ? evaluation.customerLocation : '';
+
+        if (!companyName && !locationStr) {
+            console.warn(`⚠️ Skipping: No company or location data for ${evaluation.product}`);
+            continue;
         }
+
+        console.log(`\n--- Evaluation ${processed}/${total} ---`);
+        console.log(`Product: ${evaluation.product}`);
+        console.log(`Company: ${companyName}`);
+        console.log(`Location: ${locationStr}`);
+
+        const geoResult = await geocodeLocation(companyName, locationStr);
 
         if (geoResult) {
             evaluation.location = geoResult.location;
             evaluation.locationName = geoResult.locationName;
+            evaluation.searchQuery = geoResult.searchQuery;
+            successCount++;
+            console.log(`✅ SUCCESS: Geocoded to [${geoResult.location[0].toFixed(6)}, ${geoResult.location[1].toFixed(6)}]`);
+        } else {
+            console.error(`❌ FAILED: Could not geocode "${companyName}, ${locationStr}"`);
         }
     }
 
-    const locatedCount = evaluationData.filter(e => e.location).length;
-    updateStatus.textContent = `📍 Showing ${locatedCount} of ${total} locations`;
+    console.log(`\n📊 Geocoding complete: ${successCount}/${total} locations found\n`);
+    updateStatus.textContent = `📍 Showing ${successCount} of ${total} locations on map`;
     updateMapMarkers();
 }
 
@@ -554,63 +583,76 @@ function initMap() {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 18
     }).addTo(map);
+
+    // Initialize marker cluster group
+    markerClusterGroup = L.markerClusterGroup({
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true
+    });
+    
+    map.addLayer(markerClusterGroup);
 }
 
 function updateMapMarkers() {
-    if (!map) return;
+    if (!map || !markerClusterGroup) return;
 
-    markers.forEach(m => map.removeLayer(m));
-    markers = [];
+    markerClusterGroup.clearLayers();
     
     const data = getFilteredData();
-    const bounds = L.latLngBounds([]);
-    let hasMarkers = false;
+    let displayedCount = 0;
 
-    console.log(`🗺️ Updating map with ${data.length} evaluations`);
+    console.log(`\n🗺️ Updating map with ${data.length} evaluations...`);
 
-    data.forEach(e => {
+    data.forEach((e, index) => {
         if (e.location && Array.isArray(e.location) && e.location.length === 2) {
             const color = e.status === 'complete' ? '#28a745' : 
                          e.status === 'progress' ? '#ffc107' : '#dc3545';
 
             const icon = L.divIcon({
-                className: 'custom-marker',
+                className: 'custom-marker-icon',
                 html: `<div style="
+                    width: 32px;
+                    height: 32px;
                     background: ${color};
-                    width: 28px;
-                    height: 28px;
+                    border: 4px solid white;
                     border-radius: 50%;
-                    border: 3px solid white;
-                    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
-                    cursor: pointer;
-                    transition: transform 0.2s;
-                "></div>`,
-                iconSize: [28, 28],
-                iconAnchor: [14, 14]
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 12px;
+                    color: white;
+                ">${index + 1}</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
             });
 
-            const marker = L.marker(e.location, { icon }).addTo(map);
+            const marker = L.marker(e.location, { icon });
             
-            marker.bindPopup(`
-                <div style="min-width: 240px; font-family: Arial, sans-serif;">
-                    <div style="font-weight: bold; font-size: 15px; margin-bottom: 10px; color: #333; border-bottom: 2px solid ${color}; padding-bottom: 5px;">
+            const popupContent = `
+                <div style="min-width: 260px; font-family: Arial, sans-serif;">
+                    <div style="font-weight: bold; font-size: 16px; margin-bottom: 12px; color: #333; border-bottom: 3px solid ${color}; padding-bottom: 8px;">
                         ${e.product}
                     </div>
-                    <div style="font-size: 13px; line-height: 1.8; color: #555;">
+                    <div style="font-size: 13px; line-height: 2; color: #555;">
                         <div><strong>📦 Category:</strong> ${e.category}</div>
                         <div><strong>👤 Staff:</strong> ${e.staff}</div>
                         <div><strong>🏢 Company:</strong> ${e.customerCompany}</div>
                         <div><strong>📍 Location:</strong> ${e.customerLocation}</div>
                         <div><strong>📅 Date:</strong> ${e.date}</div>
+                        ${e.searchQuery ? `<div style="font-size: 11px; color: #999; margin-top: 8px;"><em>Found via: "${e.searchQuery}"</em></div>` : ''}
                     </div>
-                    <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #eee; text-align: center;">
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: center;">
                         <span style="
                             display: inline-block;
-                            padding: 6px 12px;
+                            padding: 8px 16px;
                             background: ${color};
                             color: white;
-                            border-radius: 5px;
-                            font-size: 12px;
+                            border-radius: 6px;
+                            font-size: 13px;
                             font-weight: bold;
                             text-transform: uppercase;
                         ">
@@ -619,32 +661,30 @@ function updateMapMarkers() {
                         </span>
                     </div>
                 </div>
-            `);
+            `;
 
-            // Add hover effect
-            marker.on('mouseover', function() {
-                this.getElement().querySelector('div').style.transform = 'scale(1.2)';
-            });
-            marker.on('mouseout', function() {
-                this.getElement().querySelector('div').style.transform = 'scale(1)';
-            });
+            marker.bindPopup(popupContent);
+            markerClusterGroup.addLayer(marker);
+            displayedCount++;
 
-            markers.push(marker);
-            bounds.extend(e.location);
-            hasMarkers = true;
+            console.log(`  ✓ Marker ${index + 1}: ${e.customerCompany} at [${e.location[0].toFixed(4)}, ${e.location[1].toFixed(4)}]`);
+        } else {
+            console.warn(`  ✗ No location: ${e.customerCompany} - ${e.customerLocation}`);
         }
     });
 
-    if (hasMarkers) {
-        map.fitBounds(bounds, {
-            padding: [50, 50],
-            maxZoom: 12
-        });
-    } else {
-        map.setView([4.2105, 101.9758], 6);
+    // Fit bounds to show all markers
+    if (displayedCount > 0) {
+        const group = markerClusterGroup.getBounds();
+        if (group.isValid()) {
+            map.fitBounds(group, {
+                padding: [50, 50],
+                maxZoom: 13
+            });
+        }
     }
 
-    console.log(`✅ ${markers.length} markers displayed`);
+    console.log(`✅ ${displayedCount} markers displayed on map\n`);
 }
 
 function getFilteredData() {
