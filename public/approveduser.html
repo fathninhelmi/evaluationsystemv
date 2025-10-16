@@ -302,10 +302,33 @@ function changeUserRole(userId, newRole) {
 }
 
 let pendingRoleChange = null;
-let pendingRegionEdit = null;
+
+async function updateManagerRegion(userId, region) {
+    if (!region) {
+        showNotification('Please select a region', 'error');
+        // Reset the dropdown to the current value
+        const user = users.find(u => u.id === userId);
+        renderUsers();
+        return;
+    }
+    
+    try {
+        await database.updateDocument(databaseId, collectionId, userId, { region: region });
+        const user = users.find(u => u.id === userId);
+        if (user) {
+            user.region = region;
+        }
+        applySorting();
+        filterUsers();
+    } catch (err) {
+        console.error(err);
+        showNotification('Failed to update region', 'error');
+        renderUsers();
+    }
+}
 
 function handleRoleChange(userId, newRole, currentRole) {
-    if (newRole === 'manager') {
+    if (newRole === 'manager' && currentRole !== 'manager') {
         pendingRoleChange = { userId, newRole };
         const user = users.find(u => u.id === userId);
         if (user && user.region) {
@@ -315,19 +338,10 @@ function handleRoleChange(userId, newRole, currentRole) {
         }
         document.getElementById('regionModal').style.display = 'flex';
     } else {
-        if (currentRole === 'manager') {
+        if (currentRole === 'manager' && newRole !== 'manager') {
             updateUserField(userId, 'region', '');
         }
         changeUserRole(userId, newRole);
-    }
-}
-
-function editManagerRegion(userId) {
-    const user = users.find(u => u.id === userId);
-    if (user && user.role === 'manager') {
-        pendingRegionEdit = userId;
-        document.getElementById('editRegionSelect').value = user.region || '';
-        document.getElementById('editRegionModal').style.display = 'flex';
     }
 }
 
@@ -335,11 +349,6 @@ function closeRegionModal() {
     document.getElementById('regionModal').style.display = 'none';
     pendingRoleChange = null;
     renderUsers();
-}
-
-function closeEditRegionModal() {
-    document.getElementById('editRegionModal').style.display = 'none';
-    pendingRegionEdit = null;
 }
 
 async function confirmRegionSelection() {
@@ -368,19 +377,6 @@ async function confirmRegionSelection() {
             console.error(err);
             showNotification('Failed to update role and region', 'error');
         }
-    }
-}
-
-async function confirmEditRegion() {
-    const region = document.getElementById('editRegionSelect').value;
-    if (!region) {
-        showNotification('Please select a region', 'error');
-        return;
-    }
-    
-    if (pendingRegionEdit) {
-        await updateUserField(pendingRegionEdit, 'region', region);
-        closeEditRegionModal();
     }
 }
 
@@ -512,14 +508,11 @@ function viewUser(userId) {
 window.onclick = function(event) {
     const userModal = document.getElementById('userModal');
     const regionModal = document.getElementById('regionModal');
-    const editRegionModal = document.getElementById('editRegionModal');
     
     if (event.target === userModal) {
         closeModal();
     } else if (event.target === regionModal) {
         closeRegionModal();
-    } else if (event.target === editRegionModal) {
-        closeEditRegionModal();
     }
 };
 
