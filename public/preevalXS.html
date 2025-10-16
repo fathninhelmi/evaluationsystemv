@@ -130,7 +130,7 @@
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Surface Conditions :</div>
                 <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="surfaceConditions" value="reflections_glare"> Reflections/ Glare</label>
+                    <label><input type="checkbox" name="surfaceConditions" value="reflecions_glare"> Reflections/ Glare</label>
                     <label><input type="checkbox" name="surfaceConditions" value="curves"> Curves</label>
                     <label><input type="checkbox" name="surfaceConditions" value="transparent_layers"> Transparent layers</label>
                 </div>
@@ -428,20 +428,15 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    // Handle checkbox fields - these are now stored as comma-separated strings
-    const checkboxFields = [
+    // Handle checkbox fields - all are stored as arrays (enums) in the database
+    const checkboxEnumFields = [
         'codeType', 'printMaterial', 'surfaceConditions', 'xs_samplesProvided', 
         'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
     ];
 
-    checkboxFields.forEach(fieldName => {
-        if (data[fieldName]) {
-            // Handle both array format (old data) and comma-separated string format (new data)
-            const values = Array.isArray(data[fieldName]) 
-                ? data[fieldName] 
-                : data[fieldName].split(',').map(v => v.trim()).filter(v => v);
-            
-            values.forEach(value => {
+    checkboxEnumFields.forEach(fieldName => {
+        if (data[fieldName] && Array.isArray(data[fieldName])) {
+            data[fieldName].forEach(value => {
                 const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
                 if (checkbox) checkbox.checked = true;
             });
@@ -512,17 +507,19 @@ function collectFormData() {
         }
     });
 
-    // Collect checkbox fields as comma-separated strings (not arrays)
-    const checkboxFields = [
+    // Collect checkbox fields - all are enums in Appwrite, so store as arrays
+    const checkboxEnumFields = [
         'codeType', 'printMaterial', 'surfaceConditions', 'xs_samplesProvided', 
         'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
     ];
 
-    checkboxFields.forEach(fieldName => {
+    checkboxEnumFields.forEach(fieldName => {
         const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
         const values = Array.from(checkboxes).map(cb => cb.value);
-        // Store as comma-separated string to fit string field type (max 255 chars)
-        data[fieldName] = values.length > 0 ? values.join(', ') : '';
+        // Store as array for enum fields (only add if there are values)
+        if (values.length > 0) {
+            data[fieldName] = values;
+        }
     });
     
     return data;
