@@ -61,6 +61,9 @@
           </div>
         </div>
         <div id="map"></div>
+        <div style="padding: 10px; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0;">
+          <span id="mapStatus">Loading map data...</span>
+        </div>
       </div>
 
       <div class="widget">
@@ -132,6 +135,8 @@ let evaluationData = [];
 let map;
 let markers = [];
 let locationCache = {}; // Cache geocoded locations in memory
+let geocodeQueue = []; // Queue for geocoding requests
+let isGeocoding = false;
 
 async function checkSession() {
     try {
@@ -168,12 +173,18 @@ function computeOverallStatus(pre, evalStatus, post) {
 async function geocodeLocation(queryString) {
     // Check cache first
     if (locationCache[queryString]) {
+        console.log(`✅ Using cached location for: ${queryString}`);
         return locationCache[queryString];
     }
 
     try {
+        // Add delay to respect Nominatim usage policy (1 request per second)
+        await new Promise(resolve => setTimeout(resolve, 1100));
+        
+        console.log(`🔍 Geocoding: ${queryString}`);
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryString)}&limit=1&addressdetails=1`);
         const data = await res.json();
+        
         if (data && data.length > 0) {
             const result = {
                 location: [parseFloat(data[0].lat), parseFloat(data[0].lon)],
@@ -181,12 +192,51 @@ async function geocodeLocation(queryString) {
             };
             // Cache the result
             locationCache[queryString] = result;
+            console.log(`✅ Geocoded: ${queryString} -> [${result.location[0]}, ${result.location[1]}]`);
             return result;
+        } else {
+            console.warn(`⚠️ No results found for: ${queryString}`);
         }
     } catch (err) {
-        console.warn("Geocoding failed for", queryString, err);
+        console.error("❌ Geocoding failed for", queryString, err);
     }
     return null;
+}
+
+// Process geocoding queue one at a time
+async function processGeocodeQueue() {
+    if (isGeocoding || geocodeQueue.length === 0) return;
+    
+    isGeocoding = true;
+    const updateStatus = document.getElementById('mapStatus');
+    
+    while (geocodeQueue.length > 0) {
+        const item = geocodeQueue.shift();
+        updateStatus.textContent = `Geocoding locations... ${geocodeQueue.length} remaining`;
+        
+        let geoResult = null;
+        if (item.doc.customerLocation) {
+            geoResult = await geocodeLocation(item.doc.customerLocation);
+        }
+        
+        // Fallback to company name if primary location fails
+        if (!geoResult && item.doc.customerCompany) {
+            geoResult = await geocodeLocation(item.doc.customerCompany);
+        }
+        
+        if (geoResult) {
+            item.evaluation.location = geoResult.location;
+            item.evaluation.locationName = geoResult.locationName;
+        }
+    }
+    
+    isGeocoding = false;
+    updateStatus.textContent = `📍 Showing ${evaluationData.filter(e => e.location).length} of ${evaluationData.length} locations`;
+    
+    // Update map after all geocoding is complete
+    if (map) {
+        updateMapMarkers();
+    }
 }
 
 async function loadEvaluations() {
@@ -197,6 +247,9 @@ async function loadEvaluations() {
         ]);
 
         evaluationData = [];
+        geocodeQueue = [];
+
+        console.log(`📊 Loading ${response.documents.length} evaluations...`);
 
         for (const doc of response.documents) {
             let preDoc, evalDoc, postDoc;
@@ -222,24 +275,7 @@ async function loadEvaluations() {
             let location = null;
             let locationName = doc.customerCompany || 'Unknown Location';
 
-            // Try to geocode using customerLocation (primary) or customerCompany
-            if (doc.customerLocation) {
-                const geoResult = await geocodeLocation(doc.customerLocation);
-                if (geoResult) {
-                    location = geoResult.location;
-                    locationName = geoResult.locationName;
-                    console.log(`Geocoded location for ${doc.customerLocation}:`, location);
-                }
-            } else if (doc.customerCompany) {
-                const geoResult = await geocodeLocation(doc.customerCompany);
-                if (geoResult) {
-                    location = geoResult.location;
-                    locationName = geoResult.locationName;
-                    console.log(`Geocoded location for ${doc.customerCompany}:`, location);
-                }
-            }
-
-            evaluationData.push({
+            const evaluation = {
                 id: doc.$id,
                 product: doc.prodname || 'Unknown Product',
                 category: doc.productType || 'Other',
@@ -247,7 +283,7 @@ async function loadEvaluations() {
                 company: doc.company || 'N/A',
                 customerCompany: doc.customerCompany || 'N/A',
                 customerLocation: doc.customerLocation || 'N/A', 
-                location,
+                location: null,
                 locationName,
                 date: evalDate.toISOString().split('T')[0],
                 timestamp: evalDate.toISOString(),
@@ -256,22 +292,28 @@ async function loadEvaluations() {
                 post_eval: postStatus,
                 status: overallStatus,
                 winlose: winLoseStatus
-            });
+            };
+
+            evaluationData.push(evaluation);
+            
+            // Add to geocoding queue
+            geocodeQueue.push({ doc, evaluation });
         }
 
-        updateDashboard();
+        // Update dashboard immediately with data (without locations yet)
+        updateStats();
+        initCharts();
+        populateEvaluationList();
+        initMap();
+        
+        // Start geocoding in background
+        processGeocodeQueue();
+
     } catch (err) {
         console.error("Error loading evaluations:", err);
         document.getElementById('evaluationList').innerHTML =
             '<div class="error-message">Failed to load evaluations. Refresh the page.</div>';
     }
-}
-
-function updateDashboard() {
-    updateStats();
-    initCharts();
-    populateEvaluationList();
-    initMap();
 }
 
 function updateStats() {
@@ -445,7 +487,7 @@ function populateEvaluationList() {
                 <div class="evaluation-info">
                     <div class="evaluation-product">${e.product}</div>
                     <div class="evaluation-details">
-                        👤 ${e.staff} • 🏢 ${e.customerCompany} • 📅 ${e.date}
+                        👤 ${e.staff} • 🏢 ${e.customerCompany} • 📍 ${e.customerLocation} • 📅 ${e.date}
                     </div>
                     <div class="form-progress" style="margin-top:4px;">
                         <small>
@@ -467,28 +509,78 @@ function populateEvaluationList() {
 
 function initMap() {
     if(map) map.remove();
-    map = L.map('map').setView([20, 0], 3);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap contributors', maxZoom:18 }).addTo(map);
+    map = L.map('map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ 
+        attribution:'© OpenStreetMap contributors', 
+        maxZoom:18 
+    }).addTo(map);
+    
     updateMapMarkers();
 }
 
 function updateMapMarkers(){
     if(!map) return;
+    
     markers.forEach(m=>map.removeLayer(m));
     markers = [];
     const data = getFilteredData();
+    
+    console.log(`🗺️ Displaying ${data.length} evaluations on map`);
+    let markersWithLocation = 0;
+    
     data.forEach(e=>{
         if (e.location && Array.isArray(e.location) && e.location.length === 2) {
             const color = e.status==='complete'?'#28a745': e.status==='progress'?'#ffc107':'#dc3545';
-            const icon = L.divIcon({className:'custom-marker', html:`<div style="background:${color};width:20px;height:20px;border-radius:50%;border:3px solid white;"></div>`, iconSize:[20,20], iconAnchor:[10,10]});
+            const icon = L.divIcon({
+                className:'custom-marker', 
+                html:`<div style="background:${color};width:26px;height:26px;border-radius:50%;border:3px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.4);cursor:pointer;"></div>`, 
+                iconSize:[26,26], 
+                iconAnchor:[13,13]
+            });
             const marker = L.marker(e.location,{icon}).addTo(map);
-            marker.bindPopup(`<b>${e.product}</b><br>👤 ${e.staff}<br>📅 ${e.date}<br>🏢 ${e.customerCompany}<br>`);
+            marker.bindPopup(`
+                <div style="min-width:220px; font-family: Arial, sans-serif;">
+                    <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#333;">${e.product}</div>
+                    <div style="font-size:12px; color:#666; line-height:1.6;">
+                        <div>📦 <strong>Category:</strong> ${e.category}</div>
+                        <div>👤 <strong>Staff:</strong> ${e.staff}</div>
+                        <div>🏢 <strong>Company:</strong> ${e.customerCompany}</div>
+                        <div>📍 <strong>Location:</strong> ${e.customerLocation}</div>
+                        <div>📅 <strong>Date:</strong> ${e.date}</div>
+                    </div>
+                    <div style="margin-top:8px; padding-top:8px; border-top:1px solid #eee;">
+                        <span style="display:inline-block; padding:4px 8px; background:${color}; color:white; border-radius:4px; font-size:11px; font-weight:bold;">
+                            ${e.status.toUpperCase()}
+                        </span>
+                    </div>
+                </div>
+            `);
             markers.push(marker);
+            markersWithLocation++;
+        } else {
+            console.warn(`⚠️ No location for: ${e.customerCompany} - ${e.customerLocation}`);
         }
     });
-    if(markers.length>0){ const group=L.featureGroup(markers); map.fitBounds(group.getBounds(),{padding:[20,20]}); }
-    else { 
-        map.setView([20, 0], 3);
+    
+    console.log(`✅ ${markersWithLocation} markers displayed on map`);
+    
+    const updateStatus = document.getElementById('mapStatus');
+    if (updateStatus) {
+        updateStatus.textContent = `📍 Showing ${markersWithLocation} of ${data.length} locations on map`;
+    }
+    
+    if(markers.length>0){ 
+        const group=L.featureGroup(markers); 
+        const bounds = group.getBounds();
+        
+        // Set max zoom level to prevent zooming too close when markers are nearby
+        map.fitBounds(bounds, {
+            padding: [50, 50],
+            maxZoom: 11  // Prevent zooming closer than zoom level 11
+        });
+    } else { 
+        console.warn('⚠️ No markers to display on map');
+        map.setView([4.5, 101], 6); // Default to Malaysia view
     }
 }
 
@@ -506,10 +598,15 @@ function getFilteredData() {
     });
 }
 
-function applyFilters(){ updateMapMarkers(); }
+function applyFilters(){ 
+    updateMapMarkers(); 
+}
 
 function setupRealTimeUpdates(){
-    client.subscribe(`databases.${databaseId}.collections.${collectionId}.documents`,()=>loadEvaluations());
+    client.subscribe(`databases.${databaseId}.collections.${collectionId}.documents`,()=>{
+        console.log('📡 Real-time update received, reloading evaluations...');
+        loadEvaluations();
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async ()=>{
