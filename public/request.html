@@ -21,11 +21,14 @@
 
 <div class="req-contain">
   <h1>Requested Form List</h1>
+  <div class="region-info" id="regionInfo" style="text-align: center; margin-bottom: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+    <i class="fas fa-map-marker-alt"></i> Loading your region...
+  </div>
   <div class="reqcontainer" id="requestContainer"></div>
 </div>
 
 <script>
-const { Client, Account, Databases } = window.Appwrite;
+const { Client, Account, Databases, Query } = window.Appwrite;
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255d4f5c96");
 
@@ -38,15 +41,41 @@ const collectionId = "68ba918c0022d2b9a429";
 const preEvalCollectionId = "68c7ced6001bd14d08f4";
 const evalCollectionId    = "68bf9d5600257a20775a";
 const postEvalCollectionId= "68bf9d62002b4f5f7f23";
+const usersCollectionId = "68ba8c240002116fa647";
 
 const requestContainer = document.getElementById('requestContainer');
+let managerRegion = null;
 
-// Check login session
+// Check login session and get manager region
 async function checkSession() {
     try {
         const user = await account.get();
+        
+        // Get manager's region from the users collection
+        const userDocs = await databases.listDocuments(
+            databaseId, 
+            usersCollectionId,
+            [Query.equal('email', user.email)]
+        );
+        
+        if (userDocs.documents.length > 0) {
+            const userDoc = userDocs.documents[0];
+            managerRegion = userDoc.region || null;
+            
+            // Update region info display
+            const regionInfo = document.getElementById('regionInfo');
+            if (managerRegion) {
+                regionInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Your Region: <strong>${managerRegion}</strong>`;
+            } else {
+                regionInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> No region assigned`;
+                regionInfo.style.background = '#fff3cd';
+                regionInfo.style.color = '#856404';
+            }
+        }
+        
         return user;
-    } catch {
+    } catch (err) {
+        console.error('Session check error:', err);
         window.location.href = '/index.html';
     }
 }
@@ -62,33 +91,51 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 
 async function loadRequests() {
     try {
+        // Get all requests
         const res = await databases.listDocuments(databaseId, requestListId);
-        const pendingRequests = res.documents.map(doc => {
-            let formattedDate = doc.evalDate || 'N/A';
-            if (doc.evalDate && doc.evalDate !== 'N/A') {
-                try {
-                    const date = new Date(doc.evalDate);
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = String(date.getFullYear()).slice(-2);
-                    formattedDate = `${day}/${month}/${year}`;
-                } catch (err) {
-                    console.warn('Error formatting date:', err);
+        
+        // Filter requests based on manager's region
+        const filteredRequests = [];
+        
+        for (const doc of res.documents) {
+            // Get the form document to check its customerLocation
+            try {
+                const formDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.formId);
+                const formLocation = formDoc.customerLocation || '';
+                
+                // Only include if manager's region matches form's customerLocation
+                // OR if manager has no region (show all)
+                if (!managerRegion || formLocation === managerRegion) {
+                    let formattedDate = doc.evalDate || 'N/A';
+                    if (doc.evalDate && doc.evalDate !== 'N/A') {
+                        try {
+                            const date = new Date(doc.evalDate);
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const year = String(date.getFullYear()).slice(-2);
+                            formattedDate = `${day}/${month}/${year}`;
+                        } catch (err) {
+                            console.warn('Error formatting date:', err);
+                        }
+                    }
+                    
+                    filteredRequests.push({
+                        id: doc.$id,
+                        formId: doc.formId,
+                        username: doc.username || 'Unknown User',
+                        prodname: doc.prodname || 'Untitled',
+                        customerCompany: doc.customerCompany || 'N/A',
+                        evalDate: formattedDate,
+                        statusReq: doc.statusReq || 'pending',
+                        location: formLocation
+                    });
                 }
+            } catch (err) {
+                console.warn(`Could not fetch form ${doc.formId}:`, err);
             }
-            
-            return {
-                id: doc.$id,
-                formId: doc.formId,
-                username: doc.username || 'Unknown User',
-                prodname: doc.prodname || 'Untitled',
-                customerCompany: doc.customerCompany || 'N/A',
-                evalDate: formattedDate,
-                statusReq: doc.statusReq || 'pending'
-            };
-        });
+        }
 
-        renderRequests(pendingRequests);
+        renderRequests(filteredRequests);
     } catch (err) {
         console.error('Error loading requests:', err);
         requestContainer.innerHTML = '<p style="text-align:center; padding:20px;">Error loading requests</p>';
@@ -98,7 +145,10 @@ async function loadRequests() {
 function renderRequests(pendingRequests) {
     requestContainer.innerHTML = '';
     if (pendingRequests.length === 0) {
-        requestContainer.innerHTML = '<p style="text-align:center; padding:20px;">No pending requests</p>';
+        const message = managerRegion 
+            ? `No requests found for your region (${managerRegion})`
+            : 'No pending requests';
+        requestContainer.innerHTML = `<p style="text-align:center; padding:20px;">${message}</p>`;
         return;
     }
 
@@ -130,6 +180,12 @@ function renderRequests(pendingRequests) {
             `;
         }
         
+        const locationBadge = request.location 
+            ? `<span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-left: 8px;">
+                <i class="fas fa-map-marker-alt"></i> ${request.location}
+               </span>`
+            : '';
+        
         item.innerHTML = `
             <div class="user-info">
                 <strong>${request.username}</strong> has requested 
@@ -137,6 +193,7 @@ function renderRequests(pendingRequests) {
                    style="color: #007bff; text-decoration: underline; cursor: pointer; font-weight: 500;">
                     ${request.prodname}
                 </a>, ${request.customerCompany} (${request.evalDate})
+                ${locationBadge}
             </div>
             <div class="actions">
                 ${actionButtons}
@@ -180,8 +237,11 @@ async function declineRequest(id) {
     }
 }
 
-checkSession();
-loadRequests();
+// Initialize
+(async function init() {
+    await checkSession();
+    await loadRequests();
+})();
 </script>
 
 <footer class="footer-regis">
