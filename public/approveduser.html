@@ -128,6 +128,29 @@
     </div>
 </div>
 
+<div id="regionModal" class="modal" style="display: none;">
+    <div class="modal-content small">
+        <div class="modal-header">
+            <h3>Select Manager Region</h3>
+            <button class="modal-close" onclick="closeRegionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Please select the region this manager will be in charge of:</p>
+            <select id="regionSelect" class="region-select-modal">
+                <option value="">-- Select Region --</option>
+                <option value="North">Asia</option>
+                <option value="South">China</option>
+                <option value="East">America</option>
+                <option value="West">Malaysia</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeRegionModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmRegionSelection()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 const { Client, Account, Databases, Query } = window.Appwrite;
 const client = new Client();
@@ -191,6 +214,7 @@ async function fetchUsers() {
             email: doc.email || '',
             role: doc.role || 'staff',
             status: doc.status || 'approved',
+            region: doc.region || '',
             registrationDate: doc.registerDate || doc.$createdAt,
             isVitrox: doc.email?.endsWith('@vitrox.com') || false
         })).sort((a, b) => new Date(b.registrationDate) - new Date(a.registrationDate));
@@ -220,6 +244,61 @@ async function updateUserField(userId, field, value) {
 
 function changeUserRole(userId, newRole) { 
     updateUserField(userId, 'role', newRole); 
+}
+
+let pendingRoleChange = null;
+
+function handleRoleChange(userId, newRole, currentRole) {
+    if (newRole === 'manager') {
+        pendingRoleChange = { userId, newRole };
+        const user = users.find(u => u.id === userId);
+        if (user && user.region) {
+            document.getElementById('regionSelect').value = user.region;
+        } else {
+            document.getElementById('regionSelect').value = '';
+        }
+        document.getElementById('regionModal').style.display = 'flex';
+    } else {
+        if (currentRole === 'manager') {
+            updateUserField(userId, 'region', '');
+        }
+        changeUserRole(userId, newRole);
+    }
+}
+
+function closeRegionModal() {
+    document.getElementById('regionModal').style.display = 'none';
+    pendingRoleChange = null;
+    renderUsers();
+}
+
+async function confirmRegionSelection() {
+    const region = document.getElementById('regionSelect').value;
+    if (!region) {
+        showNotification('Please select a region', 'error');
+        return;
+    }
+    
+    if (pendingRoleChange) {
+        try {
+            await database.updateDocument(databaseId, collectionId, pendingRoleChange.userId, {
+                role: 'manager',
+                region: region
+            });
+            const user = users.find(u => u.id === pendingRoleChange.userId);
+            if (user) {
+                user.role = 'manager';
+                user.region = region;
+            }
+            renderUsers();
+            updateStats();
+            showNotification('Manager role and region assigned successfully', 'success');
+            closeRegionModal();
+        } catch (err) {
+            console.error(err);
+            showNotification('Failed to update role and region', 'error');
+        }
+    }
 }
 
 async function deleteUser(userId) {
@@ -258,11 +337,12 @@ function renderUsers() {
         <td>${user.name || '-'}</td>
         <td>${user.email} ${user.isVitrox ? '<i class="fas fa-shield-alt"></i>' : ''}</td>
         <td>
-            <select class="role-select" onchange="changeUserRole('${user.id}', this.value)">
+            <select class="role-select" onchange="handleRoleChange('${user.id}', this.value, '${user.role}')">
                 <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>Staff</option>
                 <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option>
                 <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
             </select>
+            ${user.role === 'manager' && user.region ? `<span class="region-badge">${user.region}</span>` : ''}
         </td>
         <td>${formatDate(user.registrationDate)}</td>
         <td>
@@ -312,6 +392,12 @@ function generateUserDetailsHTML(user) {
                 <label>Role:</label>
                 <span class="role-badge ${user.role}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
             </div>
+            ${user.role === 'manager' && user.region ? `
+            <div class="detail-item">
+                <label>Region:</label>
+                <span class="region-badge">${user.region}</span>
+            </div>
+            ` : ''}
             <div class="detail-item">
                 <label>Registration Date:</label>
                 <span>${formatDate(user.registrationDate)}</span>
