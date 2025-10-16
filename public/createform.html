@@ -42,14 +42,16 @@
         <input type="text" id="customerCompany" placeholder="Enter customer company name" required>
       </div>
       <div class="form-group">
-        <input type="text" id="customerLocation" placeholder="Enter customer company region" required>
+        <input type="text" id="customerLocation" placeholder="e.g., Bayan Lepas, Penang, Malaysia" required>
+        <div class="location-hint">💡 Include city, state, and country for better map accuracy</div>
+        <div id="locationPreview" class="location-preview"></div>
       </div>
       <button type="submit" class="btn" style="grid-column: span 2;">Create Form</button>
     </div>
   </form>
 
   <h2>All Evaluation Forms</h2>
-  <div id="eventsList"><p>Loading</p></div>
+  <div id="eventsList"><p>Loading...</p></div>
 </div>
 
 <script type="module">
@@ -68,6 +70,42 @@ const evalCollectionId = "68bf9d5600257a20775a";
 const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 
 let currentUser = null;
+let geocodeTimeout = null;
+
+// Preview location as user types
+document.getElementById("customerLocation").addEventListener("input", (e) => {
+  clearTimeout(geocodeTimeout);
+  const preview = document.getElementById("locationPreview");
+  
+  geocodeTimeout = setTimeout(async () => {
+    const location = e.target.value.trim();
+    if (location.length > 3) {
+      preview.innerHTML = "🔍 Checking location...";
+      preview.classList.add("active");
+      
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`);
+        const data = await res.json();
+        
+        if (data && data.length > 0) {
+          preview.innerHTML = `✅ Found: ${data[0].display_name}`;
+          preview.style.background = "#d4edda";
+          preview.style.color = "#155724";
+        } else {
+          preview.innerHTML = "⚠️ Location not found. Please be more specific.";
+          preview.style.background = "#fff3cd";
+          preview.style.color = "#856404";
+        }
+      } catch (err) {
+        preview.innerHTML = "❌ Could not verify location";
+        preview.style.background = "#f8d7da";
+        preview.style.color = "#721c24";
+      }
+    } else {
+      preview.classList.remove("active");
+    }
+  }, 1000);
+});
 
 async function getOverallStatus(eventId) {
   const statuses = await Promise.all([
@@ -104,7 +142,7 @@ async function getFormStatus(collectionId, eventId) {
 
 async function loadForms() {
   const list = document.getElementById("eventsList");
-  list.innerHTML = "<p>Loading</p>";
+  list.innerHTML = "<p>Loading...</p>";
 
   try {
     const res = await databases.listDocuments(databaseId, collectionId, [
@@ -135,10 +173,19 @@ async function loadForms() {
       div.style.justifyContent = "space-between";
       div.style.alignItems = "center";
 
-      const span = document.createElement("span");
-      span.textContent = `${doc.prodname || "Untitled"} (${formatDate(doc.createDate)})`;
-      span.style.cursor = "pointer";
-      span.onclick = () => window.location.href = `detail.html?id=${doc.$id}`;
+      const infoDiv = document.createElement("div");
+      infoDiv.style.flex = "1";
+      infoDiv.style.cursor = "pointer";
+      infoDiv.onclick = () => window.location.href = `detail.html?id=${doc.$id}`;
+      
+      infoDiv.innerHTML = `
+        <div><strong>${doc.prodname || "Untitled"}</strong></div>
+        <div style="font-size:12px;opacity:0.9;">
+          📅 ${formatDate(doc.createDate)} | 
+          🏢 ${doc.customerCompany} | 
+          📍 ${doc.customerLocation}
+        </div>
+      `;
 
       const delBtn = document.createElement("button");
       delBtn.className = "delete-btn";
@@ -158,7 +205,8 @@ async function loadForms() {
           }
         }
       };
-      div.appendChild(span);
+      
+      div.appendChild(infoDiv);
       div.appendChild(delBtn);
       list.appendChild(div);
     }
@@ -226,6 +274,7 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 
     alert("Evaluation form created successfully!");
     document.getElementById("eventForm").reset();
+    document.getElementById("locationPreview").classList.remove("active");
     loadForms();
 
   } catch (err) {
