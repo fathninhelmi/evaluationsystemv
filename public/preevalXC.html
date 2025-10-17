@@ -491,7 +491,6 @@ function populateForm(preEvalData, referenceData) {
         if (radio) radio.checked = true;
     }
 
-    // ✅ FIXED: Handle both array or comma-separated string for multi-choice fields
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
         'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
@@ -626,8 +625,10 @@ async function saveForm(status = "draft") {
 
         for (const key in saveData) {
             if (Array.isArray(saveData[key])) {
-                saveData[key] = saveData[key].filter(v => v !== "" && v !== null && v !== undefined);
-                if (saveData[key].length === 0) delete saveData[key];
+                saveData[key] = saveData[key].join(", ");
+            }
+            if (saveData[key] === "" || saveData[key] === null || saveData[key] === undefined) {
+                delete saveData[key];
             }
         }
 
@@ -674,5 +675,6 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
 
 
