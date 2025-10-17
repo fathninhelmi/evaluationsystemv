@@ -406,7 +406,6 @@ async function loadExistingForm() {
     try {
         document.getElementById("loadingIndicator").style.display = "block";
         
-        // Load the reference document from main collection (created in createform)
         try {
             referenceDocData = await databases.getDocument(databaseId, collectionId, eventId);
             console.log("Loaded reference data from main collection:", referenceDocData);
@@ -414,7 +413,6 @@ async function loadExistingForm() {
             console.log("Reference document not found in main collection:", err);
         }
         
-        // Load pre-eval form data if it exists
         try {
             formData = await databases.getDocument(databaseId, preEvalCollectionId, eventId);
             console.log("Loaded pre-eval form data:", formData);
@@ -422,7 +420,6 @@ async function loadExistingForm() {
             console.log("Pre-eval form not found, will create new one:", err);
         }
         
-        // Populate form with data from both sources
         populateForm(formData, referenceDocData);
         currentStatus = (formData && formData.status) || "draft";
         
@@ -440,7 +437,6 @@ async function loadExistingForm() {
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
     
-    // Get company name from reference data (main collection)
     const customerCompanyElement = document.getElementById('customerCompany');
     if (customerCompanyElement) {
         if (referenceData && referenceData.customerCompany) {
@@ -472,7 +468,7 @@ function populateForm(preEvalData, referenceData) {
 
     const selectFields = [
         'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
-        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable', 'heightConsistency'
+        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable'
     ];
 
     selectFields.forEach(fieldId => {
@@ -490,7 +486,12 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    // ✅ FIXED: Handle both array and comma-separated string data for checkboxes
+    if (data.heightConsistency) {
+        const radio = document.querySelector(`input[name="heightConsistency"][value="${data.heightConsistency}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    // ✅ FIXED: Handle both array or comma-separated string for multi-choice fields
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
         'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
@@ -498,8 +499,8 @@ function populateForm(preEvalData, referenceData) {
 
     multiChoiceFields.forEach(fieldName => {
         if (data[fieldName]) {
-            const values = Array.isArray(data[fieldName]) 
-                ? data[fieldName] 
+            const values = Array.isArray(data[fieldName])
+                ? data[fieldName]
                 : data[fieldName].split(',').map(v => v.trim());
             
             values.forEach(value => {
@@ -575,7 +576,7 @@ function collectFormData() {
 
     const selectFields = [
         'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
-        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable', 'heightConsistency'
+        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable'
     ];
 
     selectFields.forEach(fieldId => {
@@ -584,8 +585,10 @@ function collectFormData() {
             data[fieldId] = element.value;
         }
     });
+
+    const heightRadio = document.querySelector('input[name="heightConsistency"]:checked');
+    if (heightRadio) data.heightConsistency = heightRadio.value;
     
-    // ✅ FIXED: Convert checkbox selections into a comma-separated string
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
         'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
@@ -594,9 +597,7 @@ function collectFormData() {
     multiChoiceFields.forEach(fieldName => {
         const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
         const values = Array.from(checkboxes).map(cb => cb.value);
-        if (values.length > 0) {
-            data[fieldName] = values.join(', ');
-        }
+        if (values.length > 0) data[fieldName] = values;
     });
     
     return data;
@@ -624,8 +625,9 @@ async function saveForm(status = "draft") {
         };
 
         for (const key in saveData) {
-            if (saveData[key] === "" || saveData[key] === null || saveData[key] === undefined) {
-                delete saveData[key];
+            if (Array.isArray(saveData[key])) {
+                saveData[key] = saveData[key].filter(v => v !== "" && v !== null && v !== undefined);
+                if (saveData[key].length === 0) delete saveData[key];
             }
         }
 
@@ -672,4 +674,5 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
 
