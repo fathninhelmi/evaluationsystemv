@@ -440,7 +440,7 @@ async function loadExistingForm() {
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
     
-    // Get company name from reference data (main collection) - this comes from createform
+    // Get company name from reference data (main collection)
     const customerCompanyElement = document.getElementById('customerCompany');
     if (customerCompanyElement) {
         if (referenceData && referenceData.customerCompany) {
@@ -490,6 +490,7 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
+    // ✅ FIXED: Handle both array and comma-separated string data for checkboxes
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
         'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
@@ -497,7 +498,6 @@ function populateForm(preEvalData, referenceData) {
 
     multiChoiceFields.forEach(fieldName => {
         if (data[fieldName]) {
-            // Handle both array format (old data) and string format (new data)
             const values = Array.isArray(data[fieldName]) 
                 ? data[fieldName] 
                 : data[fieldName].split(',').map(v => v.trim());
@@ -534,7 +534,7 @@ function updateFormDisplay() {
     const saveProgressBtn = document.getElementById("saveProgressBtn");
     
     statusBadge.textContent = currentStatus;
-    statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
+    statusBadge.className = `status-badge ${currentStatus.replace(/\\s+/g, '-').toLowerCase()}`;
     
     if (viewMode) {
         formTitle.textContent = `Pre-Evaluation Form (Viewing)`;
@@ -585,6 +585,7 @@ function collectFormData() {
         }
     });
     
+    // ✅ FIXED: Convert checkbox selections into a comma-separated string
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
         'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
@@ -594,7 +595,6 @@ function collectFormData() {
         const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
         const values = Array.from(checkboxes).map(cb => cb.value);
         if (values.length > 0) {
-            // Convert array to comma-separated string for string-type fields
             data[fieldName] = values.join(', ');
         }
     });
@@ -624,7 +624,6 @@ async function saveForm(status = "draft") {
         };
 
         for (const key in saveData) {
-            // Remove empty or null values
             if (saveData[key] === "" || saveData[key] === null || saveData[key] === undefined) {
                 delete saveData[key];
             }
@@ -673,3 +672,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
