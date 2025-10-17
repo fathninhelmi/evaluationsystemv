@@ -570,7 +570,7 @@ function collectFormData() {
 
     const selectFields = [
         'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
-        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable'
+        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable', 'heightConsistency'
     ];
 
     selectFields.forEach(fieldId => {
@@ -579,9 +579,6 @@ function collectFormData() {
             data[fieldId] = element.value;
         }
     });
-
-    const heightRadio = document.querySelector('input[name="heightConsistency"]:checked');
-    if (heightRadio) data.heightConsistency = heightRadio.value;
     
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
@@ -618,13 +615,11 @@ async function saveForm(status = "draft") {
             ...collectedData,
             status: status
         };
-
-        // ✅ Fix: only convert `primaryInspectionTask` to string, keep others as arrays
+        
         if (Array.isArray(saveData["primaryInspectionTask"])) {
             saveData["primaryInspectionTask"] = saveData["primaryInspectionTask"].join(", ");
         }
 
-        // Remove empty fields
         for (const key in saveData) {
             if (saveData[key] === "" || saveData[key] === null || saveData[key] === undefined) {
                 delete saveData[key];
@@ -674,6 +669,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
 
 
 
