@@ -605,6 +605,7 @@ function collectFormData() {
 async function saveForm(status = "draft") {
     try {
         const collectedData = collectFormData();
+
         if (status === "complete") {
             const requiredFields = [
                 'customerCompany', 'custTechChamp', 'evalDate','sisalesChamp', 'sitechChamp', 
@@ -623,10 +624,13 @@ async function saveForm(status = "draft") {
             status: status
         };
 
+        // ✅ Fix: only convert `primaryInspectionTask` to string, keep others as arrays
+        if (Array.isArray(saveData["primaryInspectionTask"])) {
+            saveData["primaryInspectionTask"] = saveData["primaryInspectionTask"].join(", ");
+        }
+
+        // Remove empty fields
         for (const key in saveData) {
-            if (Array.isArray(saveData[key])) {
-                saveData[key] = saveData[key].join(", ");
-            }
             if (saveData[key] === "" || saveData[key] === null || saveData[key] === undefined) {
                 delete saveData[key];
             }
@@ -675,6 +679,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
 
 
 
