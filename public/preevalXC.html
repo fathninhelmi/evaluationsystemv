@@ -130,8 +130,8 @@
                 <label>Height Consistency :</label>
                 <select id="heightConsistency" name="heightConsistency">
                     <option value="">Select</option>
-                    <option value="consistent">Height are consistent</option>
-                    <option value="vary">Height vary</option>
+                    <option value="consistent">Heights are consistent</option>
+                    <option value="vary">Heights vary</option>
                 </select>
             </div>
 
@@ -472,7 +472,7 @@ function populateForm(preEvalData, referenceData) {
 
     const selectFields = [
         'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
-        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable'
+        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable', 'heightConsistency'
     ];
 
     selectFields.forEach(fieldId => {
@@ -490,19 +490,19 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    if (data.heightConsistency) {
-        const radio = document.querySelector(`input[name="heightConsistency"][value="${data.heightConsistency}"]`);
-        if (radio) radio.checked = true;
-    }
-
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
         'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
     ];
 
     multiChoiceFields.forEach(fieldName => {
-        if (data[fieldName] && Array.isArray(data[fieldName])) {
-            data[fieldName].forEach(value => {
+        if (data[fieldName]) {
+            // Handle both array format (old data) and string format (new data)
+            const values = Array.isArray(data[fieldName]) 
+                ? data[fieldName] 
+                : data[fieldName].split(',').map(v => v.trim());
+            
+            values.forEach(value => {
                 const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
                 if (checkbox) checkbox.checked = true;
             });
@@ -575,7 +575,7 @@ function collectFormData() {
 
     const selectFields = [
         'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
-        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable'
+        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable', 'heightConsistency'
     ];
 
     selectFields.forEach(fieldId => {
@@ -584,9 +584,6 @@ function collectFormData() {
             data[fieldId] = element.value;
         }
     });
-
-    const heightRadio = document.querySelector('input[name="heightConsistency"]:checked');
-    if (heightRadio) data.heightConsistency = heightRadio.value;
     
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
@@ -596,7 +593,10 @@ function collectFormData() {
     multiChoiceFields.forEach(fieldName => {
         const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
         const values = Array.from(checkboxes).map(cb => cb.value);
-        if (values.length > 0) data[fieldName] = values;
+        if (values.length > 0) {
+            // Convert array to comma-separated string for string-type fields
+            data[fieldName] = values.join(', ');
+        }
     });
     
     return data;
@@ -624,9 +624,9 @@ async function saveForm(status = "draft") {
         };
 
         for (const key in saveData) {
-            if (Array.isArray(saveData[key])) {
-                saveData[key] = saveData[key].filter(v => v !== "" && v !== null && v !== undefined);
-                if (saveData[key].length === 0) delete saveData[key];
+            // Remove empty or null values
+            if (saveData[key] === "" || saveData[key] === null || saveData[key] === undefined) {
+                delete saveData[key];
             }
         }
 
@@ -671,4 +671,5 @@ document.addEventListener("DOMContentLoaded", () => {
 </footer>
 
 </body>
+
 </html>
