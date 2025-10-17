@@ -428,10 +428,9 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    // Handle ALL checkbox fields - all stored as comma-separated strings in database
+    // Handle checkbox STRING fields - stored as comma-separated strings in database
     const checkboxStringFields = [
-        'codeType', 'printMaterial', 'surfaceConditions', 'xs_samplesProvided', 
-        'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
+        'codeType', 'printMaterial', 'surfaceConditions'
     ];
 
     checkboxStringFields.forEach(fieldName => {
@@ -447,6 +446,26 @@ function populateForm(preEvalData, referenceData) {
             });
         }
     });
+
+    // Handle checkbox ARRAY fields - stored as arrays in database
+    const checkboxArrayFields = [
+        'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
+    ];
+
+    checkboxArrayFields.forEach(fieldName => {
+        if (data[fieldName] && Array.isArray(data[fieldName])) {
+            data[fieldName].forEach(value => {
+                const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+    });
+
+    // Handle boolean checkbox - xs_samplesProvided
+    if (data.xs_samplesProvided === true) {
+        const checkbox = document.querySelector('input[name="xs_samplesProvided"]');
+        if (checkbox) checkbox.checked = true;
+    }
 }
 
 function setViewMode() {
@@ -512,10 +531,9 @@ function collectFormData() {
         }
     });
 
-    // Collect ALL checkbox fields as comma-separated strings (all are string type in Appwrite)
+    // Collect checkbox fields as comma-separated STRINGS
     const checkboxStringFields = [
-        'codeType', 'printMaterial', 'surfaceConditions', 'xs_samplesProvided', 
-        'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
+        'codeType', 'printMaterial', 'surfaceConditions'
     ];
 
     checkboxStringFields.forEach(fieldName => {
@@ -526,6 +544,24 @@ function collectFormData() {
             data[fieldName] = values.join(', ');
         }
     });
+
+    // Collect checkbox fields as ARRAYS (these are enum arrays in Appwrite)
+    const checkboxArrayFields = [
+        'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
+    ];
+
+    checkboxArrayFields.forEach(fieldName => {
+        const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
+        const values = Array.from(checkboxes).map(cb => cb.value);
+        // Store as array - only add if there are values
+        if (values.length > 0) {
+            data[fieldName] = values;
+        }
+    });
+
+    // Handle boolean checkbox - xs_samplesProvided
+    const sampleProvidedCheckbox = document.querySelector('input[name="xs_samplesProvided"]:checked');
+    data['xs_samplesProvided'] = sampleProvidedCheckbox ? true : false;
     
     return data;
 }
