@@ -468,7 +468,7 @@ function populateForm(preEvalData, referenceData) {
 
     const selectFields = [
         'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
-        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable'
+        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable', 'heightConsistency'
     ];
 
     selectFields.forEach(fieldId => {
@@ -485,11 +485,6 @@ function populateForm(preEvalData, referenceData) {
             element.value = new Date(data[fieldId]).toISOString().split("T")[0];
         }
     });
-
-    if (data.heightConsistency) {
-        const radio = document.querySelector(`input[name="heightConsistency"][value="${data.heightConsistency}"]`);
-        if (radio) radio.checked = true;
-    }
 
     const multiChoiceFields = [
         'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
@@ -679,6 +674,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
 
 
 
