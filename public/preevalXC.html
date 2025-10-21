@@ -43,7 +43,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Existing customer? :</label>
-                <select id="existcust" name="existcust">
+                <select id="existcust" name="existcust" required>
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -60,7 +60,7 @@
             <div class="section-title">2. RESOURCES</div>
             <div class="form-group-evalxc-compact">
                 <label>VisionXpert BD Sales Champion :</label>
-                <select id="vxpertsalesChamp" name="vxpertsalesChamp">
+                <select id="vxpertsalesChamp" name="vxpertsalesChamp" required>
                     <option value="">Select</option>
                     <option value="George_Koay">George Koay</option>
                     <option value="Avren_Ch'ng">Avren Ch'ng</option>
@@ -70,7 +70,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>VisionXpert Technical Champion :</label>
-                <select id="vxperttechChamp" name="vxperttechChamp">
+                <select id="vxperttechChamp" name="vxperttechChamp" required>
                     <option value="">Select</option>
                     <option value="Han_Li_Shan">Han Li Shan</option>
                     <option value="Sam_Xian_Qi">Sam Xian Qi</option>
@@ -205,7 +205,7 @@
 
             <div class="form-group-evalxc-compact">
                 <label>Defect/Feature Description :</label>
-                <input type="text" id="defectDescription" name="defectDescription">
+                <input type="text" id="defectDescription" name="defectDescription" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Smallest Defect Size (mm) :</label>
@@ -214,7 +214,7 @@
             
             <div class="form-group-evalxc">
                 <label>Samples Provided :</label>
-                <select id="samplesProvided" name="samplesProvided">
+                <select id="samplesProvided" name="samplesProvided" required>
                     <option value="">Select</option>
                     <option value="good_bad_samples">Client can provide both good and bad samples</option>
                     <option value="defects_labeled">Defects are clearly labeled on the samples</option>
@@ -263,7 +263,7 @@
                 <div class="requirement-xc">Working Distance (mm) :</div>
                 <div class="requirement-subinfo">Any space/height constraint?</div>
             </div>
-                <input type="text" name="workingDistance" id="workingDistance">
+                <input type="text" name="workingDistance" id="workingDistance" required>
             </div>
             <div class="form-group-evalxc">
                 <div class="requirement-wrapperxs">
@@ -275,7 +275,7 @@
 
             <div class="form-group-evalxc">
                 <label>Object Movement :</label>
-                <select id="objectMovement" name="objectMovement">
+                <select id="objectMovement" name="objectMovement" required>
                     <option value="">Select</option>
                     <option value="static_jig">Static Jig or Station</option>
                     <option value="moving_conveyor">Moving Conveyor</option>
@@ -413,15 +413,15 @@
             <div class="subsection-title">Competitors (if applicable)</div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor(s) :</label>
-                <input type="text" id="competitor_xs" name="competitor_xs" required>
+                <input type="text" id="competitor_xs" name="competitor_xs">
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor camera model(s) :</label>
-                <input type="text" id="competitormodel_xs" name="competitormodel_xs" required>
+                <input type="text" id="competitormodel_xs" name="competitormodel_xs">
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor(s) offering price :</label>
-                <input type="text" id="competitorprice_xs" name="competitorprice_xs" required>
+                <input type="text" id="competitorprice_xs" name="competitorprice_xs">
             </div>
         </div>
 
@@ -796,5 +796,6 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
 
 
