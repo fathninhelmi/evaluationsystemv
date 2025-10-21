@@ -43,7 +43,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Existing customer? :</label>
-                <select id="existcust" name="existcust">
+                <select id="existcust" name="existcust" required>
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -60,7 +60,7 @@
             <div class="section-title">2. RESOURCES</div>
             <div class="form-group-evalxc-compact">
                 <label>VisionXpert BD Sales Champion :</label>
-                <select id="vxpertsalesChamp" name="vxpertsalesChamp">
+                <select id="vxpertsalesChamp" name="vxpertsalesChamp" required>
                     <option value="">Select</option>
                     <option value="George_Koay">George Koay</option>
                     <option value="Avren_Ch'ng">Avren Ch'ng</option>
@@ -70,7 +70,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>VisionXpert Technical Champion :</label>
-                <select id="vxperttechChamp" name="vxperttechChamp">
+                <select id="vxperttechChamp" name="vxperttechChamp" required>
                     <option value="">Select</option>
                     <option value="Han_Li_Shan">Han Li Shan</option>
                     <option value="Sam_Xian_Qi">Sam Xian Qi</option>
@@ -121,10 +121,10 @@
                 <label>Minimum Code Size :</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 14px; font-weight: 500; color: black;">L (mm)</span>
-                    <input type="float" id="codeMinSize_l" name="codeMinSize_l" style="width: 100px; padding: 8px;" step="0.01" min="0">
+                    <input type="float" id="codeMinSize_l" name="codeMinSize_l" style="width: 100px; padding: 8px;" step="0.01" min="0" required>
                     
                     <span style="font-size: 14px; font-weight: 500; color: black;">W (mm)</span>
-                    <input type="float" id="codeMinSize_w" name="codeMinSize_w" style="width: 100px; padding: 8px;" step="0.01" min="0">
+                    <input type="float" id="codeMinSize_w" name="codeMinSize_w" style="width: 100px; padding: 8px;" step="0.01" min="0" required>
                 </div>
             </div>
             
@@ -190,7 +190,7 @@
                     <div class="requirement-xc">Required Reading Speed :</div>
                     <div class="requirement-subinfo">Units Per Hour (UPH)</div>
                 </div>
-                <input type="text" id="readingSpeed" name="readingSpeed">
+                <input type="text" id="readingSpeed" name="readingSpeed" required>
             </div>
 
             <div class="form-group-evalxc">
@@ -203,12 +203,12 @@
 
             <div class="form-group-evalxc" style="grid-column: span 2;">
                 <label>Working Distance (mm) :</label>
-                <input type="text" id="workingDistance" name="workingDistance">
+                <input type="text" id="workingDistance" name="workingDistance" required>
             </div>
 
             <div class="form-group-evalxc">
                 <label>Object Height Consistency :</label>
-                <select id="heightConsistency" name="heightConsistency">
+                <select id="heightConsistency" name="heightConsistency" required>
                     <option value="">Select</option>
                     <option value="consistent">Height are consistent</option>
                     <option value="vary">Height varies</option>
@@ -222,7 +222,7 @@
 
             <div class="form-group-evalxc">
                 <label>Code Movement Type :</label>
-                <select id="xs_objectMovement" name="xs_objectMovement">
+                <select id="xs_objectMovement" name="xs_objectMovement" required>
                     <option value="">Select</option>
                     <option value="static">Static</option>
                     <option value="moving">Moving</option>
@@ -320,15 +320,15 @@
             <div class="subsection-title">Competitors (if applicable)</div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor(s) :</label>
-                <input type="text" id="competitor_xs" name="competitor_xs" required>
+                <input type="text" id="competitor_xs" name="competitor_xs" >
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor camera model(s) :</label>
-                <input type="text" id="competitormodel_xs" name="competitormodel_xs" required>
+                <input type="text" id="competitormodel_xs" name="competitormodel_xs" >
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor(s) offering price :</label>
-                <input type="text" id="competitorprice_xs" name="competitorprice_xs" required>
+                <input type="text" id="competitorprice_xs" name="competitorprice_xs" >
             </div>
         </div>
 
@@ -700,6 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
