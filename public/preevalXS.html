@@ -136,7 +136,7 @@
                 <label><input type="checkbox" name="printMaterial" value="paper"> Paper</label>
                 <label><input type="checkbox" name="printMaterial" value="metal"> Metal</label>
                 <label><input type="checkbox" name="printMaterial" value="plastic"> Plastic</label>
-                <label><input type="checkbox" name="printMaterial" value="others"> Others</label>
+                <label><input type="checkbox" name="printMaterial" value="other"> Others</label>
             </div>
             </div>
 
@@ -676,21 +676,22 @@ function toggleSpecifyBox(checkboxName, specifyInputId) {
   const specifyInput = document.getElementById(specifyInputId);
 
   function updateVisibility() {
-    const othersChecked = Array.from(checkboxes).some(cb => cb.value === 'other' || cb.value === 'others' ? cb.checked : false);
+    const othersChecked = Array.from(checkboxes).some(cb => cb.value === 'others' ? cb.checked : false);
     specifyInput.closest('.form-group-evalxc').style.display = othersChecked ? 'block' : 'none';
   }
 
   checkboxes.forEach(cb => cb.addEventListener('change', updateVisibility));
-  updateVisibility(); // initialize on page load
+  updateVisibility();
 }
 
 // Apply to all relevant fields
 document.addEventListener('DOMContentLoaded', () => {
   toggleSpecifyBox('codeType', 'codeTypeOtherDetails');
-  toggleSpecifyBox('printMaterial', 'codeTypeOtherDetails'); // not needed, only codeType has this
+  toggleSpecifyBox('printMaterial', 'codeTypeOtherDetails'); 
   toggleSpecifyBox('codeDataUsage', 'dataUsageOtherDetails');
   toggleSpecifyBox('protocolsRequired', 'protocolOtherDetails');
 });
+
 </script>
 
 <footer class="footer">
@@ -699,4 +700,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
