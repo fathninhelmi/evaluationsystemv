@@ -102,21 +102,21 @@
         <div class="form-section two-column">
             <div class="section-title" style="grid-column: span 2;">3. OBJECT & INSPECTION DETAILS</div>
             <div class="subsection-title" style="grid-column: span 2;">Object Dimensions & Shape</div>
-            <div class="form-group-evalxc-compact" style="grid-column: span 2;">
+            <div class="form-group-evalxc-compact"style="grid-column: span 2;">
                 <label>Object Name :</label>
                 <input type="text" id="objname" name="objname" required>
             </div>
-            <div class="form-group-evalxc-compact" style="grid-column: span 2;">
+            <div class="form-group-evalxc-compact">
                 <label>Size :</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 14px; font-weight: 500; color: black;">L (mm)</span>
-                    <input type="number" id="objectSize_l" name="objectSize_l" style="width: 100px; padding: 8px;" step="0.01" min="0">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="font-weight: 500;">L (mm)</span>
+                    <input type="number" id="objectSize_l" name="objectSize_l" style="width: 80px;" step="0.01" min="0">
                     
-                    <span style="font-size: 14px; font-weight: 500; color: black;">W (mm)</span>
-                    <input type="number" id="objectSize_w" name="objectSize_w" style="width: 100px; padding: 8px;" step="0.01" min="0">
+                    <span style="font-weight: 500;">W (mm)</span>
+                    <input type="number" id="objectSize_w" name="objectSize_w" style="width: 80px;" step="0.01" min="0">
                     
-                    <span style="font-size: 14px; font-weight: 500; color: black;">H (mm)</span>
-                    <input type="number" id="objectSize_h" name="objectSize_h" style="width: 100px; padding: 8px;" step="0.01" min="0">
+                    <span style="font-weight: 500;">H (mm)</span>
+                    <input type="number" id="objectSize_h" name="objectSize_h" style="width: 80px;" step="0.01" min="0">
                 </div>
             </div>
             <div class="checkbox-grid-xc" style="grid-column: span 2;">
@@ -127,7 +127,7 @@
                     <label><input type="checkbox" name="objectShape" value="complex_geometry"> Complex Geometry</label>
                     <label><input type="checkbox" name="objectShape" value="other" id="objectShapeOther"> Others</label>
                 </div>
-                <input type="text" name="objectShapeOtherText" id="objectShapeOtherText" placeholder="Please specify..." style="display: none; margin-top: 8px; width: 100%;">
+                <input type="text" name="objectShapeOtherText" id="objectShapeOtherText">
                 
                 <div class="requirement-xc">Surface of Inspection :</div>
                 <div class="checkbox-options-xc">
@@ -136,7 +136,7 @@
                     <label><input type="checkbox" name="surfaceinspect" value="360_degree"> 360 degree</label>
                     <label><input type="checkbox" name="surfaceinspect" value="other" id="surfaceInspectOther"> Others</label>
                 </div>
-                <input type="text" name="surfaceInspectOtherText" id="surfaceInspectOtherText" placeholder="Please specify..." style="display: none; margin-top: 8px; width: 100%;">
+                <input type="text" name="surfaceInspectOtherText" id="surfaceInspectOtherText">
                 
                 <div class="requirement-xc">Material :</div>
                 <div class="checkbox-options-xc">
@@ -145,7 +145,7 @@
                     <label><input type="checkbox" name="objectMaterial" value="paper"> Paper</label>
                     <label><input type="checkbox" name="objectMaterial" value="other" id="objectMaterialOther"> Others</label>
                 </div>
-                <input type="text" name="objectMaterialOtherText" id="objectMaterialOtherText" placeholder="Please specify..." style="display: none; margin-top: 8px; width: 100%;">
+                <input type="text" name="objectMaterialOtherText" id="objectMaterialOtherText">
                 
                 <div class="requirement-xc">Surface Type :</div>
                 <div class="checkbox-options-xc">
@@ -154,7 +154,7 @@
                     <label><input type="checkbox" name="surfaceType" value="transparent"> Transparent</label>
                     <label><input type="checkbox" name="surfaceType" value="other" id="surfaceTypeOther"> Others</label>
                 </div>
-                <input type="text" name="surfaceTypeOtherText" id="surfaceTypeOtherText" placeholder="Please specify..." style="display: none; margin-top: 8px; width: 100%;">
+                <input type="text" name="surfaceTypeOtherText" id="surfaceTypeOtherText" >
             </div>
 
             <div class="form-group-evalxc">
@@ -236,7 +236,7 @@
             </div>
         </div>
 
-                <!-- Section 4 -->
+        <!-- Section 4 -->
         <div class="form-section two-column">
             <div class="section-title" style="grid-column: span 2;">4. TECHNICAL ENVIRONMENT</div>
             <div class="form-group-evalxc">
@@ -358,7 +358,7 @@
                 </select>
             </div>
 
-            <div class="form-group-evalxc">
+            <div class="form-group-evalxc" >
                 <label class="sub-ques">If object color is similar to the background, can the background be changed to improve contrast?:</label>
                 <select id="backgroundChangeable" name="backgroundChangeable">
                     <option value="">Select</option>
@@ -389,6 +389,20 @@
             <div class="form-group-evalxc">
                 <label>Target Deployment Date :</label>
                 <input type="date" id="targetDeploymentDate" name="targetDeploymentDate" required>
+            </div>
+
+            <div class="subsection-title">Competitors (if applicable)</div>
+            <div class="form-group-evalxc-compact">
+                <label>Competitor(s) :</label>
+                <input type="text" id="competitor_xs" name="competitor_xs" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Competitor camera model(s) :</label>
+                <input type="text" id="competitormodel_xs" name="competitormodel_xs" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Competitor(s) offering price :</label>
+                <input type="text" id="competitorprice_xs" name="competitorprice_xs" required>
             </div>
         </div>
 
@@ -757,6 +771,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
+
 
 
 
