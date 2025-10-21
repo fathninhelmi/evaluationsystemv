@@ -33,8 +33,12 @@
                 <input type="text" id="customerCompany" name="customerCompany" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Customer Tech Champion :</label>
-                <input type="text" id="custTechChamp" name="custTechChamp" required>
+                <label>Customer PIC name :</label>
+                <input type="text" id="custPICname" name="custPICname" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Customer PIC position :</label>
+                <input type="text" id="custPICposition" name="custPICposition" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Existing customer? :</label>
@@ -48,47 +52,49 @@
                 <label>Evaluation Date :</label>
                 <input type="date" id="evalDate" name="evalDate" required>
             </div>
-            <div class="form-group-evalxc-compact">
-                <label>Competitor(s) if any :</label>
-                <input type="text" id="competitor" name="competitor">
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Competitor machine model :</label>
-                <input type="text" id="compModel" name="compModel">
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Venue :</label>
-                <select id="venue" name="venue">
-                    <option value="">Select</option>
-                    <option value="customer_site">Customer site</option>
-                    <option value="in_house">In House</option>
-                    <option value="si_office">SI office</option>
-                </select>
-            </div>
         </div>
 
         <!-- Section 2 -->
         <div class="form-section two-column">
             <div class="section-title">2. RESOURCES</div>
             <div class="form-group-evalxc-compact">
-                <label>SI Sales Champion :</label>
-                <input type="text" id="sisalesChamp" name="sisalesChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>SI Technical Champion :</label>
-                <input type="text" id="sitechChamp" name="sitechChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>VTech BD Sales Champion :</label>
-                <input type="text" id="vtechsalesChamp" name="vtechsalesChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
                 <label>VisionXpert BD Sales Champion :</label>
-                <input type="text" id="vxpertsalesChamp" name="vxpertsalesChamp" required>
+                <select id="vxpertsalesChamp" name="vxpertsalesChamp">
+                    <option value="">Select</option>
+                    <option value="George_Koay">George Koay</option>
+                    <option value="Avren_Ch'ng">Avren Ch'ng</option>
+                    <option value="Ooi_Jia_Yik">Ooi Jia Yik</option>
+                    <option value="Lau_Kah_Keen">Lau Kah Keen</option>
+                </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>ViTrox Technical Champion :</label>
-                <input type="text" id="vitroxtechChamp" name="vitroxtechChamp" required>
+                <label>VisionXpert Technical Champion :</label>
+                <select id="vxperttechChamp" name="vxperttechChamp">
+                    <option value="">Select</option>
+                    <option value="Han_Li_Shan">Han Li Shan</option>
+                    <option value="Sam_Xian_Qi">Sam Xian Qi</option>
+                </select>
+            </div>
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <div class="requirement-wrapperxs">
+                <div class="requirement-xc">VTech BD Sales Champion :</div>
+                <div class="requirement-subinfo">if applicable</div>
+            </div>
+                <input type="text" name="vtechsalesChamp" id="vtechsalesChamp">
+            </div>
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <div class="requirement-wrapperxs">
+                <div class="requirement-xc">SI Sales Champion :</div>
+                <div class="requirement-subinfo">if applicable</div>
+            </div>
+                <input type="text" name="sisalesChamp" id="sisalesChamp">
+            </div>
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <div class="requirement-wrapperxs">
+                <div class="requirement-xc">SI Technical Champion :</div>
+                <div class="requirement-subinfo">if applicable</div>
+            </div>
+                <input type="text" name="sitechChamp" id="sitechChamp">
             </div>
         </div>
         
@@ -669,6 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
 
 
 
