@@ -612,9 +612,10 @@ async function saveForm(status = "draft") {
         const collectedData = collectFormData();
         if (status === "complete") {
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalDate', 
-                'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 
-                'vitroxtechChamp', 'targetDeploymentDate'
+                'customerCompany', 'custPICname', 'custPICposition', 'existcust', 'evalDate', 
+                'vxpertsalesChamp', 'vxperttechChamp', 'codeType', 'codeMinSize_l', 'codeMinSize_w',
+                'targetDeploymentDate', 'xs_samplesProvided', 'readingSpeed', 'workingDistance', 'heightConsistency',
+                'xs_objectMovement', 'targetDeploymentDate', 'nextSteps'
             ];
             
             const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
@@ -631,7 +632,6 @@ async function saveForm(status = "draft") {
 
         // Clean up empty fields
         for (const key in saveData) {
-            // Convert empty strings to null for optional fields
             if (saveData[key] === "") {
                 delete saveData[key];
             }
@@ -700,5 +700,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
