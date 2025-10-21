@@ -691,8 +691,9 @@ async function saveForm(status = "draft") {
 
         if (status === "complete") {
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalDate','sisalesChamp', 'sitechChamp', 
-                'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp', 'targetDeploymentDate'
+                'customerCompany', 'custPICname', 'custPICposition', 'existcust', 'evalDate', 
+                'vxpertsalesChamp', 'vxperttechChamp', 'objname', 'defectDescription',
+                'samplesProvided', 'workingDistance', 'objectMovement', 'targetDeploymentDate', 'nextSteps'
             ];
             
             const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
@@ -795,4 +796,5 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
 
