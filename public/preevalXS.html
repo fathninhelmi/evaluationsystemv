@@ -677,7 +677,7 @@ function toggleSpecifyBox(checkboxName, specifyInputId) {
   const specifyInput = document.getElementById(specifyInputId);
 
   function updateVisibility() {
-    const othersChecked = Array.from(checkboxes).some(cb => cb.value === 'others' ? cb.checked : false);
+    const othersChecked = Array.from(checkboxes).some(cb => cb.value === 'other' || cb.value === 'others' ? cb.checked : false);
     specifyInput.closest('.form-group-evalxc').style.display = othersChecked ? 'block' : 'none';
   }
 
@@ -700,4 +700,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
