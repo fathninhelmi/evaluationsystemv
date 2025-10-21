@@ -2301,9 +2301,10 @@ label {
 .checkbox-grid-xc {
   display: grid;
   grid-template-columns: 190px 1fr;
-  row-gap: 0;
+  row-gap: 10px;
   column-gap: 0;
   margin-top: 1rem;
+  align-items: start;
 }
 
 .requirement-xc {
@@ -2367,6 +2368,22 @@ label {
   width: 16px;
   height: 16px;
   margin: 0;
+}
+
+#objectShapeOtherText,
+#surfaceInspectOtherText,
+#objectMaterialOtherText,
+#surfaceTypeOtherText {
+  display: none;
+  padding: 6px 10px;
+  border: 1px solid #0e2952;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #000;
+  font-size: 14px;
+  width: 200px;
+  margin: 0;
+  grid-column: 2;
 }
 
 .height-input-xc {
@@ -3788,3 +3805,4 @@ label {
 .location-preview.active {
   display: block;
 }
+
