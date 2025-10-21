@@ -262,7 +262,7 @@
                     <label><input type="checkbox" name="protocolsRequired" value="rs232">RS232</label>
                     <label><input type="checkbox" name="protocolsRequired" value="modbus_TCP">Modbus TCP</label>
                     <label><input type="checkbox" name="protocolsRequired" value="tcp_ip">TCP/IP</label>
-                    <label><input type="checkbox" name="protocolsRequired" value="other">Others</label>
+                    <label><input type="checkbox" name="protocolsRequired" value="others">Others</label>
                 </div>
             </div>
             <div class="form-group-evalxc">
@@ -686,8 +686,7 @@ function toggleSpecifyBox(checkboxName, specifyInputId) {
 
 // Apply to all relevant fields
 document.addEventListener('DOMContentLoaded', () => {
-  toggleSpecifyBox('codeType', 'codeTypeOtherDetails');
-  toggleSpecifyBox('printMaterial', 'codeTypeOtherDetails'); 
+  toggleSpecifyBox('codeType', 'codeTypeOtherDetails'); 
   toggleSpecifyBox('codeDataUsage', 'dataUsageOtherDetails');
   toggleSpecifyBox('protocolsRequired', 'protocolOtherDetails');
 });
