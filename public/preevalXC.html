@@ -751,33 +751,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-document.getElementById('objectShapeOther').addEventListener('change', function() {
-    document.getElementById('objectShapeOtherGroup').style.display = this.checked ? 'flex' : 'none';
-    if (!this.checked) {
-        document.getElementById('objectShapeOtherText').value = '';
-    }
+// Utility function to toggle "please specify" fields
+function toggleSpecifyBox(checkboxName, specifyInputId) {
+  const checkboxes = document.querySelectorAll(`input[name="${checkboxName}"]`);
+  const specifyInput = document.getElementById(specifyInputId);
+
+  function updateVisibility() {
+    const othersChecked = Array.from(checkboxes).some(cb => cb.value === 'other' || cb.value === 'others' ? cb.checked : false);
+    specifyInput.closest('.form-group-evalxc').style.display = othersChecked ? 'block' : 'none';
+  }
+
+  checkboxes.forEach(cb => cb.addEventListener('change', updateVisibility));
+  updateVisibility(); // initialize on page load
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const checkboxGroups = [
+        { checkboxId: "objectShapeOther", groupId: "objectShapeOtherGroup" },
+        { checkboxId: "surfaceInspectOther", groupId: "surfaceInspectOtherGroup" },
+        { checkboxId: "objectMaterialOther", groupId: "objectMaterialOtherGroup" },
+        { checkboxId: "surfaceTypeOther", groupId: "surfaceTypeOtherGroup" }
+    ];
+
+    checkboxGroups.forEach(({ checkboxId, groupId }) => {
+        const checkbox = document.getElementById(checkboxId);
+        const group = document.getElementById(groupId);
+
+        if (checkbox && group) {
+            checkbox.addEventListener("change", () => {
+                group.style.display = checkbox.checked ? "block" : "none";
+            });
+        }
+    });
 });
 
-document.getElementById('surfaceInspectOther').addEventListener('change', function() {
-    document.getElementById('surfaceInspectOtherGroup').style.display = this.checked ? 'flex' : 'none';
-    if (!this.checked) {
-        document.getElementById('surfaceInspectOtherText').value = '';
-    }
-});
-
-document.getElementById('objectMaterialOther').addEventListener('change', function() {
-    document.getElementById('objectMaterialOtherGroup').style.display = this.checked ? 'flex' : 'none';
-    if (!this.checked) {
-        document.getElementById('objectMaterialOtherText').value = '';
-    }
-});
-
-document.getElementById('surfaceTypeOther').addEventListener('change', function() {
-    document.getElementById('surfaceTypeOtherGroup').style.display = this.checked ? 'flex' : 'none';
-    if (!this.checked) {
-        document.getElementById('surfaceTypeOtherText').value = '';
-    }
-});
 </script>
 
 <footer class="footer">
