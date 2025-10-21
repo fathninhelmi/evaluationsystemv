@@ -109,53 +109,71 @@
             <div class="form-group-evalxc-compact" style="grid-column: span 2;">
                 <label>Size :</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 14px; font-weight: 500; color:black;">L (mm)</span>
+                    <span style="font-size: 14px; font-weight: 500; color: black;">L (mm)</span>
                     <input type="float" id="objectSize_l" name="objectSize_l" style="width: 100px; padding: 8px;" step="0.01" min="0">
                     
-                    <span style="font-size: 14px; font-weight: 500 ; color:black;">W (mm)</span>
+                    <span style="font-size: 14px; font-weight: 500; color: black;">W (mm)</span>
                     <input type="float" id="objectSize_w" name="objectSize_w" style="width: 100px; padding: 8px;" step="0.01" min="0">
                     
-                    <span style="font-size: 14px; font-weight: 500; color:black;">H (mm)</span>
+                    <span style="font-size: 14px; font-weight: 500; color: black;">H (mm)</span>
                     <input type="float" id="objectSize_h" name="objectSize_h" style="width: 100px; padding: 8px;" step="0.01" min="0">
                 </div>
             </div>
-            <div class="checkbox-grid-xc" style="grid-column: span 2;">
-                <div class="requirement-xc">Object Shape Description :</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="objectShape" value="flat"> Flat</label>
-                    <label><input type="checkbox" name="objectShape" value="cylindrical"> Cylindrical</label>
-                    <label><input type="checkbox" name="objectShape" value="complex_geometry"> Complex Geometry</label>
-                    <label><input type="checkbox" name="objectShape" value="other" id="objectShapeOther"> Others</label>
+                <div class="checkbox-grid-xc" style="grid-column: span 2;">
+                    <div class="requirement-xc">Object Shape Description :</div>
+                    <div class="checkbox-options-xc">
+                        <label><input type="checkbox" name="objectShape" value="flat"> Flat</label>
+                        <label><input type="checkbox" name="objectShape" value="cylindrical"> Cylindrical</label>
+                        <label><input type="checkbox" name="objectShape" value="complex_geometry"> Complex Geometry</label>
+                        <label><input type="checkbox" name="objectShape" value="other" id="objectShapeOther"> Others</label>
+                    </div>
                 </div>
-                <input type="text" name="objectShapeOtherText" id="objectShapeOtherText">
+                <div class="form-group-evalxc" id="objectShapeOtherGroup" style="display: none; grid-column: span 2;">
+                    <label class="sub-ques">If select others, please specify :</label>
+                    <input type="text" name="objectShapeOtherText" id="objectShapeOtherText">
+                </div>
                 
-                <div class="requirement-xc">Surface of Inspection :</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="surfaceinspect" value="1_surface"> One surface only</label>
-                    <label><input type="checkbox" name="surfaceinspect" value="6-sided"> 6-sided surface</label>
-                    <label><input type="checkbox" name="surfaceinspect" value="360_degree"> 360 degree</label>
-                    <label><input type="checkbox" name="surfaceinspect" value="other" id="surfaceInspectOther"> Others</label>
+                <div class="checkbox-grid-xc" style="grid-column: span 2;">
+                    <div class="requirement-xc">Surface of Inspection :</div>
+                    <div class="checkbox-options-xc">
+                        <label><input type="checkbox" name="surfaceinspect" value="1_surface"> One surface only</label>
+                        <label><input type="checkbox" name="surfaceinspect" value="6-sided"> 6-sided surface</label>
+                        <label><input type="checkbox" name="surfaceinspect" value="360_degree"> 360 degree</label>
+                        <label><input type="checkbox" name="surfaceinspect" value="other" id="surfaceInspectOther"> Others</label>
+                    </div>
                 </div>
-                <input type="text" name="surfaceInspectOtherText" id="surfaceInspectOtherText">
-                
-                <div class="requirement-xc">Material :</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="objectMaterial" value="metal"> Metal</label>
-                    <label><input type="checkbox" name="objectMaterial" value="plastic"> Plastic</label>
-                    <label><input type="checkbox" name="objectMaterial" value="paper"> Paper</label>
-                    <label><input type="checkbox" name="objectMaterial" value="other" id="objectMaterialOther"> Others</label>
+                <div class="form-group-evalxc" id="surfaceInspectOtherGroup" style="display: none; grid-column: span 2;">
+                    <label class="sub-ques">If select others, please specify :</label>
+                    <input type="text" name="surfaceInspectOtherText" id="surfaceInspectOtherText">
                 </div>
-                <input type="text" name="objectMaterialOtherText" id="objectMaterialOtherText">
-                
-                <div class="requirement-xc">Surface Type :</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="surfaceType" value="glossy"> Glossy</label>
-                    <label><input type="checkbox" name="surfaceType" value="matte"> Matte</label>
-                    <label><input type="checkbox" name="surfaceType" value="transparent"> Transparent</label>
-                    <label><input type="checkbox" name="surfaceType" value="other" id="surfaceTypeOther"> Others</label>
+
+                <div class="checkbox-grid-xc" style="grid-column: span 2;">
+                    <div class="requirement-xc">Material :</div>
+                    <div class="checkbox-options-xc">
+                        <label><input type="checkbox" name="objectMaterial" value="metal"> Metal</label>
+                        <label><input type="checkbox" name="objectMaterial" value="plastic"> Plastic</label>
+                        <label><input type="checkbox" name="objectMaterial" value="paper"> Paper</label>
+                        <label><input type="checkbox" name="objectMaterial" value="other" id="objectMaterialOther"> Others</label>
+                    </div>
                 </div>
-                <input type="text" name="surfaceTypeOtherText" id="surfaceTypeOtherText" >
-            </div>
+                <div class="form-group-evalxc" id="objectMaterialOtherGroup" style="display: none; grid-column: span 2;">
+                    <label class="sub-ques">If select others, please specify :</label>
+                    <input type="text" name="objectMaterialOtherText" id="objectMaterialOtherText">
+                </div>
+
+                <div class="checkbox-grid-xc" style="grid-column: span 2;">
+                    <div class="requirement-xc">Surface Type :</div>
+                    <div class="checkbox-options-xc">
+                        <label><input type="checkbox" name="surfaceType" value="glossy"> Glossy</label>
+                        <label><input type="checkbox" name="surfaceType" value="matte"> Matte</label>
+                        <label><input type="checkbox" name="surfaceType" value="transparent"> Transparent</label>
+                        <label><input type="checkbox" name="surfaceType" value="other" id="surfaceTypeOther"> Others</label>
+                    </div>
+                </div>
+                <div class="form-group-evalxc" id="surfaceTypeOtherGroup" style="display: none; grid-column: span 2;">
+                    <label class="sub-ques">If select others, please specify :</label>
+                    <input type="text" name="surfaceTypeOtherText" id="surfaceTypeOtherText">
+                </div>
 
             <div class="form-group-evalxc">
                 <label>Height Consistency :</label>
@@ -733,34 +751,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('objectShapeOther').addEventListener('change', function() {
-        document.getElementById('objectShapeOtherText').style.display = this.checked ? 'block' : 'none';
-        if (!this.checked) {
-            document.getElementById('objectShapeOtherText').value = '';
-        }
-    });
+document.getElementById('objectShapeOther').addEventListener('change', function() {
+    document.getElementById('objectShapeOtherGroup').style.display = this.checked ? 'flex' : 'none';
+    if (!this.checked) {
+        document.getElementById('objectShapeOtherText').value = '';
+    }
+});
 
-    document.getElementById('surfaceInspectOther').addEventListener('change', function() {
-        document.getElementById('surfaceInspectOtherText').style.display = this.checked ? 'block' : 'none';
-        if (!this.checked) {
-            document.getElementById('surfaceInspectOtherText').value = '';
-        }
-    });
+document.getElementById('surfaceInspectOther').addEventListener('change', function() {
+    document.getElementById('surfaceInspectOtherGroup').style.display = this.checked ? 'flex' : 'none';
+    if (!this.checked) {
+        document.getElementById('surfaceInspectOtherText').value = '';
+    }
+});
 
-    document.getElementById('objectMaterialOther').addEventListener('change', function() {
-        document.getElementById('objectMaterialOtherText').style.display = this.checked ? 'block' : 'none';
-        if (!this.checked) {
-            document.getElementById('objectMaterialOtherText').value = '';
-        }
-    });
+document.getElementById('objectMaterialOther').addEventListener('change', function() {
+    document.getElementById('objectMaterialOtherGroup').style.display = this.checked ? 'flex' : 'none';
+    if (!this.checked) {
+        document.getElementById('objectMaterialOtherText').value = '';
+    }
+});
 
-    document.getElementById('surfaceTypeOther').addEventListener('change', function() {
-        document.getElementById('surfaceTypeOtherText').style.display = this.checked ? 'block' : 'none';
-        if (!this.checked) {
-            document.getElementById('surfaceTypeOtherText').value = '';
-        }
-    });
+document.getElementById('surfaceTypeOther').addEventListener('change', function() {
+    document.getElementById('surfaceTypeOtherGroup').style.display = this.checked ? 'flex' : 'none';
+    if (!this.checked) {
+        document.getElementById('surfaceTypeOtherText').value = '';
+    }
 });
 </script>
 
@@ -771,18 +787,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
