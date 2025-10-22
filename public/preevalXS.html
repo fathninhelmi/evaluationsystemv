@@ -404,18 +404,21 @@ async function initForm() {
 async function loadExistingForm() {
     try {
         document.getElementById("loadingIndicator").style.display = "block";
+        
         try {
             referenceDocData = await databases.getDocument(databaseId, collectionId, eventId);
             console.log("Loaded reference data from main collection:", referenceDocData);
         } catch (err) {
             console.log("Reference document not found in main collection:", err);
         }
+        
         try {
             formData = await databases.getDocument(databaseId, preEvalCollectionId, eventId);
             console.log("Loaded pre-eval form data:", formData);
         } catch (err) {
             console.log("Pre-eval form not found, will create new one:", err);
         }
+        
         populateForm(formData, referenceDocData);
         currentStatus = (formData && formData.status) || "draft";
         
@@ -432,6 +435,7 @@ async function loadExistingForm() {
 
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
+    
     const customerCompanyElement = document.getElementById('customerCompany');
     if (customerCompanyElement) {
         if (referenceData && referenceData.customerCompany) {
@@ -443,12 +447,16 @@ function populateForm(preEvalData, referenceData) {
     }
     
     const textFields = [
-        'custTechChamp', 'existcust', 'evalDate', 'competitor', 'compModel', 'venue',
-        'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
-        'codeTypeOtherDetails', 'codeMinSize', 'externalLightingNeeded', 'currentBrandModel', 
+        'custPICname', 'custPICposition', 'custTechChamp', 'existcust', 'evalDate', 
+        'competitor', 'compModel', 'venue', 'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 
+        'vxpertsalesChamp', 'vxperttechChamp', 'vitroxtechChamp',
+        'codeTypeOtherDetails', 'codeMinSize_l', 'codeMinSize_w', 'codeMinSize', 
+        'externalLightingNeeded', 'xs_samplesProvided', 'currentBrandModel', 
         'readingSpeed', 'codesPerItem', 'workingDistance', 'heightConsistency', 'heightVariation', 
-        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 'xs_samplesProvided',
-        'protocolOtherDetails', 'controlSystem', 'budgetRange', 'targetDeploymentDate', 'notesActionItems'
+        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 
+        'protocolOtherDetails', 'controlSystem', 'triggerRequired', 'triggerMethod',
+        'budgetRange', 'targetDeploymentDate', 'competitor_xs', 'competitormodel_xs', 
+        'competitorprice_xs', 'notesActionItems'
     ];
 
     textFields.forEach(fieldId => {
@@ -461,6 +469,7 @@ function populateForm(preEvalData, referenceData) {
             }
         }
     });
+
     const checkboxStringFields = [
         'codeType', 'printMaterial', 'surfaceConditions'
     ];
@@ -534,12 +543,16 @@ function updateFormDisplay() {
 function collectFormData() {
     const data = {};
     const textFields = [
-        'customerCompany', 'custTechChamp', 'existcust', 'evalDate', 'competitor', 'compModel', 'venue',
-        'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
-        'codeTypeOtherDetails', 'codeMinSize', 'externalLightingNeeded', 'currentBrandModel', 
+        'customerCompany', 'custPICname', 'custPICposition', 'custTechChamp', 'existcust', 'evalDate', 
+        'competitor', 'compModel', 'venue', 'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 
+        'vxpertsalesChamp', 'vxperttechChamp', 'vitroxtechChamp',
+        'codeTypeOtherDetails', 'codeMinSize_l', 'codeMinSize_w', 'codeMinSize', 
+        'externalLightingNeeded', 'xs_samplesProvided', 'currentBrandModel', 
         'readingSpeed', 'codesPerItem', 'workingDistance', 'heightConsistency', 'heightVariation', 
-        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 'xs_samplesProvided',
-        'protocolOtherDetails', 'controlSystem', 'budgetRange', 'targetDeploymentDate', 'notesActionItems'
+        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 
+        'protocolOtherDetails', 'controlSystem', 'triggerRequired', 'triggerMethod',
+        'budgetRange', 'targetDeploymentDate', 'competitor_xs', 'competitormodel_xs', 
+        'competitorprice_xs', 'notesActionItems'
     ];
     
     textFields.forEach(fieldId => {
@@ -593,8 +606,19 @@ async function saveForm(status = "draft") {
                 'xs_objectMovement', 'targetDeploymentDate', 'nextSteps'
             ];
             
-            const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
+            const missingFields = requiredFields.filter(field => {
+                const value = collectedData[field];
+                
+                // Check for missing or empty values based on type
+                if (value === undefined || value === null) return true;
+                if (typeof value === 'string' && value.trim() === '') return true;
+                if (Array.isArray(value) && value.length === 0) return true;
+                
+                return false;
+            });
+            
             if (missingFields.length > 0) {
+                console.log("Missing fields:", missingFields);
                 alert("Please fill in all required fields before submitting.");
                 return;
             }
@@ -604,8 +628,14 @@ async function saveForm(status = "draft") {
             ...collectedData,
             status: status
         };
+
+        // Clean up empty fields
         for (const key in saveData) {
-            if (saveData[key] === "") {
+            const value = saveData[key];
+            if (value === "" || 
+                value === null || 
+                value === undefined ||
+                (Array.isArray(value) && value.length === 0)) {
                 delete saveData[key];
             }
         }
@@ -672,9 +702,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
-
-
-
-
-
