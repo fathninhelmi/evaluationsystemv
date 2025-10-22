@@ -25,25 +25,24 @@
     </div>
     
     <form id="preEvalForm" style="display: none;">
-
         <!-- Section 1 -->
         <div class="form-section two-column">
             <div class="section-title">1. GENERAL</div>
             <div class="form-group-evalxc-compact">
                 <label>Customer Company Name :</label>
-                <input type="text" id="customerCompany" name="customerCompany" required>
+                <input type="text" id="customerCompany" name="customerCompany">
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Customer PIC name :</label>
-                <input type="text" id="custPICname" name="custPICname" required>
+                <input type="text" id="custPICname" name="custPICname">
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Customer PIC position :</label>
-                <input type="text" id="custPICposition" name="custPICposition" required>
+                <input type="text" id="custPICposition" name="custPICposition">
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Existing customer? :</label>
-                <select id="existcust" name="existcust" required>
+                <select id="existcust" name="existcust">
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -51,7 +50,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Evaluation Date :</label>
-                <input type="date" id="evalDate" name="evalDate" required>
+                <input type="date" id="evalDate" name="evalDate">
             </div>
         </div>
 
@@ -60,7 +59,7 @@
             <div class="section-title">2. RESOURCES</div>
             <div class="form-group-evalxc-compact">
                 <label>VisionXpert BD Sales Champion :</label>
-                <select id="vxpertsalesChamp" name="vxpertsalesChamp" required>
+                <select id="vxpertsalesChamp" name="vxpertsalesChamp">
                     <option value="">Select</option>
                     <option value="George_Koay">George Koay</option>
                     <option value="Avren_Ch'ng">Avren Ch'ng</option>
@@ -70,7 +69,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>VisionXpert Technical Champion :</label>
-                <select id="vxperttechChamp" name="vxperttechChamp" required>
+                <select id="vxperttechChamp" name="vxperttechChamp">
                     <option value="">Select</option>
                     <option value="Han_Li_Shan">Han Li Shan</option>
                     <option value="Sam_Xian_Qi">Sam Xian Qi</option>
@@ -105,19 +104,19 @@
             <div class="subsection-title" style="grid-column: span 2;">Object Dimensions & Shape</div>
             <div class="form-group-evalxc-compact"style="grid-column: span 2;">
                 <label>Object Name :</label>
-                <input type="text" id="objname" name="objname" required>
+                <input type="text" id="objname" name="objname">
             </div>
             <div class="form-group-evalxc-compact" style="grid-column: span 2;">
                 <label>Size :</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 14px; font-weight: 500; color: black;">L (mm)</span>
-                    <input type="float" id="objectSize_l" name="objectSize_l" style="width: 100px; padding: 8px;" step="0.01" min="0">
+                    <input type="number" id="objectSize_l" name="objectSize_l" style="width: 100px; padding: 8px;" step="0.01" min="0">
                     
                     <span style="font-size: 14px; font-weight: 500; color: black;">W (mm)</span>
-                    <input type="float" id="objectSize_w" name="objectSize_w" style="width: 100px; padding: 8px;" step="0.01" min="0">
+                    <input type="number" id="objectSize_w" name="objectSize_w" style="width: 100px; padding: 8px;" step="0.01" min="0">
                     
                     <span style="font-size: 14px; font-weight: 500; color: black;">H (mm)</span>
-                    <input type="float" id="objectSize_h" name="objectSize_h" style="width: 100px; padding: 8px;" step="0.01" min="0">
+                    <input type="number" id="objectSize_h" name="objectSize_h" style="width: 100px; padding: 8px;" step="0.01" min="0">
                 </div>
             </div>
                 <div class="checkbox-grid-xc" style="grid-column: span 2;">
@@ -205,7 +204,7 @@
 
             <div class="form-group-evalxc-compact">
                 <label>Defect/Feature Description :</label>
-                <input type="text" id="defectDescription" name="defectDescription" required>
+                <input type="text" id="defectDescription" name="defectDescription">
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Smallest Defect Size (mm) :</label>
@@ -214,7 +213,7 @@
             
             <div class="form-group-evalxc">
                 <label>Samples Provided :</label>
-                <select id="samplesProvided" name="samplesProvided" required>
+                <select id="samplesProvided" name="samplesProvided">
                     <option value="">Select</option>
                     <option value="good_bad_samples">Client can provide both good and bad samples</option>
                     <option value="defects_labeled">Defects are clearly labeled on the samples</option>
@@ -263,7 +262,7 @@
                 <div class="requirement-xc">Working Distance (mm) :</div>
                 <div class="requirement-subinfo">Any space/height constraint?</div>
             </div>
-                <input type="text" name="workingDistance" id="workingDistance" required>
+                <input type="text" name="workingDistance" id="workingDistance">
             </div>
             <div class="form-group-evalxc">
                 <div class="requirement-wrapperxs">
@@ -275,7 +274,7 @@
 
             <div class="form-group-evalxc">
                 <label>Object Movement :</label>
-                <select id="objectMovement" name="objectMovement" required>
+                <select id="objectMovement" name="objectMovement">
                     <option value="">Select</option>
                     <option value="static_jig">Static Jig or Station</option>
                     <option value="moving_conveyor">Moving Conveyor</option>
@@ -335,8 +334,8 @@
                 <label>Will this be inline system (part of conveyor) or standalone station? :</label>
                 <select id="inline_standalone" name="inline_standalone">
                     <option value="">Select</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
+                    <option value="inline">Inline System</option>
+                    <option value="standalone">Standalone Station</option>
                 </select>
             </div>
 
@@ -407,7 +406,7 @@
             <div class="subsection-title">Project Timeline</div>
             <div class="form-group-evalxc">
                 <label>Target Deployment Date :</label>
-                <input type="date" id="targetDeploymentDate" name="targetDeploymentDate" required>
+                <input type="date" id="targetDeploymentDate" name="targetDeploymentDate">
             </div>
 
             <div class="subsection-title">Competitors (if applicable)</div>
@@ -537,58 +536,37 @@ function populateForm(preEvalData, referenceData) {
             customerCompanyElement.value = data.customerCompany;
         }
     }
-    
-    const textFields = [
-        'custTechChamp', 'competitor', 'compModel', 
-        'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
-        'objectSize', 'heightVariation', 'defectDescription', 'smallestDefectSize', 'automatedSystemDetails', 
-        'currentChallenges', 'requiredThroughput', 'physicalSetup', 'workingDistance', 'fieldOfView', 
-        'conveyorSpeed', 'orientationMovement', 'currentLightingType', 'budgetRange', 'notesActionItems'
+    const allFields = [
+        'custPICname', 'custPICposition', 'existcust', 'evalDate', 'vxpertsalesChamp', 'vxperttechChamp',
+        'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'objname', 'objectSize_l', 'objectSize_w', 'objectSize_h',
+        'objectShapeOtherText', 'surfaceInspectOtherText', 'objectMaterialOtherText', 'surfaceTypeOtherText',
+        'heightConsistency', 'heightVariation', 'defectDescription', 'smallestDefectSize', 'samplesProvided',
+        'currentInspectionMethod', 'automatedSystemDetails', 'currentChallenges', 'requiredThroughput',
+        'workingDistance', 'fieldOfView', 'objectMovement', 'conveyorSpeed', 'objectOrientation',
+        'orientationMovement', 'camera_integrate', 'communication_PLCMES', 'inline_standalone',
+        'currentLightingType', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable',
+        'budgetRange', 'targetDeploymentDate', 'competitor_xs', 'competitormodel_xs', 'competitorprice_xs',
+        'notesActionItems'
     ];
 
-    textFields.forEach(fieldId => {
+    allFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element && data[fieldId]) {
             if (element.type === "date") {
-                element.value = data[fieldId].split("T")[0]; 
+                element.value = new Date(data[fieldId]).toISOString().split("T")[0];
             } else {
                 element.value = data[fieldId];
             }
         }
     });
-
-    const selectFields = [
-        'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
-        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable', 'heightConsistency'
-    ];
-
-    selectFields.forEach(fieldId => {
-        const element = document.getElementById(fieldId);
-        if (element && data[fieldId]) {
-            element.value = data[fieldId];
-        }
-    });
-
-    const dateFields = ['evalDate', 'targetDeploymentDate'];
-    dateFields.forEach(fieldId => {
-        const element = document.getElementById(fieldId);
-        if (element && data[fieldId]) {
-            element.value = new Date(data[fieldId]).toISOString().split("T")[0];
-        }
-    });
-
-    const multiChoiceFields = [
-        'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
+    const checkboxArrayFields = [
+        'objectShape', 'surfaceinspect', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
         'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
     ];
 
-    multiChoiceFields.forEach(fieldName => {
-        if (data[fieldName]) {
-            const values = Array.isArray(data[fieldName])
-                ? data[fieldName]
-                : data[fieldName].split(',').map(v => v.trim());
-            
-            values.forEach(value => {
+    checkboxArrayFields.forEach(fieldName => {
+        if (data[fieldName] && Array.isArray(data[fieldName])) {
+            data[fieldName].forEach(value => {
                 const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
                 if (checkbox) checkbox.checked = true;
             });
@@ -620,7 +598,7 @@ function updateFormDisplay() {
     const saveProgressBtn = document.getElementById("saveProgressBtn");
     
     statusBadge.textContent = currentStatus;
-    statusBadge.className = `status-badge ${currentStatus.replace(/\\s+/g, '-').toLowerCase()}`;
+    statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
     
     if (viewMode) {
         formTitle.textContent = `Pre-Evaluation Form (Viewing)`;
@@ -637,49 +615,46 @@ function updateFormDisplay() {
 
 function collectFormData() {
     const data = {};
-    const textFields = [
-        'customerCompany', 'custTechChamp', 'competitor', 'compModel',
-        'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
-        'objectSize', 'heightVariation', 'defectDescription', 'smallestDefectSize', 'automatedSystemDetails', 
-        'currentChallenges', 'requiredThroughput', 'physicalSetup', 'workingDistance', 'fieldOfView', 
-        'conveyorSpeed', 'orientationMovement', 'currentLightingType', 'budgetRange', 'notesActionItems'
+    const allFields = [
+        'customerCompany', 'custPICname', 'custPICposition', 'existcust', 'evalDate', 'vxpertsalesChamp', 'vxperttechChamp',
+        'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'objname', 'objectSize_l', 'objectSize_w', 'objectSize_h',
+        'objectShapeOtherText', 'surfaceInspectOtherText', 'objectMaterialOtherText', 'surfaceTypeOtherText',
+        'heightConsistency', 'heightVariation', 'defectDescription', 'smallestDefectSize', 'samplesProvided',
+        'currentInspectionMethod', 'automatedSystemDetails', 'currentChallenges', 'requiredThroughput',
+        'workingDistance', 'fieldOfView', 'objectMovement', 'conveyorSpeed', 'objectOrientation',
+        'orientationMovement', 'camera_integrate', 'communication_PLCMES', 'inline_standalone',
+        'currentLightingType', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable',
+        'budgetRange', 'targetDeploymentDate', 'competitor_xs', 'competitormodel_xs', 'competitorprice_xs',
+        'notesActionItems'
     ];
     
-    textFields.forEach(fieldId => {
+    allFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
-        if (element) {
+        if (element && element.value) {
             data[fieldId] = element.value.trim();
         }
     });
-
+    ['objectSize_l', 'objectSize_w', 'objectSize_h'].forEach(floatField => {
+        if (data[floatField] && data[floatField] !== '') {
+            data[floatField] = parseFloat(data[floatField]);
+        }
+    });
     ['evalDate', 'targetDeploymentDate'].forEach(dateField => {
-        const element = document.getElementById(dateField);
-        if (element && element.value) {
-            data[dateField] = new Date(element.value + "T00:00:00Z").toISOString();
+        if (data[dateField]) {
+            data[dateField] = new Date(data[dateField] + "T00:00:00Z").toISOString();
         }
     });
-
-    const selectFields = [
-        'existcust', 'venue', 'samplesProvided', 'currentInspectionMethod', 'objectMovement',
-        'objectOrientation', 'externalLightingNeeded', 'backgroundContrast', 'backgroundChangeable', 'heightConsistency'
-    ];
-
-    selectFields.forEach(fieldId => {
-        const element = document.getElementById(fieldId);
-        if (element && element.value) {
-            data[fieldId] = element.value;
-        }
-    });
-    
-    const multiChoiceFields = [
-        'objectShape', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
+    const checkboxArrayFields = [
+        'objectShape', 'surfaceinspect', 'objectMaterial', 'surfaceType', 'primaryInspectionTask', 
         'environmentalFactors', 'lightingIssues', 'budgetStatus', 'nextSteps'
     ];
 
-    multiChoiceFields.forEach(fieldName => {
+    checkboxArrayFields.forEach(fieldName => {
         const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
         const values = Array.from(checkboxes).map(cb => cb.value);
-        if (values.length > 0) data[fieldName] = values;
+        if (values.length > 0) {
+            data[fieldName] = values;
+        }
     });
     
     return data;
@@ -696,9 +671,19 @@ async function saveForm(status = "draft") {
                 'samplesProvided', 'workingDistance', 'objectMovement', 'targetDeploymentDate', 'nextSteps'
             ];
             
-            const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
+            const missingFields = requiredFields.filter(field => {
+                const value = collectedData[field];
+                if (value === undefined || value === null) return true;
+                if (typeof value === 'string' && value.trim() === '') return true;
+                if (Array.isArray(value) && value.length === 0) return true;
+                if (typeof value === 'number' && isNaN(value)) return true;
+                
+                return false;
+            });
+            
             if (missingFields.length > 0) {
-                alert("Please fill in all required fields before submitting.");
+                console.log("Missing required fields:", missingFields);
+                alert("Please fill in all required fields before submitting:\n" + missingFields.join(", "));
                 return;
             }
         }
@@ -707,13 +692,12 @@ async function saveForm(status = "draft") {
             ...collectedData,
             status: status
         };
-        
-        if (Array.isArray(saveData["primaryInspectionTask"])) {
-            saveData["primaryInspectionTask"] = saveData["primaryInspectionTask"].join(", ");
-        }
-
         for (const key in saveData) {
-            if (saveData[key] === "" || saveData[key] === null || saveData[key] === undefined) {
+            const value = saveData[key];
+            if (value === "" || 
+                value === null || 
+                value === undefined ||
+                (Array.isArray(value) && value.length === 0)) {
                 delete saveData[key];
             }
         }
@@ -751,23 +735,6 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         saveForm("complete");
     });
-});
-
-// Utility function to toggle "please specify" fields
-function toggleSpecifyBox(checkboxName, specifyInputId) {
-  const checkboxes = document.querySelectorAll(`input[name="${checkboxName}"]`);
-  const specifyInput = document.getElementById(specifyInputId);
-
-  function updateVisibility() {
-    const othersChecked = Array.from(checkboxes).some(cb => cb.value === 'other' || cb.value === 'others' ? cb.checked : false);
-    specifyInput.closest('.form-group-evalxc').style.display = othersChecked ? 'block' : 'none';
-  }
-
-  checkboxes.forEach(cb => cb.addEventListener('change', updateVisibility));
-  updateVisibility(); // initialize on page load
-}
-
-document.addEventListener("DOMContentLoaded", () => {
     const checkboxGroups = [
         { checkboxId: "objectShapeOther", groupId: "objectShapeOtherGroup" },
         { checkboxId: "surfaceInspectOther", groupId: "surfaceInspectOtherGroup" },
@@ -794,8 +761,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </footer>
 
 </body>
-
 </html>
-
-
-
