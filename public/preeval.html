@@ -60,7 +60,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Venue :</label>
-                <select id="venue" name="venue">
+                <select id="venue" name="venue" required>
                     <option value="">Select</option>
                     <option value="customer_site">Customer site</option>
                     <option value="in_house">In House</option>
@@ -542,24 +542,18 @@ async function initForm() {
 async function loadExistingForm() {
     try {
         document.getElementById("loadingIndicator").style.display = "block";
-        
-        // Load the reference document from main collection (created in createform)
         try {
             referenceDocData = await databases.getDocument(databaseId, collectionId, eventId);
             console.log("Loaded reference data from main collection:", referenceDocData);
         } catch (err) {
             console.log("Reference document not found in main collection:", err);
         }
-        
-        // Load pre-eval form data if it exists
         try {
             formData = await databases.getDocument(databaseId, preEvalCollectionId, eventId);
             console.log("Loaded pre-eval form data:", formData);
         } catch (err) {
             console.log("Pre-eval form not found, will create new one:", err);
         }
-        
-        // Populate form with data from both sources
         populateForm(formData, referenceDocData);
         currentStatus = (formData && formData.status) || "draft";
         
@@ -576,8 +570,6 @@ async function loadExistingForm() {
 
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
-    
-    // Get company name from reference data (main collection) - this comes from createform
     const customerCompanyElement = document.getElementById('customerCompany');
     if (customerCompanyElement) {
         if (referenceData && referenceData.customerCompany) {
@@ -815,7 +807,7 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const requiredFields = [
                 'customerCompany', 'custTechChamp', 'evalDate','scpsalesChamp', 'scptechChamp',
-                'vitroxsalesChamp', 'vitroxtechChamp'
+                'vitroxsalesChamp', 'vitroxtechChamp', 'venue'
             ];
             
             const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
@@ -930,16 +922,15 @@ function showTooltip(event, toolId) {
   tooltip.classList.add('active');
 }
 
-// Event listeners
 document.addEventListener("DOMContentLoaded", async () => {
     await initForm();
     await loadReferenceData();  
     initTooltips();         
 
-    document.getElementById("preEvalForm").addEventListener("submit", e => {
-        e.preventDefault();
-        saveForm("complete");
-    });
+document.getElementById("preEvalForm").addEventListener("submit", e => {
+    e.preventDefault();
+    saveForm("complete");
+});
 });
 
 </script>
@@ -951,3 +942,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 </body>
 
 </html>
+
