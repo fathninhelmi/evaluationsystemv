@@ -159,12 +159,13 @@
                 </select>
             </div>
 
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Sample Provided :</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="xs_samplesProvided" value="client_can_provide"> Client can provide code samples</label>
-                    <label><input type="checkbox" name="xs_samplesProvided" value="client_cannot_provide"> Client cannot provide code samples</label>
-                </div>
+            <div class="form-group-evalxc">
+                <label>Samples Provided :</label>
+                <select id="xs_samplesProvided" name="xs_samplesProvided" required>
+                    <option value="">Select</option>
+                    <option value="client_can_provide"> Client can provide code samples</option>
+                    <option value="client_cannot_provide"> Client cannot provide code samples</option>
+                </select>
             </div>
         </div>
 
@@ -403,24 +404,18 @@ async function initForm() {
 async function loadExistingForm() {
     try {
         document.getElementById("loadingIndicator").style.display = "block";
-        
-        // Load the reference document from main collection (created in createform)
         try {
             referenceDocData = await databases.getDocument(databaseId, collectionId, eventId);
             console.log("Loaded reference data from main collection:", referenceDocData);
         } catch (err) {
             console.log("Reference document not found in main collection:", err);
         }
-        
-        // Load pre-eval form data if it exists
         try {
             formData = await databases.getDocument(databaseId, preEvalCollectionId, eventId);
             console.log("Loaded pre-eval form data:", formData);
         } catch (err) {
             console.log("Pre-eval form not found, will create new one:", err);
         }
-        
-        // Populate form with data from both sources
         populateForm(formData, referenceDocData);
         currentStatus = (formData && formData.status) || "draft";
         
@@ -437,8 +432,6 @@ async function loadExistingForm() {
 
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
-    
-    // Get company name from reference data (main collection) - this comes from createform
     const customerCompanyElement = document.getElementById('customerCompany');
     if (customerCompanyElement) {
         if (referenceData && referenceData.customerCompany) {
@@ -454,7 +447,7 @@ function populateForm(preEvalData, referenceData) {
         'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
         'codeTypeOtherDetails', 'codeMinSize', 'externalLightingNeeded', 'currentBrandModel', 
         'readingSpeed', 'codesPerItem', 'workingDistance', 'heightConsistency', 'heightVariation', 
-        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 
+        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 'xs_samplesProvided',
         'protocolOtherDetails', 'controlSystem', 'budgetRange', 'targetDeploymentDate', 'notesActionItems'
     ];
 
@@ -468,15 +461,12 @@ function populateForm(preEvalData, referenceData) {
             }
         }
     });
-
-    // Handle checkbox STRING fields - stored as comma-separated strings in database
     const checkboxStringFields = [
         'codeType', 'printMaterial', 'surfaceConditions'
     ];
 
     checkboxStringFields.forEach(fieldName => {
         if (data[fieldName]) {
-            // Handle both array format (backward compatibility) and comma-separated string format
             const values = Array.isArray(data[fieldName]) 
                 ? data[fieldName] 
                 : data[fieldName].split(',').map(v => v.trim()).filter(v => v);
@@ -488,7 +478,6 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    // Handle checkbox ARRAY fields - stored as arrays in database
     const checkboxArrayFields = [
         'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
     ];
@@ -501,12 +490,6 @@ function populateForm(preEvalData, referenceData) {
             });
         }
     });
-
-    // Handle boolean checkbox - xs_samplesProvided
-    if (data.xs_samplesProvided === true) {
-        const checkbox = document.querySelector('input[name="xs_samplesProvided"]');
-        if (checkbox) checkbox.checked = true;
-    }
 }
 
 function setViewMode() {
@@ -555,7 +538,7 @@ function collectFormData() {
         'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 'vxpertsalesChamp', 'vitroxtechChamp',
         'codeTypeOtherDetails', 'codeMinSize', 'externalLightingNeeded', 'currentBrandModel', 
         'readingSpeed', 'codesPerItem', 'workingDistance', 'heightConsistency', 'heightVariation', 
-        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 
+        'xs_objectMovement', 'movementSpeed', 'maxFieldOfView', 'dataUsageOtherDetails', 'xs_samplesProvided',
         'protocolOtherDetails', 'controlSystem', 'budgetRange', 'targetDeploymentDate', 'notesActionItems'
     ];
     
@@ -572,7 +555,6 @@ function collectFormData() {
         }
     });
 
-    // Collect checkbox fields as comma-separated STRINGS
     const checkboxStringFields = [
         'codeType', 'printMaterial', 'surfaceConditions'
     ];
@@ -580,13 +562,11 @@ function collectFormData() {
     checkboxStringFields.forEach(fieldName => {
         const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
         const values = Array.from(checkboxes).map(cb => cb.value);
-        // Store as comma-separated string (max 255 chars) - only add if there are values
         if (values.length > 0) {
             data[fieldName] = values.join(', ');
         }
     });
 
-    // Collect checkbox fields as ARRAYS (these are enum arrays in Appwrite)
     const checkboxArrayFields = [
         'xs_currentInspectionMethod', 'codeDataUsage', 'protocolsRequired', 'budgetStatus', 'nextSteps'
     ];
@@ -594,15 +574,10 @@ function collectFormData() {
     checkboxArrayFields.forEach(fieldName => {
         const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
         const values = Array.from(checkboxes).map(cb => cb.value);
-        // Store as array - only add if there are values
         if (values.length > 0) {
             data[fieldName] = values;
         }
     });
-
-    // Handle boolean checkbox - xs_samplesProvided
-    const sampleProvidedCheckbox = document.querySelector('input[name="xs_samplesProvided"]:checked');
-    data['xs_samplesProvided'] = sampleProvidedCheckbox ? true : false;
     
     return data;
 }
@@ -629,8 +604,6 @@ async function saveForm(status = "draft") {
             ...collectedData,
             status: status
         };
-
-        // Clean up empty fields
         for (const key in saveData) {
             if (saveData[key] === "") {
                 delete saveData[key];
@@ -685,7 +658,6 @@ function toggleSpecifyBox(checkboxName, specifyInputId) {
   updateVisibility();
 }
 
-// Apply to all relevant fields
 document.addEventListener('DOMContentLoaded', () => {
   toggleSpecifyBox('codeType', 'codeTypeOtherDetails'); 
   toggleSpecifyBox('codeDataUsage', 'dataUsageOtherDetails');
@@ -700,6 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
