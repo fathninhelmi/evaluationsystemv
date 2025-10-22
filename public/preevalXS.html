@@ -562,6 +562,13 @@ function collectFormData() {
         }
     });
 
+    // Convert float fields to numbers
+    ['codeMinSize_l', 'codeMinSize_w'].forEach(floatField => {
+        if (data[floatField] && data[floatField] !== '') {
+            data[floatField] = parseFloat(data[floatField]);
+        }
+    });
+
     ['evalDate', 'targetDeploymentDate'].forEach(dateField => {
         if (data[dateField]) {
             data[dateField] = new Date(data[dateField] + "T00:00:00Z").toISOString();
@@ -613,6 +620,7 @@ async function saveForm(status = "draft") {
                 if (value === undefined || value === null) return true;
                 if (typeof value === 'string' && value.trim() === '') return true;
                 if (Array.isArray(value) && value.length === 0) return true;
+                if (typeof value === 'number' && isNaN(value)) return true;
                 
                 return false;
             });
