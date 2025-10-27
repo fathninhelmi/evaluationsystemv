@@ -14,44 +14,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
-<style>
-  #map {
-    height: 500px;
-    width: 100%;
-    border-radius: 8px;
-  }
-  .map-status {
-    padding: 10px;
-    font-size: 12px;
-    color: #666;
-    border-top: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .legend {
-    display: flex;
-    gap: 15px;
-    font-size: 11px;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid white;
-  }
-  .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
-    background-color: rgba(52, 152, 219, 0.6) !important;
-  }
-  .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
-    background-color: rgba(52, 152, 219, 0.8) !important;
-  }
-</style>
 </head>
 <body>
 
@@ -224,7 +186,6 @@ function computeOverallStatus(pre, evalStatus, post) {
     return 'draft';
 }
 
-// IMPROVED: Search with company name + location for accurate results
 async function geocodeLocation(companyName, locationString) {
     const cacheKey = `${companyName}|${locationString}`;
     
@@ -232,13 +193,11 @@ async function geocodeLocation(companyName, locationString) {
         console.log(`✅ Cache: ${cacheKey}`);
         return locationCache[cacheKey];
     }
-
-    // Create search queries with company name for better accuracy
     const searchQueries = [
-        `${companyName}, ${locationString}`, // Company + Location (BEST)
-        `${companyName}, ${locationString}, Malaysia`, // Company + Location + Country
-        `${locationString}, Malaysia`, // Just location + country (fallback)
-        locationString // Just location (last resort)
+        `${companyName}, ${locationString}`, 
+        `${companyName}, ${locationString}, Malaysia`, 
+        `${locationString}, Malaysia`, 
+        locationString 
     ].filter(q => q && q.trim() && q !== ', ' && q !== ', Malaysia');
 
     for (const query of searchQueries) {
@@ -334,8 +293,6 @@ async function loadEvaluations() {
         initCharts();
         populateEvaluationList();
         initMap();
-        
-        // Geocode locations in background
         geocodeLocations();
 
     } catch (err) {
@@ -356,8 +313,6 @@ async function geocodeLocations() {
     for (const evaluation of evaluationData) {
         processed++;
         updateStatus.textContent = `Geocoding locations... ${processed}/${total} (${successCount} found)`;
-
-        // Skip if already has location
         if (evaluation.location) {
             successCount++;
             continue;
@@ -584,8 +539,6 @@ function initMap() {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 18
     }).addTo(map);
-
-    // Initialize marker cluster group
     markerClusterGroup = L.markerClusterGroup({
         maxClusterRadius: 50,
         spiderfyOnMaxZoom: true,
@@ -673,8 +626,6 @@ function updateMapMarkers() {
             console.warn(`  ✗ No location: ${e.customerCompany} - ${e.customerLocation}`);
         }
     });
-
-    // Fit bounds to show all markers
     if (displayedCount > 0) {
         const group = markerClusterGroup.getBounds();
         if (group.isValid()) {
@@ -735,4 +686,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
