@@ -8,24 +8,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create Evaluation Form</title>
-<style>
-  .location-hint {
-    font-size: 12px;
-    color: #666;
-    margin-top: 4px;
-  }
-  .location-preview {
-    margin-top: 8px;
-    padding: 8px;
-    background: #f0f0f0;
-    border-radius: 4px;
-    font-size: 12px;
-    display: none;
-  }
-  .location-preview.active {
-    display: block;
-  }
-</style>
 </head>
 <body>
 
@@ -91,7 +73,6 @@ const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 let currentUser = null;
 let geocodeTimeout = null;
 
-// Preview location as user types
 document.getElementById("customerLocation").addEventListener("input", (e) => {
   clearTimeout(geocodeTimeout);
   const preview = document.getElementById("locationPreview");
@@ -310,4 +291,5 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 
 </body>
 </html>
+
 
