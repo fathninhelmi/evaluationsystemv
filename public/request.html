@@ -40,10 +40,8 @@ const preEvalCollectionId = "68c7ced6001bd14d08f4";
 const evalCollectionId    = "68bf9d5600257a20775a";
 const postEvalCollectionId= "68bf9d62002b4f5f7f23";
 const usersCollectionId = "68ba8c240002116fa647";
-
 const requestContainer = document.getElementById('requestContainer');
 
-// Check login session
 async function checkSession() {
     try {
         const user = await account.get();
@@ -65,13 +63,9 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 
 async function loadRequests() {
     try {
-        // Get all requests
         const res = await databases.listDocuments(databaseId, requestListId);
-        
         const allRequests = [];
-        
         for (const doc of res.documents) {
-            // Get the form document to get customerLocation
             let formLocation = '';
             try {
                 const formDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.formId);
@@ -204,7 +198,6 @@ async function declineRequest(id) {
     }
 }
 
-// Initialize
 (async function init() {
     await checkSession();
     await loadRequests();
@@ -216,4 +209,5 @@ async function declineRequest(id) {
 </footer>
 </body>
 </html>
+
 
