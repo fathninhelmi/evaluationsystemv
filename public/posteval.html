@@ -131,29 +131,19 @@ let currentStatus = "draft";
 let competitorRowCount = 1;
 let keywordRowCount = 1;
 
-// Initialize Win/Lose buttons
 function initScoreButtons() {
     document.querySelectorAll('.result-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
             if (this.disabled) return;
-            
-            // Remove active class from all buttons
             document.querySelectorAll('.result-btn').forEach(b => b.classList.remove('active'));
-            
-            // Add active class to clicked button
             this.classList.add('active');
-            
-            // Set the hidden input value
             const resultValue = this.dataset.result;
             document.getElementById('result').value = resultValue;
-            
-            // Auto-save to database
             await autoSaveResult(resultValue);
         });
     });
 }
 
-// Auto-save result to database
 async function autoSaveResult(resultValue) {
     const data = {
         result: resultValue,
@@ -166,8 +156,6 @@ async function autoSaveResult(resultValue) {
         try {
             await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
             console.log("Result auto-saved successfully");
-            
-            // Optional: Show a subtle success message
             showToast("Selection saved!");
         } catch (updateError) {
             if (updateError.message.includes("Document with the requested ID could not be found")) {
@@ -184,9 +172,7 @@ async function autoSaveResult(resultValue) {
     }
 }
 
-// Show toast notification
 function showToast(message, isError = false) {
-    // Remove existing toast if any
     const existingToast = document.querySelector('.toast-notification');
     if (existingToast) {
         existingToast.remove();
@@ -216,7 +202,6 @@ function showToast(message, isError = false) {
     }, 2000);
 }
 
-// Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
@@ -256,10 +241,7 @@ async function initForm() {
             document.getElementById("preEvalBtn").style.display = "inline-block";
             document.getElementById("evalBtn").style.display = "inline-block";
         }
-        
-        // Initialize score buttons
         initScoreButtons();
-        
         await loadForm();
 
         if (viewMode) setViewMode();
@@ -278,11 +260,8 @@ async function loadForm() {
     try {
         evDoc = await databases.getDocument(databaseId, postEvalCollectionId, eventId);
         console.log("Loaded post-eval document:", evDoc);
-        
-        // Load result (Win/Lose)
         if (evDoc.result) {
             document.getElementById('result').value = evDoc.result;
-            // Set active button
             document.querySelectorAll('.result-btn').forEach(btn => {
                 if (btn.dataset.result === evDoc.result) {
                     btn.classList.add('active');
@@ -625,5 +604,6 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
