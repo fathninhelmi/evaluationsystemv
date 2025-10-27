@@ -307,7 +307,6 @@ let pendingRoleChange = null;
 async function updateManagerRegion(userId, region) {
     if (!region) {
         showNotification('Please select a region', 'error');
-        // Reset the dropdown to the current value
         const user = users.find(u => u.id === userId);
         renderUsers();
         return;
@@ -489,7 +488,6 @@ function renderUsers() {
 function updatePaginationInfo() {
     const totalPages = Math.ceil(filteredUsers.length / perPage);
     document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
-    
     document.getElementById('firstBtn').disabled = currentPage === 1;
     document.getElementById('prevBtn').disabled = currentPage === 1;
     document.getElementById('nextBtn').disabled = currentPage >= totalPages;
@@ -647,5 +645,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
