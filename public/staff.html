@@ -491,8 +491,6 @@ function renderMyForms(forms) {
         : status === "complete"
         ? `<button class="btn-mini btn-secondary" onclick="viewForm('${form.$id}','${type}')"><i class="fas fa-eye"></i> View</button>`
         : `<button class="btn-mini btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">Not Created</button>`;
-      
-      // FIXED: Status badge moved to subform-actions
       subformsHTML += `
         <div class="subform-row">
           <div class="subform-info">
@@ -724,6 +722,7 @@ document.addEventListener("DOMContentLoaded", loadForms);
 </body>
 
 </html>
+
 
 
 
