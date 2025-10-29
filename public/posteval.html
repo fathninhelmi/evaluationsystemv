@@ -95,6 +95,19 @@
             </div>
         </div>
 
+        <!-- Attachment Section -->
+        <div class="form-section">
+            <div class="section-title">Attachment</div>
+            <div class="form-group-eval">
+                <label>Upload File (Optional)</label>
+                <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                    Please upload the file in PNG or PDF only
+                </div>
+                <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" style="margin-bottom: 10px;">
+                <div id="attachmentPreview" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="button" class="btn btn-secondary" onclick="goBack()">Back</button>
             <button type="button" id="preEvalBtn" class="btn btn-secondary" onclick="viewPreEval()" style="display: none;">
@@ -116,10 +129,12 @@ const client = new Appwrite.Client()
 
 const databases = new Appwrite.Databases(client);
 const account = new Appwrite.Account(client);
+const storage = new Appwrite.Storage(client);
 
 const databaseId = "68ba8a9c001f17064e15";
 const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 const mainCollectionId = "68ba918c0022d2b9a429";
+const bucketId = "69015d8b0030f329c599";
 
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id");
@@ -130,6 +145,7 @@ let evDoc = null;
 let currentStatus = "draft";
 let competitorRowCount = 1;
 let keywordRowCount = 1;
+let uploadedFileId = null;
 
 function initScoreButtons() {
     document.querySelectorAll('.result-btn').forEach(btn => {
@@ -202,6 +218,73 @@ function showToast(message, isError = false) {
     }, 2000);
 }
 
+function initFileUpload() {
+    const fileInput = document.getElementById('attachmentInput');
+    fileInput.addEventListener('change', handleFileSelect);
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/png', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+        alert('Please upload only PNG or PDF files.');
+        event.target.value = '';
+        return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+        alert('File size must be less than 10MB.');
+        event.target.value = '';
+        return;
+    }
+
+    displayFilePreview(file);
+}
+
+function displayFilePreview(file) {
+    const preview = document.getElementById('attachmentPreview');
+    preview.innerHTML = `
+        <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+            <span style="flex: 1;">${file.name} (${(file.size / 1024).toFixed(2)} KB)</span>
+            <button type="button" onclick="removeAttachment()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Remove</button>
+        </div>
+    `;
+}
+
+function removeAttachment() {
+    document.getElementById('attachmentInput').value = '';
+    document.getElementById('attachmentPreview').innerHTML = '';
+    uploadedFileId = null;
+}
+
+async function uploadFile() {
+    const fileInput = document.getElementById('attachmentInput');
+    const file = fileInput.files[0];
+    
+    if (!file) return null;
+
+    try {
+        showToast('Uploading file...');
+        const response = await storage.createFile(
+            bucketId,
+            'unique()',
+            file
+        );
+        uploadedFileId = response.$id;
+        showToast('File uploaded successfully!');
+        return response.$id;
+    } catch (error) {
+        console.error('File upload error:', error);
+        showToast('Failed to upload file', true);
+        return null;
+    }
+}
+
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
@@ -242,6 +325,7 @@ async function initForm() {
             document.getElementById("evalBtn").style.display = "inline-block";
         }
         initScoreButtons();
+        initFileUpload();
         await loadForm();
 
         if (viewMode) setViewMode();
@@ -272,6 +356,25 @@ async function loadForm() {
         if (evDoc.score !== undefined && evDoc.score !== null) {
             document.getElementById('score').value = evDoc.score;
         }
+
+        // Load attachment if exists
+        if (evDoc.attachmentId) {
+            uploadedFileId = evDoc.attachmentId;
+            try {
+                const fileUrl = storage.getFileView(bucketId, evDoc.attachmentId);
+                const fileName = evDoc.attachmentName || 'Uploaded file';
+                document.getElementById('attachmentPreview').innerHTML = `
+                    <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+                        <span style="flex: 1;">${fileName}</span>
+                        <a href="${fileUrl}" target="_blank" style="margin-right: 10px; color: #007bff; text-decoration: none;">View</a>
+                        ${!viewMode ? '<button type="button" onclick="removeAttachment()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Remove</button>' : ''}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading attachment:', error);
+            }
+        }
+
         if (Array.isArray(evDoc.competitorInfo) && evDoc.competitorInfo.length > 0) {
             const tbody = document.getElementById("competitorTableBody");
             tbody.innerHTML = "";
@@ -336,6 +439,8 @@ function setViewMode() {
         } else if (input.classList.contains('result-btn')) {
             // keep visible but disable clicking
             input.disabled = true;
+        } else if (input.type === 'file') {
+            input.style.display = 'none';
         } else {
             input.disabled = true;
         }
@@ -485,6 +590,16 @@ async function saveForm(status = "draft") {
     if (!validationResult) return;
 
     const { resultValue, scoreValue, competitorInfoArray, keywordArray } = validationResult;
+    
+    // Upload file if new file is selected
+    const fileInput = document.getElementById('attachmentInput');
+    if (fileInput.files.length > 0) {
+        const fileId = await uploadFile();
+        if (fileId) {
+            uploadedFileId = fileId;
+        }
+    }
+
     const data = {
         status: status
     };
@@ -493,6 +608,14 @@ async function saveForm(status = "draft") {
     if (scoreValue) data.score = scoreValue;
     if (competitorInfoArray.length > 0) data.competitorInfo = competitorInfoArray;
     if (keywordArray.length > 0) data.keyword = keywordArray;
+    if (uploadedFileId) {
+        data.attachmentId = uploadedFileId;
+        if (fileInput.files.length > 0) {
+            data.attachmentName = fileInput.files[0].name;
+        } else if (evDoc && evDoc.attachmentName) {
+            data.attachmentName = evDoc.attachmentName;
+        }
+    }
 
     console.log("Saving data:", data);
 
@@ -523,7 +646,7 @@ async function saveForm(status = "draft") {
         console.error("Error details:", err.message);
 
         if (err.message.includes("Invalid document structure")) {
-            alert(`Database schema error: ${err.message}\n\nPlease check if your database fields are configured correctly:\n- result: string\n- score: string\n- status: enum\n- competitorInfo: string[]\n- keyword: string[]`);
+            alert(`Database schema error: ${err.message}\n\nPlease check if your database fields are configured correctly:\n- result: string\n- score: string\n- status: enum\n- competitorInfo: string[]\n- keyword: string[]\n- attachmentId: string\n- attachmentName: string`);
         } else if (err.message.includes("Missing required attribute")) {
             alert(`Missing required field: ${err.message}`);
         } else if (err.message.includes("Invalid enum value")) {
@@ -604,6 +727,3 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
-
-
-
