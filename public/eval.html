@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -159,6 +160,19 @@
                 <button type="button" class="add-row-btn" onclick="addCommentRow()">+ Add Comment</button>
             </div>
         </div>
+
+        <!-- Attachment Section -->
+        <div class="form-section">
+            <div class="section-title">Attachment</div>
+            <div class="form-group-eval">
+                <label>Upload File (Optional)</label>
+                <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                    Please upload the file in PNG or PDF only
+                </div>
+                <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" style="margin-bottom: 10px;">
+                <div id="attachmentPreview" style="margin-top: 10px;"></div>
+            </div>
+        </div>
         
         <div class="form-actions">
             <button type="button" class="btn btn-secondary" onclick="goBack()">Back</button>
@@ -175,9 +189,12 @@ const client = new Appwrite.Client()
 
 const databases = new Appwrite.Databases(client);
 const account = new Appwrite.Account(client);
+const storage = new Appwrite.Storage(client);
 
 const databaseId = "68ba8a9c001f17064e15";
 const evalCollectionId = "68bf9d5600257a20775a";
+const bucketId = "69015d8b0030f329c599"; // Same bucket as post-eval
+
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id");
 const viewMode = params.get("mode") === "view";
@@ -187,6 +204,130 @@ let currentStatus = "draft";
 let issueRowCount = 1;
 let feedbackRowCount = 1;
 let commentRowCount = 1;
+let uploadedFileId = null;
+
+function showToast(message, isError = false) {
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${isError ? '#f44336' : '#4CAF50'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
+function initFileUpload() {
+    const fileInput = document.getElementById('attachmentInput');
+    fileInput.addEventListener('change', handleFileSelect);
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/png', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+        alert('Please upload only PNG or PDF files.');
+        event.target.value = '';
+        return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+        alert('File size must be less than 10MB.');
+        event.target.value = '';
+        return;
+    }
+
+    displayFilePreview(file);
+}
+
+function displayFilePreview(file) {
+    const preview = document.getElementById('attachmentPreview');
+    preview.innerHTML = `
+        <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+            <span style="flex: 1;">${file.name} (${(file.size / 1024).toFixed(2)} KB)</span>
+            <button type="button" onclick="removeAttachment()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Remove</button>
+        </div>
+    `;
+}
+
+function removeAttachment() {
+    document.getElementById('attachmentInput').value = '';
+    document.getElementById('attachmentPreview').innerHTML = '';
+    uploadedFileId = null;
+}
+
+async function uploadFile() {
+    const fileInput = document.getElementById('attachmentInput');
+    const file = fileInput.files[0];
+    
+    if (!file) return null;
+
+    try {
+        showToast('Uploading file...');
+        const response = await storage.createFile(
+            bucketId,
+            'unique()',
+            file
+        );
+        uploadedFileId = response.$id;
+        showToast('File uploaded successfully!');
+        return response.$id;
+    } catch (error) {
+        console.error('File upload error:', error);
+        showToast('Failed to upload file', true);
+        return null;
+    }
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 
 function updateRowNumbers(tbodyId, prefix) {
     const rows = document.querySelectorAll(`#${tbodyId} tr`);
@@ -345,6 +486,24 @@ async function loadForm() {
             if (checkbox) checkbox.checked = !!evDoc[key];
         });
 
+        // Load attachment if exists
+        if (evDoc.attachmentId) {
+            uploadedFileId = evDoc.attachmentId;
+            try {
+                const fileUrl = storage.getFileView(bucketId, evDoc.attachmentId);
+                const fileName = evDoc.attachmentName || 'Uploaded file';
+                document.getElementById('attachmentPreview').innerHTML = `
+                    <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+                        <span style="flex: 1;">${fileName}</span>
+                        <a href="${fileUrl}" target="_blank" style="margin-right: 10px; color: #007bff; text-decoration: none;">View</a>
+                        ${!viewMode ? '<button type="button" onclick="removeAttachment()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Remove</button>' : ''}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading attachment:', error);
+            }
+        }
+
         const tbodyIssues = document.getElementById('issuesTableBody');
         tbodyIssues.innerHTML = '';
         issueRowCount = 0;
@@ -454,6 +613,7 @@ function updateFormDisplay() {
         formTitle.textContent = `Evaluation Form (View Mode)`;
         document.querySelectorAll('input, textarea, select, button[type="button"]:not(.btn-secondary)').forEach(el => el.disabled = true);
         document.querySelectorAll('.add-row-btn').forEach(btn => btn.style.display = 'none');
+        document.getElementById('attachmentInput').style.display = 'none';
         submitBtn.style.display = 'none';
         saveProgressBtn.style.display = 'none';
     } else {
@@ -466,6 +626,15 @@ function updateFormDisplay() {
 
 async function saveForm(status = "draft") {
     console.log("Starting save process...");
+
+    // Upload file if new file is selected
+    const fileInput = document.getElementById('attachmentInput');
+    if (fileInput.files.length > 0) {
+        const fileId = await uploadFile();
+        if (fileId) {
+            uploadedFileId = fileId;
+        }
+    }
 
     const saveData = {
         tech_inspection_cycle_above: document.getElementById('tech_inspection_cycle_above').checked,
@@ -500,6 +669,16 @@ async function saveForm(status = "draft") {
 
         status: status
     };
+
+    // Add attachment data if exists
+    if (uploadedFileId) {
+        saveData.attachmentId = uploadedFileId;
+        if (fileInput.files.length > 0) {
+            saveData.attachmentName = fileInput.files[0].name;
+        } else if (evDoc && evDoc.attachmentName) {
+            saveData.attachmentName = evDoc.attachmentName;
+        }
+    }
 
     for (const key in saveData) {
         if (Array.isArray(saveData[key])) {
@@ -559,6 +738,7 @@ function goBack() {
 
 document.addEventListener("DOMContentLoaded", () => {
     setupCheckboxGroups();
+    initFileUpload();
     loadForm();
 });
 </script>
