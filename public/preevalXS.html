@@ -352,6 +352,19 @@
             </div>
         </div>
 
+        <!-- Attachment Section -->
+        <div class="form-section">
+            <div class="section-title">7. Attachment</div>
+            <div class="form-group-evalxc">
+                <label>Upload File (Optional)</label>
+                <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                    Please upload the file in PNG or PDF only
+                </div>
+                <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" style="margin-bottom: 10px;">
+                <div id="attachmentPreview" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="button" class="btn btn-secondary" onclick="goBack()">Back</button>
             <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
@@ -362,15 +375,17 @@
 
 <script>
 const client = new Appwrite.Client()
-    .setEndpoint("https://fra.cloud.appwrite.io/v1")
-    .setProject("68ddd7de00255d4f5c96"); 
+    .setEndpoint("https://fra.cloud.appwrite.io/v1") 
+    .setProject("68ddd7de00255d4f5c96");
 
 const databases = new Appwrite.Databases(client);
 const account = new Appwrite.Account(client);
+const storage = new Appwrite.Storage(client);
 
 const databaseId = "68ba8a9c001f17064e15";
 const collectionId = "68ba918c0022d2b9a429";
 const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const bucketId = "69015d8b0030f329c599";
 
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id"); 
@@ -380,6 +395,7 @@ let currentUser = null;
 let formData = null;
 let referenceDocData = null;
 let currentStatus = "draft";
+let uploadedFileId = null;
 
 async function initForm() {
     try {
@@ -445,6 +461,23 @@ function populateForm(preEvalData, referenceData) {
             customerCompanyElement.value = data.customerCompany;
         }
     }
+
+    if (data.attachmentId) {
+        uploadedFileId = data.attachmentId;
+        try {
+            const fileUrl = storage.getFileView(bucketId, data.attachmentId);
+            const fileName = data.attachmentName || 'Uploaded file';
+            document.getElementById('attachmentPreview').innerHTML = `
+                <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+                    <span style="flex: 1;">${fileName}</span>
+                    <a href="${fileUrl}" target="_blank" style="margin-right: 10px; color: #007bff; text-decoration: none;">View</a>
+                    ${!viewMode ? '<button type="button" onclick="removeAttachment()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Remove</button>' : ''}
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error loading attachment:', error);
+        }
+    }
     
     const textFields = [
         'custPICname', 'custPICposition', 'custTechChamp', 'existcust', 'evalDate', 
@@ -506,6 +539,8 @@ function setViewMode() {
     const inputs = form.querySelectorAll('input, textarea, select, button[type="submit"], button[type="button"]:not(.btn-secondary)');
     inputs.forEach(input => {
         if (input.type === 'submit' || input.classList.contains('add-row-btn') || input.classList.contains('draft-btn')) {
+            input.style.display = 'none';
+        } else if (input.type === 'file') {
             input.style.display = 'none';
         } else {
             input.disabled = true;
@@ -599,9 +634,114 @@ function collectFormData() {
     return data;
 }
 
+function showToast(message, isError = false) {
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${isError ? '#f44336' : '#4CAF50'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
+function initFileUpload() {
+    const fileInput = document.getElementById('attachmentInput');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+    }
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const validTypes = ['image/png', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+        alert('Please upload only PNG or PDF files.');
+        event.target.value = '';
+        return;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+        alert('File size must be less than 10MB.');
+        event.target.value = '';
+        return;
+    }
+
+    displayFilePreview(file);
+}
+
+function displayFilePreview(file) {
+    const preview = document.getElementById('attachmentPreview');
+    preview.innerHTML = `
+        <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+            <span style="flex: 1;">${file.name} (${(file.size / 1024).toFixed(2)} KB)</span>
+            <button type="button" onclick="removeAttachment()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Remove</button>
+        </div>
+    `;
+}
+
+function removeAttachment() {
+    document.getElementById('attachmentInput').value = '';
+    document.getElementById('attachmentPreview').innerHTML = '';
+    uploadedFileId = null;
+}
+
+async function uploadFile() {
+    const fileInput = document.getElementById('attachmentInput');
+    const file = fileInput.files[0];
+    
+    if (!file) return null;
+
+    try {
+        showToast('Uploading file...');
+        const response = await storage.createFile(
+            bucketId,
+            'unique()',
+            file
+        );
+        uploadedFileId = response.$id;
+        showToast('File uploaded successfully!');
+        return response.$id;
+    } catch (error) {
+        console.error('File upload error:', error);
+        showToast('Failed to upload file', true);
+        return null;
+    }
+}
+
 async function saveForm(status = "draft") {
     try {
         const collectedData = collectFormData();
+        const fileInput = document.getElementById('attachmentInput');
+        
+        if (fileInput && fileInput.files.length > 0) {
+            const fileId = await uploadFile();
+            if (fileId) {
+                uploadedFileId = fileId;
+            }
+        }
         if (status === "complete") {
             const requiredFields = [
                 'customerCompany', 'custPICname', 'custPICposition', 'existcust', 'evalDate', 
@@ -630,6 +770,16 @@ async function saveForm(status = "draft") {
             ...collectedData,
             status: status
         };
+        
+        if (uploadedFileId) {
+            saveData.attachmentId = uploadedFileId;
+            if (fileInput && fileInput.files.length > 0) {
+                saveData.attachmentName = fileInput.files[0].name;
+            } else if (formData && formData.attachmentName) {
+                saveData.attachmentName = formData.attachmentName;
+            }
+        }
+        
         for (const key in saveData) {
             const value = saveData[key];
             if (value === "" || 
@@ -668,6 +818,7 @@ async function saveForm(status = "draft") {
 
 document.addEventListener("DOMContentLoaded", () => {
     initForm();
+    initFileUpload();
 
     document.getElementById("preEvalForm").addEventListener("submit", e => {
         e.preventDefault();
@@ -702,4 +853,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
