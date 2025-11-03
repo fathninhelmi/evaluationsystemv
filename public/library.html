@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Library</title>
+<title>Product Paper Survey Library</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
@@ -30,19 +30,25 @@
     <div class="content-tabs">
       <div class="tab-headers">
         <button class="tab-header active" onclick="switchProduct('aoi')">
-          <i class="fas fa-microscope"></i> AOI
+          <i></i> AOI
         </button>
         <button class="tab-header" onclick="switchProduct('axi')">
-          <i class="fas fa-x-ray"></i> AXI
+          <i></i> AXI
         </button>
         <button class="tab-header" onclick="switchProduct('spi')">
-          <i class="fas fa-ruler-combined"></i> SPI
+          <i></i> SPI
         </button>
         <button class="tab-header" onclick="switchProduct('arv')">
-          <i class="fas fa-robot"></i> ARV
+          <i></i> ARV
         </button>
         <button class="tab-header" onclick="switchProduct('vone')">
-          <i class="fas fa-cube"></i> V-ONE
+          <i></i> V-ONE
+        </button>
+        <button class="tab-header" onclick="switchProduct('xc')">
+          <i></i> SMART CAMERA
+        </button>
+        <button class="tab-header" onclick="switchProduct('xs')">
+          <i></i> SMART CODE READER
         </button>
       </div>
 
@@ -107,8 +113,6 @@ async function checkSession() {
         console.log('Logged in as:', user.email);
     } catch (err) {
         console.error('No active session:', err);
-        // TEMPORARILY COMMENTED OUT FOR TESTING
-        // window.location.href = 'index.html';
     }
 }
 
@@ -141,6 +145,8 @@ function switchProduct(product) {
     'spi': 'SPI Resources',
     'arv': 'ARV Resources',
     'vone': 'V-ONE Resources'
+    'xc': 'SMART CAMERA Resources'
+    'xs': 'SMART CODE READER Resources'
   };
   document.getElementById('sidebarTitle').textContent = titles[product];
   
@@ -169,6 +175,8 @@ function updateContent() {
     'spi': 'SPI',
     'arv': 'ARV',
     'vone': 'V-ONE'
+    'xc': 'SMART CAMERA'
+    'xs': 'SMART CODE READER'
   };
   
   const categoryNames = {
@@ -322,3 +330,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
