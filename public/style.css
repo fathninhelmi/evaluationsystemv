@@ -4019,22 +4019,13 @@ label {
   }
 }
 
-.main-library h1 {
+.lib-header h1 {
   text-align: center; 
   font-size: 2.5rem;  
   font-weight: bold;
   margin: 2rem 0; 
   color: #ffffff; 
-  margin-top: 10px;
-}
-
-.main-library {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  gap: 2rem;
-  padding: 2rem;
+  margin-top: 50px;
 }
 
 .container-lib {
@@ -4045,6 +4036,7 @@ label {
   flex-direction: column;
   gap: 2rem;
 }
+
 
 
 
