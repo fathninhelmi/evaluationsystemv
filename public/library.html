@@ -276,6 +276,7 @@ const { Client, Account, Databases, Query } = window.Appwrite;
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
 .setProject("68ddd7de00255d4f5c96");
+.setSessionPersist(true);
 
 const account = new Account(client);
 const database = new Databases(client);
@@ -488,3 +489,4 @@ window.onclick = function(event) {
 </footer>
 </body>
 </html>
+
