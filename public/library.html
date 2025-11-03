@@ -272,13 +272,18 @@
 
 <script>
 const { Client, Account, Databases, Query } = window.Appwrite;
+
+// Initialize Appwrite client
 const client = new Client();
-client.setEndpoint("https://fra.cloud.appwrite.io/v1")
-.setProject("68ddd7de00255d4f5c96");
+client
+  .setEndpoint("https://fra.cloud.appwrite.io/v1")
+  .setProject("68ddd7de00255d4f5c96");
 
 const account = new Account(client);
 const database = new Databases(client);
 const databaseId = "68ba8a9c001f17064e15";
+
+console.log('🔧 Appwrite client initialized');
 
 let currentProductType = 'aoi';
 let currentSubmenu = 'overview';
@@ -287,24 +292,11 @@ async function checkSession() {
     try {
         const user = await account.get();
         console.log('Logged in as:', user.email);
-        console.log('User details:', user);
         return user;
     } catch (err) {
         console.error('Session check error:', err);
-        console.error('Error type:', err.type);
-        console.error('Error code:', err.code);
-        console.error('Error message:', err.message);
-        
-        // Only redirect if it's actually an authentication error
-        if (err.code === 401 || err.type === 'user_unauthorized' || err.message?.includes('Missing scope')) {
-            console.warn('No active session, redirecting to login');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000);
-        } else {
-            console.error('Unexpected error during session check:', err);
-        }
-        return null;
+        console.warn('No active session, redirecting');
+        window.location.href = 'index.html';
     }
 }
 
@@ -487,10 +479,13 @@ function loadContent() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Page loaded, checking session...');
+    console.log('📄 Library page loading...');
     const user = await checkSession();
     if (user) {
-        console.log('Session valid, loading content...');
+        console.log('✓ User authenticated, initializing page');
+        loadContent();
+    } else {
+        console.log('⚠ User not authenticated but page loaded');
         loadContent();
     }
 });
