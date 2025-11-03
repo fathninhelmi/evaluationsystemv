@@ -3734,6 +3734,7 @@ label {
   border-color: #2a9d8f;
 }
 
+/* Button Styling */
 .btn-mini {
   padding: 6px 14px;
   font-size: 13px;
@@ -3804,6 +3805,7 @@ label {
 .location-preview.active {
   display: block;
 }
+
   #map {
     height: 500px;
     width: 100%;
@@ -3840,7 +3842,7 @@ label {
   .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
     background-color: rgba(52, 152, 219, 0.8) !important;
   }
-
+  
 .library-layout {
   display: flex;
   gap: 20px;
@@ -4019,24 +4021,19 @@ label {
   }
 }
 
-.lib-header h1 {
+.main-library h1 {
   text-align: center; 
   font-size: 2.5rem;  
   font-weight: bold;
   margin: 2rem 0; 
   color: #ffffff; 
-  margin-top: 50px;
 }
 
-.container-lib {
-  width: 100%;
-  max-width: 2000px;
-  margin: 0 auto;
+.main-library {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  width: 100%;
   gap: 2rem;
+  padding: 2rem;
 }
-
-
-
-
