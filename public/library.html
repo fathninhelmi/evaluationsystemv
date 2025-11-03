@@ -46,48 +46,29 @@
           <i></i> V-ONE
         </button>
         <button class="tab-header" onclick="switchProduct('xc')">
-          <i></i> SMART CAMERA
+          <i></i> XC
         </button>
         <button class="tab-header" onclick="switchProduct('xs')">
-          <i></i> SMART CODE READER
+          <i></i> XS
         </button>
       </div>
-
-      <div class="library-layout">
-        <div class="library-content">
-          <div class="content-box" id="mainContent">
-            <h2>Welcome to the Library</h2>
-            <p>Select a product type and category to explore technical documents, papers, and resources.</p>
-          </div>
-        </div>
 
         <!-- submenu -->
         <div class="library-sidebar">
           <div class="sidebar-menu">
-            <div class="sidebar-header" id="sidebarTitle">AOI Resources</div>
-            <div class="sidebar-link active" onclick="switchCategory('overview')">
-              <i class="fas fa-home"></i>
-              <span>Overview</span>
+            <div class="sidebar-header" id="sidebarTitle">SUB MENU</div>
+            <div class="sidebar-link active" onclick="switchCategory('sub1')">
+              <i></i>
+              <span>sub1</span>
             </div>
-            <div class="sidebar-link" onclick="switchCategory('technical')">
-              <i class="fas fa-book"></i>
-              <span>Technical Papers</span>
+            <div class="sidebar-link" onclick="switchCategory('sub2')">
+              <i></i>
+              <span>sub2</span>
             </div>
-            <div class="sidebar-link" onclick="switchCategory('casestudies')">
-              <i class="fas fa-file-alt"></i>
-              <span>Case Studies</span>
+            <div class="sidebar-link" onclick="switchCategory('sub3')">
+              <i></i>
+              <span>sub3</span>
             </div>
-            <div class="sidebar-link" onclick="switchCategory('specs')">
-              <i class="fas fa-cog"></i>
-              <span>Specifications</span>
-            </div>
-            <div class="sidebar-link" onclick="switchCategory('comparison')">
-              <i class="fas fa-chart-bar"></i>
-              <span>Comparisons</span>
-            </div>
-            <div class="sidebar-link" onclick="switchCategory('downloads')">
-              <i class="fas fa-download"></i>
-              <span>Downloads</span>
             </div>
           </div>
         </div>
@@ -142,13 +123,13 @@ function switchProduct(product) {
   event.target.closest('.tab-header').classList.add("active");
   
   const titles = {
-    'aoi': 'AOI Resources',
-    'axi': 'AXI Resources',
-    'spi': 'SPI Resources',
-    'arv': 'ARV Resources',
-    'vone': 'V-ONE Resources',
-    'xc': 'SMART CAMERA Resources',
-    'xs': 'SMART CODE READER Resources'
+    'aoi': 'AOI submenu',
+    'axi': 'AXI submenu',
+    'spi': 'SPI submenu',
+    'arv': 'ARV submenu',
+    'vone': 'V-ONE submenu',
+    'xc': 'SMART CAMERA submenu',
+    'xs': 'SMART CODE READER submenu'
   };
   document.getElementById('sidebarTitle').textContent = titles[product];
   
@@ -182,12 +163,9 @@ function updateContent() {
   };
   
   const categoryNames = {
-    'overview': 'Overview',
-    'technical': 'Technical Papers',
-    'casestudies': 'Case Studies',
-    'specs': 'Specifications',
-    'comparison': 'Comparisons',
-    'downloads': 'Downloads'
+    'sub1': 'sub1',
+    'sub2': 'sub2',
+    'sub3': 'sub3',
   };
   
   const productName = productNames[currentProduct];
@@ -198,11 +176,11 @@ function updateContent() {
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
   
-  if (currentCategory === 'overview') {
+  if (currentCategory === 'sub1') {
     html += `
       <div class="resource-grid">
         <div class="resource-card">
-          <div class="resource-title">${productName} Introduction Guide</div>
+          <div class="resource-title">${productName} Paper Survey</div>
           <div class="resource-meta">Updated: October 2024</div>
           <div class="resource-actions">
             <button class="btn-resource btn-view">
@@ -213,37 +191,13 @@ function updateContent() {
             </button>
           </div>
         </div>
-        <div class="resource-card">
-          <div class="resource-title">${productName} Quick Start</div>
-          <div class="resource-meta">Updated: September 2024</div>
-          <div class="resource-actions">
-            <button class="btn-resource btn-view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn-resource btn-download">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
-        </div>
-        <div class="resource-card">
-          <div class="resource-title">${productName} Product Catalog</div>
-          <div class="resource-meta">Updated: August 2024</div>
-          <div class="resource-actions">
-            <button class="btn-resource btn-view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn-resource btn-download">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
-        </div>
       </div>
     `;
-  } else if (currentCategory === 'technical') {
+  } else if (currentCategory === 'sub2') {
     html += `
       <div class="resource-grid">
         <div class="resource-card">
-          <div class="resource-title">${productName} Technical Whitepaper</div>
+          <div class="resource-title">${productName} Paper Survey</div>
           <div class="resource-meta">Research Paper • 2024</div>
           <div class="resource-actions">
             <button class="btn-resource btn-view">
@@ -254,38 +208,14 @@ function updateContent() {
             </button>
           </div>
         </div>
-        <div class="resource-card">
-          <div class="resource-title">${productName} Performance Analysis</div>
-          <div class="resource-meta">Technical Document • 2024</div>
-          <div class="resource-actions">
-            <button class="btn-resource btn-view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn-resource btn-download">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
-        </div>
       </div>
     `;
-  } else if (currentCategory === 'casestudies') {
+  } else if (currentCategory === 'sub3') {
     html += `
       <div class="resource-grid">
         <div class="resource-card">
-          <div class="resource-title">${productName} Implementation Success</div>
+          <div class="resource-title">${productName} sub3</div>
           <div class="resource-meta">Customer Case Study</div>
-          <div class="resource-actions">
-            <button class="btn-resource btn-view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn-resource btn-download">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
-        </div>
-        <div class="resource-card">
-          <div class="resource-title">${productName} ROI Analysis</div>
-          <div class="resource-meta">Case Study • 2024</div>
           <div class="resource-actions">
             <button class="btn-resource btn-view">
               <i class="fas fa-eye"></i> View
@@ -332,3 +262,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
