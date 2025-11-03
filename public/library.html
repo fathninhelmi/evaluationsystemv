@@ -287,9 +287,24 @@ async function checkSession() {
     try {
         const user = await account.get();
         console.log('Logged in as:', user.email);
+        console.log('User details:', user);
+        return user;
     } catch (err) {
         console.error('Session check error:', err);
-        window.location.href = 'index.html';
+        console.error('Error type:', err.type);
+        console.error('Error code:', err.code);
+        console.error('Error message:', err.message);
+        
+        // Only redirect if it's actually an authentication error
+        if (err.code === 401 || err.type === 'user_unauthorized' || err.message?.includes('Missing scope')) {
+            console.warn('No active session, redirecting to login');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            console.error('Unexpected error during session check:', err);
+        }
+        return null;
     }
 }
 
@@ -472,8 +487,12 @@ function loadContent() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await checkSession();
-    loadContent();
+    console.log('Page loaded, checking session...');
+    const user = await checkSession();
+    if (user) {
+        console.log('Session valid, loading content...');
+        loadContent();
+    }
 });
 </script>
 
