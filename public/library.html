@@ -12,12 +12,8 @@
 <body>
 <header class="header">
     <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
-    <nav class="nav-desktop">
-        <a href="approveduser.html" class="nav-link">User Management</a>
-        <a href="manageform.html" class="nav-link">Manage Forms</a>
-        <a href="referencecust.html" class="nav-link">References Details</a>
-        <a href="library.html" class="nav-link active">Library</a>
-        <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+    <nav class="nav-desktop" id="navMenu">
+        <!-- Navigation will be dynamically loaded based on role -->
     </nav>
 </header>
 
@@ -94,17 +90,89 @@ client.setEndpoint("https://fra.cloud.appwrite.io/v1")
 const account = new Account(client);
 const databases = new Databases(client);
 const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba8c240002116fa647";
 
 let currentProduct = 'aoi';
 let currentCategory = 'overview';
+let userRole = '';
 
 async function checkSession() {
     try {
         const user = await account.get();
         console.log('Logged in as:', user.email);
+        
+        // Get user role from database
+        await getUserRole(user.$id);
+        
+        // Load navigation based on role
+        loadNavigation(userRole);
+        
     } catch (err) {
         console.error('No active session:', err);
+        window.location.href = 'index.html';
     }
+}
+
+async function getUserRole(userId) {
+    try {
+        const response = await databases.listDocuments(
+            databaseId, 
+            collectionId, 
+            [Query.limit(1000)]
+        );
+        
+        const user = response.documents.find(doc => doc.$id === userId);
+        if (user) {
+            userRole = user.role || 'staff';
+        } else {
+            userRole = 'staff';
+        }
+        console.log('User role:', userRole);
+    } catch (err) {
+        console.error('Error fetching user role:', err);
+        userRole = 'staff';
+    }
+}
+
+function loadNavigation(role) {
+    const navMenu = document.getElementById('navMenu');
+    let navHTML = '';
+    
+    if (role === 'admin') {
+        // Admin navigation - matches approveduser.html
+        navHTML = `
+            <a href="approveduser.html" class="nav-link">User Management</a>
+            <a href="manageform.html" class="nav-link">Manage Forms</a>
+            <a href="referencecust.html" class="nav-link">References Details</a>
+            <a href="library.html" class="nav-link active">Library</a>
+            <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+        `;
+    } else if (role === 'manager') {
+        // Manager navigation - matches manager.html
+        navHTML = `
+            <a href="manager.html" class="nav-link">Home</a>
+            <a href="spreadsheet.html" class="nav-link">Spreadsheet</a>
+            <a href="request.html" class="nav-link">Requested Form</a>
+            <a href="library.html" class="nav-link active">Library</a>
+            <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+        `;
+    } else {
+        // Staff navigation (fallback)
+        navHTML = `
+            <a href="staff.html" class="nav-link">My Forms</a>
+            <a href="library.html" class="nav-link active">Library</a>
+            <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+        `;
+    }
+    
+    navMenu.innerHTML = navHTML;
+    
+    // Re-attach logout event listener
+    document.getElementById("logoutBtn").addEventListener("click", (e) => {
+        e.preventDefault();
+        console.log('Logout button clicked');
+        logout();
+    });
 }
 
 async function logout() {
@@ -117,12 +185,6 @@ async function logout() {
     window.location.href = "index.html";
   }
 }
-
-document.getElementById("logoutBtn").addEventListener("click", (e) => {
-  e.preventDefault();
-  console.log('Logout button clicked');
-  logout();
-});
 
 function switchProduct(product) {
   currentProduct = product;
