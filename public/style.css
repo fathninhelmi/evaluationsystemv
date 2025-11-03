@@ -3734,7 +3734,6 @@ label {
   border-color: #2a9d8f;
 }
 
-/* Button Styling */
 .btn-mini {
   padding: 6px 14px;
   font-size: 13px;
@@ -4020,3 +4019,19 @@ label {
   }
 }
 
+.main-library h1 {
+  text-align: center; 
+  font-size: 2.5rem;  
+  font-weight: bold;
+  margin: 2rem 0; 
+  color: #ffffff; 
+}
+
+.main-library {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 2rem;
+  padding: 2rem;
+}
