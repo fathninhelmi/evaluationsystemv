@@ -273,17 +273,13 @@
 <script>
 const { Client, Account, Databases, Query } = window.Appwrite;
 
-// Initialize Appwrite client
 const client = new Client();
-client
-  .setEndpoint("https://fra.cloud.appwrite.io/v1")
-  .setProject("68ddd7de00255d4f5c96");
+client.setEndpoint("https://fra.cloud.appwrite.io/v1")
+.setProject("68ddd7de00255d4f5c96");
 
 const account = new Account(client);
 const database = new Databases(client);
 const databaseId = "68ba8a9c001f17064e15";
-
-console.log('🔧 Appwrite client initialized');
 
 let currentProductType = 'aoi';
 let currentSubmenu = 'overview';
@@ -292,10 +288,8 @@ async function checkSession() {
     try {
         const user = await account.get();
         console.log('Logged in as:', user.email);
-        return user;
     } catch (err) {
-        console.error('Session check error:', err);
-        console.warn('No active session, redirecting');
+        console.error('No active session:', err);
         window.location.href = 'index.html';
     }
 }
@@ -479,16 +473,12 @@ function loadContent() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📄 Library page loading...');
-    const user = await checkSession();
-    if (user) {
-        console.log('✓ User authenticated, initializing page');
-        loadContent();
-    } else {
-        console.log('⚠ User not authenticated but page loaded');
-        loadContent();
-    }
+    await checkSession();
+    loadContent();
 });
+
+window.onclick = function(event) {
+};
 </script>
 
 <footer class="footer">
