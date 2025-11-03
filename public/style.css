@@ -4035,3 +4035,13 @@ label {
   gap: 2rem;
   padding: 2rem;
 }
+
+.container-lib {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
