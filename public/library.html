@@ -21,11 +21,59 @@
     </nav>
 </header>
 
+<script>
+const { Client, Account, Databases, Query } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1")
+.setProject("68ddd7de00255d4f5c96");
 
+const account = new Account(client);
+const database = new Databases(client);
+
+async function checkSession() {
+    try {
+        const user = await account.get();
+        console.log('Logged in as:', user.email);
+        document.querySelector('h1').textContent = `Welcome, ${user.name || 'Admin'}`;
+    } catch (err) {
+        console.error('Session check error:', err);
+        console.warn('No active session, redirecting');
+        window.location.href = 'index.html';
+    }
+}
+
+async function logout() {
+    try {
+        await account.deleteSession('current');
+        console.log('Logged out successfully');
+    } catch (err) {
+        console.warn('Could not delete session (maybe already logged out):', err);
+    } finally {
+        window.location.href = 'index.html';
+    }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    logout();
+});
+
+setInterval(() => {
+    fetchUsers();
+}, 30000);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkSession();
+    await fetchUsers();
+});
+
+</script>
+    
 <footer class="footer">
     <div>
         <span>© 2025 ViTrox. All rights reserved.</span>
     </div>
 </footer>
 </body>
+
 </html>
