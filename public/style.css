@@ -4057,6 +4057,7 @@ label {
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
   text-align: center;
+  justify-content: center !important;
 }
 
 .btn-upload-doc:hover {
@@ -4520,6 +4521,3 @@ label {
     padding: 12px;
   }
 }
-
-
-
