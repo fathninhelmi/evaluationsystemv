@@ -275,12 +275,12 @@ function updateContent() {
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
 
-  html += `
+html += `
     <div class="resource-grid">
       <div class="resource-card">
         <div class="resource-title">${productName} ${categoryName}</div>
         <div class="resource-actions">
-          <button class="btn-resource btn-view">
+          <button class="btn-resource btn-view" onclick="viewDocument()">
             <i class="fas fa-eye"></i> View
           </button>
         </div>
@@ -289,6 +289,10 @@ function updateContent() {
   `;
   
   content.innerHTML = html;
+}
+
+function viewDocument() {
+  window.open('https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing', '_blank');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -303,4 +307,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
