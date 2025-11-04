@@ -13,7 +13,6 @@
 <header class="header">
     <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
     <nav class="nav-desktop" id="navMenu">
-        <!-- Navigation will be dynamically loaded based on role -->
     </nav>
 </header>
 
@@ -23,7 +22,7 @@
       <h1>Product Paper Survey Library</h1>
     </div>
 
-    <!-- tab product-->
+    <!-- tab solution-->
     <div class="content-tabs">
       <div class="tab-headers">
         <button class="tab-header active" onclick="switchProduct('aoi')">
@@ -57,21 +56,11 @@
           </div>
         </div>
 
-        <!-- submenu -->
+        <!-- product -->
         <div class="library-sidebar">
           <div class="sidebar-menu">
             <div class="sidebar-header" id="sidebarTitle">SUB MENU</div>
-            <div class="sidebar-link active" onclick="switchCategory('sub1')">
-              <i></i>
-              <span>sub1</span>
-            </div>
-            <div class="sidebar-link" onclick="switchCategory('sub2')">
-              <i></i>
-              <span>sub2</span>
-            </div>
-            <div class="sidebar-link" onclick="switchCategory('sub3')">
-              <i></i>
-              <span>sub3</span>
+            <div id="sidebarLinks">
             </div>
             </div>
           </div>
@@ -100,11 +89,8 @@ async function checkSession() {
     try {
         const user = await account.get();
         console.log('Logged in as:', user.email);
-        
-        // Get user role from database
+
         await getUserRole(user.$id);
-        
-        // Load navigation based on role
         loadNavigation(userRole);
         
     } catch (err) {
@@ -139,7 +125,6 @@ function loadNavigation(role) {
     let navHTML = '';
     
     if (role === 'admin') {
-        // Admin navigation - matches approveduser.html
         navHTML = `
             <a href="approveduser.html" class="nav-link">User Management</a>
             <a href="manageform.html" class="nav-link">Manage Forms</a>
@@ -148,7 +133,6 @@ function loadNavigation(role) {
             <a href="#" class="nav-link" id="logoutBtn">Logout</a>
         `;
     } else if (role === 'manager') {
-        // Manager navigation - matches manager.html
         navHTML = `
             <a href="manager.html" class="nav-link">Home</a>
             <a href="spreadsheet.html" class="nav-link">Spreadsheet</a>
@@ -157,7 +141,6 @@ function loadNavigation(role) {
             <a href="#" id="logoutBtn" class="nav-link">Logout</a>
         `;
     } else {
-        // Staff navigation (fallback)
         navHTML = `
             <a href="staff.html" class="nav-link">My Forms</a>
             <a href="library.html" class="nav-link active">Library</a>
@@ -186,36 +169,87 @@ async function logout() {
   }
 }
 
+function getSidebarCategories(product) {
+  const categories = {
+    'spi': [
+      { id: 'overview', label: 'Overview'},
+      { id: 'v310ispi', label: 'V310i SPI for Advanced Packaging and Microelectronics' },
+      { id: 'v310ioptimus', label: 'V310i Optimus 3D'},
+      { id: 'case-studies', label: 'Case Studies'}
+    ],
+    'aoi': [
+      { id: 'overview', label: 'Overview'},
+      { id: 'visionpro', label: 'V510i Vision Pro' },
+      { id: 'v510ioptimus', label: 'V510i Optimus 3D'},
+      { id: 'dst', label: 'V510i DST'}
+    ],
+    'axi': [
+      { id: 'overview', label: 'Overview'},
+      { id: 'qx1', label: 'V810iAi QXI' },
+      { id: 'v810is3', label: 'V810i S3'},
+      { id: 'v810is2ex', label: 'V810i S2EX'}
+    ],
+    'arv': [
+      { id: 'overview', label: 'Overview'},
+      { id: 'v9ifi', label: 'V9i FI' },
+      { id: 'v9ici', label: 'V9i CI'},
+      { id: 'v510ir', label: 'V510i R'}
+    ],
+    'vone': [
+      { id: 'overview', label: 'Overview'}
+    ],
+    'xc': [
+      { id: 'overview', label: 'Overview'}
+    ],
+    'xs': [
+      { id: 'overview', label: 'Overview'}
+    ]
+  };
+  
+  return categories[product] || categories['aoi'];
+}
+
+function loadSidebarMenu(product) {
+  const sidebarLinks = document.getElementById('sidebarLinks');
+  const categories = getSidebarCategories(product);
+  
+  let html = '';
+  categories.forEach((cat, index) => {
+    const activeClass = index === 0 ? 'active' : '';
+    html += `
+      <div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat.id}')">
+        <i class="${cat.icon}"></i>
+        <span>${cat.label}</span>
+      </div>
+    `;
+  });
+  
+  sidebarLinks.innerHTML = html;
+}
+
 function switchProduct(product) {
   currentProduct = product;
-  
   document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
   event.target.closest('.tab-header').classList.add("active");
-  
   const titles = {
-    'aoi': 'AOI submenu',
-    'axi': 'AXI submenu',
-    'spi': 'SPI submenu',
-    'arv': 'ARV submenu',
-    'vone': 'V-ONE submenu',
-    'xc': 'SMART CAMERA submenu',
-    'xs': 'SMART CODE READER submenu'
+    'aoi': 'AOI Product',
+    'axi': 'AXI Product',
+    'spi': 'SPI Product',
+    'arv': 'ARV Product',
+    'vone': 'V-ONE Product',
+    'xc': 'SMART CAMERA Product',
+    'xs': 'SMART CODE READER Product'
   };
   document.getElementById('sidebarTitle').textContent = titles[product];
-  
-  currentCategory = 'overview';
-  document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
-  document.querySelector('.sidebar-link').classList.add("active");
-  
+  loadSidebarMenu(product);
+  currentCategory = getSidebarCategories(product)[0].id;
   updateContent();
 }
 
 function switchCategory(category) {
   currentCategory = category;
-  
   document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
   event.target.closest('.sidebar-link').classList.add("active");
-  
   updateContent();
 }
 
@@ -231,96 +265,37 @@ function updateContent() {
     'xc': 'SMART CAMERA',
     'xs': 'SMART CODE READER'
   };
-  
-  const categoryNames = {
-    'sub1': 'sub1',
-    'sub2': 'sub2',
-    'sub3': 'sub3',
-  };
+
+  const categories = getSidebarCategories(currentProduct);
+  const currentCat = categories.find(cat => cat.id === currentCategory);
+  const categoryName = currentCat ? currentCat.label : currentCategory;
   
   const productName = productNames[currentProduct];
-  const categoryName = categoryNames[currentCategory];
   
   let html = `
     <h2>${productName} - ${categoryName}</h2>
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
-  
-  if (currentCategory === 'sub1') {
-    html += `
-      <div class="resource-grid">
-        <div class="resource-card">
-          <div class="resource-title">${productName} Paper Survey</div>
-          <div class="resource-meta">Updated: October 2024</div>
-          <div class="resource-actions">
-            <button class="btn-resource btn-view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn-resource btn-download">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
+
+  html += `
+    <div class="resource-grid">
+      <div class="resource-card">
+        <div class="resource-title">${productName} ${categoryName}</div>
+        <div class="resource-actions">
+          <button class="btn-resource btn-view">
+            <i class="fas fa-eye"></i> View
+          </button>
         </div>
       </div>
-    `;
-  } else if (currentCategory === 'sub2') {
-    html += `
-      <div class="resource-grid">
-        <div class="resource-card">
-          <div class="resource-title">${productName} Paper Survey</div>
-          <div class="resource-meta">Updated: October 2024</div>
-          <div class="resource-actions">
-            <button class="btn-resource btn-view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn-resource btn-download">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  } else if (currentCategory === 'sub3') {
-    html += `
-      <div class="resource-grid">
-        <div class="resource-card">
-          <div class="resource-title">${productName} Paper Survey</div>
-          <div class="resource-meta">Updated: October 2024</div>
-          <div class="resource-actions">
-            <button class="btn-resource btn-view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn-resource btn-download">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  } else {
-    html += `
-      <div class="resource-grid">
-        <div class="resource-card">
-          <div class="resource-title">${productName} ${categoryName} Document</div>
-          <div class="resource-meta">Available for download</div>
-          <div class="resource-actions">
-            <button class="btn-resource btn-view">
-              <i class="fas fa-eye"></i> View
-            </button>
-            <button class="btn-resource btn-download">
-              <i class="fas fa-download"></i> Download
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
+    </div>
+  `;
   
   content.innerHTML = html;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
+    loadSidebarMenu(currentProduct);
     updateContent();
 });
 </script>
@@ -330,4 +305,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
