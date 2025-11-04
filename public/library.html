@@ -13,7 +13,6 @@
 <header class="header">
     <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
     <nav class="nav-desktop" id="navMenu">
-        <!-- Navigation will be dynamically loaded based on role -->
     </nav>
 </header>
 
@@ -253,7 +252,6 @@ function switchCategory(category) {
 }
 
 function getDocumentLink(product, category) {
-  // Define document links for each product and category
   const documentLinks = {
     'aoi': {
       'overview': '',
@@ -268,7 +266,7 @@ function getDocumentLink(product, category) {
       'v810is2ex': ''
     },
     'spi': {
-      'overview': '',
+      'overview': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
       'v310ispi': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
       'v310ioptimus': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
     },
@@ -352,3 +350,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
