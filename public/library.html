@@ -30,25 +30,25 @@
     <!-- tab solution-->
     <div class="content-tabs">
       <div class="tab-headers">
-        <button class="tab-header active" onclick="switchProduct(event,'spi')">
+        <button class="tab-header active" onclick="switchProduct('spi')">
           <i></i> SPI
         </button>
-        <button class="tab-header" onclick="switchProduct(event,'aoi')">
+        <button class="tab-header" onclick="switchProduct('aoi')">
           <i></i> AOI
         </button>
-        <button class="tab-header" onclick="switchProduct(event,'axi')">
+        <button class="tab-header" onclick="switchProduct('axi')">
           <i></i> AXI
         </button>
-        <button class="tab-header" onclick="switchProduct(event,'arv')">
+        <button class="tab-header" onclick="switchProduct('arv')">
           <i></i> ARV
         </button>
-        <button class="tab-header" onclick="switchProduct(event,'vone')">
+        <button class="tab-header" onclick="switchProduct('vone')">
           <i></i> V-ONE
         </button>
-        <button class="tab-header" onclick="switchProduct(event,'xc')">
+        <button class="tab-header" onclick="switchProduct('xc')">
           <i></i> XC
         </button>
-        <button class="tab-header" onclick="switchProduct(event,'xs')">
+        <button class="tab-header" onclick="switchProduct('xs')">
           <i></i> XS
         </button>
       </div>
@@ -534,7 +534,6 @@ async function processDocument() {
   updateProgress(20);
   
   try {
-    // Extract text based on file type
     if (uploadedFile.type === 'application/pdf') {
       extractedText = await extractTextFromPDF(uploadedFile);
     } else {
@@ -543,21 +542,16 @@ async function processDocument() {
     
     updateProgress(50);
     showProcessingStatus('Analyzing questions...');
-    
-    // Extract questions from document
     const questions = extractQuestions(extractedText);
     
     updateProgress(70);
     showProcessingStatus('Matching with survey library...');
-    
-    // Match with survey library
     const selectedProduct = document.getElementById('productSelect').value;
     matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
     
     updateProgress(100);
     showProcessingStatus('Processing complete!');
-    
-    // Show results
+
     setTimeout(() => {
       document.getElementById('processingStatus').style.display = 'none';
       showMatchResults();
@@ -624,12 +618,12 @@ function extractQuestions(text) {
     /^[A-Z]\.\s*(.+\?)/i,    // A. Question?
     /^Q\d*[\.\:]\s*(.+)/i,   // Q1: Question or Q. Question
     /^Question\s*\d*[\.\:]\s*(.+)/i,  // Question 1: ...
-    /(.+\?)\s*$/i            // Any line ending with ?
+    /(.+\?)\s*$/i        
   ];
   
   lines.forEach((line, index) => {
     line = line.trim();
-    if (line.length < 10) return; // Skip very short lines
+    if (line.length < 10) return; 
     
     for (const pattern of questionPatterns) {
       const match = line.match(pattern);
@@ -657,7 +651,7 @@ function matchQuestionsWithLibrary(questions, product) {
     
     productLibrary.forEach(libraryItem => {
       const score = calculateSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.6) { // 60% similarity threshold
+      if (score > highestScore && score > 0.6) { 
         highestScore = score;
         bestMatch = libraryItem;
       }
@@ -677,7 +671,6 @@ function matchQuestionsWithLibrary(questions, product) {
 }
 
 function calculateSimilarity(str1, str2) {
-  // Simple word-based similarity calculation
   const words1 = str1.toLowerCase().split(/\s+/);
   const words2 = str2.toLowerCase().split(/\s+/);
   
@@ -717,8 +710,7 @@ function showMatchResults() {
 
 async function downloadFilledDocument() {
   if (!uploadedFile || matchedData.length === 0) return;
-  
-  // Create a formatted document with questions and answers
+
   let outputText = '='.repeat(80) + '\n';
   outputText += 'AUTO-FILLED SURVEY DOCUMENT\n';
   outputText += 'Generated: ' + new Date().toLocaleString() + '\n';
@@ -740,8 +732,7 @@ async function downloadFilledDocument() {
     
     outputText += '\n' + '-'.repeat(80) + '\n';
   });
-  
-  // Create and download file
+
   const blob = new Blob([outputText], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -767,3 +758,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
