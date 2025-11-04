@@ -149,8 +149,7 @@ function loadNavigation(role) {
     }
     
     navMenu.innerHTML = navHTML;
-    
-    // Re-attach logout event listener
+
     document.getElementById("logoutBtn").addEventListener("click", (e) => {
         e.preventDefault();
         console.log('Logout button clicked');
@@ -174,8 +173,7 @@ function getSidebarCategories(product) {
     'spi': [
       { id: 'overview', label: 'Overview'},
       { id: 'v310ispi', label: 'V310i SPI for Advanced Packaging and Microelectronics' },
-      { id: 'v310ioptimus', label: 'V310i Optimus 3D'},
-      { id: 'case-studies', label: 'Case Studies'}
+      { id: 'v310ioptimus', label: 'V310i Optimus 3D'}
     ],
     'aoi': [
       { id: 'overview', label: 'Overview'},
@@ -305,3 +303,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
