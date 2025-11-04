@@ -383,11 +383,14 @@ function initCharts() {
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
-    const breakdownHTML = '<ul style="padding-left:16px;margin:0;">' +
-    Object.entries(productStats)
-    .map(([cat, stats]) => `<li>${cat}: ${stats.win}W / ${stats.lose}L</li>`)
-    .join('') +
-    '</ul>';
+    const breakdownHTML = `
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding-left: 0; margin: 0; list-style: none;">
+        ${Object.entries(productStats)
+        .map(([cat, stats]) => `
+            <div>${cat}: ${stats.win}W / ${stats.lose}L</div>
+        `)
+        .join('')}
+    </div>`;
     document.getElementById('categoryBreakdown').innerHTML = breakdownHTML;
 
     const categories = Object.keys(productStats);
@@ -689,6 +692,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
