@@ -3976,6 +3976,7 @@ label {
 .resource-actions {
   display: flex;
   gap: 10px;
+  justify-content: flex-end;
 }
 
 .btn-resource {
@@ -4040,3 +4041,4 @@ label {
   gap: 2rem;
   padding: 2rem;
 }
+
