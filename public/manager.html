@@ -383,9 +383,11 @@ function initCharts() {
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
-    const breakdownHTML = Object.entries(productStats)
-        .map(([cat, stats]) => `${cat}: ${stats.win}W / ${stats.lose}L`)
-        .join(' • ');
+    const breakdownHTML = '<ul style="padding-left:16px;margin:0;">' +
+    Object.entries(productStats)
+    .map(([cat, stats]) => `<li>${cat}: ${stats.win}W / ${stats.lose}L</li>`)
+    .join('') +
+    '</ul>';
     document.getElementById('categoryBreakdown').innerHTML = breakdownHTML;
 
     const categories = Object.keys(productStats);
@@ -687,6 +689,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
