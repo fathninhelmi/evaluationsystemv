@@ -428,8 +428,6 @@ function viewDocument(url) {
   }
 }
 
-// ============ FILE UPLOAD & PROCESSING FUNCTIONS ============
-
 function openUploadModal() {
   document.getElementById('uploadModal').style.display = 'flex';
 }
@@ -763,8 +761,6 @@ async function downloadFilledDocument() {
 }
 
 async function loadSurveyLibrary() {
-  // This loads sample survey data
-  // Replace this with actual database fetch from Appwrite
   surveyLibrary = {
     'spi': [
       { question: 'What is the inspection method', answer: '3D inspection using laser triangulation technology' },
@@ -780,41 +776,6 @@ async function loadSurveyLibrary() {
       { question: 'What is the false call rate', answer: 'Less than 0.1% false call rate with AI-powered inspection' },
       { question: 'Does it support 3D inspection', answer: 'Yes
 
-<script>
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-const { Client, Account, Databases, Query } = window.Appwrite;
-const client = new Client();
-client.setEndpoint("https://fra.cloud.appwrite.io/v1")
-.setProject("68ddd7de00255d4f5c96");
-
-const account = new Account(client);
-const databases = new Databases(client);
-const databaseId = "68ba8a9c001f17064e15";
-const collectionId = "68ba8c240002116fa647";
-
-let currentProduct = 'spi';
-let currentCategory = 'overview';
-let userRole = '';
-let uploadedFile = null;
-let extractedText = '';
-let matchedData = [];
-let surveyLibrary = {};
-
-async function checkSession() {
-    try {
-        const user = await account.get();
-        console.log('Logged in as:', user.email);
-
-        await getUserRole(user.$id);
-        loadNavigation(userRole);
-        
-    } catch (err) {
-        console.error('No active session:', err);
-        window.location.href = 'index.html';
-    }
-}
 
 async function getUserRole(userId) {
     try {
@@ -837,174 +798,6 @@ async function getUserRole(userId) {
     }
 }
 
-function loadNavigation(role) {
-    const navMenu = document.getElementById('navMenu');
-    let navHTML = '';
-    
-    if (role === 'admin') {
-        navHTML = `
-            <a href="approveduser.html" class="nav-link">User Management</a>
-            <a href="manageform.html" class="nav-link">Manage Forms</a>
-            <a href="referencecust.html" class="nav-link">References Details</a>
-            <a href="library.html" class="nav-link active">Library</a>
-            <a href="#" class="nav-link" id="logoutBtn">Logout</a>
-        `;
-    } else if (role === 'manager') {
-        navHTML = `
-            <a href="manager.html" class="nav-link">Home</a>
-            <a href="spreadsheet.html" class="nav-link">Spreadsheet</a>
-            <a href="request.html" class="nav-link">Requested Form</a>
-            <a href="library.html" class="nav-link active">Library</a>
-            <a href="#" id="logoutBtn" class="nav-link">Logout</a>
-        `;
-    } else {
-        navHTML = `
-            <a href="staff.html" class="nav-link">My Forms</a>
-            <a href="library.html" class="nav-link active">Library</a>
-            <a href="#" class="nav-link" id="logoutBtn">Logout</a>
-        `;
-    }
-    
-    navMenu.innerHTML = navHTML;
-
-    document.getElementById("logoutBtn").addEventListener("click", (e) => {
-        e.preventDefault();
-        console.log('Logout button clicked');
-        logout();
-    });
-}
-
-async function logout() {
-  try {
-    await account.deleteSession("current");
-    console.log('Logged out successfully');
-  } catch (err) {
-    console.warn('Could not delete session (maybe already logged out):', err);
-  } finally {
-    window.location.href = "index.html";
-  }
-}
-
-function getSidebarCategories(product) {
-  const categories = {
-    'spi': [
-      { id: 'overview', label: 'Overview'},
-      { id: 'v310ispi', label: 'V310i SPI for Advanced Packaging and Microelectronics' },
-      { id: 'v310ioptimus', label: 'V310i Optimus 3D'}
-    ],
-    'aoi': [
-      { id: 'overview', label: 'Overview'},
-      { id: 'visionpro', label: 'V510i Vision Pro' },
-      { id: 'v510ioptimus', label: 'V510i Optimus 3D'},
-      { id: 'dst', label: 'V510i DST'}
-    ],
-    'axi': [
-      { id: 'overview', label: 'Overview'},
-      { id: 'qx1', label: 'V810iAi QXI' },
-      { id: 'v810is3', label: 'V810i S3'},
-      { id: 'v810is2ex', label: 'V810i S2EX'}
-    ],
-    'arv': [
-      { id: 'overview', label: 'Overview'},
-      { id: 'v9ifi', label: 'V9i FI' },
-      { id: 'v9ici', label: 'V9i CI'},
-      { id: 'v510ir', label: 'V510i R'}
-    ],
-    'vone': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'xc': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'xs': [
-      { id: 'overview', label: 'Overview'}
-    ]
-  };
-  
-  return categories[product] || categories['aoi'];
-}
-
-function loadSidebarMenu(product) {
-  const sidebarLinks = document.getElementById('sidebarLinks');
-  const categories = getSidebarCategories(product);
-  
-  let html = '';
-  categories.forEach((cat, index) => {
-    const activeClass = index === 0 ? 'active' : '';
-    html += `
-      <div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat.id}')">
-        <span>${cat.label}</span>
-      </div>
-    `;
-  });
-  
-  sidebarLinks.innerHTML = html;
-}
-
-function switchProduct(product) {
-  currentProduct = product;
-  document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
-  event.target.closest('.tab-header').classList.add("active");
-  const titles = {
-    'aoi': 'AOI Product',
-    'axi': 'AXI Product',
-    'spi': 'SPI Product',
-    'arv': 'ARV Product',
-    'vone': 'V-ONE Product',
-    'xc': 'SMART CAMERA Product',
-    'xs': 'SMART CODE READER Product'
-  };
-  document.getElementById('sidebarTitle').textContent = titles[product];
-  loadSidebarMenu(product);
-  currentCategory = getSidebarCategories(product)[0].id;
-  updateContent();
-}
-
-function switchCategory(category) {
-  currentCategory = category;
-  document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
-  event.target.closest('.sidebar-link').classList.add("active");
-  updateContent();
-}
-
-function getDocumentLink(product, category) {
-  const documentLinks = {
-    'aoi': {
-      'overview': '#',
-      'visionpro': '#',
-      'v510ioptimus': '#',
-      'dst': '#'
-    },
-    'axi': {
-      'overview': '#',
-      'qx1': '#',
-      'v810is3': '#',
-      'v810is2ex': '#'
-    },
-    'spi': {
-      'overview': '#',
-      'v310ispi': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
-      'v310ioptimus': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
-    },
-    'arv': {
-      'overview': '#',
-      'v9ifi': '#',
-      'v9ici': '#',
-      'v510ir': '#'
-    },
-    'vone': {
-      'overview': '#'
-    },
-    'xc': {
-      'overview': '#'
-    },
-    'xs': {
-      'overview': '#'
-    }
-  };
-  
-  return documentLinks[product]?.[category] || '#';
-}
 
 function updateContent() {
   const content = document.getElementById('mainContent');
@@ -1455,7 +1248,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
-
-
-
