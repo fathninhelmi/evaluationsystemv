@@ -4982,12 +4982,21 @@ label {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
 .btn-upload-doc {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 8px !important;
+  width: auto !important; 
+}
+
+.btn-upload-doc i {
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;}
+}
   
   .modal-actions {
     flex-direction: column;
@@ -5030,4 +5039,5 @@ label {
     padding: 12px;
   }
 }
+
 
