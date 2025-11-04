@@ -254,16 +254,16 @@ function switchCategory(category) {
 function getDocumentLink(product, category) {
   const documentLinks = {
     'aoi': {
-      'overview': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
-      'visionpro': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
-      'v510ioptimus': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
+      'overview': '#',
+      'visionpro': '#',
+      'v510ioptimus': '#',
       'dst': ''
     },
     'axi': {
-      'overview': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
-      'qx1': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
-      'v810is3': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
-      'v810is2ex': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing'
+      'overview': '#',
+      'qx1': '#',
+      'v810is3': '#',
+      'v810is2ex': '#'
     },
     'spi': {
       'overview': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
@@ -271,19 +271,19 @@ function getDocumentLink(product, category) {
       'v310ioptimus': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
     },
     'arv': {
-      'overview': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing',
-      'v9ifi': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing',
-      'v9ici': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing',
-      'v510ir': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
+      'overview': '#',
+      'v9ifi': '#',
+      'v9ici': '#',
+      'v510ir': '#'
     },
     'vone': {
-      'overview': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
+      'overview': '#'
     },
     'xc': {
-      'overview': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
+      'overview': '#'
     },
     'xs': {
-      'overview': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
+      'overview': '#'
     }
   };
   
@@ -319,7 +319,7 @@ html += `
       <div class="resource-card">
         <div class="resource-title">${productName} ${categoryName}</div>
         <div class="resource-actions">
-          <button class="btn-resource btn-view" onclick="viewDocument()">
+          <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
             <i class="fas fa-eye"></i> View
           </button>
         </div>
@@ -350,5 +350,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
-
