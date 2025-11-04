@@ -4983,10 +4983,11 @@ label {
     align-items: stretch;
   }
   
-  .btn-upload-doc {
-    width: 100%;
-    justify-content: center;
-  }
+.btn-upload-doc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;}
   
   .modal-actions {
     flex-direction: column;
@@ -5029,3 +5030,4 @@ label {
     padding: 12px;
   }
 }
+
