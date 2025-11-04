@@ -4,10 +4,654 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Product Paper Survey Library</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f5f7fa;
+  color: #2c3e50;
+}
+
+/* Header Styles */
+.header {
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo img {
+  height: 40px;
+}
+
+.nav-desktop {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #667eea;
+}
+
+/* Main Library Section */
+.main-library {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.container-lib {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.lib-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.lib-header h1 {
+  color: #2c3e50;
+  font-size: 28px;
+}
+
+.btn-upload-doc {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-upload-doc:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+/* Tab Styles */
+.content-tabs {
+  margin-top: 2rem;
+}
+
+.tab-headers {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.tab-header {
+  padding: 12px 24px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c3e50;
+  transition: all 0.3s;
+}
+
+.tab-header:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.tab-header.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+/* Library Layout */
+.library-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+}
+
+.library-content {
+  min-height: 400px;
+}
+
+.content-box {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.content-box h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.content-box p {
+  color: #7f8c8d;
+  line-height: 1.6;
+}
+
+/* Sidebar */
+.library-sidebar {
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.sidebar-menu {
+  padding: 1.5rem;
+}
+
+.sidebar-header {
+  font-size: 14px;
+  font-weight: 700;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar-link {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.sidebar-link:hover {
+  background: #e8ecf1;
+}
+
+.sidebar-link.active {
+  background: #667eea;
+  color: white;
+}
+
+/* Resource Grid */
+.resource-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.resource-card {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.resource-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.resource-title {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.btn-resource {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s;
+}
+
+.btn-view {
+  background: #667eea;
+  color: white;
+}
+
+.btn-view:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  max-width: 700px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-content h2 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+}
+
+.modal-content h2 i {
+  color: #667eea;
+}
+
+.modal-description {
+  color: #7f8c8d;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+  margin-top: -10px;
+}
+
+.close:hover {
+  color: #000;
+}
+
+/* File Upload Styles */
+.upload-section {
+  margin-top: 20px;
+}
+
+.file-drop-zone {
+  border: 3px dashed #bdc3c7;
+  border-radius: 12px;
+  padding: 50px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.dragover {
+  border-color: #667eea;
+  background: #f0f3ff;
+}
+
+.file-drop-zone i {
+  font-size: 48px;
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.file-drop-zone p {
+  margin: 10px 0;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.file-info {
+  font-size: 13px !important;
+  color: #95a5a6 !important;
+}
+
+/* File Preview */
+.file-preview {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.file-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.file-preview-item i {
+  font-size: 36px;
+}
+
+.file-preview-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.file-size {
+  font-size: 13px;
+  color: #7f8c8d;
+}
+
+.btn-remove {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-remove:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+/* Product Select */
+.product-select-group {
+  margin: 25px 0;
+}
+
+.product-select-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.product-select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2c3e50;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.product-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Processing Status */
+.processing-status {
+  margin: 25px 0;
+  padding: 25px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#statusMessage {
+  color: #2c3e50;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* Match Results */
+.match-results {
+  margin: 25px 0;
+  padding: 25px;
+  background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+  border-radius: 12px;
+}
+
+.match-results h3 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.match-results h3 i {
+  color: #48bb78;
+  font-size: 24px;
+}
+
+.results-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.result-stat {
+  text-align: center;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+  display: block;
+  font-size: 32px;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #7f8c8d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-success {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #2c3e50;
+}
+
+.btn-secondary:hover {
+  background: #bdc3c7;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+}
+
+/* Footer */
+.footer-regis {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+  .library-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .lib-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .btn-upload-doc {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 25px;
+    width: 95%;
+  }
+  
+  .results-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .tab-headers {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary,
+  .btn-secondary,
+  .btn-success {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>
 </head>
 <body>
 <header class="header">
@@ -20,6 +664,9 @@
   <div class="container-lib">
     <div class="lib-header">
       <h1>Product Paper Survey Library</h1>
+      <button class="btn-upload-doc" onclick="openUploadModal()">
+        <i class="fas fa-upload"></i> Auto-Fill Survey Document
+      </button>
     </div>
 
     <!-- tab solution-->
@@ -70,7 +717,90 @@
   </div>
 </main>
 
+<!-- Upload Modal -->
+<div id="uploadModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeUploadModal()">&times;</span>
+    <h2><i class="fas fa-file-upload"></i> Upload Survey Document</h2>
+    <p class="modal-description">Upload a customer survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
+    
+    <div class="upload-section">
+      <div class="file-drop-zone" id="dropZone">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Drag & drop your file here or click to browse</p>
+        <p class="file-info">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
+      </div>
+      
+      <div id="filePreview" class="file-preview" style="display: none;">
+        <div class="file-preview-item">
+          <i class="fas fa-file-pdf"></i>
+          <div class="file-preview-info">
+            <span class="file-name" id="fileName"></span>
+            <span class="file-size" id="fileSize"></span>
+          </div>
+          <button class="btn-remove" onclick="removeFile()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="product-select-group">
+        <label for="productSelect">Select Product Category:</label>
+        <select id="productSelect" class="product-select">
+          <option value="spi">SPI</option>
+          <option value="aoi">AOI</option>
+          <option value="axi">AXI</option>
+          <option value="arv">ARV</option>
+          <option value="vone">V-ONE</option>
+          <option value="xc">SMART CAMERA</option>
+          <option value="xs">SMART CODE READER</option>
+        </select>
+      </div>
+      
+      <div id="processingStatus" class="processing-status" style="display: none;">
+        <div class="spinner"></div>
+        <p id="statusMessage">Processing document...</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar"></div>
+        </div>
+      </div>
+      
+      <div id="matchResults" class="match-results" style="display: none;">
+        <h3><i class="fas fa-check-circle"></i> Matching Complete</h3>
+        <div class="results-summary">
+          <div class="result-stat">
+            <span class="stat-number" id="questionsFound">0</span>
+            <span class="stat-label">Questions Found</span>
+          </div>
+          <div class="result-stat">
+            <span class="stat-number" id="answersMatched">0</span>
+            <span class="stat-label">Answers Matched</span>
+          </div>
+          <div class="result-stat">
+            <span class="stat-number" id="matchRate">0%</span>
+            <span class="stat-label">Match Rate</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
+        <button class="btn-primary" id="processBtn" onclick="processDocument()" disabled>
+          <i class="fas fa-magic"></i> Process & Auto-Fill
+        </button>
+        <button class="btn-success" id="downloadBtn" onclick="downloadFilledDocument()" style="display: none;">
+          <i class="fas fa-download"></i> Download Filled Document
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 const { Client, Account, Databases, Query } = window.Appwrite;
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -84,6 +814,10 @@ const collectionId = "68ba8c240002116fa647";
 let currentProduct = 'spi';
 let currentCategory = 'overview';
 let userRole = '';
+let uploadedFile = null;
+let extractedText = '';
+let matchedData = [];
+let surveyLibrary = {};
 
 async function checkSession() {
     try {
@@ -183,7 +917,7 @@ function getSidebarCategories(product) {
     ],
     'axi': [
       { id: 'overview', label: 'Overview'},
-      { id: 'qx1', label: 'V810iAi QX1' },
+      { id: 'qx1', label: 'V810iAi QXI' },
       { id: 'v810is3', label: 'V810i S3'},
       { id: 'v810is2ex', label: 'V810i S2EX'}
     ],
@@ -216,7 +950,6 @@ function loadSidebarMenu(product) {
     const activeClass = index === 0 ? 'active' : '';
     html += `
       <div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat.id}')">
-        <i class="${cat.icon}"></i>
         <span>${cat.label}</span>
       </div>
     `;
@@ -257,7 +990,7 @@ function getDocumentLink(product, category) {
       'overview': '#',
       'visionpro': '#',
       'v510ioptimus': '#',
-      'dst': ''
+      'dst': '#'
     },
     'axi': {
       'overview': '#',
@@ -266,7 +999,7 @@ function getDocumentLink(product, category) {
       'v810is2ex': '#'
     },
     'spi': {
-      'overview': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
+      'overview': '#',
       'v310ispi': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
       'v310ioptimus': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
     },
@@ -314,7 +1047,7 @@ function updateContent() {
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
 
-html += `
+  html += `
     <div class="resource-grid">
       <div class="resource-card">
         <div class="resource-title">${productName} ${categoryName}</div>
@@ -338,10 +1071,399 @@ function viewDocument(url) {
   }
 }
 
+// ============ FILE UPLOAD & PROCESSING FUNCTIONS ============
+
+function openUploadModal() {
+  document.getElementById('uploadModal').style.display = 'flex';
+}
+
+function closeUploadModal() {
+  document.getElementById('uploadModal').style.display = 'none';
+  resetUploadForm();
+}
+
+function resetUploadForm() {
+  uploadedFile = null;
+  extractedText = '';
+  matchedData = [];
+  document.getElementById('fileInput').value = '';
+  document.getElementById('filePreview').style.display = 'none';
+  document.getElementById('processingStatus').style.display = 'none';
+  document.getElementById('matchResults').style.display = 'none';
+  document.getElementById('processBtn').disabled = true;
+  document.getElementById('downloadBtn').style.display = 'none';
+}
+
+function setupFileUpload() {
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  
+  dropZone.addEventListener('click', () => fileInput.click());
+  
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+  });
+  
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    handleFileSelect(file);
+  });
+  
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    handleFileSelect(file);
+  });
+}
+
+function handleFileSelect(file) {
+  if (!file) return;
+  
+  const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  
+  if (!validTypes.includes(file.type)) {
+    alert('Please upload only PDF or Word documents.');
+    return;
+  }
+  
+  if (file.size > maxSize) {
+    alert('File size must be less than 10MB.');
+    return;
+  }
+  
+  uploadedFile = file;
+  displayFilePreview(file);
+  document.getElementById('processBtn').disabled = false;
+}
+
+function displayFilePreview(file) {
+  const preview = document.getElementById('filePreview');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  
+  fileName.textContent = file.name;
+  fileSize.textContent = formatFileSize(file.size);
+  preview.style.display = 'block';
+  
+  const icon = preview.querySelector('.fa-file-pdf');
+  if (file.type.includes('word')) {
+    icon.className = 'fas fa-file-word';
+    icon.style.color = '#2B579A';
+  } else {
+    icon.className = 'fas fa-file-pdf';
+    icon.style.color = '#E74C3C';
+  }
+}
+
+function removeFile() {
+  uploadedFile = null;
+  document.getElementById('filePreview').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('processBtn').disabled = true;
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+async function processDocument() {
+  if (!uploadedFile) return;
+  
+  showProcessingStatus('Extracting text from document...');
+  updateProgress(20);
+  
+  try {
+    // Extract text based on file type
+    if (uploadedFile.type === 'application/pdf') {
+      extractedText = await extractTextFromPDF(uploadedFile);
+    } else {
+      extractedText = await extractTextFromWord(uploadedFile);
+    }
+    
+    updateProgress(50);
+    showProcessingStatus('Analyzing questions...');
+    
+    // Extract questions from document
+    const questions = extractQuestions(extractedText);
+    
+    updateProgress(70);
+    showProcessingStatus('Matching with survey library...');
+    
+    // Match with survey library
+    const selectedProduct = document.getElementById('productSelect').value;
+    matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
+    
+    updateProgress(100);
+    showProcessingStatus('Processing complete!');
+    
+    // Show results
+    setTimeout(() => {
+      document.getElementById('processingStatus').style.display = 'none';
+      showMatchResults();
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error processing document:', error);
+    alert('Error processing document. Please try again.');
+    document.getElementById('processingStatus').style.display = 'none';
+  }
+}
+
+async function extractTextFromPDF(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const typedArray = new Uint8Array(e.target.result);
+        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+        let fullText = '';
+        
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items.map(item => item.str).join(' ');
+          fullText += pageText + '\n';
+        }
+        
+        resolve(fullText);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function extractTextFromWord(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const arrayBuffer = e.target.result;
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        resolve(result.value);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function extractQuestions(text) {
+  const questions = [];
+  const lines = text.split('\n');
+  
+  // Common question patterns
+  const questionPatterns = [
+    /^\d+[\.\)]\s*(.+\?)/i,  // 1. Question?
+    /^[A-Z]\.\s*(.+\?)/i,    // A. Question?
+    /^Q\d*[\.\:]\s*(.+)/i,   // Q1: Question or Q. Question
+    /^Question\s*\d*[\.\:]\s*(.+)/i,  // Question 1: ...
+    /(.+\?)\s*$/i            // Any line ending with ?
+  ];
+  
+  lines.forEach((line, index) => {
+    line = line.trim();
+    if (line.length < 10) return; // Skip very short lines
+    
+    for (const pattern of questionPatterns) {
+      const match = line.match(pattern);
+      if (match) {
+        questions.push({
+          text: match[1] || match[0],
+          originalLine: line,
+          lineNumber: index + 1
+        });
+        break;
+      }
+    }
+  });
+  
+  return questions;
+}
+
+function matchQuestionsWithLibrary(questions, product) {
+  const matches = [];
+  const productLibrary = surveyLibrary[product] || [];
+  
+  questions.forEach(question => {
+    let bestMatch = null;
+    let highestScore = 0;
+    
+    productLibrary.forEach(libraryItem => {
+      const score = calculateSimilarity(question.text, libraryItem.question);
+      if (score > highestScore && score > 0.6) { // 60% similarity threshold
+        highestScore = score;
+        bestMatch = libraryItem;
+      }
+    });
+    
+    matches.push({
+      question: question.text,
+      originalLine: question.originalLine,
+      lineNumber: question.lineNumber,
+      matchedAnswer: bestMatch ? bestMatch.answer : null,
+      confidence: Math.round(highestScore * 100),
+      matched: bestMatch !== null
+    });
+  });
+  
+  return matches;
+}
+
+function calculateSimilarity(str1, str2) {
+  // Simple word-based similarity calculation
+  const words1 = str1.toLowerCase().split(/\s+/);
+  const words2 = str2.toLowerCase().split(/\s+/);
+  
+  const set1 = new Set(words1);
+  const set2 = new Set(words2);
+  
+  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const union = new Set([...set1, ...set2]);
+  
+  return intersection.size / union.size;
+}
+
+function showProcessingStatus(message) {
+  const status = document.getElementById('processingStatus');
+  const statusMessage = document.getElementById('statusMessage');
+  statusMessage.textContent = message;
+  status.style.display = 'block';
+}
+
+function updateProgress(percent) {
+  const progressBar = document.getElementById('progressBar');
+  progressBar.style.width = percent + '%';
+}
+
+function showMatchResults() {
+  const resultsDiv = document.getElementById('matchResults');
+  const totalQuestions = matchedData.length;
+  const matchedQuestions = matchedData.filter(m => m.matched).length;
+  const matchRate = totalQuestions > 0 ? Math.round((matchedQuestions / totalQuestions) * 100) : 0;
+  
+  document.getElementById('questionsFound').textContent = totalQuestions;
+  document.getElementById('answersMatched').textContent = matchedQuestions;
+  document.getElementById('matchRate').textContent = matchRate + '%';
+  
+  resultsDiv.style.display = 'block';
+}
+
+async function downloadFilledDocument() {
+  if (!uploadedFile || matchedData.length === 0) return;
+  
+  // Create a formatted document with questions and answers
+  let outputText = '='.repeat(80) + '\n';
+  outputText += 'AUTO-FILLED SURVEY DOCUMENT\n';
+  outputText += 'Generated: ' + new Date().toLocaleString() + '\n';
+  outputText += 'Original File: ' + uploadedFile.name + '\n';
+  outputText += 'Product: ' + document.getElementById('productSelect').value.toUpperCase() + '\n';
+  outputText += '='.repeat(80) + '\n\n';
+  
+  matchedData.forEach((item, index) => {
+    outputText += `\n[Question ${index + 1}]\n`;
+    outputText += `${item.originalLine}\n\n`;
+    
+    if (item.matched) {
+      outputText += `[Auto-Filled Answer] (Confidence: ${item.confidence}%)\n`;
+      outputText += `${item.matchedAnswer}\n`;
+    } else {
+      outputText += `[No Match Found]\n`;
+      outputText += `Please provide answer manually.\n`;
+    }
+    
+    outputText += '\n' + '-'.repeat(80) + '\n';
+  });
+  
+  // Create and download file
+  const blob = new Blob([outputText], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'filled_survey_' + Date.now() + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  alert('Document downloaded successfully! Please review and edit the auto-filled answers as needed.');
+}
+
+async function loadSurveyLibrary() {
+  // This loads sample survey data
+  // Replace this with actual database fetch from Appwrite
+  surveyLibrary = {
+    'spi': [
+      { question: 'What is the inspection method', answer: '3D inspection using laser triangulation technology' },
+      { question: 'What is the measurement accuracy', answer: 'Up to 1 micron measurement accuracy' },
+      { question: 'What board sizes are supported', answer: 'Board sizes from 50mm x 50mm up to 510mm x 460mm' },
+      { question: 'What is the inspection speed', answer: 'Inspection speed up to 85 cm²/sec' },
+      { question: 'Does it support automated optical inspection', answer: 'Yes, fully automated with real-time defect detection' },
+      { question: 'What type of solder paste inspection', answer: 'Volume, area, height, X-Y offset, shape analysis' }
+    ],
+    'aoi': [
+      { question: 'What components can be inspected', answer: 'All SMT components including 01005, BGA, QFN, connectors' },
+      { question: 'What defects can be detected', answer: 'Missing components, wrong parts, polarity, solder bridges, insufficient solder' },
+      { question: 'What is the false call rate', answer: 'Less than 0.1% false call rate with AI-powered inspection' },
+      { question: 'Does it support 3D inspection', answer: 'Yes, advanced 3D inspection with multiple projections' },
+      { question: 'What is the inspection resolution', answer: 'Up to 10 microns with high-resolution cameras' }
+    ],
+    'axi': [
+      { question: 'What is the X-ray resolution', answer: 'Up to 1 micron resolution with 16-bit grayscale imaging' },
+      { question: 'Can it inspect BGA and QFN', answer: 'Yes, full 3D inspection of BGA, QFN, and hidden solder joints' },
+      { question: 'What is the inspection time', answer: 'Typical inspection time 30-60 seconds per board' },
+      { question: 'Does it detect voids in solder', answer: 'Yes, void detection and analysis up to 5% accuracy' },
+      { question: 'What X-ray tube type is used', answer: 'Closed tube with 130kV maximum voltage' }
+    ],
+    'arv': [
+      { question: 'What types of coating can be inspected', answer: 'Conformal coating, underfill, potting, and adhesives' },
+      { question: 'What is the measurement method', answer: 'Laser profilometry and fluorescence imaging' },
+      { question: 'Can it measure coating thickness', answer: 'Yes, measures thickness from 10 to 500 microns' },
+      { question: 'Does it detect coating coverage', answer: 'Yes, 100% coverage verification with UV fluorescence' }
+    ],
+    'vone': [
+      { question: 'What inspection types are integrated', answer: 'Combined SPI, AOI, and AXI in one platform' },
+      { question: 'What is the platform advantage', answer: 'Reduces footprint and increases throughput by 40%' },
+      { question: 'Is it compatible with Industry 4.0', answer: 'Yes, full IIoT connectivity and data analytics' }
+    ],
+    'xc': [
+      { question: 'What applications is it suitable for', answer: 'In-line inspection, robot guidance, presence detection' },
+      { question: 'What is the camera resolution', answer: 'Up to 12 megapixels with programmable lighting' },
+      { question: 'Does it support multiple protocols', answer: 'Yes, supports Ethernet/IP, Profinet, and Modbus TCP' }
+    ],
+    'xs': [
+      { question: 'What codes can be read', answer: '1D barcodes, 2D Data Matrix, QR codes' },
+      { question: 'What is the read rate', answer: 'Up to 60 reads per second with 99.9% accuracy' },
+      { question: 'Does it work in difficult conditions', answer: 'Yes, reads damaged, low-contrast, and distorted codes' }
+    ]
+  };
+  
+  console.log('Survey library loaded with', Object.keys(surveyLibrary).length, 'products');
+}
+
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
     loadSidebarMenu(currentProduct);
     updateContent();
+    setupFileUpload();
+    await loadSurveyLibrary();
 });
 </script>
 
@@ -350,4 +1472,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
