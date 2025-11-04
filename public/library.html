@@ -18,10 +18,30 @@
     </nav>
 </header>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Paper Survey Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+    <nav class="nav-desktop" id="navMenu">
+    </nav>
+</header>
+
 <main class="main-library">
+  <h1>Product Paper Survey Library</h1>
   <div class="container-lib">
     <div class="lib-header">
-      <h1>Product Paper Survey Library</h1>
       <button class="btn-upload-doc" onclick="openUploadModal()">
         <i class="fas fa-upload"></i> Auto-Fill Survey Document
       </button>
@@ -779,6 +799,632 @@ async function loadSurveyLibrary() {
       { question: 'What components can be inspected', answer: 'All SMT components including 01005, BGA, QFN, connectors' },
       { question: 'What defects can be detected', answer: 'Missing components, wrong parts, polarity, solder bridges, insufficient solder' },
       { question: 'What is the false call rate', answer: 'Less than 0.1% false call rate with AI-powered inspection' },
+      { question: 'Does it support 3D inspection', answer: 'Yes
+
+<script>
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const { Client, Account, Databases, Query } = window.Appwrite;
+const client = new Client();
+client.setEndpoint("https://fra.cloud.appwrite.io/v1")
+.setProject("68ddd7de00255d4f5c96");
+
+const account = new Account(client);
+const databases = new Databases(client);
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba8c240002116fa647";
+
+let currentProduct = 'spi';
+let currentCategory = 'overview';
+let userRole = '';
+let uploadedFile = null;
+let extractedText = '';
+let matchedData = [];
+let surveyLibrary = {};
+
+async function checkSession() {
+    try {
+        const user = await account.get();
+        console.log('Logged in as:', user.email);
+
+        await getUserRole(user.$id);
+        loadNavigation(userRole);
+        
+    } catch (err) {
+        console.error('No active session:', err);
+        window.location.href = 'index.html';
+    }
+}
+
+async function getUserRole(userId) {
+    try {
+        const response = await databases.listDocuments(
+            databaseId, 
+            collectionId, 
+            [Query.limit(1000)]
+        );
+        
+        const user = response.documents.find(doc => doc.$id === userId);
+        if (user) {
+            userRole = user.role || 'staff';
+        } else {
+            userRole = 'staff';
+        }
+        console.log('User role:', userRole);
+    } catch (err) {
+        console.error('Error fetching user role:', err);
+        userRole = 'staff';
+    }
+}
+
+function loadNavigation(role) {
+    const navMenu = document.getElementById('navMenu');
+    let navHTML = '';
+    
+    if (role === 'admin') {
+        navHTML = `
+            <a href="approveduser.html" class="nav-link">User Management</a>
+            <a href="manageform.html" class="nav-link">Manage Forms</a>
+            <a href="referencecust.html" class="nav-link">References Details</a>
+            <a href="library.html" class="nav-link active">Library</a>
+            <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+        `;
+    } else if (role === 'manager') {
+        navHTML = `
+            <a href="manager.html" class="nav-link">Home</a>
+            <a href="spreadsheet.html" class="nav-link">Spreadsheet</a>
+            <a href="request.html" class="nav-link">Requested Form</a>
+            <a href="library.html" class="nav-link active">Library</a>
+            <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+        `;
+    } else {
+        navHTML = `
+            <a href="staff.html" class="nav-link">My Forms</a>
+            <a href="library.html" class="nav-link active">Library</a>
+            <a href="#" class="nav-link" id="logoutBtn">Logout</a>
+        `;
+    }
+    
+    navMenu.innerHTML = navHTML;
+
+    document.getElementById("logoutBtn").addEventListener("click", (e) => {
+        e.preventDefault();
+        console.log('Logout button clicked');
+        logout();
+    });
+}
+
+async function logout() {
+  try {
+    await account.deleteSession("current");
+    console.log('Logged out successfully');
+  } catch (err) {
+    console.warn('Could not delete session (maybe already logged out):', err);
+  } finally {
+    window.location.href = "index.html";
+  }
+}
+
+function getSidebarCategories(product) {
+  const categories = {
+    'spi': [
+      { id: 'overview', label: 'Overview'},
+      { id: 'v310ispi', label: 'V310i SPI for Advanced Packaging and Microelectronics' },
+      { id: 'v310ioptimus', label: 'V310i Optimus 3D'}
+    ],
+    'aoi': [
+      { id: 'overview', label: 'Overview'},
+      { id: 'visionpro', label: 'V510i Vision Pro' },
+      { id: 'v510ioptimus', label: 'V510i Optimus 3D'},
+      { id: 'dst', label: 'V510i DST'}
+    ],
+    'axi': [
+      { id: 'overview', label: 'Overview'},
+      { id: 'qx1', label: 'V810iAi QXI' },
+      { id: 'v810is3', label: 'V810i S3'},
+      { id: 'v810is2ex', label: 'V810i S2EX'}
+    ],
+    'arv': [
+      { id: 'overview', label: 'Overview'},
+      { id: 'v9ifi', label: 'V9i FI' },
+      { id: 'v9ici', label: 'V9i CI'},
+      { id: 'v510ir', label: 'V510i R'}
+    ],
+    'vone': [
+      { id: 'overview', label: 'Overview'}
+    ],
+    'xc': [
+      { id: 'overview', label: 'Overview'}
+    ],
+    'xs': [
+      { id: 'overview', label: 'Overview'}
+    ]
+  };
+  
+  return categories[product] || categories['aoi'];
+}
+
+function loadSidebarMenu(product) {
+  const sidebarLinks = document.getElementById('sidebarLinks');
+  const categories = getSidebarCategories(product);
+  
+  let html = '';
+  categories.forEach((cat, index) => {
+    const activeClass = index === 0 ? 'active' : '';
+    html += `
+      <div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat.id}')">
+        <span>${cat.label}</span>
+      </div>
+    `;
+  });
+  
+  sidebarLinks.innerHTML = html;
+}
+
+function switchProduct(product) {
+  currentProduct = product;
+  document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
+  event.target.closest('.tab-header').classList.add("active");
+  const titles = {
+    'aoi': 'AOI Product',
+    'axi': 'AXI Product',
+    'spi': 'SPI Product',
+    'arv': 'ARV Product',
+    'vone': 'V-ONE Product',
+    'xc': 'SMART CAMERA Product',
+    'xs': 'SMART CODE READER Product'
+  };
+  document.getElementById('sidebarTitle').textContent = titles[product];
+  loadSidebarMenu(product);
+  currentCategory = getSidebarCategories(product)[0].id;
+  updateContent();
+}
+
+function switchCategory(category) {
+  currentCategory = category;
+  document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
+  event.target.closest('.sidebar-link').classList.add("active");
+  updateContent();
+}
+
+function getDocumentLink(product, category) {
+  const documentLinks = {
+    'aoi': {
+      'overview': '#',
+      'visionpro': '#',
+      'v510ioptimus': '#',
+      'dst': '#'
+    },
+    'axi': {
+      'overview': '#',
+      'qx1': '#',
+      'v810is3': '#',
+      'v810is2ex': '#'
+    },
+    'spi': {
+      'overview': '#',
+      'v310ispi': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
+      'v310ioptimus': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
+    },
+    'arv': {
+      'overview': '#',
+      'v9ifi': '#',
+      'v9ici': '#',
+      'v510ir': '#'
+    },
+    'vone': {
+      'overview': '#'
+    },
+    'xc': {
+      'overview': '#'
+    },
+    'xs': {
+      'overview': '#'
+    }
+  };
+  
+  return documentLinks[product]?.[category] || '#';
+}
+
+function updateContent() {
+  const content = document.getElementById('mainContent');
+  
+  const productNames = {
+    'aoi': 'AOI',
+    'axi': 'AXI',
+    'spi': 'SPI',
+    'arv': 'ARV',
+    'vone': 'V-ONE',
+    'xc': 'SMART CAMERA',
+    'xs': 'SMART CODE READER'
+  };
+
+  const categories = getSidebarCategories(currentProduct);
+  const currentCat = categories.find(cat => cat.id === currentCategory);
+  const categoryName = currentCat ? currentCat.label : currentCategory;
+  
+  const productName = productNames[currentProduct];
+  
+  let html = `
+    <h2>${productName} - ${categoryName}</h2>
+    <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
+  `;
+
+  html += `
+    <div class="resource-grid">
+      <div class="resource-card">
+        <div class="resource-title">${productName} ${categoryName}</div>
+        <div class="resource-actions">
+          <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
+            <i class="fas fa-eye"></i> View
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  content.innerHTML = html;
+}
+
+function viewDocument(url) {
+  if (url && url !== '#') {
+    window.open(url, '_blank');
+  } else {
+    alert('Document link not available for this category.');
+  }
+}
+
+// ============ FILE UPLOAD & PROCESSING FUNCTIONS ============
+
+function openUploadModal() {
+  document.getElementById('uploadModal').style.display = 'flex';
+}
+
+function closeUploadModal() {
+  document.getElementById('uploadModal').style.display = 'none';
+  resetUploadForm();
+}
+
+function resetUploadForm() {
+  uploadedFile = null;
+  extractedText = '';
+  matchedData = [];
+  document.getElementById('fileInput').value = '';
+  document.getElementById('filePreview').style.display = 'none';
+  document.getElementById('processingStatus').style.display = 'none';
+  document.getElementById('matchResults').style.display = 'none';
+  document.getElementById('processBtn').disabled = true;
+  document.getElementById('downloadBtn').style.display = 'none';
+}
+
+function setupFileUpload() {
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  
+  dropZone.addEventListener('click', () => fileInput.click());
+  
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+  });
+  
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    handleFileSelect(file);
+  });
+  
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    handleFileSelect(file);
+  });
+}
+
+function handleFileSelect(file) {
+  if (!file) return;
+  
+  const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  
+  if (!validTypes.includes(file.type)) {
+    alert('Please upload only PDF or Word documents.');
+    return;
+  }
+  
+  if (file.size > maxSize) {
+    alert('File size must be less than 10MB.');
+    return;
+  }
+  
+  uploadedFile = file;
+  displayFilePreview(file);
+  document.getElementById('processBtn').disabled = false;
+}
+
+function displayFilePreview(file) {
+  const preview = document.getElementById('filePreview');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  
+  fileName.textContent = file.name;
+  fileSize.textContent = formatFileSize(file.size);
+  preview.style.display = 'block';
+  
+  const icon = preview.querySelector('.fa-file-pdf');
+  if (file.type.includes('word')) {
+    icon.className = 'fas fa-file-word';
+    icon.style.color = '#2B579A';
+  } else {
+    icon.className = 'fas fa-file-pdf';
+    icon.style.color = '#E74C3C';
+  }
+}
+
+function removeFile() {
+  uploadedFile = null;
+  document.getElementById('filePreview').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('processBtn').disabled = true;
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+async function processDocument() {
+  if (!uploadedFile) return;
+  
+  showProcessingStatus('Extracting text from document...');
+  updateProgress(20);
+  
+  try {
+    // Extract text based on file type
+    if (uploadedFile.type === 'application/pdf') {
+      extractedText = await extractTextFromPDF(uploadedFile);
+    } else {
+      extractedText = await extractTextFromWord(uploadedFile);
+    }
+    
+    updateProgress(50);
+    showProcessingStatus('Analyzing questions...');
+    
+    // Extract questions from document
+    const questions = extractQuestions(extractedText);
+    
+    updateProgress(70);
+    showProcessingStatus('Matching with survey library...');
+    
+    // Match with survey library
+    const selectedProduct = document.getElementById('productSelect').value;
+    matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
+    
+    updateProgress(100);
+    showProcessingStatus('Processing complete!');
+    
+    // Show results
+    setTimeout(() => {
+      document.getElementById('processingStatus').style.display = 'none';
+      showMatchResults();
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error processing document:', error);
+    alert('Error processing document. Please try again.');
+    document.getElementById('processingStatus').style.display = 'none';
+  }
+}
+
+async function extractTextFromPDF(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const typedArray = new Uint8Array(e.target.result);
+        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+        let fullText = '';
+        
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items.map(item => item.str).join(' ');
+          fullText += pageText + '\n';
+        }
+        
+        resolve(fullText);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function extractTextFromWord(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const arrayBuffer = e.target.result;
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        resolve(result.value);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function extractQuestions(text) {
+  const questions = [];
+  const lines = text.split('\n');
+  
+  // Common question patterns
+  const questionPatterns = [
+    /^\d+[\.\)]\s*(.+\?)/i,  // 1. Question?
+    /^[A-Z]\.\s*(.+\?)/i,    // A. Question?
+    /^Q\d*[\.\:]\s*(.+)/i,   // Q1: Question or Q. Question
+    /^Question\s*\d*[\.\:]\s*(.+)/i,  // Question 1: ...
+    /(.+\?)\s*$/i            // Any line ending with ?
+  ];
+  
+  lines.forEach((line, index) => {
+    line = line.trim();
+    if (line.length < 10) return; // Skip very short lines
+    
+    for (const pattern of questionPatterns) {
+      const match = line.match(pattern);
+      if (match) {
+        questions.push({
+          text: match[1] || match[0],
+          originalLine: line,
+          lineNumber: index + 1
+        });
+        break;
+      }
+    }
+  });
+  
+  return questions;
+}
+
+function matchQuestionsWithLibrary(questions, product) {
+  const matches = [];
+  const productLibrary = surveyLibrary[product] || [];
+  
+  questions.forEach(question => {
+    let bestMatch = null;
+    let highestScore = 0;
+    
+    productLibrary.forEach(libraryItem => {
+      const score = calculateSimilarity(question.text, libraryItem.question);
+      if (score > highestScore && score > 0.6) { // 60% similarity threshold
+        highestScore = score;
+        bestMatch = libraryItem;
+      }
+    });
+    
+    matches.push({
+      question: question.text,
+      originalLine: question.originalLine,
+      lineNumber: question.lineNumber,
+      matchedAnswer: bestMatch ? bestMatch.answer : null,
+      confidence: Math.round(highestScore * 100),
+      matched: bestMatch !== null
+    });
+  });
+  
+  return matches;
+}
+
+function calculateSimilarity(str1, str2) {
+  // Simple word-based similarity calculation
+  const words1 = str1.toLowerCase().split(/\s+/);
+  const words2 = str2.toLowerCase().split(/\s+/);
+  
+  const set1 = new Set(words1);
+  const set2 = new Set(words2);
+  
+  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const union = new Set([...set1, ...set2]);
+  
+  return intersection.size / union.size;
+}
+
+function showProcessingStatus(message) {
+  const status = document.getElementById('processingStatus');
+  const statusMessage = document.getElementById('statusMessage');
+  statusMessage.textContent = message;
+  status.style.display = 'block';
+}
+
+function updateProgress(percent) {
+  const progressBar = document.getElementById('progressBar');
+  progressBar.style.width = percent + '%';
+}
+
+function showMatchResults() {
+  const resultsDiv = document.getElementById('matchResults');
+  const totalQuestions = matchedData.length;
+  const matchedQuestions = matchedData.filter(m => m.matched).length;
+  const matchRate = totalQuestions > 0 ? Math.round((matchedQuestions / totalQuestions) * 100) : 0;
+  
+  document.getElementById('questionsFound').textContent = totalQuestions;
+  document.getElementById('answersMatched').textContent = matchedQuestions;
+  document.getElementById('matchRate').textContent = matchRate + '%';
+  
+  resultsDiv.style.display = 'block';
+}
+
+async function downloadFilledDocument() {
+  if (!uploadedFile || matchedData.length === 0) return;
+  
+  // Create a formatted document with questions and answers
+  let outputText = '='.repeat(80) + '\n';
+  outputText += 'AUTO-FILLED SURVEY DOCUMENT\n';
+  outputText += 'Generated: ' + new Date().toLocaleString() + '\n';
+  outputText += 'Original File: ' + uploadedFile.name + '\n';
+  outputText += 'Product: ' + document.getElementById('productSelect').value.toUpperCase() + '\n';
+  outputText += '='.repeat(80) + '\n\n';
+  
+  matchedData.forEach((item, index) => {
+    outputText += `\n[Question ${index + 1}]\n`;
+    outputText += `${item.originalLine}\n\n`;
+    
+    if (item.matched) {
+      outputText += `[Auto-Filled Answer] (Confidence: ${item.confidence}%)\n`;
+      outputText += `${item.matchedAnswer}\n`;
+    } else {
+      outputText += `[No Match Found]\n`;
+      outputText += `Please provide answer manually.\n`;
+    }
+    
+    outputText += '\n' + '-'.repeat(80) + '\n';
+  });
+  
+  // Create and download file
+  const blob = new Blob([outputText], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'filled_survey_' + Date.now() + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  alert('Document downloaded successfully! Please review and edit the auto-filled answers as needed.');
+}
+
+async function loadSurveyLibrary() {
+  // This loads sample survey data
+  // Replace this with actual database fetch from Appwrite
+  surveyLibrary = {
+    'spi': [
+      { question: 'What is the inspection method', answer: '3D inspection using laser triangulation technology' },
+      { question: 'What is the measurement accuracy', answer: 'Up to 1 micron measurement accuracy' },
+      { question: 'What board sizes are supported', answer: 'Board sizes from 50mm x 50mm up to 510mm x 460mm' },
+      { question: 'What is the inspection speed', answer: 'Inspection speed up to 85 cm²/sec' },
+      { question: 'Does it support automated optical inspection', answer: 'Yes, fully automated with real-time defect detection' },
+      { question: 'What type of solder paste inspection', answer: 'Volume, area, height, X-Y offset, shape analysis' }
+    ],
+    'aoi': [
+      { question: 'What components can be inspected', answer: 'All SMT components including 01005, BGA, QFN, connectors' },
+      { question: 'What defects can be detected', answer: 'Missing components, wrong parts, polarity, solder bridges, insufficient solder' },
+      { question: 'What is the false call rate', answer: 'Less than 0.1% false call rate with AI-powered inspection' },
       { question: 'Does it support 3D inspection', answer: 'Yes, advanced 3D inspection with multiple projections' },
       { question: 'What is the inspection resolution', answer: 'Up to 10 microns with high-resolution cameras' }
     ],
@@ -830,5 +1476,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
