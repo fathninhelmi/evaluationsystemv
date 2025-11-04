@@ -23,7 +23,7 @@
   <div class="container-lib">
     <div class="lib-header">
       <button class="btn-upload-doc" onclick="openUploadModal()">
-        <i class="fas fa-upload"></i> Auto-Fill Survey Document
+        <i class="fas fa-upload"></i> Auto-Fill Paper Survey Document
       </button>
     </div>
 
@@ -79,8 +79,8 @@
 <div id="uploadModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeUploadModal()">&times;</span>
-    <h2><i class="fas fa-file-upload"></i> Upload Survey Document</h2>
-    <p class="modal-description">Upload a customer survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
+    <h2><i class="fas fa-file-upload"></i> Upload Paper Survey Document</h2>
+    <p class="modal-description">Upload a customer Paper Survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
     
     <div class="upload-section">
       <div class="file-drop-zone" id="dropZone">
@@ -545,7 +545,7 @@ async function processDocument() {
     const questions = extractQuestions(extractedText);
     
     updateProgress(70);
-    showProcessingStatus('Matching with survey library...');
+    showProcessingStatus('Matching with Paper Survey library...');
     const selectedProduct = document.getElementById('productSelect').value;
     matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
     
@@ -712,7 +712,7 @@ async function downloadFilledDocument() {
   if (!uploadedFile || matchedData.length === 0) return;
 
   let outputText = '='.repeat(80) + '\n';
-  outputText += 'AUTO-FILLED SURVEY DOCUMENT\n';
+  outputText += 'AUTO-FILLED PAPER SURVEY DOCUMENT\n';
   outputText += 'Generated: ' + new Date().toLocaleString() + '\n';
   outputText += 'Original File: ' + uploadedFile.name + '\n';
   outputText += 'Product: ' + document.getElementById('productSelect').value.toUpperCase() + '\n';
@@ -758,4 +758,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
