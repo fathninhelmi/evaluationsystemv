@@ -30,25 +30,25 @@
     <!-- tab solution-->
     <div class="content-tabs">
       <div class="tab-headers">
-        <button class="tab-header active" onclick="switchProduct('spi')">
+        <button class="tab-header active" onclick="switchProduct(event,'spi')">
           <i></i> SPI
         </button>
-        <button class="tab-header" onclick="switchProduct('aoi')">
+        <button class="tab-header" onclick="switchProduct(event,'aoi')">
           <i></i> AOI
         </button>
-        <button class="tab-header" onclick="switchProduct('axi')">
+        <button class="tab-header" onclick="switchProduct(event,'axi')">
           <i></i> AXI
         </button>
-        <button class="tab-header" onclick="switchProduct('arv')">
+        <button class="tab-header" onclick="switchProduct(event,'arv')">
           <i></i> ARV
         </button>
-        <button class="tab-header" onclick="switchProduct('vone')">
+        <button class="tab-header" onclick="switchProduct(event,'vone')">
           <i></i> V-ONE
         </button>
-        <button class="tab-header" onclick="switchProduct('xc')">
+        <button class="tab-header" onclick="switchProduct(event,'xc')">
           <i></i> XC
         </button>
-        <button class="tab-header" onclick="switchProduct('xs')">
+        <button class="tab-header" onclick="switchProduct(event,'xs')">
           <i></i> XS
         </button>
       </div>
@@ -156,8 +156,6 @@
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
 const { Client, Account, Databases, Query } = window.Appwrite;
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -171,10 +169,6 @@ const collectionId = "68ba8c240002116fa647";
 let currentProduct = 'spi';
 let currentCategory = 'overview';
 let userRole = '';
-let uploadedFile = null;
-let extractedText = '';
-let matchedData = [];
-let surveyLibrary = {};
 
 async function checkSession() {
     try {
@@ -307,6 +301,7 @@ function loadSidebarMenu(product) {
     const activeClass = index === 0 ? 'active' : '';
     html += `
       <div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat.id}')">
+        <i class="${cat.icon}"></i>
         <span>${cat.label}</span>
       </div>
     `;
@@ -347,7 +342,7 @@ function getDocumentLink(product, category) {
       'overview': '#',
       'visionpro': '#',
       'v510ioptimus': '#',
-      'dst': '#'
+      'dst': ''
     },
     'axi': {
       'overview': '#',
@@ -404,7 +399,7 @@ function updateContent() {
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
 
-  html += `
+html += `
     <div class="resource-grid">
       <div class="resource-card">
         <div class="resource-title">${productName} ${categoryName}</div>
@@ -760,486 +755,10 @@ async function downloadFilledDocument() {
   alert('Document downloaded successfully! Please review and edit the auto-filled answers as needed.');
 }
 
-async function loadSurveyLibrary() {
-  surveyLibrary = {
-    'spi': [
-      { question: 'What is the inspection method', answer: '3D inspection using laser triangulation technology' },
-      { question: 'What is the measurement accuracy', answer: 'Up to 1 micron measurement accuracy' },
-      { question: 'What board sizes are supported', answer: 'Board sizes from 50mm x 50mm up to 510mm x 460mm' },
-      { question: 'What is the inspection speed', answer: 'Inspection speed up to 85 cm²/sec' },
-      { question: 'Does it support automated optical inspection', answer: 'Yes, fully automated with real-time defect detection' },
-      { question: 'What type of solder paste inspection', answer: 'Volume, area, height, X-Y offset, shape analysis' }
-    ],
-    'aoi': [
-      { question: 'What components can be inspected', answer: 'All SMT components including 01005, BGA, QFN, connectors' },
-      { question: 'What defects can be detected', answer: 'Missing components, wrong parts, polarity, solder bridges, insufficient solder' },
-      { question: 'What is the false call rate', answer: 'Less than 0.1% false call rate with AI-powered inspection' },
-      { question: 'Does it support 3D inspection', answer: 'Yes
-
-
-async function getUserRole(userId) {
-    try {
-        const response = await databases.listDocuments(
-            databaseId, 
-            collectionId, 
-            [Query.limit(1000)]
-        );
-        
-        const user = response.documents.find(doc => doc.$id === userId);
-        if (user) {
-            userRole = user.role || 'staff';
-        } else {
-            userRole = 'staff';
-        }
-        console.log('User role:', userRole);
-    } catch (err) {
-        console.error('Error fetching user role:', err);
-        userRole = 'staff';
-    }
-}
-
-
-function updateContent() {
-  const content = document.getElementById('mainContent');
-  
-  const productNames = {
-    'aoi': 'AOI',
-    'axi': 'AXI',
-    'spi': 'SPI',
-    'arv': 'ARV',
-    'vone': 'V-ONE',
-    'xc': 'SMART CAMERA',
-    'xs': 'SMART CODE READER'
-  };
-
-  const categories = getSidebarCategories(currentProduct);
-  const currentCat = categories.find(cat => cat.id === currentCategory);
-  const categoryName = currentCat ? currentCat.label : currentCategory;
-  
-  const productName = productNames[currentProduct];
-  
-  let html = `
-    <h2>${productName} - ${categoryName}</h2>
-    <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
-  `;
-
-  html += `
-    <div class="resource-grid">
-      <div class="resource-card">
-        <div class="resource-title">${productName} ${categoryName}</div>
-        <div class="resource-actions">
-          <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
-            <i class="fas fa-eye"></i> View
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  content.innerHTML = html;
-}
-
-function viewDocument(url) {
-  if (url && url !== '#') {
-    window.open(url, '_blank');
-  } else {
-    alert('Document link not available for this category.');
-  }
-}
-
-// ============ FILE UPLOAD & PROCESSING FUNCTIONS ============
-
-function openUploadModal() {
-  document.getElementById('uploadModal').style.display = 'flex';
-}
-
-function closeUploadModal() {
-  document.getElementById('uploadModal').style.display = 'none';
-  resetUploadForm();
-}
-
-function resetUploadForm() {
-  uploadedFile = null;
-  extractedText = '';
-  matchedData = [];
-  document.getElementById('fileInput').value = '';
-  document.getElementById('filePreview').style.display = 'none';
-  document.getElementById('processingStatus').style.display = 'none';
-  document.getElementById('matchResults').style.display = 'none';
-  document.getElementById('processBtn').disabled = true;
-  document.getElementById('downloadBtn').style.display = 'none';
-}
-
-function setupFileUpload() {
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
-  
-  dropZone.addEventListener('click', () => fileInput.click());
-  
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-  });
-  
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('dragover');
-  });
-  
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    handleFileSelect(file);
-  });
-  
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    handleFileSelect(file);
-  });
-}
-
-function handleFileSelect(file) {
-  if (!file) return;
-  
-  const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-  const maxSize = 10 * 1024 * 1024; // 10MB
-  
-  if (!validTypes.includes(file.type)) {
-    alert('Please upload only PDF or Word documents.');
-    return;
-  }
-  
-  if (file.size > maxSize) {
-    alert('File size must be less than 10MB.');
-    return;
-  }
-  
-  uploadedFile = file;
-  displayFilePreview(file);
-  document.getElementById('processBtn').disabled = false;
-}
-
-function displayFilePreview(file) {
-  const preview = document.getElementById('filePreview');
-  const fileName = document.getElementById('fileName');
-  const fileSize = document.getElementById('fileSize');
-  
-  fileName.textContent = file.name;
-  fileSize.textContent = formatFileSize(file.size);
-  preview.style.display = 'block';
-  
-  const icon = preview.querySelector('.fa-file-pdf');
-  if (file.type.includes('word')) {
-    icon.className = 'fas fa-file-word';
-    icon.style.color = '#2B579A';
-  } else {
-    icon.className = 'fas fa-file-pdf';
-    icon.style.color = '#E74C3C';
-  }
-}
-
-function removeFile() {
-  uploadedFile = null;
-  document.getElementById('filePreview').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-  document.getElementById('processBtn').disabled = true;
-}
-
-function formatFileSize(bytes) {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-}
-
-async function processDocument() {
-  if (!uploadedFile) return;
-  
-  showProcessingStatus('Extracting text from document...');
-  updateProgress(20);
-  
-  try {
-    // Extract text based on file type
-    if (uploadedFile.type === 'application/pdf') {
-      extractedText = await extractTextFromPDF(uploadedFile);
-    } else {
-      extractedText = await extractTextFromWord(uploadedFile);
-    }
-    
-    updateProgress(50);
-    showProcessingStatus('Analyzing questions...');
-    
-    // Extract questions from document
-    const questions = extractQuestions(extractedText);
-    
-    updateProgress(70);
-    showProcessingStatus('Matching with survey library...');
-    
-    // Match with survey library
-    const selectedProduct = document.getElementById('productSelect').value;
-    matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
-    
-    updateProgress(100);
-    showProcessingStatus('Processing complete!');
-    
-    // Show results
-    setTimeout(() => {
-      document.getElementById('processingStatus').style.display = 'none';
-      showMatchResults();
-      document.getElementById('downloadBtn').style.display = 'inline-block';
-    }, 500);
-    
-  } catch (error) {
-    console.error('Error processing document:', error);
-    alert('Error processing document. Please try again.');
-    document.getElementById('processingStatus').style.display = 'none';
-  }
-}
-
-async function extractTextFromPDF(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const typedArray = new Uint8Array(e.target.result);
-        const pdf = await pdfjsLib.getDocument(typedArray).promise;
-        let fullText = '';
-        
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageText = textContent.items.map(item => item.str).join(' ');
-          fullText += pageText + '\n';
-        }
-        
-        resolve(fullText);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-async function extractTextFromWord(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const arrayBuffer = e.target.result;
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        resolve(result.value);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-function extractQuestions(text) {
-  const questions = [];
-  const lines = text.split('\n');
-  
-  // Common question patterns
-  const questionPatterns = [
-    /^\d+[\.\)]\s*(.+\?)/i,  // 1. Question?
-    /^[A-Z]\.\s*(.+\?)/i,    // A. Question?
-    /^Q\d*[\.\:]\s*(.+)/i,   // Q1: Question or Q. Question
-    /^Question\s*\d*[\.\:]\s*(.+)/i,  // Question 1: ...
-    /(.+\?)\s*$/i            // Any line ending with ?
-  ];
-  
-  lines.forEach((line, index) => {
-    line = line.trim();
-    if (line.length < 10) return; // Skip very short lines
-    
-    for (const pattern of questionPatterns) {
-      const match = line.match(pattern);
-      if (match) {
-        questions.push({
-          text: match[1] || match[0],
-          originalLine: line,
-          lineNumber: index + 1
-        });
-        break;
-      }
-    }
-  });
-  
-  return questions;
-}
-
-function matchQuestionsWithLibrary(questions, product) {
-  const matches = [];
-  const productLibrary = surveyLibrary[product] || [];
-  
-  questions.forEach(question => {
-    let bestMatch = null;
-    let highestScore = 0;
-    
-    productLibrary.forEach(libraryItem => {
-      const score = calculateSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.6) { // 60% similarity threshold
-        highestScore = score;
-        bestMatch = libraryItem;
-      }
-    });
-    
-    matches.push({
-      question: question.text,
-      originalLine: question.originalLine,
-      lineNumber: question.lineNumber,
-      matchedAnswer: bestMatch ? bestMatch.answer : null,
-      confidence: Math.round(highestScore * 100),
-      matched: bestMatch !== null
-    });
-  });
-  
-  return matches;
-}
-
-function calculateSimilarity(str1, str2) {
-  // Simple word-based similarity calculation
-  const words1 = str1.toLowerCase().split(/\s+/);
-  const words2 = str2.toLowerCase().split(/\s+/);
-  
-  const set1 = new Set(words1);
-  const set2 = new Set(words2);
-  
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
-  const union = new Set([...set1, ...set2]);
-  
-  return intersection.size / union.size;
-}
-
-function showProcessingStatus(message) {
-  const status = document.getElementById('processingStatus');
-  const statusMessage = document.getElementById('statusMessage');
-  statusMessage.textContent = message;
-  status.style.display = 'block';
-}
-
-function updateProgress(percent) {
-  const progressBar = document.getElementById('progressBar');
-  progressBar.style.width = percent + '%';
-}
-
-function showMatchResults() {
-  const resultsDiv = document.getElementById('matchResults');
-  const totalQuestions = matchedData.length;
-  const matchedQuestions = matchedData.filter(m => m.matched).length;
-  const matchRate = totalQuestions > 0 ? Math.round((matchedQuestions / totalQuestions) * 100) : 0;
-  
-  document.getElementById('questionsFound').textContent = totalQuestions;
-  document.getElementById('answersMatched').textContent = matchedQuestions;
-  document.getElementById('matchRate').textContent = matchRate + '%';
-  
-  resultsDiv.style.display = 'block';
-}
-
-async function downloadFilledDocument() {
-  if (!uploadedFile || matchedData.length === 0) return;
-  
-  // Create a formatted document with questions and answers
-  let outputText = '='.repeat(80) + '\n';
-  outputText += 'AUTO-FILLED SURVEY DOCUMENT\n';
-  outputText += 'Generated: ' + new Date().toLocaleString() + '\n';
-  outputText += 'Original File: ' + uploadedFile.name + '\n';
-  outputText += 'Product: ' + document.getElementById('productSelect').value.toUpperCase() + '\n';
-  outputText += '='.repeat(80) + '\n\n';
-  
-  matchedData.forEach((item, index) => {
-    outputText += `\n[Question ${index + 1}]\n`;
-    outputText += `${item.originalLine}\n\n`;
-    
-    if (item.matched) {
-      outputText += `[Auto-Filled Answer] (Confidence: ${item.confidence}%)\n`;
-      outputText += `${item.matchedAnswer}\n`;
-    } else {
-      outputText += `[No Match Found]\n`;
-      outputText += `Please provide answer manually.\n`;
-    }
-    
-    outputText += '\n' + '-'.repeat(80) + '\n';
-  });
-  
-  // Create and download file
-  const blob = new Blob([outputText], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'filled_survey_' + Date.now() + '.txt';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  
-  alert('Document downloaded successfully! Please review and edit the auto-filled answers as needed.');
-}
-
-async function loadSurveyLibrary() {
-  // This loads sample survey data
-  // Replace this with actual database fetch from Appwrite
-  surveyLibrary = {
-    'spi': [
-      { question: 'What is the inspection method', answer: '3D inspection using laser triangulation technology' },
-      { question: 'What is the measurement accuracy', answer: 'Up to 1 micron measurement accuracy' },
-      { question: 'What board sizes are supported', answer: 'Board sizes from 50mm x 50mm up to 510mm x 460mm' },
-      { question: 'What is the inspection speed', answer: 'Inspection speed up to 85 cm²/sec' },
-      { question: 'Does it support automated optical inspection', answer: 'Yes, fully automated with real-time defect detection' },
-      { question: 'What type of solder paste inspection', answer: 'Volume, area, height, X-Y offset, shape analysis' }
-    ],
-    'aoi': [
-      { question: 'What components can be inspected', answer: 'All SMT components including 01005, BGA, QFN, connectors' },
-      { question: 'What defects can be detected', answer: 'Missing components, wrong parts, polarity, solder bridges, insufficient solder' },
-      { question: 'What is the false call rate', answer: 'Less than 0.1% false call rate with AI-powered inspection' },
-      { question: 'Does it support 3D inspection', answer: 'Yes, advanced 3D inspection with multiple projections' },
-      { question: 'What is the inspection resolution', answer: 'Up to 10 microns with high-resolution cameras' }
-    ],
-    'axi': [
-      { question: 'What is the X-ray resolution', answer: 'Up to 1 micron resolution with 16-bit grayscale imaging' },
-      { question: 'Can it inspect BGA and QFN', answer: 'Yes, full 3D inspection of BGA, QFN, and hidden solder joints' },
-      { question: 'What is the inspection time', answer: 'Typical inspection time 30-60 seconds per board' },
-      { question: 'Does it detect voids in solder', answer: 'Yes, void detection and analysis up to 5% accuracy' },
-      { question: 'What X-ray tube type is used', answer: 'Closed tube with 130kV maximum voltage' }
-    ],
-    'arv': [
-      { question: 'What types of coating can be inspected', answer: 'Conformal coating, underfill, potting, and adhesives' },
-      { question: 'What is the measurement method', answer: 'Laser profilometry and fluorescence imaging' },
-      { question: 'Can it measure coating thickness', answer: 'Yes, measures thickness from 10 to 500 microns' },
-      { question: 'Does it detect coating coverage', answer: 'Yes, 100% coverage verification with UV fluorescence' }
-    ],
-    'vone': [
-      { question: 'What inspection types are integrated', answer: 'Combined SPI, AOI, and AXI in one platform' },
-      { question: 'What is the platform advantage', answer: 'Reduces footprint and increases throughput by 40%' },
-      { question: 'Is it compatible with Industry 4.0', answer: 'Yes, full IIoT connectivity and data analytics' }
-    ],
-    'xc': [
-      { question: 'What applications is it suitable for', answer: 'In-line inspection, robot guidance, presence detection' },
-      { question: 'What is the camera resolution', answer: 'Up to 12 megapixels with programmable lighting' },
-      { question: 'Does it support multiple protocols', answer: 'Yes, supports Ethernet/IP, Profinet, and Modbus TCP' }
-    ],
-    'xs': [
-      { question: 'What codes can be read', answer: '1D barcodes, 2D Data Matrix, QR codes' },
-      { question: 'What is the read rate', answer: 'Up to 60 reads per second with 99.9% accuracy' },
-      { question: 'Does it work in difficult conditions', answer: 'Yes, reads damaged, low-contrast, and distorted codes' }
-    ]
-  };
-  
-  console.log('Survey library loaded with', Object.keys(surveyLibrary).length, 'products');
-}
-
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
     loadSidebarMenu(currentProduct);
     updateContent();
-    setupFileUpload();
-    await loadSurveyLibrary();
 });
 </script>
 
