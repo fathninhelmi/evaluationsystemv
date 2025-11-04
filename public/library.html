@@ -156,6 +156,7 @@
 </div>
 
 <script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 const { Client, Account, Databases, Query } = window.Appwrite;
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -612,7 +613,6 @@ function extractQuestions(text) {
   const questions = [];
   const lines = text.split('\n');
   
-  // Common question patterns
   const questionPatterns = [
     /^\d+[\.\)]\s*(.+\?)/i,  // 1. Question?
     /^[A-Z]\.\s*(.+\?)/i,    // A. Question?
@@ -759,6 +759,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
 
