@@ -23,7 +23,7 @@
   <div class="container-lib">
     <div class="lib-header">
       <button class="btn-upload-doc" onclick="openUploadModal()">
-        <i class="fas fa-upload"></i> Auto-Fill Paper Survey Document
+        <i class="fas fa-upload"></i> Auto-Fill Survey Document
       </button>
     </div>
 
@@ -79,8 +79,8 @@
 <div id="uploadModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeUploadModal()">&times;</span>
-    <h2><i class="fas fa-file-upload"></i> Upload Paper Survey Document</h2>
-    <p class="modal-description">Upload a customer Paper Survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
+    <h2><i class="fas fa-file-upload"></i> Upload Survey Document</h2>
+    <p class="modal-description">Upload a customer survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
     
     <div class="upload-section">
       <div class="file-drop-zone" id="dropZone">
@@ -125,7 +125,7 @@
       </div>
       
       <div id="matchResults" class="match-results" style="display: none;">
-        <h3><i class="fas fa-check-circle"></i> Processing Complete</h3>
+        <h3><i class="fas fa-check-circle"></i> Matching Complete</h3>
         <div class="results-summary">
           <div class="result-stat">
             <span class="stat-number" id="questionsFound">0</span>
@@ -156,8 +156,7 @@
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc ='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const { Client, Account, Databases, Query, Storage } = window.Appwrite;
+const { Client, Account, Databases, Query } = window.Appwrite;
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
 .setProject("68ddd7de00255d4f5c96");
@@ -172,10 +171,6 @@ const bucketId = "69015d8b0030f329c599";
 let currentProduct = 'spi';
 let currentCategory = 'overview';
 let userRole = '';
-let surveyLibrary = {};
-let uploadedFile = null;
-let extractedText = '';
-let matchedData = [];
 
 async function checkSession() {
     try {
@@ -184,7 +179,6 @@ async function checkSession() {
 
         await getUserRole(user.$id);
         loadNavigation(userRole);
-        await loadSurveyLibrary();
         
     } catch (err) {
         console.error('No active session:', err);
@@ -535,133 +529,6 @@ function formatFileSize(bytes) {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
-async function loadSurveyLibrary() {
-  try {
-    console.log('Loading survey library from bucket...');
-    const files = await storage.listFiles(bucketId);
-    
-    surveyLibrary = {
-      'spi': [],
-      'aoi': [],
-      'axi': [],
-      'arv': [],
-      'vone': [],
-      'xc': [],
-      'xs': []
-    };
-    
-    if (files.files.length === 0) {
-      console.warn('No files found in survey library bucket');
-      return;
-    }
-    
-    for (const file of files.files) {
-      try {
-        console.log('Processing file:', file.name);
-        const fileUrl = storage.getFileView(bucketId, file.$id);
-        const response = await fetch(fileUrl);
-        
-        if (!response.ok) {
-          console.error(`Failed to fetch file ${file.name}: ${response.status}`);
-          continue;
-        }
-        
-        const blob = await response.blob();
-        
-        let text = '';
-        if (file.mimeType === 'application/pdf') {
-          text = await extractTextFromPDF(blob);
-        } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
-          text = await extractTextFromWord(blob);
-        }
-        
-        if (text) {
-          const qaData = parseQuestionsAndAnswers(text);
-          const productType = determineProductType(file.name);
-          
-          if (surveyLibrary[productType]) {
-            surveyLibrary[productType].push(...qaData);
-            console.log(`Added ${qaData.length} Q&A pairs to ${productType}`);
-          }
-        }
-      } catch (fileError) {
-        console.error(`Error processing file ${file.name}:`, fileError);
-      }
-    }
-    
-    console.log('Survey library loaded:', surveyLibrary);
-  } catch (error) {
-    console.error('Error loading survey library:', error);
-    if (error.code === 401) {
-      alert('Access denied: You do not have permission to access the survey library. Please contact your administrator.');
-    } else {
-      console.warn('Could not load survey library. Auto-fill may not work properly.');
-    }
-  }
-}
-
-function determineProductType(filename) {
-  const name = filename.toLowerCase();
-  if (name.includes('spi')) return 'spi';
-  if (name.includes('aoi')) return 'aoi';
-  if (name.includes('axi')) return 'axi';
-  if (name.includes('arv')) return 'arv';
-  if (name.includes('vone') || name.includes('v-one')) return 'vone';
-  if (name.includes('xc') || name.includes('smart camera')) return 'xc';
-  if (name.includes('xs') || name.includes('code reader')) return 'xs';
-  return 'spi';
-}
-
-function parseQuestionsAndAnswers(text) {
-  const qaData = [];
-  const lines = text.split('\n');
-  let currentQuestion = null;
-  let currentAnswer = '';
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-
-    const questionPatterns = [
-      /^\d+[\.\)]\s*(.+)/i,
-      /^[A-Z]\.\s*(.+)/i,
-      /^Q\d*[\.\:]\s*(.+)/i,
-      /^Question\s*\d*[\.\:]\s*(.+)/i
-    ];
-    
-    let isQuestion = false;
-    for (const pattern of questionPatterns) {
-      if (pattern.test(line)) {
-        isQuestion = true;
-        
-        if (currentQuestion && currentAnswer) {
-          qaData.push({
-            question: currentQuestion,
-            answer: currentAnswer.trim()
-          });
-        }
-
-        currentQuestion = line;
-        currentAnswer = '';
-        break;
-      }
-    }
-
-    if (!isQuestion && currentQuestion) {
-      currentAnswer += line + ' ';
-    }
-  }
-  
-  if (currentQuestion && currentAnswer) {
-    qaData.push({
-      question: currentQuestion,
-      answer: currentAnswer.trim()
-    });
-  }
-  
-  return qaData;
-}
-
 async function processDocument() {
   if (!uploadedFile) return;
   
@@ -675,41 +542,18 @@ async function processDocument() {
       extractedText = await extractTextFromWord(uploadedFile);
     }
     
-    console.log('Extracted text length:', extractedText.length);
-    console.log('First 500 chars:', extractedText.substring(0, 500));
-    
     updateProgress(50);
-    showProcessingStatus('Analyzing questions and content...');
+    showProcessingStatus('Analyzing questions...');
     const questions = extractQuestions(extractedText);
-
-    if (questions.length === 0) {
-      console.warn('No structured questions found. Will extract all content as potential questions.');
-      const allLines = extractAllLines(extractedText);
-      matchedData = allLines.map(line => ({
-        question: line.text,
-        originalLine: line.text,
-        lineNumber: line.lineNumber,
-        matchedAnswer: null,
-        confidence: 0,
-        matched: false
-      }));
-    } else {
-      updateProgress(70);
-      showProcessingStatus('Matching with Paper Survey library...');
-      const selectedProduct = document.getElementById('productSelect').value;
-      
-      const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
-      console.log(`Library size for ${selectedProduct}: ${productLibrarySize}`);
-      
-      if (productLibrarySize === 0) {
-        console.warn(`No survey data found for ${selectedProduct}. Processing without auto-fill.`);
-      }
-      
-      matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
-    }
+    
+    updateProgress(70);
+    showProcessingStatus('Matching with survey library...');
+    const selectedProduct = document.getElementById('productSelect').value;
+    matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
     
     updateProgress(100);
     showProcessingStatus('Processing complete!');
+
     setTimeout(() => {
       document.getElementById('processingStatus').style.display = 'none';
       showMatchResults();
@@ -718,7 +562,7 @@ async function processDocument() {
     
   } catch (error) {
     console.error('Error processing document:', error);
-    alert('Error processing document: ' + error.message);
+    alert('Error processing document. Please try again.');
     document.getElementById('processingStatus').style.display = 'none';
   }
 }
@@ -766,107 +610,35 @@ async function extractTextFromWord(file) {
   });
 }
 
-function extractAllLines(text) {
-  const lines = [];
-  const textLines = text.split('\n');
-  
-  textLines.forEach((line, index) => {
-    line = line.trim();
-    if (line.length < 15) return;
-    if (line.match(/^page\s+\d+/i)) return;
-    if (line.match(/^\d+$/)) return;
-    if (line.toLowerCase().includes('confidential')) return;
-    
-    lines.push({
-      text: line,
-      lineNumber: index + 1
-    });
-  });
-  
-  return lines;
-}
-
 function extractQuestions(text) {
   const questions = [];
   const lines = text.split('\n');
-
-  const specKeywords = [
-    // General specs
-    'model', 'type', 'version', 'series', 'name', 'number', 'code', 'id',
-    // Dimensions & Physical
-    'size', 'dimension', 'width', 'height', 'length', 'weight', 'depth',
-    // Performance
-    'speed', 'resolution', 'accuracy', 'precision', 'capacity', 'throughput',
-    'cycle time', 'takt time', 'inspection', 'detection', 'coverage',
-    // Electrical
-    'voltage', 'power', 'current', 'frequency', 'phase', 'consumption',
-    // Environmental
-    'temperature', 'humidity', 'operating', 'storage', 'environment',
-    // Features
-    'feature', 'capability', 'function', 'option', 'configuration',
-    // Camera/Optical
-    'camera', 'lens', 'lighting', 'illumination', 'sensor', 'pixel',
-    // Software
-    'software', 'interface', 'protocol', 'communication', 'connectivity',
-    // Mechanical
-    'conveyor', 'rail', 'stage', 'axis', 'movement', 'travel',
-    // Standards
-    'standard', 'compliance', 'certification', 'compatible',
-    // Others
-    'range', 'minimum', 'maximum', 'typical', 'specification', 'parameter'
-  ];
   
-  // Enhanced patterns for spec tables
-  const specPatterns = [
-    /^\d+[\.\)]\s*(.+)/i
-    /^[A-Z]\.\s*(.+)/i,
-    /^[-•]\s*(.+)/i,   
-    /^(.+?)[\:\-]\s*.{0,50}$/i, 
-    /^([A-Z][a-zA-Z\s]+)\s*$/i 
+  // Common question patterns
+  const questionPatterns = [
+    /^\d+[\.\)]\s*(.+\?)/i,  // 1. Question?
+    /^[A-Z]\.\s*(.+\?)/i,    // A. Question?
+    /^Q\d*[\.\:]\s*(.+)/i,   // Q1: Question or Q. Question
+    /^Question\s*\d*[\.\:]\s*(.+)/i,  // Question 1:
+    /(.+\?)\s*$/i        
   ];
   
   lines.forEach((line, index) => {
     line = line.trim();
+    if (line.length < 10) return; 
     
-    if (line.length < 3) return;
-
-    if (line.toLowerCase().includes('page ') || 
-        line.toLowerCase().includes('confidential') ||
-        line.match(/^page\s*\d+$/i) ||
-        line.match(/^\d+$/)) {
-      return;
-    }
-
-    const lowerLine = line.toLowerCase();
-    const containsSpecKeyword = specKeywords.some(keyword => 
-      lowerLine.includes(keyword.toLowerCase())
-    );
-
-    let matched = false;
-    for (const pattern of specPatterns) {
-      if (pattern.test(line)) {
-        matched = true;
-        break;
-      }
-    }
-
-    if (containsSpecKeyword || matched) {
-      const questionText = line;
-
-      if (!questions.some(q => q.text === questionText)) {
+    for (const pattern of questionPatterns) {
+      const match = line.match(pattern);
+      if (match) {
         questions.push({
-          text: questionText,
+          text: match[1] || match[0],
           originalLine: line,
           lineNumber: index + 1
         });
+        break;
       }
     }
   });
-  
-  console.log(`Extracted ${questions.length} specification fields from document`);
-  if (questions.length > 0) {
-    console.log('First 5 spec fields:', questions.slice(0, 5).map(q => q.text));
-  }
   
   return questions;
 }
@@ -875,15 +647,13 @@ function matchQuestionsWithLibrary(questions, product) {
   const matches = [];
   const productLibrary = surveyLibrary[product] || [];
   
-  console.log(`Matching ${questions.length} questions against ${productLibrary.length} library entries for ${product}`);
-  
   questions.forEach(question => {
     let bestMatch = null;
     let highestScore = 0;
     
     productLibrary.forEach(libraryItem => {
-      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.4) { 
+      const score = calculateSimilarity(question.text, libraryItem.question);
+      if (score > highestScore && score > 0.6) { 
         highestScore = score;
         bestMatch = libraryItem;
       }
@@ -899,73 +669,7 @@ function matchQuestionsWithLibrary(questions, product) {
     });
   });
   
-  console.log(`Found ${matches.filter(m => m.matched).length} matches out of ${matches.length} questions`);
-  
   return matches;
-}
-
-function calculateEnhancedSimilarity(str1, str2) {
-  const normalize = (s) => s.toLowerCase()
-    .replace(/[^\w\s]/g, ' ')  
-    .replace(/\s+/g, ' ')    
-    .trim();
-  
-  const norm1 = normalize(str1);
-  const norm2 = normalize(str2);
-
-  const words1 = norm1.split(/\s+/).filter(w => w.length > 2);
-  const words2 = norm2.split(/\s+/).filter(w => w.length > 2);
-  
-  const set1 = new Set(words1);
-  const set2 = new Set(words2);
-  
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
-  const union = new Set([...set1, ...set2]);
-  
-  const jaccardScore = union.size > 0 ? intersection.size / union.size : 0;
-  
-  const longerStr = norm1.length > norm2.length ? norm1 : norm2;
-  const shorterStr = norm1.length > norm2.length ? norm2 : norm1;
-  
-  let substringScore = 0;
-  if (longerStr.includes(shorterStr)) {
-    substringScore = 0.5;
-  } else {
-    const shorterWords = shorterStr.split(/\s+/);
-    const matchingWords = shorterWords.filter(word => 
-      word.length > 3 && longerStr.includes(word)
-    );
-    substringScore = shorterWords.length > 0 ? 
-      (matchingWords.length / shorterWords.length) * 0.3 : 0;
-  }
-  const keyTerms1 = extractKeyTerms(str1);
-  const keyTerms2 = extractKeyTerms(str2);
-  
-  const keyTermMatches = keyTerms1.filter(term => 
-    keyTerms2.some(t => t.includes(term) || term.includes(t))
-  ).length;
-  
-  const keyTermScore = Math.max(keyTerms1.length, keyTerms2.length) > 0 ?
-    keyTermMatches / Math.max(keyTerms1.length, keyTerms2.length) : 0;
-
-  const finalScore = (jaccardScore * 0.4) + (substringScore * 0.3) + (keyTermScore * 0.3);
-  return finalScore;
-}
-    
-function extractKeyTerms(text) {
-  const normalized = text.toLowerCase();
-  const words = normalized.split(/\s+/);
-  const commonWords = new Set(['what', 'how', 'why', 'when', 'where', 'who', 'which', 
-    'that', 'this', 'these', 'those', 'with', 'from', 'have', 'about', 'your', 
-    'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe']);
-  
-  const keyTerms = words.filter(word => 
-    word.length > 3 && 
-    !commonWords.has(word) &&
-    !/^\d+$/.test(word)
-  );
-  
-  return keyTerms;
 }
 
 function calculateSimilarity(str1, str2) {
@@ -1007,74 +711,47 @@ function showMatchResults() {
 }
 
 async function downloadFilledDocument() {
-  if (!uploadedFile && matchedData.length === 0) {
-    alert('Please upload and process a document first.');
-    return;
-  }
-  
-  const selectedProduct = document.getElementById('productSelect').value.toUpperCase();
-  const timestamp = new Date().toLocaleString();
-  
+  if (!uploadedFile || matchedData.length === 0) return;
+
   let outputText = '='.repeat(80) + '\n';
-  outputText += 'AUTO-FILLED PAPER SURVEY DOCUMENT\n';
-  outputText += 'Generated: ' + timestamp + '\n';
-  outputText += 'Original File: ' + (uploadedFile ? uploadedFile.name : 'N/A') + '\n';
-  outputText += 'Product: ' + selectedProduct + '\n';
+  outputText += 'AUTO-FILLED SURVEY DOCUMENT\n';
+  outputText += 'Generated: ' + new Date().toLocaleString() + '\n';
+  outputText += 'Original File: ' + uploadedFile.name + '\n';
+  outputText += 'Product: ' + document.getElementById('productSelect').value.toUpperCase() + '\n';
   outputText += '='.repeat(80) + '\n\n';
   
-  if (matchedData.length === 0) {
-    outputText += 'No questions or content extracted from the document.\n';
-    outputText += 'Please ensure the document contains readable text.\n\n';
-    outputText += 'Extracted Text Preview:\n';
-    outputText += '-'.repeat(80) + '\n';
-    outputText += extractedText.substring(0, 1000) + '...\n';
-  } else {
-    const matchedCount = matchedData.filter(m => m.matched).length;
-    outputText += `Summary: ${matchedData.length} items found, ${matchedCount} answers auto-filled\n\n`;
+  matchedData.forEach((item, index) => {
+    outputText += `\n[Question ${index + 1}]\n`;
+    outputText += `${item.originalLine}\n\n`;
     
-    matchedData.forEach((item, index) => {
-      outputText += `\n[Question/Item ${index + 1}]\n`;
-      outputText += `${item.originalLine}\n\n`;
-      
-      if (item.matched) {
-        outputText += `[Auto-Filled Answer] (Confidence: ${item.confidence}%)\n`;
-        outputText += `${item.matchedAnswer}\n`;
-      } else {
-        outputText += `[No Match Found]\n`;
-        outputText += `Please provide answer manually.\n`;
-      }
-      
-      outputText += '\n' + '-'.repeat(80) + '\n';
-    });
-  }
-  
-  outputText += '\n\n' + '='.repeat(80) + '\n';
-  outputText += 'END OF DOCUMENT\n';
-  outputText += 'Please review and edit all content as needed.\n';
-  outputText += '='.repeat(80) + '\n';
+    if (item.matched) {
+      outputText += `[Auto-Filled Answer] (Confidence: ${item.confidence}%)\n`;
+      outputText += `${item.matchedAnswer}\n`;
+    } else {
+      outputText += `[No Match Found]\n`;
+      outputText += `Please provide answer manually.\n`;
+    }
+    
+    outputText += '\n' + '-'.repeat(80) + '\n';
+  });
 
   const blob = new Blob([outputText], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const filename = uploadedFile ? 
-    'filled_' + uploadedFile.name.replace(/\.[^/.]+$/, '') + '_' + Date.now() + '.txt' :
-    'survey_extract_' + Date.now() + '.txt';
-  a.download = filename;
+  a.download = 'filled_survey_' + Date.now() + '.txt';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   
-  console.log('Document downloaded:', filename);
-  alert('Document downloaded successfully! Please review and edit the content as needed.');
+  alert('Document downloaded successfully! Please review and edit the auto-filled answers as needed.');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
     loadSidebarMenu(currentProduct);
     updateContent();
-    setupFileUpload();
 });
 </script>
 
@@ -1083,4 +760,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
