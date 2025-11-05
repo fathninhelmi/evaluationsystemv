@@ -125,7 +125,7 @@
       </div>
       
       <div id="matchResults" class="match-results" style="display: none;">
-        <h3><i class="fas fa-check-circle"></i> Matching Complete</h3>
+        <h3><i class="fas fa-check-circle"></i> Processing Complete</h3>
         <div class="results-summary">
           <div class="result-stat">
             <span class="stat-number" id="questionsFound">0</span>
@@ -550,11 +550,22 @@ async function loadSurveyLibrary() {
       'xs': []
     };
     
+    if (files.files.length === 0) {
+      console.warn('No files found in survey library bucket');
+      return;
+    }
+    
     for (const file of files.files) {
       try {
         console.log('Processing file:', file.name);
         const fileUrl = storage.getFileView(bucketId, file.$id);
         const response = await fetch(fileUrl);
+        
+        if (!response.ok) {
+          console.error(`Failed to fetch file ${file.name}: ${response.status}`);
+          continue;
+        }
+        
         const blob = await response.blob();
         
         let text = '';
@@ -581,7 +592,11 @@ async function loadSurveyLibrary() {
     console.log('Survey library loaded:', surveyLibrary);
   } catch (error) {
     console.error('Error loading survey library:', error);
-    alert('Warning: Could not load survey library. Auto-fill may not work properly.');
+    if (error.code === 401) {
+      alert('Access denied: You do not have permission to access the survey library. Please contact your administrator.');
+    } else {
+      console.warn('Could not load survey library. Auto-fill may not work properly.');
+    }
   }
 }
 
@@ -609,8 +624,8 @@ function parseQuestionsAndAnswers(text) {
     
     // Check if this line is a question
     const questionPatterns = [
-      /^\d+[\.\)]\s*(.+\?)/i,
-      /^[A-Z]\.\s*(.+\?)/i,
+      /^\d+[\.\)]\s*(.+)/i,
+      /^[A-Z]\.\s*(.+)/i,
       /^Q\d*[\.\:]\s*(.+)/i,
       /^Question\s*\d*[\.\:]\s*(.+)/i
     ];
@@ -665,18 +680,45 @@ async function processDocument() {
       extractedText = await extractTextFromWord(uploadedFile);
     }
     
+    console.log('Extracted text length:', extractedText.length);
+    console.log('First 500 chars:', extractedText.substring(0, 500));
+    
     updateProgress(50);
-    showProcessingStatus('Analyzing questions...');
+    showProcessingStatus('Analyzing questions and content...');
     const questions = extractQuestions(extractedText);
     
-    updateProgress(70);
-    showProcessingStatus('Matching with Paper Survey library...');
-    const selectedProduct = document.getElementById('productSelect').value;
-    matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
+    // ALWAYS ALLOW PROCESSING - even if 0 questions found
+    if (questions.length === 0) {
+      console.warn('No structured questions found. Will extract all content as potential questions.');
+      // Extract all meaningful lines as potential questions
+      const allLines = extractAllLines(extractedText);
+      matchedData = allLines.map(line => ({
+        question: line.text,
+        originalLine: line.text,
+        lineNumber: line.lineNumber,
+        matchedAnswer: null,
+        confidence: 0,
+        matched: false
+      }));
+    } else {
+      updateProgress(70);
+      showProcessingStatus('Matching with Paper Survey library...');
+      const selectedProduct = document.getElementById('productSelect').value;
+      
+      const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
+      console.log(`Library size for ${selectedProduct}: ${productLibrarySize}`);
+      
+      if (productLibrarySize === 0) {
+        console.warn(`No survey data found for ${selectedProduct}. Processing without auto-fill.`);
+      }
+      
+      matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
+    }
     
     updateProgress(100);
     showProcessingStatus('Processing complete!');
 
+    // ALWAYS show results and enable download button
     setTimeout(() => {
       document.getElementById('processingStatus').style.display = 'none';
       showMatchResults();
@@ -685,7 +727,7 @@ async function processDocument() {
     
   } catch (error) {
     console.error('Error processing document:', error);
-    alert('Error processing document. Please try again.');
+    alert('Error processing document: ' + error.message);
     document.getElementById('processingStatus').style.display = 'none';
   }
 }
@@ -733,34 +775,117 @@ async function extractTextFromWord(file) {
   });
 }
 
+// New function to extract all meaningful lines when no questions found
+function extractAllLines(text) {
+  const lines = [];
+  const textLines = text.split('\n');
+  
+  textLines.forEach((line, index) => {
+    line = line.trim();
+    
+    // Filter out very short lines, page numbers, headers/footers
+    if (line.length < 15) return;
+    if (line.match(/^page\s+\d+/i)) return;
+    if (line.match(/^\d+$/)) return;
+    if (line.toLowerCase().includes('confidential')) return;
+    
+    lines.push({
+      text: line,
+      lineNumber: index + 1
+    });
+  });
+  
+  return lines;
+}
+
 function extractQuestions(text) {
   const questions = [];
   const lines = text.split('\n');
   
-  const questionPatterns = [
-    /^\d+[\.\)]\s*(.+\?)/i,  // 1. Question?
-    /^[A-Z]\.\s*(.+\?)/i,    // A. Question?
-    /^Q\d*[\.\:]\s*(.+)/i,   // Q1: Question or Q. Question
-    /^Question\s*\d*[\.\:]\s*(.+)/i,  // Question 1: ...
-    /(.+\?)\s*$/i        
+  // Specification table field keywords (technical specs, parameters, features)
+  const specKeywords = [
+    // General specs
+    'model', 'type', 'version', 'series', 'name', 'number', 'code', 'id',
+    // Dimensions & Physical
+    'size', 'dimension', 'width', 'height', 'length', 'weight', 'depth',
+    // Performance
+    'speed', 'resolution', 'accuracy', 'precision', 'capacity', 'throughput',
+    'cycle time', 'takt time', 'inspection', 'detection', 'coverage',
+    // Electrical
+    'voltage', 'power', 'current', 'frequency', 'phase', 'consumption',
+    // Environmental
+    'temperature', 'humidity', 'operating', 'storage', 'environment',
+    // Features
+    'feature', 'capability', 'function', 'option', 'configuration',
+    // Camera/Optical
+    'camera', 'lens', 'lighting', 'illumination', 'sensor', 'pixel',
+    // Software
+    'software', 'interface', 'protocol', 'communication', 'connectivity',
+    // Mechanical
+    'conveyor', 'rail', 'stage', 'axis', 'movement', 'travel',
+    // Standards
+    'standard', 'compliance', 'certification', 'compatible',
+    // Others
+    'range', 'minimum', 'maximum', 'typical', 'specification', 'parameter'
+  ];
+  
+  // Enhanced patterns for spec tables
+  const specPatterns = [
+    /^\d+[\.\)]\s*(.+)/i,  // 1. Specification
+    /^[A-Z]\.\s*(.+)/i,    // A. Specification
+    /^[-•]\s*(.+)/i,       // • Bullet specification
+    /^(.+?)[\:\-]\s*.{0,50}$/i,  // Field: Value or Field - Value format
+    /^([A-Z][a-zA-Z\s]+)\s*$/i   // Capitalized field names
   ];
   
   lines.forEach((line, index) => {
     line = line.trim();
-    if (line.length < 10) return; 
     
-    for (const pattern of questionPatterns) {
-      const match = line.match(pattern);
-      if (match) {
-        questions.push({
-          text: match[1] || match[0],
-          originalLine: line,
-          lineNumber: index + 1
-        });
+    // Skip very short lines
+    if (line.length < 3) return;
+    
+    // Skip common header/footer text
+    if (line.toLowerCase().includes('page ') || 
+        line.toLowerCase().includes('confidential') ||
+        line.match(/^page\s*\d+$/i) ||
+        line.match(/^\d+$/)) {
+      return;
+    }
+    
+    // Check if line contains specification keywords
+    const lowerLine = line.toLowerCase();
+    const containsSpecKeyword = specKeywords.some(keyword => 
+      lowerLine.includes(keyword.toLowerCase())
+    );
+    
+    // Check against patterns
+    let matched = false;
+    for (const pattern of specPatterns) {
+      if (pattern.test(line)) {
+        matched = true;
         break;
       }
     }
+    
+    // Accept line if it contains spec keywords OR matches pattern
+    if (containsSpecKeyword || matched) {
+      const questionText = line;
+      
+      // Avoid duplicates
+      if (!questions.some(q => q.text === questionText)) {
+        questions.push({
+          text: questionText,
+          originalLine: line,
+          lineNumber: index + 1
+        });
+      }
+    }
   });
+  
+  console.log(`Extracted ${questions.length} specification fields from document`);
+  if (questions.length > 0) {
+    console.log('First 5 spec fields:', questions.slice(0, 5).map(q => q.text));
+  }
   
   return questions;
 }
@@ -776,8 +901,9 @@ function matchQuestionsWithLibrary(questions, product) {
     let highestScore = 0;
     
     productLibrary.forEach(libraryItem => {
-      const score = calculateSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.6) { 
+      // Use enhanced similarity calculation with keyword matching
+      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
+      if (score > highestScore && score > 0.4) {  // Lowered threshold from 0.6 to 0.4
         highestScore = score;
         bestMatch = libraryItem;
       }
@@ -793,7 +919,85 @@ function matchQuestionsWithLibrary(questions, product) {
     });
   });
   
+  console.log(`Found ${matches.filter(m => m.matched).length} matches out of ${matches.length} questions`);
+  
   return matches;
+}
+
+// Enhanced similarity calculation with keyword matching
+function calculateEnhancedSimilarity(str1, str2) {
+  // Normalize strings
+  const normalize = (s) => s.toLowerCase()
+    .replace(/[^\w\s]/g, ' ')  // Remove punctuation
+    .replace(/\s+/g, ' ')       // Normalize whitespace
+    .trim();
+  
+  const norm1 = normalize(str1);
+  const norm2 = normalize(str2);
+  
+  // Method 1: Word overlap (Jaccard similarity)
+  const words1 = norm1.split(/\s+/).filter(w => w.length > 2);
+  const words2 = norm2.split(/\s+/).filter(w => w.length > 2);
+  
+  const set1 = new Set(words1);
+  const set2 = new Set(words2);
+  
+  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const union = new Set([...set1, ...set2]);
+  
+  const jaccardScore = union.size > 0 ? intersection.size / union.size : 0;
+  
+  // Method 2: Substring matching
+  const longerStr = norm1.length > norm2.length ? norm1 : norm2;
+  const shorterStr = norm1.length > norm2.length ? norm2 : norm1;
+  
+  let substringScore = 0;
+  if (longerStr.includes(shorterStr)) {
+    substringScore = 0.5;
+  } else {
+    // Check for partial substring matches
+    const shorterWords = shorterStr.split(/\s+/);
+    const matchingWords = shorterWords.filter(word => 
+      word.length > 3 && longerStr.includes(word)
+    );
+    substringScore = shorterWords.length > 0 ? 
+      (matchingWords.length / shorterWords.length) * 0.3 : 0;
+  }
+  
+  // Method 3: Key term matching
+  const keyTerms1 = extractKeyTerms(str1);
+  const keyTerms2 = extractKeyTerms(str2);
+  
+  const keyTermMatches = keyTerms1.filter(term => 
+    keyTerms2.some(t => t.includes(term) || term.includes(t))
+  ).length;
+  
+  const keyTermScore = Math.max(keyTerms1.length, keyTerms2.length) > 0 ?
+    keyTermMatches / Math.max(keyTerms1.length, keyTerms2.length) : 0;
+  
+  // Weighted combination
+  const finalScore = (jaccardScore * 0.4) + (substringScore * 0.3) + (keyTermScore * 0.3);
+  
+  return finalScore;
+}
+
+// Extract key terms (technical terms, product names, important nouns)
+function extractKeyTerms(text) {
+  const normalized = text.toLowerCase();
+  const words = normalized.split(/\s+/);
+  
+  // Filter for meaningful terms (longer than 3 chars, not common words)
+  const commonWords = new Set(['what', 'how', 'why', 'when', 'where', 'who', 'which', 
+    'that', 'this', 'these', 'those', 'with', 'from', 'have', 'about', 'your', 
+    'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe']);
+  
+  const keyTerms = words.filter(word => 
+    word.length > 3 && 
+    !commonWords.has(word) &&
+    !/^\d+$/.test(word)  // Not just numbers
+  );
+  
+  return keyTerms;
 }
 
 function calculateSimilarity(str1, str2) {
@@ -835,41 +1039,68 @@ function showMatchResults() {
 }
 
 async function downloadFilledDocument() {
-  if (!uploadedFile || matchedData.length === 0) return;
-
+  // ALWAYS ALLOW DOWNLOAD - even if no file or no matches
+  if (!uploadedFile && matchedData.length === 0) {
+    alert('Please upload and process a document first.');
+    return;
+  }
+  
+  const selectedProduct = document.getElementById('productSelect').value.toUpperCase();
+  const timestamp = new Date().toLocaleString();
+  
   let outputText = '='.repeat(80) + '\n';
   outputText += 'AUTO-FILLED PAPER SURVEY DOCUMENT\n';
-  outputText += 'Generated: ' + new Date().toLocaleString() + '\n';
-  outputText += 'Original File: ' + uploadedFile.name + '\n';
-  outputText += 'Product: ' + document.getElementById('productSelect').value.toUpperCase() + '\n';
+  outputText += 'Generated: ' + timestamp + '\n';
+  outputText += 'Original File: ' + (uploadedFile ? uploadedFile.name : 'N/A') + '\n';
+  outputText += 'Product: ' + selectedProduct + '\n';
   outputText += '='.repeat(80) + '\n\n';
   
-  matchedData.forEach((item, index) => {
-    outputText += `\n[Question ${index + 1}]\n`;
-    outputText += `${item.originalLine}\n\n`;
+  if (matchedData.length === 0) {
+    outputText += 'No questions or content extracted from the document.\n';
+    outputText += 'Please ensure the document contains readable text.\n\n';
+    outputText += 'Extracted Text Preview:\n';
+    outputText += '-'.repeat(80) + '\n';
+    outputText += extractedText.substring(0, 1000) + '...\n';
+  } else {
+    const matchedCount = matchedData.filter(m => m.matched).length;
+    outputText += `Summary: ${matchedData.length} items found, ${matchedCount} answers auto-filled\n\n`;
     
-    if (item.matched) {
-      outputText += `[Auto-Filled Answer] (Confidence: ${item.confidence}%)\n`;
-      outputText += `${item.matchedAnswer}\n`;
-    } else {
-      outputText += `[No Match Found]\n`;
-      outputText += `Please provide answer manually.\n`;
-    }
-    
-    outputText += '\n' + '-'.repeat(80) + '\n';
-  });
+    matchedData.forEach((item, index) => {
+      outputText += `\n[Question/Item ${index + 1}]\n`;
+      outputText += `${item.originalLine}\n\n`;
+      
+      if (item.matched) {
+        outputText += `[Auto-Filled Answer] (Confidence: ${item.confidence}%)\n`;
+        outputText += `${item.matchedAnswer}\n`;
+      } else {
+        outputText += `[No Match Found]\n`;
+        outputText += `Please provide answer manually.\n`;
+      }
+      
+      outputText += '\n' + '-'.repeat(80) + '\n';
+    });
+  }
+  
+  outputText += '\n\n' + '='.repeat(80) + '\n';
+  outputText += 'END OF DOCUMENT\n';
+  outputText += 'Please review and edit all content as needed.\n';
+  outputText += '='.repeat(80) + '\n';
 
   const blob = new Blob([outputText], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'filled_survey_' + Date.now() + '.txt';
+  const filename = uploadedFile ? 
+    'filled_' + uploadedFile.name.replace(/\.[^/.]+$/, '') + '_' + Date.now() + '.txt' :
+    'survey_extract_' + Date.now() + '.txt';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   
-  alert('Document downloaded successfully! Please review and edit the auto-filled answers as needed.');
+  console.log('Document downloaded:', filename);
+  alert('Document downloaded successfully! Please review and edit the content as needed.');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
