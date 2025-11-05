@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="./style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.3.0/docx.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
@@ -977,61 +978,85 @@ async function downloadFilledDocument() {
     alert('Please upload and process a document first.');
     return;
   }
-  
+
+  const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, TextRun } = docx;
+
   const selectedProduct = document.getElementById('productSelect').value.toUpperCase();
   const timestamp = new Date().toLocaleString();
-  
-  let outputText = '='.repeat(80) + '\n';
-  outputText += 'AUTO-FILLED PAPER SURVEY DOCUMENT\n';
-  outputText += 'Generated: ' + timestamp + '\n';
-  outputText += 'Original File: ' + (uploadedFile ? uploadedFile.name : 'N/A') + '\n';
-  outputText += 'Product: ' + selectedProduct + '\n';
-  outputText += '='.repeat(80) + '\n\n';
-  
-  if (matchedData.length === 0) {
-    outputText += 'No questions or content extracted from the document.\n';
-    outputText += 'Please ensure the document contains readable text.\n\n';
-    outputText += 'Extracted Text Preview:\n';
-    outputText += '-'.repeat(80) + '\n';
-    outputText += extractedText.substring(0, 1000) + '...\n';
-  } else {
-    const matchedCount = matchedData.filter(m => m.matched).length;
-    outputText += `Summary: ${matchedData.length} items found, ${matchedCount} answers auto-filled\n\n`;
-    
-    matchedData.forEach((item, index) => {
-      outputText += `\n[Question/Item ${index + 1}]\n`;
-      outputText += `${item.originalLine}\n\n`;
-      
-      if (item.matched) {
-        outputText += `[Auto-Filled Answer] (Confidence: ${item.confidence}%)\n`;
-        outputText += `${item.matchedAnswer}\n`;
-      } else {
-        outputText += `[No Match Found]\n`;
-        outputText += `Please provide answer manually.\n`;
-      }
-      
-      outputText += '\n' + '-'.repeat(80) + '\n';
-    });
-  }
-  
-  outputText += '\n\n' + '='.repeat(80) + '\n';
-  outputText += 'END OF DOCUMENT\n';
-  outputText += 'Please review and edit all content as needed.\n';
-  outputText += '='.repeat(80) + '\n';
 
-  const blob = new Blob([outputText], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
+  // Create document
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: [
+        new Paragraph({
+          text: 'AUTO-FILLED PAPER SURVEY DOCUMENT',
+          heading: HeadingLevel.HEADING1,
+        }),
+        new Paragraph(`Generated: ${timestamp}`),
+        new Paragraph(`Original File: ${uploadedFile ? uploadedFile.name : 'N/A'}`),
+        new Paragraph(`Product: ${selectedProduct}`),
+        new Paragraph('='.repeat(60)),
+      ]
+    }]
+  });
+
+  // If no matched data, just show preview
+  if (matchedData.length === 0) {
+    doc.addSection({
+      children: [
+        new Paragraph('No questions or content extracted from the document.'),
+        new Paragraph('Please ensure the document contains readable text.'),
+        new Paragraph('Extracted Text Preview:'),
+        new Paragraph('-'.repeat(60)),
+        new Paragraph(extractedText.substring(0, 1000) + '...')
+      ]
+    });
+  } else {
+    // Create table for Q&A
+    const tableRows = [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph('No')] }),
+          new TableCell({ children: [new Paragraph('Question/Item')] }),
+          new TableCell({ children: [new Paragraph('Auto-Filled Answer')] }),
+        ]
+      })
+    ];
+
+    matchedData.forEach((item, index) => {
+      tableRows.push(
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph(String(index + 1))] }),
+            new TableCell({ children: [new Paragraph(item.originalLine)] }),
+            new TableCell({ children: [new Paragraph(item.matched ? item.matchedAnswer : 'No match found')] }),
+          ]
+        })
+      );
+    });
+
+    const table = new Table({
+      rows: tableRows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
+    });
+
+    doc.addSection({ children: [table] });
+  }
+
+  // Download the .docx
+  const blob = await Packer.toBlob(doc);
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   const filename = uploadedFile ? 
     'filled_' + uploadedFile.name.replace(/\.[^/.]+$/, '') + '.docx' :
-    'survey_extract_' + '.docx';
+    'survey_extract.docx';
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  
+  URL.revokeObjectURL(a.href);
+
   console.log('Document downloaded:', filename);
   alert('Document downloaded successfully! Please review and edit the content as needed.');
 }
@@ -1049,5 +1074,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
-
