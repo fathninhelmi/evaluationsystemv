@@ -130,7 +130,7 @@
         <div class="results-summary">
           <div class="result-stat">
             <span class="stat-number" id="questionsFound">0</span>
-            <span class="stat-label">Questions Found</span>
+            <span class="stat-label">Fields Found</span>
           </div>
           <div class="result-stat">
             <span class="stat-number" id="answersMatched">0</span>
@@ -618,46 +618,169 @@ function parseQuestionsAndAnswers(text) {
   const lines = text.split('\n');
   let currentQuestion = null;
   let currentAnswer = '';
+  const specKeywords = [
+    'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
+    'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
+    'technologies', 'functions', 'traceability', 'hardware', 'software', 
+    'coverage', 'inspection', 'operating', 'optical', 'transport', 'edge',
+    'board', 'level', 'panel', 'camera', 'lighting', 'module', 'conveyor',
+    'adjustment', 'requirement', 'specification', 'footprint', 'supplies',
+    'pcb', 'maximum', 'minimum', 'total', 'installation', 'type', 'area'
+  ];
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line) continue;
-    
+    if (!line || line.length < 3) continue;
+
+    if (line.match(/^page\s+\d+/i) || line.match(/^\d+$/) || line.toLowerCase().includes('confidential')) {
+      continue;
+    }
+
     const questionPatterns = [
-      /^\d+[\.\)]\s*(.+)/i,
-      /^[A-Z]\.\s*(.+)/i,
-      /^Q\d*[\.\:]\s*(.+)/i,
-      /^Question\s*\d*[\.\:]\s*(.+)/i
+      /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]\s*(.+)/,
+      /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
+      /^([A-Z][A-Za-z\s\-\/&()]{5,}?)$/
     ];
     
     let isQuestion = false;
     for (const pattern of questionPatterns) {
-      if (pattern.test(line)) {
-        isQuestion = true;
-        if (currentQuestion && currentAnswer) {
-          qaData.push({
-            question: currentQuestion,
-            answer: currentAnswer.trim()
-          });
+      const match = line.match(pattern);
+      if (match) {
+        const potentialField = match[1].trim();
+        const lowerField = potentialField.toLowerCase();
+        const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
+        
+        if (hasSpecKeyword || /^(Maximum|Minimum|Total|System|Operating|PCB|Board)/.test(potentialField)) {
+          isQuestion = true;
+
+          if (currentQuestion && currentAnswer.trim()) {
+            qaData.push({
+              question: currentQuestion,
+              answer: currentAnswer.trim()
+            });
+          }
+          currentQuestion = potentialField;
+          if (match[2]) {
+            currentAnswer = match[2].trim() + ' ';
+          } else {
+            currentAnswer = '';
+          }
+          break;
         }
-        currentQuestion = line;
-        currentAnswer = '';
-        break;
       }
     }
+
     if (!isQuestion && currentQuestion) {
-      currentAnswer += line + ' ';
+      const looksLikeField = /^[A-Z][A-Za-z\s]{10,}$/.test(line);
+      if (!looksLikeField) {
+        currentAnswer += line + ' ';
+      }
     }
   }
-  
-  if (currentQuestion && currentAnswer) {
+
+  if (currentQuestion && currentAnswer.trim()) {
     qaData.push({
       question: currentQuestion,
       answer: currentAnswer.trim()
     });
   }
   
+  console.log(`Parsed ${qaData.length} Q&A pairs from library document`);
+  if (qaData.length > 0) {
+    console.log('Sample Q&A:', qaData.slice(0, 3));
+  }
+  
   return qaData;
+}
+
+function extractQuestions(text) {
+  const fields = [];
+  const lines = text.split('\n');
+  const fieldPatterns = [
+    /^([A-Za-z][A-Za-z\s\-\/&()]+?)(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
+    /^([A-Za-z][A-Za-z\s\-\/&]+\([^)]+\))(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
+    /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
+    /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]/
+  ];
+
+  const specKeywords = [
+    'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
+    'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
+    'technologies', 'functions', 'traceability', 'hardware', 'software', 
+    'coverage', 'inspection', 'operating', 'optical', 'transport', 'edge',
+    'board', 'level', 'panel', 'camera', 'lighting', 'module', 'conveyor',
+    'adjustment', 'requirement', 'specification', 'footprint', 'supplies',
+    'pcb', 'maximum', 'minimum', 'total', 'installation', 'type', 'area',
+    'footprint', 'conveyor'
+  ];
+  
+  lines.forEach((line, index) => {
+    const originalLine = line;
+    line = line.trim();
+
+    if (line.length < 5 || 
+        line.length > 150 || 
+        line.match(/^page\s*\d+/i) || 
+        line.match(/^\d+$/) ||
+        line.match(/^[0-9\s\.\-]+$/) ||
+        line.toLowerCase().includes('confidential')) {
+      return;
+    }
+    let fieldName = null;
+    
+    for (const pattern of fieldPatterns) {
+      const match = line.match(pattern);
+      if (match) {
+        fieldName = match[1].trim();
+        break;
+      }
+    }
+    
+    if (fieldName) {
+      const lowerField = fieldName.toLowerCase();
+      const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
+      const wordCount = fieldName.split(/\s+/).length;
+      const startsWithCap = /^[A-Z]/.test(fieldName);
+      
+      if ((hasSpecKeyword || (startsWithCap && wordCount >= 2 && wordCount <= 8)) && 
+          !fields.some(f => f.text === fieldName)) {
+        
+        fields.push({
+          text: fieldName,
+          originalLine: originalLine.trim(),
+          lineNumber: index + 1
+        });
+      }
+    }
+  });
+  
+  console.log(`Extracted ${fields.length} specification fields from survey document`);
+  if (fields.length > 0) {
+    console.log('First 10 fields:', fields.slice(0, 10).map(f => f.text));
+  }
+  
+  return fields;
+}
+
+function extractAllLines(text) {
+  const lines = [];
+  const textLines = text.split('\n');
+  
+  textLines.forEach((line, index) => {
+    line = line.trim();
+
+    if (line.length < 15) return;
+    if (line.match(/^page\s+\d+/i)) return;
+    if (line.match(/^\d+$/)) return;
+    if (line.toLowerCase().includes('confidential')) return;
+    
+    lines.push({
+      text: line,
+      lineNumber: index + 1
+    });
+  });
+  
+  return lines;
 }
 
 async function processDocument() {
@@ -673,15 +796,24 @@ async function processDocument() {
       extractedText = await extractTextFromWord(uploadedFile);
     }
     
+    console.log('=== EXTRACTION DEBUG ===');
     console.log('Extracted text length:', extractedText.length);
-    console.log('First 500 chars:', extractedText.substring(0, 500));
+    console.log('First 1000 chars:', extractedText.substring(0, 1000));
+    console.log('========================');
     
     updateProgress(50);
-    showProcessingStatus('Analyzing questions and content...');
-    const questions = extractQuestions(extractedText);
+    showProcessingStatus('Analyzing specification fields...');
+    const fields = extractQuestions(extractedText);
     
-    if (questions.length === 0) {
-      console.warn('No structured questions found. Will extract all content as potential questions.');
+    console.log('=== FIELDS FOUND ===');
+    console.log(`Total specification fields extracted: ${fields.length}`);
+    fields.slice(0, 15).forEach((q, i) => {
+      console.log(`${i + 1}. ${q.text}`);
+    });
+    console.log('========================');
+    
+    if (fields.length === 0) {
+      console.warn('No structured fields found. Will extract all content.');
       const allLines = extractAllLines(extractedText);
       matchedData = allLines.map(line => ({
         question: line.text,
@@ -697,14 +829,29 @@ async function processDocument() {
       const selectedProduct = document.getElementById('productSelect').value;
       
       const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
+      console.log('=== LIBRARY DEBUG ===');
       console.log(`Library size for ${selectedProduct}: ${productLibrarySize}`);
+      if (productLibrarySize > 0) {
+        console.log('Sample library entries:');
+        surveyLibrary[selectedProduct].slice(0, 5).forEach((item, i) => {
+          console.log(`${i + 1}. Q: "${item.question}" A: "${item.answer.substring(0, 80)}..."`);
+        });
+      }
+      console.log('========================');
       
       if (productLibrarySize === 0) {
         console.warn(`No survey data found for ${selectedProduct}. Processing without auto-fill.`);
       }
       
-      matchedData = matchQuestionsWithLibrary(questions, selectedProduct);
+      matchedData = matchQuestionsWithLibrary(fields, selectedProduct);
     }
+    
+    console.log('=== MATCH RESULTS ===');
+    console.log(`Total matches: ${matchedData.filter(m => m.matched).length}/${matchedData.length}`);
+    matchedData.filter(m => m.matched).slice(0, 10).forEach((m, i) => {
+      console.log(`${i + 1}. "${m.question}" (${m.confidence}%) -> "${m.matchedAnswer?.substring(0, 60)}..."`);
+    });
+    console.log('========================');
     
     updateProgress(100);
     showProcessingStatus('Processing complete!');
@@ -765,89 +912,19 @@ async function extractTextFromWord(file) {
   });
 }
 
-function extractAllLines(text) {
-  const lines = [];
-  const textLines = text.split('\n');
-  
-  textLines.forEach((line, index) => {
-    line = line.trim();
-
-    if (line.length < 15) return;
-    if (line.match(/^page\s+\d+/i)) return;
-    if (line.match(/^\d+$/)) return;
-    if (line.toLowerCase().includes('confidential')) return;
-    
-    lines.push({
-      text: line,
-      lineNumber: index + 1
-    });
-  });
-  
-  return lines;
-}
-
-function extractQuestions(text) {
-  const questions = [];
-  const lines = text.split('\n');
-  
-  const questionPatterns = [
-    /^\d+[\.\)]\s*(.+)/i,  
-    /^[A-Z]\.\s*(.+)/i,   
-    /^Q\d*[\.\:\s]\s*(.+)/i, 
-    /^Question\s*\d*[\.\:]\s*(.+)/i,  
-    /([^\n]{20,})\?/i,  
-    /^[-•]\s*(.+)/i,  
-    /(what|how|why|when|where|who|which|can|could|would|should|is|are|does|do)\s+.{10,}/i  // Question keywords
-  ];
-  
-  lines.forEach((line, index) => {
-    line = line.trim();
-    if (line.length < 15) return; 
-  
-    if (line.toLowerCase().includes('page ') || 
-        line.toLowerCase().includes('confidential') ||
-        line.match(/^\d+$/)) {
-      return;
-    }
-    
-    for (const pattern of questionPatterns) {
-      const match = line.match(pattern);
-      if (match) {
-        const questionText = match[1] ? match[1].trim() : match[0].trim();
-        
-        if (!questions.some(q => q.text === questionText)) {
-          questions.push({
-            text: questionText,
-            originalLine: line,
-            lineNumber: index + 1
-          });
-        }
-        break;
-      }
-    }
-  });
-  
-  console.log(`Extracted ${questions.length} questions from document`);
-  if (questions.length > 0) {
-    console.log('First 3 questions:', questions.slice(0, 3).map(q => q.text));
-  }
-  
-  return questions;
-}
-
 function matchQuestionsWithLibrary(questions, product) {
   const matches = [];
   const productLibrary = surveyLibrary[product] || [];
   
-  console.log(`Matching ${questions.length} questions against ${productLibrary.length} library entries for ${product}`);
+  console.log(`Matching ${questions.length} items against ${productLibrary.length} library entries for ${product}`);
   
   questions.forEach(question => {
     let bestMatch = null;
     let highestScore = 0;
     
     productLibrary.forEach(libraryItem => {
-    const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.4) {
+      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
+      if (score > highestScore && score > 0.25) { 
         highestScore = score;
         bestMatch = libraryItem;
       }
@@ -859,11 +936,18 @@ function matchQuestionsWithLibrary(questions, product) {
       lineNumber: question.lineNumber,
       matchedAnswer: bestMatch ? bestMatch.answer : null,
       confidence: Math.round(highestScore * 100),
-      matched: bestMatch !== null
+      matched: bestMatch !== null && highestScore > 0.25
     });
+
+    if (bestMatch) {
+      console.log(`✓ Match: "${question.text}" -> "${bestMatch.question}" (${Math.round(highestScore * 100)}%)`);
+    } else {
+      console.log(`✗ No match: "${question.text}"`);
+    }
   });
   
-  console.log(`Found ${matches.filter(m => m.matched).length} matches out of ${matches.length} questions`);
+  const matchedCount = matches.filter(m => m.matched).length;
+  console.log(`Found ${matchedCount} matches out of ${matches.length} items`);
   
   return matches;
 }
@@ -876,9 +960,23 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const norm1 = normalize(str1);
   const norm2 = normalize(str2);
+
+  if (norm1.includes(norm2) || norm2.includes(norm1)) {
+    const shorter = norm1.length < norm2.length ? norm1 : norm2;
+    const longer = norm1.length < norm2.length ? norm2 : norm1;
+    return 0.85 + (shorter.length / longer.length) * 0.15;
+  }
   
   const words1 = norm1.split(/\s+/).filter(w => w.length > 2);
   const words2 = norm2.split(/\s+/).filter(w => w.length > 2);
+  
+  if (words1.length <= 3 || words2.length <= 3) {
+    const set1 = new Set(words1);
+    const set2 = new Set(words2);
+    const matches = [...set1].filter(x => set2.has(x)).length;
+    const total = Math.max(set1.size, set2.size);
+    return total > 0 ? matches / total : 0;
+  }
   
   const set1 = new Set(words1);
   const set2 = new Set(words2);
@@ -888,32 +986,32 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const jaccardScore = union.size > 0 ? intersection.size / union.size : 0;
   
-  const longerStr = norm1.length > norm2.length ? norm1 : norm2;
-  const shorterStr = norm1.length > norm2.length ? norm2 : norm1;
-  
-  let substringScore = 0;
-  if (longerStr.includes(shorterStr)) {
-    substringScore = 0.5;
-  } else {
-    const shorterWords = shorterStr.split(/\s+/);
-    const matchingWords = shorterWords.filter(word => 
-      word.length > 3 && longerStr.includes(word)
-    );
-    substringScore = shorterWords.length > 0 ? 
-      (matchingWords.length / shorterWords.length) * 0.3 : 0;
+  let partialMatches = 0;
+  for (const w1 of words1) {
+    for (const w2 of words2) {
+      if (w1.length > 3 && w2.length > 3) {
+        if (w1.includes(w2) || w2.includes(w1)) {
+          partialMatches++;
+        }
+      }
+    }
   }
-  
+  const partialScore = partialMatches / Math.max(words1.length, words2.length);
   const keyTerms1 = extractKeyTerms(str1);
   const keyTerms2 = extractKeyTerms(str2);
   
   const keyTermMatches = keyTerms1.filter(term => 
-    keyTerms2.some(t => t.includes(term) || term.includes(t))
+    keyTerms2.some(t => 
+      t.toLowerCase() === term.toLowerCase() ||
+      t.toLowerCase().includes(term.toLowerCase()) || 
+      term.toLowerCase().includes(t.toLowerCase())
+    )
   ).length;
   
   const keyTermScore = Math.max(keyTerms1.length, keyTerms2.length) > 0 ?
     keyTermMatches / Math.max(keyTerms1.length, keyTerms2.length) : 0;
-  
-  const finalScore = (jaccardScore * 0.4) + (substringScore * 0.3) + (keyTermScore * 0.3);
+
+  const finalScore = (jaccardScore * 0.3) + (partialScore * 0.3) + (keyTermScore * 0.4);
   
   return finalScore;
 }
@@ -924,15 +1022,29 @@ function extractKeyTerms(text) {
 
   const commonWords = new Set(['what', 'how', 'why', 'when', 'where', 'who', 'which', 
     'that', 'this', 'these', 'those', 'with', 'from', 'have', 'about', 'your', 
-    'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe']);
+    'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe',
+    'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'her', 'was',
+    'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'its', 'may', 'see',
+    'she', 'than', 'them', 'they', 'said', 'each', 'tell', 'also', 'back', 'been',
+    'call', 'come', 'even', 'find', 'give', 'good', 'hand', 'here', 'just', 'know',
+    'last', 'long', 'made', 'make', 'many', 'more', 'most', 'must', 'name', 'only',
+    'over', 'part', 'such', 'take', 'than', 'them', 'then', 'very', 'want', 'well',
+    'went', 'were', 'what', 'when', 'work', 'year', 'your']);
   
-  const keyTerms = words.filter(word => 
-    word.length > 3 && 
-    !commonWords.has(word) &&
-    !/^\d+$/.test(word) 
-  );
+  const technicalTerms = [];
   
-  return keyTerms;
+  for (let word of words) {
+    word = word.replace(/[^\w]/g, '');
+    if (word.length > 3 && !commonWords.has(word) && !/^\d+$/.test(word)) {
+      technicalTerms.push(word);
+    } else if (/\d/.test(word) && word.length > 1) {
+      technicalTerms.push(word);
+    } else if (word === word.toUpperCase() && word.length >= 2 && /[A-Z]/.test(word)) {
+      technicalTerms.push(word.toLowerCase());
+    }
+  }
+  
+  return technicalTerms;
 }
 
 function calculateSimilarity(str1, str2) {
@@ -974,7 +1086,7 @@ function showMatchResults() {
 }
 
 async function downloadFilledDocument() {
-const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, TextRun } = window.docx;
+  const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, TextRun, AlignmentType, BorderStyle } = window.docx;
 
   if (!uploadedFile && matchedData.length === 0) {
     alert('Please upload and process a document first.');
@@ -983,6 +1095,7 @@ const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, Head
 
   const selectedProduct = document.getElementById('productSelect').value.toUpperCase();
   const timestamp = new Date().toLocaleString();
+
   const doc = new Document({
     sections: [{
       properties: {},
@@ -990,21 +1103,47 @@ const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, Head
         new Paragraph({
           text: 'AUTO-FILLED PAPER SURVEY DOCUMENT',
           heading: HeadingLevel.HEADING1,
+          alignment: AlignmentType.CENTER,
         }),
-        new Paragraph(`Generated: ${timestamp}`),
-        new Paragraph(`Original File: ${uploadedFile ? uploadedFile.name : 'N/A'}`),
-        new Paragraph(`Product: ${selectedProduct}`),
-        new Paragraph('='.repeat(60)),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `Generated: ${timestamp}`,
+              bold: false,
+            })
+          ],
+          spacing: { after: 200 }
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `Original File: ${uploadedFile ? uploadedFile.name : 'N/A'}`,
+              bold: false,
+            })
+          ]
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `Product: ${selectedProduct}`,
+              bold: false,
+            })
+          ],
+          spacing: { after: 400 }
+        }),
       ]
     }]
   });
+
   if (matchedData.length === 0) {
     doc.addSection({
       children: [
-        new Paragraph('No questions or content extracted from the document.'),
-        new Paragraph('Please ensure the document contains readable text.'),
-        new Paragraph('Extracted Text Preview:'),
-        new Paragraph('-'.repeat(60)),
+        new Paragraph('No specification fields extracted from the document.'),
+        new Paragraph('Please ensure the document contains readable text in table format.'),
+        new Paragraph({
+          text: 'Extracted Text Preview:',
+          spacing: { before: 400, after: 200 }
+        }),
         new Paragraph(extractedText.substring(0, 1000) + '...')
       ]
     });
@@ -1012,20 +1151,37 @@ const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, Head
     const tableRows = [
       new TableRow({
         children: [
-          new TableCell({ children: [new Paragraph('No')] }),
-          new TableCell({ children: [new Paragraph('Question/Item')] }),
-          new TableCell({ children: [new Paragraph('Auto-Filled Answer')] }),
+          new TableCell({ 
+            children: [new Paragraph({ text: 'No', bold: true })],
+            width: { size: 8, type: WidthType.PERCENTAGE }
+          }),
+          new TableCell({ 
+            children: [new Paragraph({ text: 'Specification Field', bold: true })],
+            width: { size: 40, type: WidthType.PERCENTAGE }
+          }),
+          new TableCell({ 
+            children: [new Paragraph({ text: 'Auto-Filled Value', bold: true })],
+            width: { size: 45, type: WidthType.PERCENTAGE }
+          }),
+          new TableCell({ 
+            children: [new Paragraph({ text: 'Confidence', bold: true })],
+            width: { size: 7, type: WidthType.PERCENTAGE }
+          }),
         ]
       })
     ];
 
     matchedData.forEach((item, index) => {
+      const confidenceText = item.matched ? `${item.confidence}%` : 'N/A';
+      const answerText = item.matched ? item.matchedAnswer : '[No match found - please fill manually]';
+      
       tableRows.push(
         new TableRow({
           children: [
             new TableCell({ children: [new Paragraph(String(index + 1))] }),
-            new TableCell({ children: [new Paragraph(item.originalLine)] }),
-            new TableCell({ children: [new Paragraph(item.matched ? item.matchedAnswer : 'No match found')] }),
+            new TableCell({ children: [new Paragraph(item.question)] }),
+            new TableCell({ children: [new Paragraph(answerText)] }),
+            new TableCell({ children: [new Paragraph(confidenceText)] }),
           ]
         })
       );
@@ -1037,6 +1193,26 @@ const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, Head
     });
 
     doc.addSection({ children: [table] });
+    
+    const matchedCount = matchedData.filter(m => m.matched).length;
+    const matchRate = Math.round((matchedCount / matchedData.length) * 100);
+    
+    doc.addSection({
+      children: [
+        new Paragraph({
+          text: '\nSummary',
+          heading: HeadingLevel.HEADING2,
+          spacing: { before: 400 }
+        }),
+        new Paragraph(`Total Fields: ${matchedData.length}`),
+        new Paragraph(`Matched Fields: ${matchedCount}`),
+        new Paragraph(`Match Rate: ${matchRate}%`),
+        new Paragraph({
+          text: '\nNote: Please review all auto-filled values and manually fill any missing information.',
+          spacing: { before: 200 }
+        })
+      ]
+    });
   }
 
   const blob = await Packer.toBlob(doc);
@@ -1068,5 +1244,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
-
