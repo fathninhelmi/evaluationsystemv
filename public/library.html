@@ -1024,8 +1024,8 @@ async function downloadFilledDocument() {
   const a = document.createElement('a');
   a.href = url;
   const filename = uploadedFile ? 
-    'filled_' + uploadedFile.name.replace(/\.[^/.]+$/, '') + '_' + Date.now() + '.docx' :
-    'survey_extract_' + Date.now() + '.docx';
+    'filled_' + uploadedFile.name.replace(/\.[^/.]+$/, '') + '.docx' :
+    'survey_extract_' + '.docx';
   a.download = filename;
   document.body.appendChild(a);
   a.click();
@@ -1049,4 +1049,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
