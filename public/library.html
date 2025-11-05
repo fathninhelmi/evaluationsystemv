@@ -618,6 +618,8 @@ function parseQuestionsAndAnswers(text) {
   const lines = text.split('\n');
   let currentQuestion = null;
   let currentAnswer = '';
+  
+  // Technical specification keywords to identify fields
   const specKeywords = [
     'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
     'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
@@ -631,14 +633,19 @@ function parseQuestionsAndAnswers(text) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line || line.length < 3) continue;
-
+    
+    // Skip page numbers and headers
     if (line.match(/^page\s+\d+/i) || line.match(/^\d+$/) || line.toLowerCase().includes('confidential')) {
       continue;
     }
-
+    
+    // Enhanced patterns for specifications (library documents have answers)
     const questionPatterns = [
+      // Field name with colon and answer
       /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]\s*(.+)/,
+      // Multi-word technical terms
       /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
+      // Standalone field names (will capture answer from next lines)
       /^([A-Z][A-Za-z\s\-\/&()]{5,}?)$/
     ];
     
@@ -646,20 +653,26 @@ function parseQuestionsAndAnswers(text) {
     for (const pattern of questionPatterns) {
       const match = line.match(pattern);
       if (match) {
+        // Check if this looks like a specification field
         const potentialField = match[1].trim();
         const lowerField = potentialField.toLowerCase();
         const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
         
         if (hasSpecKeyword || /^(Maximum|Minimum|Total|System|Operating|PCB|Board)/.test(potentialField)) {
           isQuestion = true;
-
+          
+          // Save previous Q&A pair
           if (currentQuestion && currentAnswer.trim()) {
             qaData.push({
               question: currentQuestion,
               answer: currentAnswer.trim()
             });
           }
+          
+          // Start new question
           currentQuestion = potentialField;
+          
+          // Check if answer is on same line (after colon)
           if (match[2]) {
             currentAnswer = match[2].trim() + ' ';
           } else {
@@ -669,15 +682,18 @@ function parseQuestionsAndAnswers(text) {
         }
       }
     }
-
+    
+    // If not a question and we have a current question, add to answer
     if (!isQuestion && currentQuestion) {
+      // Don't add lines that look like new field names
       const looksLikeField = /^[A-Z][A-Za-z\s]{10,}$/.test(line);
       if (!looksLikeField) {
         currentAnswer += line + ' ';
       }
     }
   }
-
+  
+  // Save last Q&A pair
   if (currentQuestion && currentAnswer.trim()) {
     qaData.push({
       question: currentQuestion,
@@ -696,13 +712,20 @@ function parseQuestionsAndAnswers(text) {
 function extractQuestions(text) {
   const fields = [];
   const lines = text.split('\n');
+  
+  // Technical specification field patterns (for survey table formats)
   const fieldPatterns = [
+    // Standard spec field names with optional Chinese/Japanese
     /^([A-Za-z][A-Za-z\s\-\/&()]+?)(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
+    // Fields with parentheses like "PCB Dimension (L x W)"
     /^([A-Za-z][A-Za-z\s\-\/&]+\([^)]+\))(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
+    // Multi-word technical terms
     /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
+    // With colons (but capture before colon)
     /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]/
   ];
-
+  
+  // Common technical specification keywords to identify fields
   const specKeywords = [
     'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
     'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
@@ -717,7 +740,8 @@ function extractQuestions(text) {
   lines.forEach((line, index) => {
     const originalLine = line;
     line = line.trim();
-
+    
+    // Skip empty lines, page numbers, very long lines (paragraphs), pure numbers
     if (line.length < 5 || 
         line.length > 150 || 
         line.match(/^page\s*\d+/i) || 
@@ -726,6 +750,8 @@ function extractQuestions(text) {
         line.toLowerCase().includes('confidential')) {
       return;
     }
+    
+    // Try to match against patterns
     let fieldName = null;
     
     for (const pattern of fieldPatterns) {
@@ -736,9 +762,12 @@ function extractQuestions(text) {
       }
     }
     
+    // If matched a pattern, check if it contains specification keywords
     if (fieldName) {
       const lowerField = fieldName.toLowerCase();
       const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
+      
+      // Also accept if it starts with capital letter and is 2-8 words
       const wordCount = fieldName.split(/\s+/).length;
       const startsWithCap = /^[A-Z]/.test(fieldName);
       
@@ -881,8 +910,28 @@ async function extractTextFromPDF(file) {
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
-          const pageText = textContent.items.map(item => item.str).join(' ');
-          fullText += pageText + '\n';
+          
+          // Group text items by their vertical position (y-coordinate)
+          // This helps reconstruct table rows better
+          const itemsByY = {};
+          textContent.items.forEach(item => {
+            const y = Math.round(item.transform[5]); // Y coordinate
+            if (!itemsByY[y]) {
+              itemsByY[y] = [];
+            }
+            itemsByY[y].push(item);
+          });
+          
+          // Sort by Y position (top to bottom) and then by X position (left to right)
+          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); // Descending Y
+          
+          sortedY.forEach(y => {
+            const items = itemsByY[y].sort((a, b) => a.transform[4] - b.transform[4]); // Ascending X
+            const lineText = items.map(item => item.str).join(' ');
+            fullText += lineText + '\n';
+          });
+          
+          fullText += '\n'; // Add page break
         }
         
         resolve(fullText);
@@ -924,7 +973,7 @@ function matchQuestionsWithLibrary(questions, product) {
     
     productLibrary.forEach(libraryItem => {
       const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.25) { 
+      if (score > highestScore && score > 0.25) { // Lower threshold for table-based specs
         highestScore = score;
         bestMatch = libraryItem;
       }
@@ -938,7 +987,8 @@ function matchQuestionsWithLibrary(questions, product) {
       confidence: Math.round(highestScore * 100),
       matched: bestMatch !== null && highestScore > 0.25
     });
-
+    
+    // Debug: log matches for verification
     if (bestMatch) {
       console.log(`✓ Match: "${question.text}" -> "${bestMatch.question}" (${Math.round(highestScore * 100)}%)`);
     } else {
@@ -960,7 +1010,8 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const norm1 = normalize(str1);
   const norm2 = normalize(str2);
-
+  
+  // Direct substring match gets highest priority for specs
   if (norm1.includes(norm2) || norm2.includes(norm1)) {
     const shorter = norm1.length < norm2.length ? norm1 : norm2;
     const longer = norm1.length < norm2.length ? norm2 : norm1;
@@ -970,6 +1021,7 @@ function calculateEnhancedSimilarity(str1, str2) {
   const words1 = norm1.split(/\s+/).filter(w => w.length > 2);
   const words2 = norm2.split(/\s+/).filter(w => w.length > 2);
   
+  // If either is very short, use exact word matching
   if (words1.length <= 3 || words2.length <= 3) {
     const set1 = new Set(words1);
     const set2 = new Set(words2);
@@ -986,6 +1038,7 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const jaccardScore = union.size > 0 ? intersection.size / union.size : 0;
   
+  // Check for partial word matches (important for abbreviations)
   let partialMatches = 0;
   for (const w1 of words1) {
     for (const w2 of words2) {
@@ -997,6 +1050,8 @@ function calculateEnhancedSimilarity(str1, str2) {
     }
   }
   const partialScore = partialMatches / Math.max(words1.length, words2.length);
+  
+  // Extract and compare key technical terms
   const keyTerms1 = extractKeyTerms(str1);
   const keyTerms2 = extractKeyTerms(str2);
   
@@ -1010,7 +1065,8 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const keyTermScore = Math.max(keyTerms1.length, keyTerms2.length) > 0 ?
     keyTermMatches / Math.max(keyTerms1.length, keyTerms2.length) : 0;
-
+  
+  // Weighted combination favoring key terms and exact matches
   const finalScore = (jaccardScore * 0.3) + (partialScore * 0.3) + (keyTermScore * 0.4);
   
   return finalScore;
@@ -1020,6 +1076,7 @@ function extractKeyTerms(text) {
   const normalized = text.toLowerCase();
   const words = normalized.split(/\s+/);
 
+  // Extended common words to filter out
   const commonWords = new Set(['what', 'how', 'why', 'when', 'where', 'who', 'which', 
     'that', 'this', 'these', 'those', 'with', 'from', 'have', 'about', 'your', 
     'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe',
@@ -1031,10 +1088,17 @@ function extractKeyTerms(text) {
     'over', 'part', 'such', 'take', 'than', 'them', 'then', 'very', 'want', 'well',
     'went', 'were', 'what', 'when', 'work', 'year', 'your']);
   
+  // Keep technical specification terms
   const technicalTerms = [];
   
   for (let word of words) {
-    word = word.replace(/[^\w]/g, '');
+    word = word.replace(/[^\w]/g, ''); // Remove punctuation
+    
+    // Keep if:
+    // - Length > 3 and not common word
+    // - Contains numbers (like V310i, 12MP)
+    // - All caps (like PCB, SPI, AOI)
+    // - Technical suffixes
     if (word.length > 3 && !commonWords.has(word) && !/^\d+$/.test(word)) {
       technicalTerms.push(word);
     } else if (/\d/.test(word) && word.length > 1) {
@@ -1096,6 +1160,7 @@ async function downloadFilledDocument() {
   const selectedProduct = document.getElementById('productSelect').value.toUpperCase();
   const timestamp = new Date().toLocaleString();
 
+  // Create document
   const doc = new Document({
     sections: [{
       properties: {},
@@ -1135,6 +1200,7 @@ async function downloadFilledDocument() {
     }]
   });
 
+  // If no matched data, just show preview
   if (matchedData.length === 0) {
     doc.addSection({
       children: [
@@ -1148,6 +1214,7 @@ async function downloadFilledDocument() {
       ]
     });
   } else {
+    // Create table for specifications
     const tableRows = [
       new TableRow({
         children: [
@@ -1194,6 +1261,7 @@ async function downloadFilledDocument() {
 
     doc.addSection({ children: [table] });
     
+    // Add summary at the end
     const matchedCount = matchedData.filter(m => m.matched).length;
     const matchRate = Math.round((matchedCount / matchedData.length) * 100);
     
@@ -1215,6 +1283,7 @@ async function downloadFilledDocument() {
     });
   }
 
+  // Download the .docx
   const blob = await Packer.toBlob(doc);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
