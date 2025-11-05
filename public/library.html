@@ -157,19 +157,25 @@
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc ='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const { Client, Account, Databases, Query } = window.Appwrite;
+const { Client, Account, Databases, Query, Storage } = window.Appwrite;
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
 .setProject("68ddd7de00255d4f5c96");
 
 const account = new Account(client);
 const databases = new Databases(client);
+const storage = new Storage(client);
 const databaseId = "68ba8a9c001f17064e15";
 const collectionId = "68ba8c240002116fa647";
+const bucketId = "69015d8b0030f329c599";
 
 let currentProduct = 'spi';
 let currentCategory = 'overview';
 let userRole = '';
+let surveyLibrary = {};
+let uploadedFile = null;
+let extractedText = '';
+let matchedData = [];
 
 async function checkSession() {
     try {
@@ -178,6 +184,7 @@ async function checkSession() {
 
         await getUserRole(user.$id);
         loadNavigation(userRole);
+        await loadSurveyLibrary();
         
     } catch (err) {
         console.error('No active session:', err);
@@ -528,6 +535,123 @@ function formatFileSize(bytes) {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
+async function loadSurveyLibrary() {
+  try {
+    console.log('Loading survey library from bucket...');
+    const files = await storage.listFiles(bucketId);
+    
+    surveyLibrary = {
+      'spi': [],
+      'aoi': [],
+      'axi': [],
+      'arv': [],
+      'vone': [],
+      'xc': [],
+      'xs': []
+    };
+    
+    for (const file of files.files) {
+      try {
+        console.log('Processing file:', file.name);
+        const fileUrl = storage.getFileView(bucketId, file.$id);
+        const response = await fetch(fileUrl);
+        const blob = await response.blob();
+        
+        let text = '';
+        if (file.mimeType === 'application/pdf') {
+          text = await extractTextFromPDF(blob);
+        } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
+          text = await extractTextFromWord(blob);
+        }
+        
+        if (text) {
+          const qaData = parseQuestionsAndAnswers(text);
+          const productType = determineProductType(file.name);
+          
+          if (surveyLibrary[productType]) {
+            surveyLibrary[productType].push(...qaData);
+            console.log(`Added ${qaData.length} Q&A pairs to ${productType}`);
+          }
+        }
+      } catch (fileError) {
+        console.error(`Error processing file ${file.name}:`, fileError);
+      }
+    }
+    
+    console.log('Survey library loaded:', surveyLibrary);
+  } catch (error) {
+    console.error('Error loading survey library:', error);
+    alert('Warning: Could not load survey library. Auto-fill may not work properly.');
+  }
+}
+
+function determineProductType(filename) {
+  const name = filename.toLowerCase();
+  if (name.includes('spi')) return 'spi';
+  if (name.includes('aoi')) return 'aoi';
+  if (name.includes('axi')) return 'axi';
+  if (name.includes('arv')) return 'arv';
+  if (name.includes('vone') || name.includes('v-one')) return 'vone';
+  if (name.includes('xc') || name.includes('smart camera')) return 'xc';
+  if (name.includes('xs') || name.includes('code reader')) return 'xs';
+  return 'spi'; // default
+}
+
+function parseQuestionsAndAnswers(text) {
+  const qaData = [];
+  const lines = text.split('\n');
+  let currentQuestion = null;
+  let currentAnswer = '';
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    
+    // Check if this line is a question
+    const questionPatterns = [
+      /^\d+[\.\)]\s*(.+\?)/i,
+      /^[A-Z]\.\s*(.+\?)/i,
+      /^Q\d*[\.\:]\s*(.+)/i,
+      /^Question\s*\d*[\.\:]\s*(.+)/i
+    ];
+    
+    let isQuestion = false;
+    for (const pattern of questionPatterns) {
+      if (pattern.test(line)) {
+        isQuestion = true;
+        
+        // Save previous Q&A if exists
+        if (currentQuestion && currentAnswer) {
+          qaData.push({
+            question: currentQuestion,
+            answer: currentAnswer.trim()
+          });
+        }
+        
+        // Start new question
+        currentQuestion = line;
+        currentAnswer = '';
+        break;
+      }
+    }
+    
+    // If not a question and we have a current question, it's part of the answer
+    if (!isQuestion && currentQuestion) {
+      currentAnswer += line + ' ';
+    }
+  }
+  
+  // Save last Q&A
+  if (currentQuestion && currentAnswer) {
+    qaData.push({
+      question: currentQuestion,
+      answer: currentAnswer.trim()
+    });
+  }
+  
+  return qaData;
+}
+
 async function processDocument() {
   if (!uploadedFile) return;
   
@@ -645,6 +769,8 @@ function matchQuestionsWithLibrary(questions, product) {
   const matches = [];
   const productLibrary = surveyLibrary[product] || [];
   
+  console.log(`Matching ${questions.length} questions against ${productLibrary.length} library entries for ${product}`);
+  
   questions.forEach(question => {
     let bestMatch = null;
     let highestScore = 0;
@@ -759,8 +885,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
-
-
-
-
