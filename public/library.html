@@ -974,7 +974,8 @@ function showMatchResults() {
 }
 
 async function downloadFilledDocument() {
-  const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, TextRun } = docx;
+const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, TextRun } = window.docx;
+
   if (!uploadedFile && matchedData.length === 0) {
     alert('Please upload and process a document first.');
     return;
@@ -1067,3 +1068,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
