@@ -1150,156 +1150,172 @@ function showMatchResults() {
 }
 
 async function downloadFilledDocument() {
-  const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, TextRun, AlignmentType, BorderStyle } = window.docx;
-
-  if (!uploadedFile && matchedData.length === 0) {
+  if (!uploadedFile || matchedData.length === 0) {
     alert('Please upload and process a document first.');
     return;
   }
 
-  const selectedProduct = document.getElementById('productSelect').value.toUpperCase();
-  const timestamp = new Date().toLocaleString();
+  try {
+    // For Word documents, fill in the original
+    if (uploadedFile.type.includes('word') || uploadedFile.name.endsWith('.docx')) {
+      await fillWordDocument();
+    } 
+    // For PDF, convert to filled Word document
+    else if (uploadedFile.type === 'application/pdf') {
+      await fillPDFAsWord();
+    }
+  } catch (error) {
+    console.error('Error creating filled document:', error);
+    alert('Error creating document: ' + error.message);
+  }
+}
 
-  // Create document
+async function fillWordDocument() {
+  // Read the original Word file
+  const arrayBuffer = await uploadedFile.arrayBuffer();
+  
+  // Extract the raw text to find where to insert answers
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  let documentText = result.value;
+  
+  console.log('Original document text length:', documentText.length);
+  
+  // Create a map of field names to their answers
+  const answerMap = new Map();
+  matchedData.forEach(item => {
+    if (item.matched && item.matchedAnswer) {
+      answerMap.set(item.question.toLowerCase().trim(), item.matchedAnswer);
+    }
+  });
+  
+  // Fill in the blanks by finding field names and adding answers after them
+  matchedData.forEach(item => {
+    if (item.matched && item.matchedAnswer) {
+      // Look for patterns like "Field Name:" followed by whitespace or newline
+      const patterns = [
+        new RegExp(`(${escapeRegex(item.question)}\\s*[:：]\\s*)(?=\\n|$)`, 'gi'),
+        new RegExp(`(${escapeRegex(item.question)}\\s*)(?=\\n|$)`, 'gi')
+      ];
+      
+      for (const pattern of patterns) {
+        if (pattern.test(documentText)) {
+          documentText = documentText.replace(pattern, `$1${item.matchedAnswer}`);
+          console.log(`Filled: ${item.question} -> ${item.matchedAnswer.substring(0, 50)}...`);
+          break;
+        }
+      }
+    }
+  });
+  
+  // Create a new Word document with the filled content
+  const { Document, Packer, Paragraph, TextRun } = window.docx;
+  
+  const paragraphs = documentText.split('\n').map(line => 
+    new Paragraph({
+      children: [new TextRun(line)]
+    })
+  );
+  
   const doc = new Document({
     sections: [{
       properties: {},
-      children: [
-        new Paragraph({
-          text: 'AUTO-FILLED PAPER SURVEY DOCUMENT',
-          heading: HeadingLevel.HEADING1,
-          alignment: AlignmentType.CENTER,
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Generated: ${timestamp}`,
-              bold: false,
-            })
-          ],
-          spacing: { after: 200 }
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Original File: ${uploadedFile ? uploadedFile.name : 'N/A'}`,
-              bold: false,
-            })
-          ]
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Product: ${selectedProduct}`,
-              bold: false,
-            })
-          ],
-          spacing: { after: 400 }
-        }),
-      ]
+      children: paragraphs
     }]
   });
-
-  // If no matched data, just show preview
-  if (matchedData.length === 0) {
-    doc.addSection({
-      children: [
-        new Paragraph('No specification fields extracted from the document.'),
-        new Paragraph('Please ensure the document contains readable text in table format.'),
-        new Paragraph({
-          text: 'Extracted Text Preview:',
-          spacing: { before: 400, after: 200 }
-        }),
-        new Paragraph(extractedText.substring(0, 1000) + '...')
-      ]
-    });
-  } else {
-    // Create table for specifications
-    const tableRows = [
-      new TableRow({
-        children: [
-          new TableCell({ 
-            children: [new Paragraph({ text: 'No', bold: true })],
-            width: { size: 8, type: WidthType.PERCENTAGE }
-          }),
-          new TableCell({ 
-            children: [new Paragraph({ text: 'Specification Field', bold: true })],
-            width: { size: 40, type: WidthType.PERCENTAGE }
-          }),
-          new TableCell({ 
-            children: [new Paragraph({ text: 'Auto-Filled Value', bold: true })],
-            width: { size: 45, type: WidthType.PERCENTAGE }
-          }),
-          new TableCell({ 
-            children: [new Paragraph({ text: 'Confidence', bold: true })],
-            width: { size: 7, type: WidthType.PERCENTAGE }
-          }),
-        ]
-      })
-    ];
-
-    matchedData.forEach((item, index) => {
-      const confidenceText = item.matched ? `${item.confidence}%` : 'N/A';
-      const answerText = item.matched ? item.matchedAnswer : '[No match found - please fill manually]';
-      
-      tableRows.push(
-        new TableRow({
-          children: [
-            new TableCell({ children: [new Paragraph(String(index + 1))] }),
-            new TableCell({ children: [new Paragraph(item.question)] }),
-            new TableCell({ children: [new Paragraph(answerText)] }),
-            new TableCell({ children: [new Paragraph(confidenceText)] }),
-          ]
-        })
-      );
-    });
-
-    const table = new Table({
-      rows: tableRows,
-      width: { size: 100, type: WidthType.PERCENTAGE },
-    });
-
-    doc.addSection({ children: [table] });
-    
-    // Add summary at the end
-    const matchedCount = matchedData.filter(m => m.matched).length;
-    const matchRate = Math.round((matchedCount / matchedData.length) * 100);
-    
-    doc.addSection({
-      children: [
-        new Paragraph({
-          text: '\nSummary',
-          heading: HeadingLevel.HEADING2,
-          spacing: { before: 400 }
-        }),
-        new Paragraph(`Total Fields: ${matchedData.length}`),
-        new Paragraph(`Matched Fields: ${matchedCount}`),
-        new Paragraph(`Match Rate: ${matchRate}%`),
-        new Paragraph({
-          text: '\nNote: Please review all auto-filled values and manually fill any missing information.',
-          spacing: { before: 200 }
-        })
-      ]
-    });
-  }
-
-  // Download the .docx
+  
+  // Download
   const blob = await Packer.toBlob(doc);
+  downloadBlob(blob, 'filled_' + uploadedFile.name);
+}
+
+async function fillPDFAsWord() {
+  const { Document, Packer, Paragraph, TextRun } = window.docx;
+  
+  // Split text into lines
+  const lines = extractedText.split('\n');
+  const filledLines = [];
+  
+  // Create answer map for quick lookup
+  const answerMap = new Map();
+  matchedData.forEach(item => {
+    if (item.matched && item.matchedAnswer) {
+      answerMap.set(item.question.toLowerCase().trim(), item.matchedAnswer);
+    }
+  });
+  
+  // Process each line
+  for (let line of lines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) {
+      filledLines.push(line);
+      continue;
+    }
+    
+    // Check if this line is a field that needs filling
+    let filled = false;
+    for (const [fieldName, answer] of answerMap.entries()) {
+      if (trimmedLine.toLowerCase().includes(fieldName)) {
+        // Check if line already has an answer (not empty after field name)
+        const colonIndex = line.indexOf(':');
+        if (colonIndex !== -1) {
+          const afterColon = line.substring(colonIndex + 1).trim();
+          if (!afterColon || afterColon.length < 3) {
+            // Empty or very short - fill it
+            filledLines.push(line + (colonIndex === line.length - 1 ? ' ' : '') + answer);
+            filled = true;
+            break;
+          }
+        } else {
+          // No colon, add colon and answer
+          filledLines.push(line + ': ' + answer);
+          filled = true;
+          break;
+        }
+      }
+    }
+    
+    if (!filled) {
+      filledLines.push(line);
+    }
+  }
+  
+  // Create Word document with filled content
+  const paragraphs = filledLines.map(line => 
+    new Paragraph({
+      children: [new TextRun(line)]
+    })
+  );
+  
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: paragraphs
+    }]
+  });
+  
+  // Download
+  const blob = await Packer.toBlob(doc);
+  const filename = uploadedFile.name.replace(/\.pdf$/i, '') + '_filled.docx';
+  downloadBlob(blob, filename);
+}
+
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function downloadBlob(blob, filename) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  const filename = uploadedFile ? 
-    'filled_' + uploadedFile.name.replace(/\.[^/.]+$/, '') + '.docx' :
-    'survey_extract.docx';
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-
+  
   console.log('Document downloaded:', filename);
-  alert('Document downloaded successfully! Please review and edit the content as needed.');
+  alert('Document filled and downloaded successfully! Please review the content.');
 }
-
+    
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
     loadSidebarMenu(currentProduct);
@@ -1313,3 +1329,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
