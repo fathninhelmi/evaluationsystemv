@@ -484,7 +484,7 @@ function handleFileSelect(file) {
   if (!file) return;
   
   const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-  const maxSize = 10 * 1024 * 1024; // 10MB
+  const maxSize = 10 * 1024 * 1024;
   
   if (!validTypes.includes(file.type)) {
     alert('Please upload only PDF or Word documents.');
@@ -609,7 +609,7 @@ function determineProductType(filename) {
   if (name.includes('vone') || name.includes('v-one')) return 'vone';
   if (name.includes('xc') || name.includes('smart camera')) return 'xc';
   if (name.includes('xs') || name.includes('code reader')) return 'xs';
-  return 'spi'; // default
+  return 'spi';
 }
 
 function parseQuestionsAndAnswers(text) {
@@ -622,7 +622,6 @@ function parseQuestionsAndAnswers(text) {
     const line = lines[i].trim();
     if (!line) continue;
     
-    // Check if this line is a question
     const questionPatterns = [
       /^\d+[\.\)]\s*(.+)/i,
       /^[A-Z]\.\s*(.+)/i,
@@ -634,29 +633,22 @@ function parseQuestionsAndAnswers(text) {
     for (const pattern of questionPatterns) {
       if (pattern.test(line)) {
         isQuestion = true;
-        
-        // Save previous Q&A if exists
         if (currentQuestion && currentAnswer) {
           qaData.push({
             question: currentQuestion,
             answer: currentAnswer.trim()
           });
         }
-        
-        // Start new question
         currentQuestion = line;
         currentAnswer = '';
         break;
       }
     }
-    
-    // If not a question and we have a current question, it's part of the answer
     if (!isQuestion && currentQuestion) {
       currentAnswer += line + ' ';
     }
   }
   
-  // Save last Q&A
   if (currentQuestion && currentAnswer) {
     qaData.push({
       question: currentQuestion,
@@ -687,10 +679,8 @@ async function processDocument() {
     showProcessingStatus('Analyzing questions and content...');
     const questions = extractQuestions(extractedText);
     
-    // ALWAYS ALLOW PROCESSING - even if 0 questions found
     if (questions.length === 0) {
       console.warn('No structured questions found. Will extract all content as potential questions.');
-      // Extract all meaningful lines as potential questions
       const allLines = extractAllLines(extractedText);
       matchedData = allLines.map(line => ({
         question: line.text,
@@ -718,7 +708,6 @@ async function processDocument() {
     updateProgress(100);
     showProcessingStatus('Processing complete!');
 
-    // ALWAYS show results and enable download button
     setTimeout(() => {
       document.getElementById('processingStatus').style.display = 'none';
       showMatchResults();
@@ -775,15 +764,13 @@ async function extractTextFromWord(file) {
   });
 }
 
-// New function to extract all meaningful lines when no questions found
 function extractAllLines(text) {
   const lines = [];
   const textLines = text.split('\n');
   
   textLines.forEach((line, index) => {
     line = line.trim();
-    
-    // Filter out very short lines, page numbers, headers/footers
+
     if (line.length < 15) return;
     if (line.match(/^page\s+\d+/i)) return;
     if (line.match(/^\d+$/)) return;
@@ -802,22 +789,20 @@ function extractQuestions(text) {
   const questions = [];
   const lines = text.split('\n');
   
-  // Enhanced patterns to catch more question formats
   const questionPatterns = [
-    /^\d+[\.\)]\s*(.+)/i,  // 1. Question or 1) Question
-    /^[A-Z]\.\s*(.+)/i,    // A. Question
-    /^Q\d*[\.\:\s]\s*(.+)/i,   // Q1: Question or Q. Question
-    /^Question\s*\d*[\.\:]\s*(.+)/i,  // Question 1: ...
-    /([^\n]{20,})\?/i,  // Any line with ? and at least 20 chars
-    /^[-•]\s*(.+)/i,  // Bullet points
+    /^\d+[\.\)]\s*(.+)/i,  
+    /^[A-Z]\.\s*(.+)/i,   
+    /^Q\d*[\.\:\s]\s*(.+)/i, 
+    /^Question\s*\d*[\.\:]\s*(.+)/i,  
+    /([^\n]{20,})\?/i,  
+    /^[-•]\s*(.+)/i,  
     /(what|how|why|when|where|who|which|can|could|would|should|is|are|does|do)\s+.{10,}/i  // Question keywords
   ];
   
   lines.forEach((line, index) => {
     line = line.trim();
     if (line.length < 15) return; 
-    
-    // Skip common header/footer text
+  
     if (line.toLowerCase().includes('page ') || 
         line.toLowerCase().includes('confidential') ||
         line.match(/^\d+$/)) {
@@ -829,7 +814,6 @@ function extractQuestions(text) {
       if (match) {
         const questionText = match[1] ? match[1].trim() : match[0].trim();
         
-        // Avoid duplicates
         if (!questions.some(q => q.text === questionText)) {
           questions.push({
             text: questionText,
@@ -861,9 +845,8 @@ function matchQuestionsWithLibrary(questions, product) {
     let highestScore = 0;
     
     productLibrary.forEach(libraryItem => {
-      // Use enhanced similarity calculation with keyword matching
-      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.4) {  // Lowered threshold from 0.6 to 0.4
+    const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
+      if (score > highestScore && score > 0.4) {
         highestScore = score;
         bestMatch = libraryItem;
       }
@@ -884,18 +867,15 @@ function matchQuestionsWithLibrary(questions, product) {
   return matches;
 }
 
-// Enhanced similarity calculation with keyword matching
 function calculateEnhancedSimilarity(str1, str2) {
-  // Normalize strings
   const normalize = (s) => s.toLowerCase()
-    .replace(/[^\w\s]/g, ' ')  // Remove punctuation
-    .replace(/\s+/g, ' ')       // Normalize whitespace
+    .replace(/[^\w\s]/g, ' ')  
+    .replace(/\s+/g, ' ')       
     .trim();
   
   const norm1 = normalize(str1);
   const norm2 = normalize(str2);
   
-  // Method 1: Word overlap (Jaccard similarity)
   const words1 = norm1.split(/\s+/).filter(w => w.length > 2);
   const words2 = norm2.split(/\s+/).filter(w => w.length > 2);
   
@@ -907,7 +887,6 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const jaccardScore = union.size > 0 ? intersection.size / union.size : 0;
   
-  // Method 2: Substring matching
   const longerStr = norm1.length > norm2.length ? norm1 : norm2;
   const shorterStr = norm1.length > norm2.length ? norm2 : norm1;
   
@@ -915,7 +894,6 @@ function calculateEnhancedSimilarity(str1, str2) {
   if (longerStr.includes(shorterStr)) {
     substringScore = 0.5;
   } else {
-    // Check for partial substring matches
     const shorterWords = shorterStr.split(/\s+/);
     const matchingWords = shorterWords.filter(word => 
       word.length > 3 && longerStr.includes(word)
@@ -924,7 +902,6 @@ function calculateEnhancedSimilarity(str1, str2) {
       (matchingWords.length / shorterWords.length) * 0.3 : 0;
   }
   
-  // Method 3: Key term matching
   const keyTerms1 = extractKeyTerms(str1);
   const keyTerms2 = extractKeyTerms(str2);
   
@@ -935,18 +912,15 @@ function calculateEnhancedSimilarity(str1, str2) {
   const keyTermScore = Math.max(keyTerms1.length, keyTerms2.length) > 0 ?
     keyTermMatches / Math.max(keyTerms1.length, keyTerms2.length) : 0;
   
-  // Weighted combination
   const finalScore = (jaccardScore * 0.4) + (substringScore * 0.3) + (keyTermScore * 0.3);
   
   return finalScore;
 }
 
-// Extract key terms (technical terms, product names, important nouns)
 function extractKeyTerms(text) {
   const normalized = text.toLowerCase();
   const words = normalized.split(/\s+/);
-  
-  // Filter for meaningful terms (longer than 3 chars, not common words)
+
   const commonWords = new Set(['what', 'how', 'why', 'when', 'where', 'who', 'which', 
     'that', 'this', 'these', 'those', 'with', 'from', 'have', 'about', 'your', 
     'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe']);
@@ -954,7 +928,7 @@ function extractKeyTerms(text) {
   const keyTerms = words.filter(word => 
     word.length > 3 && 
     !commonWords.has(word) &&
-    !/^\d+$/.test(word)  // Not just numbers
+    !/^\d+$/.test(word) 
   );
   
   return keyTerms;
@@ -999,7 +973,6 @@ function showMatchResults() {
 }
 
 async function downloadFilledDocument() {
-  // ALWAYS ALLOW DOWNLOAD - even if no file or no matches
   if (!uploadedFile && matchedData.length === 0) {
     alert('Please upload and process a document first.');
     return;
