@@ -974,17 +974,14 @@ function showMatchResults() {
 }
 
 async function downloadFilledDocument() {
+  const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, TextRun } = docx;
   if (!uploadedFile && matchedData.length === 0) {
     alert('Please upload and process a document first.');
     return;
   }
 
-  const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, HeadingLevel, TextRun } = docx;
-
   const selectedProduct = document.getElementById('productSelect').value.toUpperCase();
   const timestamp = new Date().toLocaleString();
-
-  // Create document
   const doc = new Document({
     sections: [{
       properties: {},
@@ -1000,8 +997,6 @@ async function downloadFilledDocument() {
       ]
     }]
   });
-
-  // If no matched data, just show preview
   if (matchedData.length === 0) {
     doc.addSection({
       children: [
@@ -1013,7 +1008,6 @@ async function downloadFilledDocument() {
       ]
     });
   } else {
-    // Create table for Q&A
     const tableRows = [
       new TableRow({
         children: [
@@ -1044,7 +1038,6 @@ async function downloadFilledDocument() {
     doc.addSection({ children: [table] });
   }
 
-  // Download the .docx
   const blob = await Packer.toBlob(doc);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
