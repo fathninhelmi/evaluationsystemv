@@ -402,27 +402,39 @@ function updateContent() {
   const categoryName = currentCat ? currentCat.label : currentCategory;
   
   const productName = productNames[currentProduct];
-  
+
   let html = `
     <h2>${productName} - ${categoryName}</h2>
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
 
-html += `
-    <div class="resource-grid">
-      <div class="resource-card">
-        <div class="resource-title">${productName} ${categoryName}</div>
-        <div class="resource-actions">
-          <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
-            <i class="fas fa-eye"></i> View
-          </button>
-        </div>
-      </div>
-    </div>
+  // Replace grid with table
+  html += `
+    <table class="resource-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Document Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>${productName} ${categoryName}</td>
+          <td>
+            <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
+              <i class="fas fa-eye"></i> View
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   `;
-  
+
   content.innerHTML = html;
 }
+
 
 function viewDocument(url) {
   if (url && url !== '#') {
@@ -1329,4 +1341,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
