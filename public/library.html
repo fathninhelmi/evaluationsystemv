@@ -78,14 +78,14 @@
   <div class="modal-content">
     <span class="close" onclick="closeUploadModal()">&times;</span>
     <h2><i class="fas fa-file-upload"></i> Upload Paper Survey Document</h2>
-    <p class="modal-description">Upload a customer Paper Survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
+    <p class="modal-description">Upload a customer Paper Survey document (PDF, Word, or Excel). The system will automatically match questions with answers from previous surveys.</p>
     
     <div class="upload-section">
       <div class="file-drop-zone" id="dropZone">
         <i class="fas fa-cloud-upload-alt"></i>
         <p>Drag & drop your file here or click to browse</p>
-        <p class="file-info">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
-        <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
+        <p class="file-info">Supported formats: PDF, DOC, DOCX, XLS, XLSX (Max 10MB)</p>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display: none;">
       </div>
       
       <div id="filePreview" class="file-preview" style="display: none;">
@@ -491,11 +491,11 @@ function setupFileUpload() {
 function handleFileSelect(file) {
   if (!file) return;
   
-  const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
   const maxSize = 10 * 1024 * 1024;
   
-  if (!validTypes.includes(file.type)) {
-    alert('Please upload only PDF or Word documents.');
+  if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    alert('Please upload only PDF, Word, or Excel documents.');
     return;
   }
   
@@ -522,6 +522,9 @@ function displayFilePreview(file) {
   if (file.type.includes('word')) {
     icon.className = 'fas fa-file-word';
     icon.style.color = '#2B579A';
+  } else if (file.type.includes('spreadsheet') || file.type.includes('excel') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+    icon.className = 'fas fa-file-excel';
+    icon.style.color = '#1D6F42';
   } else {
     icon.className = 'fas fa-file-pdf';
     icon.style.color = '#E74C3C';
@@ -579,6 +582,9 @@ async function loadSurveyLibrary() {
         let text = '';
         if (file.mimeType === 'application/pdf') {
           text = await extractTextFromPDF(blob);
+        } else if (file.mimeType.includes('spreadsheet') || file.mimeType.includes('excel') || 
+                   file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+          text = await extractTextFromExcel(blob);
         } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
           text = await extractTextFromWord(blob);
         }
@@ -805,6 +811,9 @@ async function processDocument() {
   try {
     if (uploadedFile.type === 'application/pdf') {
       extractedText = await extractTextFromPDF(uploadedFile);
+    } else if (uploadedFile.type.includes('spreadsheet') || uploadedFile.type.includes('excel') || 
+               uploadedFile.name.endsWith('.xlsx') || uploadedFile.name.endsWith('.xls')) {
+      extractedText = await extractTextFromExcel(uploadedFile);
     } else {
       extractedText = await extractTextFromWord(uploadedFile);
     }
@@ -934,6 +943,47 @@ async function extractTextFromWord(file) {
         const result = await mammoth.extractRawText({ arrayBuffer });
         resolve(result.value);
       } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function extractTextFromExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        let fullText = '';
+        
+        // Process all sheets
+        workbook.SheetNames.forEach(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+          
+          // Convert sheet to JSON format (array of arrays)
+          const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+          
+          // Convert each row to text
+          sheetData.forEach(row => {
+            // Join cells with space, treating each row as a line
+            const rowText = row.map(cell => String(cell).trim()).filter(cell => cell).join(' ');
+            if (rowText) {
+              fullText += rowText + '\n';
+            }
+          });
+          
+          fullText += '\n'; // Add space between sheets
+        });
+        
+        console.log(`Extracted ${fullText.length} characters from Excel file`);
+        resolve(fullText);
+      } catch (error) {
+        console.error('Error extracting Excel text:', error);
         reject(error);
       }
     };
