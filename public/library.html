@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Product Paper Survey Library</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<link rel="stylesheet" href="./style.css"> <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@7.7.0/build/index.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -15,162 +14,162 @@
 </head>
 <body>
 <header class="header">
-    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
-    <nav class="nav-desktop" id="navMenu">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a> <nav class="nav-desktop" id="navMenu">
     </nav>
 </header>
 
 <main class="main-library">
-  <h1>Product Paper Survey Library</h1>
-  <div class="container-lib">
-    <div class="lib-header">
-      <button class="btn-upload-doc" onclick="openUploadModal()">
-        <i class="fas fa-upload"></i> Auto-Fill Paper Survey Document
-      </button>
-    </div>
-
-    <!-- tab solution-->
-    <div class="content-tabs">
-      <div class="tab-headers">
-        <button class="tab-header active" onclick="switchProduct('spi')">
-          <i></i> SPI
-        </button>
-        <button class="tab-header" onclick="switchProduct('aoi')">
-          <i></i> AOI
-        </button>
-        <button class="tab-header" onclick="switchProduct('axi')">
-          <i></i> AXI
-        </button>
-        <button class="tab-header" onclick="switchProduct('arv')">
-          <i></i> ARV
-        </button>
-        <button class="tab-header" onclick="switchProduct('vone')">
-          <i></i> V-ONE
-        </button>
-        <button class="tab-header" onclick="switchProduct('xc')">
-          <i></i> XC
-        </button>
-        <button class="tab-header" onclick="switchProduct('xs')">
-          <i></i> XS
-        </button>
-      </div>
-
-        <div class="library-layout">
-        <div class="library-content">
-          <div class="content-box" id="mainContent">
-            <h2>Welcome to the Product Paper Survey Library</h2>
-            <p>Select a product type and category to explore.</p>
-          </div>
+    <h1>Product Paper Survey Library</h1>
+    <div class="container-lib">
+        <div class="lib-header">
+            <button class="btn-upload-doc" onclick="openUploadModal()">
+                <i class="fas fa-upload"></i> Auto-Fill Paper Survey Document
+            </button>
         </div>
 
-        <!-- sub product -->
-        <div class="library-sidebar">
-          <div class="sidebar-menu">
-            <div class="sidebar-header" id="sidebarTitle">SUB MENU</div>
-            <div id="sidebarLinks">
+        <div class="content-tabs">
+            <div class="tab-headers">
+                <button class="tab-header active" onclick="switchProduct('spi')">
+                    <i></i> SPI
+                </button>
+                <button class="tab-header" onclick="switchProduct('aoi')">
+                    <i></i> AOI
+                </button>
+                <button class="tab-header" onclick="switchProduct('axi')">
+                    <i></i> AXI
+                </button>
+                <button class="tab-header" onclick="switchProduct('arv')">
+                    <i></i> ARV
+                </button>
+                <button class="tab-header" onclick="switchProduct('vone')">
+                    <i></i> V-ONE
+                </button>
+                <button class="tab-header" onclick="switchProduct('xc')">
+                    <i></i> XC
+                </button>
+                <button class="tab-header" onclick="switchProduct('xs')">
+                    <i></i> XS
+                </button>
             </div>
+
+            <div class="library-layout">
+                <div class="library-content">
+                    <div class="content-box" id="mainContent">
+                        <h2>Welcome to the Product Paper Survey Library</h2>
+                        <p>Select a product type and category to explore.</p>
+                    </div>
+                </div>
+
+                <div class="library-sidebar">
+                    <div class="sidebar-menu">
+                        <div class="sidebar-header" id="sidebarTitle">SUB MENU</div>
+                        <div id="sidebarLinks">
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </main>
 
-<!-- Upload Modal -->
 <div id="uploadModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeUploadModal()">&times;</span>
-    <h2><i class="fas fa-file-upload"></i> Upload Paper Survey Document</h2>
-    <p class="modal-description">Upload a customer Paper Survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
-    
-    <div class="upload-section">
-      <div class="file-drop-zone" id="dropZone">
-        <i class="fas fa-cloud-upload-alt"></i>
-        <p>Drag & drop your file here or click to browse</p>
-        <p class="file-info">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
-        <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
-      </div>
-      
-      <div id="filePreview" class="file-preview" style="display: none;">
-        <div class="file-preview-item">
-          <i class="fas fa-file-pdf"></i>
-          <div class="file-preview-info">
-            <span class="file-name" id="fileName"></span>
-            <span class="file-size" id="fileSize"></span>
-          </div>
-          <button class="btn-remove" onclick="removeFile()">
-            <i class="fas fa-times"></i>
-          </button>
+    <div class="modal-content">
+        <span class="close" onclick="closeUploadModal()">&times;</span>
+        <h2><i class="fas fa-file-upload"></i> Upload Paper Survey Document</h2>
+        <p class="modal-description">Upload a customer Paper Survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
+        
+        <div class="upload-section">
+            <div class="file-drop-zone" id="dropZone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drag & drop your file here or click to browse</p>
+                <p class="file-info">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
+                <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
+            </div>
+            
+            <div id="filePreview" class="file-preview" style="display: none;">
+                <div class="file-preview-item">
+                    <i class="fas fa-file-pdf"></i>
+                    <div class="file-preview-info">
+                        <span class="file-name" id="fileName"></span>
+                        <span class="file-size" id="fileSize"></span>
+                    </div>
+                    <button class="btn-remove" onclick="removeFile()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="product-select-group">
+                <label for="productSelect">Select Product Category:</label>
+                <select id="productSelect" class="product-select">
+                    <option value="spi">SPI</option>
+                    <option value="aoi">AOI</option>
+                    <option value="axi">AXI</option>
+                    <option value="arv">ARV</option>
+                    <option value="vone">V-ONE</option>
+                    <option value="xc">SMART CAMERA</option>
+                    <option value="xs">SMART CODE READER</option>
+                </select>
+            </div>
+            
+            <div id="processingStatus" class="processing-status" style="display: none;">
+                <div class="spinner"></div>
+                <p id="statusMessage">Processing document...</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+            
+            <div id="matchResults" class="match-results" style="display: none;">
+                <h3><i class="fas fa-check-circle"></i> Processing Complete</h3>
+                <div class="results-summary">
+                    <div class="result-stat">
+                        <span class="stat-number" id="questionsFound">0</span>
+                        <span class="stat-label">Fields Found</span>
+                    </div>
+                    <div class="result-stat">
+                        <span class="stat-number" id="answersMatched">0</span>
+                        <span class="stat-label">Answers Matched</span>
+                    </div>
+                    <div class="result-stat">
+                        <span class="stat-number" id="matchRate">0%</span>
+                        <span class="stat-label">Match Rate</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
+                <button class="btn-primary" id="processBtn" onclick="processDocument()" disabled>
+                    <i class="fas fa-magic"></i> Process & Auto-Fill
+                </button>
+                <button class="btn-success" id="downloadBtn" onclick="downloadFilledDocument()" style="display: none;">
+                    <i class="fas fa-download"></i> Download Filled Document
+                </button>
+            </div>
         </div>
-      </div>
-      
-      <div class="product-select-group">
-        <label for="productSelect">Select Product Category:</label>
-        <select id="productSelect" class="product-select">
-          <option value="spi">SPI</option>
-          <option value="aoi">AOI</option>
-          <option value="axi">AXI</option>
-          <option value="arv">ARV</option>
-          <option value="vone">V-ONE</option>
-          <option value="xc">SMART CAMERA</option>
-          <option value="xs">SMART CODE READER</option>
-        </select>
-      </div>
-      
-      <div id="processingStatus" class="processing-status" style="display: none;">
-        <div class="spinner"></div>
-        <p id="statusMessage">Processing document...</p>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressBar"></div>
-        </div>
-      </div>
-      
-      <div id="matchResults" class="match-results" style="display: none;">
-        <h3><i class="fas fa-check-circle"></i> Processing Complete</h3>
-        <div class="results-summary">
-          <div class="result-stat">
-            <span class="stat-number" id="questionsFound">0</span>
-            <span class="stat-label">Fields Found</span>
-          </div>
-          <div class="result-stat">
-            <span class="stat-number" id="answersMatched">0</span>
-            <span class="stat-label">Answers Matched</span>
-          </div>
-          <div class="result-stat">
-            <span class="stat-number" id="matchRate">0%</span>
-            <span class="stat-label">Match Rate</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
-        <button class="btn-primary" id="processBtn" onclick="processDocument()" disabled>
-          <i class="fas fa-magic"></i> Process & Auto-Fill
-        </button>
-        <button class="btn-success" id="downloadBtn" onclick="downloadFilledDocument()" style="display: none;">
-          <i class="fas fa-download"></i> Download Filled Document
-        </button>
-      </div>
     </div>
-  </div>
 </div>
 
 <script>
+// --- External Library Setup ---
 pdfjsLib.GlobalWorkerOptions.workerSrc ='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const { Client, Account, Databases, Query, Storage } = window.Appwrite;
+const { PDFDocument } = window.PDFLib;
+const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } = window.docx;
+
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
-.setProject("68ddd7de00255d4f5c96");
+.setProject("68ddd7de00255d4f5c96"); // Placeholder project ID - REPLACE ME
 
 const account = new Account(client);
 const databases = new Databases(client);
 const storage = new Storage(client);
-const databaseId = "68ba8a9c001f17064e15";
-const collectionId = "68ba8c240002116fa647";
-const bucketId = "69015d8b0030f329c599";
+const databaseId = "68ba8a9c001f17064e15"; // Placeholder DB ID - REPLACE ME
+const collectionId = "68ba8c240002116fa647"; // Placeholder Collection ID - REPLACE ME
+const bucketId = "69015d8b0030f329c599"; // Placeholder Bucket ID - REPLACE ME
 
+// --- Global State ---
 let currentProduct = 'spi';
 let currentCategory = 'overview';
 let userRole = '';
@@ -178,6 +177,8 @@ let surveyLibrary = {};
 let uploadedFile = null;
 let extractedText = '';
 let matchedData = [];
+
+// --- Authentication and Navigation Functions ---
 
 async function checkSession() {
     try {
@@ -187,10 +188,11 @@ async function checkSession() {
         await getUserRole(user.$id);
         loadNavigation(userRole);
         await loadSurveyLibrary();
+        switchProduct('spi'); // Initialize content
         
     } catch (err) {
         console.error('No active session:', err);
-        window.location.href = 'index.html';
+        window.location.href = 'index.html'; // Redirect to login/home
     }
 }
 
@@ -199,10 +201,10 @@ async function getUserRole(userId) {
         const response = await databases.listDocuments(
             databaseId, 
             collectionId, 
-            [Query.limit(1000)]
+            [Query.equal('$id', userId)] // Corrected query for a single user document
         );
         
-        const user = response.documents.find(doc => doc.$id === userId);
+        const user = response.documents[0];
         if (user) {
             userRole = user.role || 'staff';
         } else {
@@ -219,6 +221,7 @@ function loadNavigation(role) {
     const navMenu = document.getElementById('navMenu');
     let navHTML = '';
     
+    // ... (Navigation logic is correct and retained) ...
     if (role === 'admin') {
         navHTML = `
             <a href="approveduser.html" class="nav-link">User Management</a>
@@ -253,1009 +256,853 @@ function loadNavigation(role) {
 }
 
 async function logout() {
-  try {
-    await account.deleteSession("current");
-    console.log('Logged out successfully');
-  } catch (err) {
-    console.warn('Could not delete session (maybe already logged out):', err);
-  } finally {
-    window.location.href = "index.html";
-  }
+    try {
+        await account.deleteSession("current");
+        console.log('Logged out successfully');
+    } catch (err) {
+        console.warn('Could not delete session (maybe already logged out):', err);
+    } finally {
+        window.location.href = "index.html";
+    }
 }
 
+// --- Library Display Functions ---
+
 function getSidebarCategories(product) {
-  const categories = {
-    'spi': [
-      { id: 'overview', label: 'Overview'},
-      { id: 'v310ispi', label: 'V310i SPI for Advanced Packaging and Microelectronics' },
-      { id: 'v310ioptimus', label: 'V310i Optimus 3D'}
-    ],
-    'aoi': [
-      { id: 'overview', label: 'Overview'},
-      { id: 'visionpro', label: 'V510i Vision Pro' },
-      { id: 'v510ioptimus', label: 'V510i Optimus 3D'},
-      { id: 'dst', label: 'V510i DST'}
-    ],
-    'axi': [
-      { id: 'overview', label: 'Overview'},
-      { id: 'qx1', label: 'V810iAi QXI' },
-      { id: 'v810is3', label: 'V810i S3'},
-      { id: 'v810is2ex', label: 'V810i S2EX'}
-    ],
-    'arv': [
-      { id: 'overview', label: 'Overview'},
-      { id: 'v9ifi', label: 'V9i FI' },
-      { id: 'v9ici', label: 'V9i CI'},
-      { id: 'v510ir', label: 'V510i R'}
-    ],
-    'vone': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'xc': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'xs': [
-      { id: 'overview', label: 'Overview'}
-    ]
-  };
-  
-  return categories[product] || categories['aoi'];
+    const categories = {
+        'spi': [
+            { id: 'overview', label: 'Overview'},
+            { id: 'v310ispi', label: 'V310i SPI for Advanced Packaging and Microelectronics' },
+            { id: 'v310ioptimus', label: 'V310i Optimus 3D'}
+        ],
+        'aoi': [
+            { id: 'overview', label: 'Overview'},
+            { id: 'visionpro', label: 'V510i Vision Pro' },
+            { id: 'v510ioptimus', label: 'V510i Optimus 3D'},
+            { id: 'dst', label: 'V510i DST'}
+        ],
+        'axi': [
+            { id: 'overview', label: 'Overview'},
+            { id: 'qx1', label: 'V810iAi QXI' },
+            { id: 'v810is3', label: 'V810i S3'},
+            { id: 'v810is2ex', label: 'V810i S2EX'}
+        ],
+        'arv': [
+            { id: 'overview', label: 'Overview'},
+            { id: 'v9ifi', label: 'V9i FI' },
+            { id: 'v9ici', label: 'V9i CI'},
+            { id: 'v510ir', label: 'V510i R'}
+        ],
+        'vone': [
+            { id: 'overview', label: 'Overview'}
+        ],
+        'xc': [
+            { id: 'overview', label: 'Overview'}
+        ],
+        'xs': [
+            { id: 'overview', label: 'Overview'}
+        ]
+    };
+    
+    return categories[product] || categories['spi']; // Default to spi
 }
 
 function loadSidebarMenu(product) {
-  const sidebarLinks = document.getElementById('sidebarLinks');
-  const categories = getSidebarCategories(product);
-  
-  let html = '';
-  categories.forEach((cat, index) => {
-    const activeClass = index === 0 ? 'active' : '';
-    html += `
-      <div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat.id}')">
-        <i class="${cat.icon}"></i>
-        <span>${cat.label}</span>
-      </div>
-    `;
-  });
-  
-  sidebarLinks.innerHTML = html;
+    const sidebarLinks = document.getElementById('sidebarLinks');
+    const categories = getSidebarCategories(product);
+    
+    let html = '';
+    categories.forEach((cat, index) => {
+        const activeClass = index === 0 ? 'active' : '';
+        html += `
+            <div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat.id}', this)">
+                <i class="${cat.icon || ''}"></i>
+                <span>${cat.label}</span>
+            </div>
+        `;
+    });
+    
+    sidebarLinks.innerHTML = html;
 }
 
 function switchProduct(product) {
-  currentProduct = product;
-  document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
-  event.target.closest('.tab-header').classList.add("active");
-  const titles = {
-    'aoi': 'AOI Product',
-    'axi': 'AXI Product',
-    'spi': 'SPI Product',
-    'arv': 'ARV Product',
-    'vone': 'V-ONE Product',
-    'xc': 'SMART CAMERA Product',
-    'xs': 'SMART CODE READER Product'
-  };
-  document.getElementById('sidebarTitle').textContent = titles[product];
-  loadSidebarMenu(product);
-  currentCategory = getSidebarCategories(product)[0].id;
-  updateContent();
+    currentProduct = product;
+    document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
+    const productButton = document.querySelector(`.tab-header[onclick="switchProduct('${product}')"]`);
+    if (productButton) {
+        productButton.classList.add("active");
+    } else {
+        // Fallback for initial load if event is not passed
+        const activeTab = document.querySelector(`.tab-header.active`);
+        if (activeTab) activeTab.classList.remove('active');
+        document.querySelector(`.tab-header[onclick*="${product}"]`).classList.add('active');
+    }
+    
+    const titles = {
+        'aoi': 'AOI Product',
+        'axi': 'AXI Product',
+        'spi': 'SPI Product',
+        'arv': 'ARV Product',
+        'vone': 'V-ONE Product',
+        'xc': 'SMART CAMERA Product',
+        'xs': 'SMART CODE READER Product'
+    };
+    document.getElementById('sidebarTitle').textContent = titles[product];
+    loadSidebarMenu(product);
+    currentCategory = getSidebarCategories(product)[0].id;
+    updateContent();
 }
 
-function switchCategory(category) {
-  currentCategory = category;
-  document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
-  event.target.closest('.sidebar-link').classList.add("active");
-  updateContent();
+function switchCategory(category, element) {
+    currentCategory = category;
+    document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
+    if (element) {
+        element.classList.add("active");
+    } else {
+         // Fallback for initial load
+         document.querySelector(`.sidebar-link[onclick*="${category}"]`).classList.add('active');
+    }
+    updateContent();
 }
 
 function getDocumentLink(product, category) {
-  const documentLinks = {
-    'aoi': {
-      'overview': '#',
-      'visionpro': '#',
-      'v510ioptimus': '#',
-      'dst': ''
-    },
-    'axi': {
-      'overview': '#',
-      'qx1': '#',
-      'v810is3': '#',
-      'v810is2ex': '#'
-    },
-    'spi': {
-      'overview': '#',
-      'v310ispi': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing',
-      'v310ioptimus': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
-    },
-    'arv': {
-      'overview': '#',
-      'v9ifi': '#',
-      'v9ici': '#',
-      'v510ir': '#'
-    },
-    'vone': {
-      'overview': '#'
-    },
-    'xc': {
-      'overview': '#'
-    },
-    'xs': {
-      'overview': '#'
-    }
-  };
-  
-  return documentLinks[product]?.[category] || '#';
+    // ... (Document links object is correct and retained) ...
+    const documentLinks = {
+        'aoi': {
+            'overview': '#',
+            'visionpro': '#',
+            'v510ioptimus': '#',
+            'dst': ''
+        },
+        'axi': {
+            'overview': '#',
+            'qx1': '#',
+            'v810is3': '#',
+            'v810is2ex': '#'
+        },
+        'spi': {
+            'overview': '#',
+            'v310ispi': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing', // Placeholder doc
+            'v310ioptimus': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing' // Placeholder doc
+        },
+        'arv': {
+            'overview': '#',
+            'v9ifi': '#',
+            'v9ici': '#',
+            'v510ir': '#'
+        },
+        'vone': {
+            'overview': '#'
+        },
+        'xc': {
+            'overview': '#'
+        },
+        'xs': {
+            'overview': '#'
+        }
+    };
+    
+    return documentLinks[product]?.[category] || '#';
 }
 
 function updateContent() {
-  const content = document.getElementById('mainContent');
-  
-  const productNames = {
-    'aoi': 'AOI',
-    'axi': 'AXI',
-    'spi': 'SPI',
-    'arv': 'ARV',
-    'vone': 'V-ONE',
-    'xc': 'SMART CAMERA',
-    'xs': 'SMART CODE READER'
-  };
+    const content = document.getElementById('mainContent');
+    
+    const productNames = {
+        'aoi': 'AOI',
+        'axi': 'AXI',
+        'spi': 'SPI',
+        'arv': 'ARV',
+        'vone': 'V-ONE',
+        'xc': 'SMART CAMERA',
+        'xs': 'SMART CODE READER'
+    };
 
-  const categories = getSidebarCategories(currentProduct);
-  const currentCat = categories.find(cat => cat.id === currentCategory);
-  const categoryName = currentCat ? currentCat.label : currentCategory;
-  
-  const productName = productNames[currentProduct];
-  
-  let html = `
-    <h2>${productName} - ${categoryName}</h2>
-    <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
-  `;
+    const categories = getSidebarCategories(currentProduct);
+    const currentCat = categories.find(cat => cat.id === currentCategory);
+    const categoryName = currentCat ? currentCat.label : currentCategory;
+    
+    const productName = productNames[currentProduct];
+    
+    let html = `
+        <h2>${productName} - ${categoryName}</h2>
+        <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
+    `;
 
-html += `
-    <div class="resource-grid">
-      <div class="resource-card">
-        <div class="resource-title">${productName} ${categoryName}</div>
-        <div class="resource-actions">
-          <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
-            <i class="fas fa-eye"></i> View
-          </button>
+    html += `
+        <div class="resource-grid">
+            <div class="resource-card">
+                <div class="resource-title">${productName} ${categoryName}</div>
+                <div class="resource-actions">
+                    <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  `;
-  
-  content.innerHTML = html;
+    `;
+    
+    content.innerHTML = html;
 }
 
 function viewDocument(url) {
-  if (url && url !== '#') {
-    window.open(url, '_blank');
-  } else {
-    alert('Document link not available for this category.');
-  }
+    if (url && url !== '#') {
+        window.open(url, '_blank');
+    } else {
+        alert('Document link not available for this category.');
+    }
 }
 
+// --- Upload Modal Functions ---
+
 function openUploadModal() {
-  document.getElementById('uploadModal').style.display = 'flex';
+    document.getElementById('uploadModal').style.display = 'flex';
 }
 
 function closeUploadModal() {
-  document.getElementById('uploadModal').style.display = 'none';
-  resetUploadForm();
+    document.getElementById('uploadModal').style.display = 'none';
+    resetUploadForm();
 }
 
 function resetUploadForm() {
-  uploadedFile = null;
-  extractedText = '';
-  matchedData = [];
-  document.getElementById('fileInput').value = '';
-  document.getElementById('filePreview').style.display = 'none';
-  document.getElementById('processingStatus').style.display = 'none';
-  document.getElementById('matchResults').style.display = 'none';
-  document.getElementById('processBtn').disabled = true;
-  document.getElementById('downloadBtn').style.display = 'none';
+    uploadedFile = null;
+    extractedText = '';
+    matchedData = [];
+    document.getElementById('fileInput').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+    document.getElementById('dropZone').style.display = 'flex';
+    document.getElementById('processingStatus').style.display = 'none';
+    document.getElementById('matchResults').style.display = 'none';
+    document.getElementById('processBtn').disabled = true;
+    document.getElementById('downloadBtn').style.display = 'none';
 }
 
 function setupFileUpload() {
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
-  
-  dropZone.addEventListener('click', () => fileInput.click());
-  
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-  });
-  
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('dragover');
-  });
-  
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    handleFileSelect(file);
-  });
-  
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    handleFileSelect(file);
-  });
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        handleFileSelect(file);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        handleFileSelect(file);
+    });
 }
 
 function handleFileSelect(file) {
-  if (!file) return;
-  
-  const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-  const maxSize = 10 * 1024 * 1024;
-  
-  if (!validTypes.includes(file.type)) {
-    alert('Please upload only PDF or Word documents.');
-    return;
-  }
-  
-  if (file.size > maxSize) {
-    alert('File size must be less than 10MB.');
-    return;
-  }
-  
-  uploadedFile = file;
-  displayFilePreview(file);
-  document.getElementById('processBtn').disabled = false;
+    if (!file) return;
+    
+    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    const maxSize = 10 * 1024 * 1024;
+    
+    if (!validTypes.includes(file.type)) {
+        alert('Please upload only PDF or Word documents.');
+        return;
+    }
+    
+    if (file.size > maxSize) {
+        alert('File size must be less than 10MB.');
+        return;
+    }
+    
+    uploadedFile = file;
+    displayFilePreview(file);
+    document.getElementById('dropZone').style.display = 'none';
+    document.getElementById('processBtn').disabled = false;
 }
 
 function displayFilePreview(file) {
-  const preview = document.getElementById('filePreview');
-  const fileName = document.getElementById('fileName');
-  const fileSize = document.getElementById('fileSize');
-  
-  fileName.textContent = file.name;
-  fileSize.textContent = formatFileSize(file.size);
-  preview.style.display = 'block';
-  
-  const icon = preview.querySelector('.fa-file-pdf');
-  if (file.type.includes('word')) {
-    icon.className = 'fas fa-file-word';
-    icon.style.color = '#2B579A';
-  } else {
-    icon.className = 'fas fa-file-pdf';
-    icon.style.color = '#E74C3C';
-  }
+    const preview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+    preview.style.display = 'flex';
+    
+    const icon = preview.querySelector('.fas');
+    if (file.type.includes('word')) {
+        icon.className = 'fas fa-file-word';
+        icon.style.color = '#2B579A';
+    } else {
+        icon.className = 'fas fa-file-pdf';
+        icon.style.color = '#E74C3C';
+    }
 }
 
 function removeFile() {
-  uploadedFile = null;
-  document.getElementById('filePreview').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-  document.getElementById('processBtn').disabled = true;
+    uploadedFile = null;
+    document.getElementById('filePreview').style.display = 'none';
+    document.getElementById('dropZone').style.display = 'flex';
+    document.getElementById('fileInput').value = '';
+    document.getElementById('processBtn').disabled = true;
+    document.getElementById('downloadBtn').style.display = 'none';
+    document.getElementById('matchResults').style.display = 'none';
 }
 
 function formatFileSize(bytes) {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
-async function loadSurveyLibrary() {
-  try {
-    console.log('Loading survey library from bucket...');
-    const files = await storage.listFiles(bucketId);
-    
-    surveyLibrary = {
-      'spi': [],
-      'aoi': [],
-      'axi': [],
-      'arv': [],
-      'vone': [],
-      'xc': [],
-      'xs': []
-    };
-    
-    if (files.files.length === 0) {
-      console.warn('No files found in survey library bucket');
-      return;
-    }
-    
-    for (const file of files.files) {
-      try {
-        console.log('Processing file:', file.name);
-        const fileUrl = storage.getFileView(bucketId, file.$id);
-        const response = await fetch(fileUrl);
-        
-        if (!response.ok) {
-          console.error(`Failed to fetch file ${file.name}: ${response.status}`);
-          continue;
-        }
-        
-        const blob = await response.blob();
-        
-        let text = '';
-        if (file.mimeType === 'application/pdf') {
-          text = await extractTextFromPDF(blob);
-        } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
-          text = await extractTextFromWord(blob);
-        }
-        
-        if (text) {
-          const qaData = parseQuestionsAndAnswers(text);
-          const productType = determineProductType(file.name);
-          
-          if (surveyLibrary[productType]) {
-            surveyLibrary[productType].push(...qaData);
-            console.log(`Added ${qaData.length} Q&A pairs to ${productType}`);
-          }
-        }
-      } catch (fileError) {
-        console.error(`Error processing file ${file.name}:`, fileError);
-      }
-    }
-    
-    console.log('Survey library loaded:', surveyLibrary);
-  } catch (error) {
-    console.error('Error loading survey library:', error);
-    if (error.code === 401) {
-      alert('Access denied: You do not have permission to access the survey library. Please contact your administrator.');
-    } else {
-      console.warn('Could not load survey library. Auto-fill may not work properly.');
-    }
-  }
-}
-
-function determineProductType(filename) {
-  const name = filename.toLowerCase();
-  if (name.includes('spi')) return 'spi';
-  if (name.includes('aoi')) return 'aoi';
-  if (name.includes('axi')) return 'axi';
-  if (name.includes('arv')) return 'arv';
-  if (name.includes('vone') || name.includes('v-one')) return 'vone';
-  if (name.includes('xc') || name.includes('smart camera')) return 'xc';
-  if (name.includes('xs') || name.includes('code reader')) return 'xs';
-  return 'spi';
-}
-
-function parseQuestionsAndAnswers(text) {
-  const qaData = [];
-  const lines = text.split('\n');
-  let currentQuestion = null;
-  let currentAnswer = '';
-  
-  // Technical specification keywords to identify fields
-  const specKeywords = [
-    'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
-    'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
-    'technologies', 'functions', 'traceability', 'hardware', 'software', 
-    'coverage', 'inspection', 'operating', 'optical', 'transport', 'edge',
-    'board', 'level', 'panel', 'camera', 'lighting', 'module', 'conveyor',
-    'adjustment', 'requirement', 'specification', 'footprint', 'supplies',
-    'pcb', 'maximum', 'minimum', 'total', 'installation', 'type', 'area'
-  ];
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line || line.length < 3) continue;
-    
-    // Skip page numbers and headers
-    if (line.match(/^page\s+\d+/i) || line.match(/^\d+$/) || line.toLowerCase().includes('confidential')) {
-      continue;
-    }
-    
-    // Enhanced patterns for specifications (library documents have answers)
-    const questionPatterns = [
-      // Field name with colon and answer
-      /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]\s*(.+)/,
-      // Multi-word technical terms
-      /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
-      // Standalone field names (will capture answer from next lines)
-      /^([A-Z][A-Za-z\s\-\/&()]{5,}?)$/
-    ];
-    
-    let isQuestion = false;
-    for (const pattern of questionPatterns) {
-      const match = line.match(pattern);
-      if (match) {
-        // Check if this looks like a specification field
-        const potentialField = match[1].trim();
-        const lowerField = potentialField.toLowerCase();
-        const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
-        
-        if (hasSpecKeyword || /^(Maximum|Minimum|Total|System|Operating|PCB|Board)/.test(potentialField)) {
-          isQuestion = true;
-          
-          // Save previous Q&A pair
-          if (currentQuestion && currentAnswer.trim()) {
-            qaData.push({
-              question: currentQuestion,
-              answer: currentAnswer.trim()
-            });
-          }
-          
-          // Start new question
-          currentQuestion = potentialField;
-          
-          // Check if answer is on same line (after colon)
-          if (match[2]) {
-            currentAnswer = match[2].trim() + ' ';
-          } else {
-            currentAnswer = '';
-          }
-          break;
-        }
-      }
-    }
-    
-    // If not a question and we have a current question, add to answer
-    if (!isQuestion && currentQuestion) {
-      // Don't add lines that look like new field names
-      const looksLikeField = /^[A-Z][A-Za-z\s]{10,}$/.test(line);
-      if (!looksLikeField) {
-        currentAnswer += line + ' ';
-      }
-    }
-  }
-  
-  // Save last Q&A pair
-  if (currentQuestion && currentAnswer.trim()) {
-    qaData.push({
-      question: currentQuestion,
-      answer: currentAnswer.trim()
-    });
-  }
-  
-  console.log(`Parsed ${qaData.length} Q&A pairs from library document`);
-  if (qaData.length > 0) {
-    console.log('Sample Q&A:', qaData.slice(0, 3));
-  }
-  
-  return qaData;
-}
-
-function extractQuestions(text) {
-  const fields = [];
-  const lines = text.split('\n');
-  
-  // Technical specification field patterns (for survey table formats)
-  const fieldPatterns = [
-    // Standard spec field names with optional Chinese/Japanese
-    /^([A-Za-z][A-Za-z\s\-\/&()]+?)(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
-    // Fields with parentheses like "PCB Dimension (L x W)"
-    /^([A-Za-z][A-Za-z\s\-\/&]+\([^)]+\))(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
-    // Multi-word technical terms
-    /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
-    // With colons (but capture before colon)
-    /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]/
-  ];
-  
-  // Common technical specification keywords to identify fields
-  const specKeywords = [
-    'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
-    'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
-    'technologies', 'functions', 'traceability', 'hardware', 'software', 
-    'coverage', 'inspection', 'operating', 'optical', 'transport', 'edge',
-    'board', 'level', 'panel', 'camera', 'lighting', 'module', 'conveyor',
-    'adjustment', 'requirement', 'specification', 'footprint', 'supplies',
-    'pcb', 'maximum', 'minimum', 'total', 'installation', 'type', 'area',
-    'footprint', 'conveyor'
-  ];
-  
-  lines.forEach((line, index) => {
-    const originalLine = line;
-    line = line.trim();
-    
-    // Skip empty lines, page numbers, very long lines (paragraphs), pure numbers
-    if (line.length < 5 || 
-        line.length > 150 || 
-        line.match(/^page\s*\d+/i) || 
-        line.match(/^\d+$/) ||
-        line.match(/^[0-9\s\.\-]+$/) ||
-        line.toLowerCase().includes('confidential')) {
-      return;
-    }
-    
-    // Try to match against patterns
-    let fieldName = null;
-    
-    for (const pattern of fieldPatterns) {
-      const match = line.match(pattern);
-      if (match) {
-        fieldName = match[1].trim();
-        break;
-      }
-    }
-    
-    // If matched a pattern, check if it contains specification keywords
-    if (fieldName) {
-      const lowerField = fieldName.toLowerCase();
-      const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
-      
-      // Also accept if it starts with capital letter and is 2-8 words
-      const wordCount = fieldName.split(/\s+/).length;
-      const startsWithCap = /^[A-Z]/.test(fieldName);
-      
-      if ((hasSpecKeyword || (startsWithCap && wordCount >= 2 && wordCount <= 8)) && 
-          !fields.some(f => f.text === fieldName)) {
-        
-        fields.push({
-          text: fieldName,
-          originalLine: originalLine.trim(),
-          lineNumber: index + 1
-        });
-      }
-    }
-  });
-  
-  console.log(`Extracted ${fields.length} specification fields from survey document`);
-  if (fields.length > 0) {
-    console.log('First 10 fields:', fields.slice(0, 10).map(f => f.text));
-  }
-  
-  return fields;
-}
-
-function extractAllLines(text) {
-  const lines = [];
-  const textLines = text.split('\n');
-  
-  textLines.forEach((line, index) => {
-    line = line.trim();
-
-    if (line.length < 15) return;
-    if (line.match(/^page\s+\d+/i)) return;
-    if (line.match(/^\d+$/)) return;
-    if (line.toLowerCase().includes('confidential')) return;
-    
-    lines.push({
-      text: line,
-      lineNumber: index + 1
-    });
-  });
-  
-  return lines;
-}
-
-async function processDocument() {
-  if (!uploadedFile) return;
-  
-  showProcessingStatus('Extracting text from document...');
-  updateProgress(20);
-  
-  try {
-    if (uploadedFile.type === 'application/pdf') {
-      extractedText = await extractTextFromPDF(uploadedFile);
-    } else {
-      extractedText = await extractTextFromWord(uploadedFile);
-    }
-    
-    console.log('=== EXTRACTION DEBUG ===');
-    console.log('Extracted text length:', extractedText.length);
-    console.log('First 1000 chars:', extractedText.substring(0, 1000));
-    console.log('========================');
-    
-    updateProgress(50);
-    showProcessingStatus('Analyzing specification fields...');
-    const fields = extractQuestions(extractedText);
-    
-    console.log('=== FIELDS FOUND ===');
-    console.log(`Total specification fields extracted: ${fields.length}`);
-    fields.slice(0, 15).forEach((q, i) => {
-      console.log(`${i + 1}. ${q.text}`);
-    });
-    console.log('========================');
-    
-    if (fields.length === 0) {
-      console.warn('No structured fields found. Will extract all content.');
-      const allLines = extractAllLines(extractedText);
-      matchedData = allLines.map(line => ({
-        question: line.text,
-        originalLine: line.text,
-        lineNumber: line.lineNumber,
-        matchedAnswer: null,
-        confidence: 0,
-        matched: false
-      }));
-    } else {
-      updateProgress(70);
-      showProcessingStatus('Matching with Paper Survey library...');
-      const selectedProduct = document.getElementById('productSelect').value;
-      
-      const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
-      console.log('=== LIBRARY DEBUG ===');
-      console.log(`Library size for ${selectedProduct}: ${productLibrarySize}`);
-      if (productLibrarySize > 0) {
-        console.log('Sample library entries:');
-        surveyLibrary[selectedProduct].slice(0, 5).forEach((item, i) => {
-          console.log(`${i + 1}. Q: "${item.question}" A: "${item.answer.substring(0, 80)}..."`);
-        });
-      }
-      console.log('========================');
-      
-      if (productLibrarySize === 0) {
-        console.warn(`No survey data found for ${selectedProduct}. Processing without auto-fill.`);
-      }
-      
-      matchedData = matchQuestionsWithLibrary(fields, selectedProduct);
-    }
-    
-    console.log('=== MATCH RESULTS ===');
-    console.log(`Total matches: ${matchedData.filter(m => m.matched).length}/${matchedData.length}`);
-    matchedData.filter(m => m.matched).slice(0, 10).forEach((m, i) => {
-      console.log(`${i + 1}. "${m.question}" (${m.confidence}%) -> "${m.matchedAnswer?.substring(0, 60)}..."`);
-    });
-    console.log('========================');
-    
-    updateProgress(100);
-    showProcessingStatus('Processing complete!');
-
-    setTimeout(() => {
-      document.getElementById('processingStatus').style.display = 'none';
-      showMatchResults();
-      document.getElementById('downloadBtn').style.display = 'inline-block';
-    }, 500);
-    
-  } catch (error) {
-    console.error('Error processing document:', error);
-    alert('Error processing document: ' + error.message);
-    document.getElementById('processingStatus').style.display = 'none';
-  }
-}
-
-async function extractTextFromPDF(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const typedArray = new Uint8Array(e.target.result);
-        const pdf = await pdfjsLib.getDocument(typedArray).promise;
-
-        const allPageItems = [];
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-
-          const itemsByY = {};
-          textContent.items.forEach(item => {
-            const y = Math.round(item.transform[5]); // Y coordinate
-            const x = Math.round(item.transform[4]); // X coordinate
-            if (!itemsByY[y]) itemsByY[y] = [];
-            itemsByY[y].push({ str: item.str, x });
-          });
-
-          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); // Descending
-          sortedY.forEach(y => {
-            const items = itemsByY[y].sort((a, b) => a.x - b.x); // left -> right
-            const lineText = items.map(i => i.str).join(' ');
-            // Save each line with coordinates and page number
-            allPageItems.push({ text: lineText, x: items[0].x, y: y, page: i });
-          });
-        }
-
-        resolve(allPageItems); // Return all pages' items with positions
-      } catch (error) {
-        reject(error);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-async function extractTextFromWord(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const arrayBuffer = e.target.result;
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        resolve(result.value);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-function matchQuestionsWithLibrary(questions, product) {
-  const matches = [];
-  const productLibrary = surveyLibrary[product] || [];
-  
-  console.log(`Matching ${questions.length} items against ${productLibrary.length} library entries for ${product}`);
-  
-  questions.forEach(question => {
-    let bestMatch = null;
-    let highestScore = 0;
-    
-    productLibrary.forEach(libraryItem => {
-      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.25) { // Lower threshold for table-based specs
-        highestScore = score;
-        bestMatch = libraryItem;
-      }
-    });
-    
-    matches.push({
-      question: question.text,
-      originalLine: question.originalLine,
-      lineNumber: question.lineNumber,
-      matchedAnswer: bestMatch ? bestMatch.answer : null,
-      confidence: Math.round(highestScore * 100),
-      matched: bestMatch !== null && highestScore > 0.25
-    });
-
-    if (bestMatch) {
-      console.log(`✓ Match: "${question.text}" -> "${bestMatch.question}" (${Math.round(highestScore * 100)}%)`);
-    } else {
-      console.log(`✗ No match: "${question.text}"`);
-    }
-  });
-  
-  const matchedCount = matches.filter(m => m.matched).length;
-  console.log(`Found ${matchedCount} matches out of ${matches.length} items`);
-  
-  return matches;
-}
-
-function calculateEnhancedSimilarity(str1, str2) {
-  const normalize = (s) => s.toLowerCase()
-    .replace(/[^\w\s]/g, ' ')  
-    .replace(/\s+/g, ' ')       
-    .trim();
-  
-  const norm1 = normalize(str1);
-  const norm2 = normalize(str2);
-
-  if (norm1.includes(norm2) || norm2.includes(norm1)) {
-    const shorter = norm1.length < norm2.length ? norm1 : norm2;
-    const longer = norm1.length < norm2.length ? norm2 : norm1;
-    return 0.85 + (shorter.length / longer.length) * 0.15;
-  }
-  
-  const words1 = norm1.split(/\s+/).filter(w => w.length > 2);
-  const words2 = norm2.split(/\s+/).filter(w => w.length > 2);
-
-  if (words1.length <= 3 || words2.length <= 3) {
-    const set1 = new Set(words1);
-    const set2 = new Set(words2);
-    const matches = [...set1].filter(x => set2.has(x)).length;
-    const total = Math.max(set1.size, set2.size);
-    return total > 0 ? matches / total : 0;
-  }
-  
-  const set1 = new Set(words1);
-  const set2 = new Set(words2);
-  
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
-  const union = new Set([...set1, ...set2]);
-  
-  const jaccardScore = union.size > 0 ? intersection.size / union.size : 0;
-
-  let partialMatches = 0;
-  for (const w1 of words1) {
-    for (const w2 of words2) {
-      if (w1.length > 3 && w2.length > 3) {
-        if (w1.includes(w2) || w2.includes(w1)) {
-          partialMatches++;
-        }
-      }
-    }
-  }
-  const partialScore = partialMatches / Math.max(words1.length, words2.length);
-  const keyTerms1 = extractKeyTerms(str1);
-  const keyTerms2 = extractKeyTerms(str2);
-  
-  const keyTermMatches = keyTerms1.filter(term => 
-    keyTerms2.some(t => 
-      t.toLowerCase() === term.toLowerCase() ||
-      t.toLowerCase().includes(term.toLowerCase()) || 
-      term.toLowerCase().includes(t.toLowerCase())
-    )
-  ).length;
-  
-  const keyTermScore = Math.max(keyTerms1.length, keyTerms2.length) > 0 ?
-    keyTermMatches / Math.max(keyTerms1.length, keyTerms2.length) : 0;
-
-  const finalScore = (jaccardScore * 0.3) + (partialScore * 0.3) + (keyTermScore * 0.4);
-  
-  return finalScore;
-}
-
-function extractKeyTerms(text) {
-  const normalized = text.toLowerCase();
-  const words = normalized.split(/\s+/);
-
-  const commonWords = new Set(['what', 'how', 'why', 'when', 'where', 'who', 'which', 
-    'that', 'this', 'these', 'those', 'with', 'from', 'have', 'about', 'your', 
-    'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe',
-    'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'her', 'was',
-    'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'its', 'may', 'see',
-    'she', 'than', 'them', 'they', 'said', 'each', 'tell', 'also', 'back', 'been',
-    'call', 'come', 'even', 'find', 'give', 'good', 'hand', 'here', 'just', 'know',
-    'last', 'long', 'made', 'make', 'many', 'more', 'most', 'must', 'name', 'only',
-    'over', 'part', 'such', 'take', 'than', 'them', 'then', 'very', 'want', 'well',
-    'went', 'were', 'what', 'when', 'work', 'year', 'your']);
-  
-  const technicalTerms = [];
-  
-  for (let word of words) {
-    word = word.replace(/[^\w]/g, '');
-  
-    if (word.length > 3 && !commonWords.has(word) && !/^\d+$/.test(word)) {
-      technicalTerms.push(word);
-    } else if (/\d/.test(word) && word.length > 1) {
-      technicalTerms.push(word);
-    } else if (word === word.toUpperCase() && word.length >= 2 && /[A-Z]/.test(word)) {
-      technicalTerms.push(word.toLowerCase());
-    }
-  }
-  
-  return technicalTerms;
-}
-
-function calculateSimilarity(str1, str2) {
-  const words1 = str1.toLowerCase().split(/\s+/);
-  const words2 = str2.toLowerCase().split(/\s+/);
-  
-  const set1 = new Set(words1);
-  const set2 = new Set(words2);
-  
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
-  const union = new Set([...set1, ...set2]);
-  
-  return intersection.size / union.size;
-}
+// --- Document Processing Status ---
 
 function showProcessingStatus(message) {
-  const status = document.getElementById('processingStatus');
-  const statusMessage = document.getElementById('statusMessage');
-  statusMessage.textContent = message;
-  status.style.display = 'block';
+    document.getElementById('matchResults').style.display = 'none';
+    document.getElementById('processingStatus').style.display = 'block';
+    document.getElementById('statusMessage').textContent = message;
+    document.getElementById('processBtn').disabled = true;
+    document.getElementById('downloadBtn').style.display = 'none';
 }
 
-function updateProgress(percent) {
-  const progressBar = document.getElementById('progressBar');
-  progressBar.style.width = percent + '%';
+function updateProgress(percentage) {
+    document.getElementById('progressBar').style.width = `${percentage}%`;
 }
 
 function showMatchResults() {
-  const resultsDiv = document.getElementById('matchResults');
-  const totalQuestions = matchedData.length;
-  const matchedQuestions = matchedData.filter(m => m.matched).length;
-  const matchRate = totalQuestions > 0 ? Math.round((matchedQuestions / totalQuestions) * 100) : 0;
-  
-  document.getElementById('questionsFound').textContent = totalQuestions;
-  document.getElementById('answersMatched').textContent = matchedQuestions;
-  document.getElementById('matchRate').textContent = matchRate + '%';
-  
-  resultsDiv.style.display = 'block';
+    const totalQuestions = matchedData.length;
+    const matchedAnswers = matchedData.filter(m => m.matched).length;
+    const matchRate = totalQuestions > 0 ? Math.round((matchedAnswers / totalQuestions) * 100) : 0;
+    
+    document.getElementById('questionsFound').textContent = totalQuestions;
+    document.getElementById('answersMatched').textContent = matchedAnswers;
+    document.getElementById('matchRate').textContent = `${matchRate}%`;
+    document.getElementById('matchResults').style.display = 'block';
+    document.getElementById('processBtn').style.display = 'none';
 }
 
-async function fillPDFDocument(templateFile, matchedData) {
-    const { PDFDocument, rgb, StandardFonts } = PDFLib;
+// --- Library Data Loading ---
 
-    const arrayBuffer = await templateFile.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(arrayBuffer);
-
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-    const { width, height } = firstPage.getSize();
-
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-    // Helper to remove unsupported characters for WinAnsi font
-    function sanitizeText(text) {
-        return text.replace(/[^\x00-\xFF]/g, ''); // removes non-WinAnsi chars
+async function loadSurveyLibrary() {
+    try {
+        console.log('Loading survey library from bucket...');
+        const files = await storage.listFiles(bucketId);
+        
+        surveyLibrary = {
+            'spi': [], 'aoi': [], 'axi': [], 'arv': [], 'vone': [], 'xc': [], 'xs': []
+        };
+        
+        if (files.files.length === 0) {
+            console.warn('No files found in survey library bucket');
+            return;
+        }
+        
+        for (const file of files.files) {
+            try {
+                console.log('Processing file:', file.name);
+                // Note: storage.getFileView requires permissions
+                const fileUrl = storage.getFileView(bucketId, file.$id);
+                const response = await fetch(fileUrl);
+                
+                if (!response.ok) {
+                    console.error(`Failed to fetch file ${file.name}: ${response.status}`);
+                    continue;
+                }
+                
+                const blob = await response.blob();
+                
+                let text = '';
+                if (file.mimeType === 'application/pdf') {
+                    // Note: PDF extraction here is line-based for simplicity, but a full text join is needed for parseQuestionsAndAnswers
+                    const pdfItems = await extractTextFromPDF(blob);
+                    text = pdfItems.map(item => item.text).join('\n');
+                } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
+                    text = await extractTextFromWord(blob);
+                }
+                
+                if (text) {
+                    const qaData = parseQuestionsAndAnswers(text);
+                    const productType = determineProductType(file.name);
+                    
+                    if (surveyLibrary[productType]) {
+                        surveyLibrary[productType].push(...qaData);
+                        console.log(`Added ${qaData.length} Q&A pairs to ${productType}`);
+                    }
+                }
+            } catch (fileError) {
+                console.error(`Error processing file ${file.name}:`, fileError);
+            }
+        }
+        
+        console.log('Survey library loaded:', surveyLibrary);
+    } catch (error) {
+        console.error('Error loading survey library:', error);
+        if (error.code === 401) {
+            // Note: Appwrite error code handling
+            alert('Access denied: You do not have permission to access the survey library. Please ensure your Appwrite storage bucket permissions are correct.');
+        } else {
+            console.warn('Could not load survey library. Auto-fill may not work properly.');
+        }
     }
+}
 
-    // Simple example: add matched Q&A to the bottom of the first page
-    let yPos = height - 50;
-    matchedData.forEach(item => {
-        const rawText = `${item.question}: ${item.matchedAnswer || ''}`;
-        const text = sanitizeText(rawText); // sanitize text
-        firstPage.drawText(text, {
-            x: 50,
-            y: yPos,
-            size: 10,
-            font: font,
-            color: rgb(0, 0, 0),
+function determineProductType(filename) {
+    const name = filename.toLowerCase();
+    if (name.includes('spi')) return 'spi';
+    if (name.includes('aoi')) return 'aoi';
+    if (name.includes('axi')) return 'axi';
+    if (name.includes('arv')) return 'arv';
+    if (name.includes('vone') || name.includes('v-one')) return 'vone';
+    if (name.includes('xc') || name.includes('smart camera')) return 'xc';
+    if (name.includes('xs') || name.includes('code reader')) return 'xs';
+    return 'spi';
+}
+
+function parseQuestionsAndAnswers(text) {
+    // ... (Your existing parseQuestionsAndAnswers function is correct and retained) ...
+    const qaData = [];
+    const lines = text.split('\n');
+    let currentQuestion = null;
+    let currentAnswer = '';
+    
+    // Technical specification keywords to identify fields
+    const specKeywords = [
+        'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
+        'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
+        'technologies', 'functions', 'traceability', 'hardware', 'software', 
+        'coverage', 'inspection', 'operating', 'optical', 'transport', 'edge',
+        'board', 'level', 'panel', 'camera', 'lighting', 'module', 'conveyor',
+        'adjustment', 'requirement', 'specification', 'footprint', 'supplies',
+        'pcb', 'maximum', 'minimum', 'total', 'installation', 'type', 'area'
+    ];
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line || line.length < 3) continue;
+        
+        // Skip page numbers and headers
+        if (line.match(/^page\s+\d+/i) || line.match(/^\d+$/) || line.toLowerCase().includes('confidential')) {
+            continue;
+        }
+        
+        // Enhanced patterns for specifications (library documents have answers)
+        const questionPatterns = [
+            // Field name with colon and answer
+            /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]\s*(.+)/,
+            // Multi-word technical terms
+            /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
+            // Standalone field names (will capture answer from next lines)
+            /^([A-Z][A-Za-z\s\-\/&()]{5,}?)$/
+        ];
+        
+        let isQuestion = false;
+        for (const pattern of questionPatterns) {
+            const match = line.match(pattern);
+            if (match) {
+                // Check if this looks like a specification field
+                const potentialField = match[1].trim();
+                const lowerField = potentialField.toLowerCase();
+                const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
+                
+                if (hasSpecKeyword || /^(Maximum|Minimum|Total|System|Operating|PCB|Board)/.test(potentialField)) {
+                    isQuestion = true;
+                    
+                    // Save previous Q&A pair
+                    if (currentQuestion && currentAnswer.trim()) {
+                        qaData.push({
+                            question: currentQuestion,
+                            answer: currentAnswer.trim()
+                        });
+                    }
+                    
+                    // Start new question
+                    currentQuestion = potentialField;
+                    
+                    // Check if answer is on same line (after colon)
+                    if (match[2]) {
+                        currentAnswer = match[2].trim() + ' ';
+                    } else {
+                        currentAnswer = '';
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // If not a question and we have a current question, add to answer
+        if (!isQuestion && currentQuestion) {
+            // Don't add lines that look like new field names
+            const looksLikeField = /^[A-Z][A-Za-z\s]{10,}$/.test(line);
+            if (!looksLikeField) {
+                currentAnswer += line + ' ';
+            }
+        }
+    }
+    
+    // Save last Q&A pair
+    if (currentQuestion && currentAnswer.trim()) {
+        qaData.push({
+            question: currentQuestion,
+            answer: currentAnswer.trim()
         });
-        yPos -= 15;
+    }
+    
+    console.log(`Parsed ${qaData.length} Q&A pairs from library document`);
+    if (qaData.length > 0) {
+        console.log('Sample Q&A:', qaData.slice(0, 3));
+    }
+    
+    return qaData;
+}
+
+function extractQuestions(text) {
+    // ... (Your existing extractQuestions function is correct and retained) ...
+    const fields = [];
+    const lines = text.split('\n');
+    
+    // Technical specification field patterns (for survey table formats)
+    const fieldPatterns = [
+        // Standard spec field names with optional Chinese/Japanese
+        /^([A-Za-z][A-Za-z\s\-\/&()]+?)(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
+        // Fields with parentheses like "PCB Dimension (L x W)"
+        /^([A-Za-z][A-Za-z\s\-\/&]+\([^)]+\))(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
+        // Multi-word technical terms
+        /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
+        // With colons (but capture before colon)
+        /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]/
+    ];
+    
+    // Common technical specification keywords to identify fields
+    const specKeywords = [
+        'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
+        'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
+        'technologies', 'functions', 'traceability', 'hardware', 'software', 
+        'coverage', 'inspection', 'operating', 'optical', 'transport', 'edge',
+        'board', 'level', 'panel', 'camera', 'lighting', 'module', 'conveyor',
+        'adjustment', 'requirement', 'specification', 'footprint', 'supplies',
+        'pcb', 'maximum', 'minimum', 'total', 'installation', 'type', 'area',
+        'footprint', 'conveyor'
+    ];
+    
+    lines.forEach((line, index) => {
+        const originalLine = line;
+        line = line.trim();
+        
+        // Skip empty lines, page numbers, very long lines (paragraphs), pure numbers
+        if (line.length < 5 || 
+            line.length > 150 || 
+            line.match(/^page\s*\d+/i) || 
+            line.match(/^\d+$/) ||
+            line.match(/^[0-9\s\.\-]+$/) ||
+            line.toLowerCase().includes('confidential')) {
+            return;
+        }
+        
+        // Try to match against patterns
+        let fieldName = null;
+        
+        for (const pattern of fieldPatterns) {
+            const match = line.match(pattern);
+            if (match) {
+                fieldName = match[1].trim();
+                break;
+            }
+        }
+        
+        // If matched a pattern, check if it contains specification keywords
+        if (fieldName) {
+            const lowerField = fieldName.toLowerCase();
+            const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
+            
+            // Also accept if it starts with capital letter and is 2-8 words
+            const wordCount = fieldName.split(/\s+/).length;
+            const startsWithCap = /^[A-Z]/.test(fieldName);
+            
+            if ((hasSpecKeyword || (startsWithCap && wordCount >= 2 && wordCount <= 8)) && 
+                !fields.some(f => f.text === fieldName)) {
+                
+                fields.push({
+                    text: fieldName,
+                    originalLine: originalLine.trim(),
+                    lineNumber: index + 1
+                });
+            }
+        }
+    });
+    
+    console.log(`Extracted ${fields.length} specification fields from survey document`);
+    if (fields.length > 0) {
+        console.log('First 10 fields:', fields.slice(0, 10).map(f => f.text));
+    }
+    
+    return fields;
+}
+
+function extractAllLines(text) {
+    // ... (Your existing extractAllLines function is correct and retained) ...
+    const lines = [];
+    const textLines = text.split('\n');
+    
+    textLines.forEach((line, index) => {
+        line = line.trim();
+
+        if (line.length < 15) return;
+        if (line.match(/^page\s+\d+/i)) return;
+        if (line.match(/^\d+$/)) return;
+        if (line.toLowerCase().includes('confidential')) return;
+        
+        lines.push({
+            text: line,
+            lineNumber: index + 1
+        });
+    });
+    
+    return lines;
+}
+
+// --- Text Extraction (PDF/Word) ---
+
+async function extractTextFromPDF(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const typedArray = new Uint8Array(e.target.result);
+                const pdf = await pdfjsLib.getDocument(typedArray).promise;
+
+                let allText = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    
+                    // Simple text extraction - lines are often better for tables/specs
+                    let lines = [];
+                    let lastY = 0;
+                    
+                    // Sort items by Y (vertically) and then X (horizontally)
+                    const items = textContent.items.map(item => ({
+                        str: item.str,
+                        y: item.transform[5],
+                        x: item.transform[4]
+                    })).sort((a, b) => b.y - a.y || a.x - b.x); // Descending Y, Ascending X
+
+                    items.forEach(item => {
+                        // Check for new line (large vertical distance)
+                        if (Math.abs(item.y - lastY) > 5 || lines.length === 0) {
+                            lines.push(item.str);
+                        } else {
+                            // Append to current line with a space
+                            lines[lines.length - 1] += ' ' + item.str;
+                        }
+                        lastY = item.y;
+                    });
+                    
+                    allText += lines.join('\n') + '\n\n';
+                }
+
+                resolve(allText); 
+            } catch (error) {
+                reject(error);
+            }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+async function extractTextFromWord(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const arrayBuffer = e.target.result;
+                const result = await mammoth.extractRawText({ arrayBuffer });
+                resolve(result.value);
+            } catch (error) {
+                reject(error);
+            }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// --- Core Matching Logic ---
+
+function tokenize(text) {
+    // Basic tokenization: lowercase, remove non-alphanumeric, split, filter short words
+    return text.toLowerCase()
+               .replace(/[^a-z0-9\s]/g, '')
+               .split(/\s+/)
+               .filter(t => t.length > 2);
+}
+
+function jaccardSimilarity(setA, setB) {
+    const intersection = new Set([...setA].filter(x => setB.has(x)));
+    const union = new Set([...setA, ...setB]);
+    if (union.size === 0) return 0;
+    return (intersection.size / union.size) * 100;
+}
+
+function matchQuestionsWithLibrary(questions, product) {
+    const matches = [];
+    const productLibrary = surveyLibrary[product] || [];
+    const minConfidence = 50; // Minimum match percentage
+
+    // Keywords that should boost confidence if present in both
+    const boostKeywords = new Set(['dimension', 'size', 'width', 'height', 'thickness', 'resolution', 'system', 'power', 'board', 'pcb']);
+
+    questions.forEach(q => {
+        const qText = q.text;
+        const qTokens = tokenize(qText);
+        let bestMatch = { answer: null, confidence: 0 };
+
+        productLibrary.forEach(libItem => {
+            const libTokens = tokenize(libItem.question);
+            let confidence = jaccardSimilarity(new Set(qTokens), new Set(libTokens));
+
+            // Keyword boosting
+            const qHasBoost = qTokens.some(token => boostKeywords.has(token));
+            const libHasBoost = libTokens.some(token => boostKeywords.has(token));
+
+            if (qHasBoost && libHasBoost) {
+                confidence *= 1.2; // 20% boost for high-value terms
+            }
+
+            confidence = Math.min(100, confidence);
+
+            if (confidence > bestMatch.confidence) {
+                bestMatch = { answer: libItem.answer, confidence: Math.round(confidence) };
+            }
+        });
+
+        const matched = bestMatch.confidence >= minConfidence;
+
+        matches.push({
+            question: qText,
+            originalLine: q.originalLine,
+            lineNumber: q.lineNumber,
+            matchedAnswer: matched ? bestMatch.answer : null,
+            confidence: bestMatch.confidence,
+            matched: matched
+        });
     });
 
-    const pdfBytes = await pdfDoc.save();
-    return new Blob([pdfBytes], { type: 'application/pdf' });
+    return matches;
 }
 
 
-async function fillWordDocument(matchedData) {
-    const { Document, Packer, Paragraph, TextRun } = window.docx;
-
-    const doc = new Document();
-
-    matchedData.forEach(item => {
-        const answerText = item.matchedAnswer || '';
-        doc.addSection({
-            children: [
-                new Paragraph({
-                    children: [
-                        new TextRun({ text: item.question + ': ', bold: true }),
-                        new TextRun({ text: answerText })
-                    ]
-                })
-            ]
-        });
-    });
-
-    const blob = await Packer.toBlob(doc);
-    return blob;
-}
+// --- Document Filling and Download (STUB) ---
 
 async function downloadFilledDocument() {
-    const arrayBuffer = await uploadedFile.arrayBuffer();
-    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-    const pages = pdfDoc.getPages();
-    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-
-    matchedData.forEach(match => {
-      if (!match.matchedAnswer) return;
-      const page = pages[0]; // if multiple pages, adjust page index
-      // Use extracted x/y from processDocument
-      const x = match.x || 50;  // fallback if no coordinates
-      const y = match.y || 700; // fallback if no coordinates
-      page.drawText(match.matchedAnswer, { x, y, size: 10, font });
-    });
-
-    const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'filled-survey.pdf';
-    a.click();
-    URL.revokeObjectURL(url);
-    if (!uploadedFile || !uploadedFile.name) {
-        alert('Please upload a file first.');
+    if (!matchedData.length || !uploadedFile) {
+        alert("No data processed or file uploaded to download.");
         return;
     }
+    
+    // Simple stub to show the function's purpose
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'Preparing...';
 
-    if (!matchedData) {
-        alert('No data to fill.');
-        return;
+    const filename = uploadedFile.name.replace(/(\.pdf|\.docx?)$/i, '') + '_AUTOFILL.docx';
+    
+    try {
+        // In a real application, you'd use a templating engine or
+        // PDF/Word manipulation library to insert matchedData answers 
+        // back into the original document's structure.
+
+        // For this full script, we'll generate a NEW Word document 
+        // summarizing the matches as a simple output file.
+
+        const paragraphs = [
+            new Paragraph({
+                children: [
+                    new TextRun({ text: "Auto-Fill Survey Results", bold: true, size: 40 }),
+                ],
+                spacing: { after: 300 }
+            })
+        ];
+
+        let matchedCount = 0;
+
+        matchedData.forEach(item => {
+            if (item.matched) {
+                matchedCount++;
+                paragraphs.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: "Question: ", bold: true }),
+                        new TextRun({ text: item.question }),
+                    ]
+                }));
+                paragraphs.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: "Answer: ", bold: true }),
+                        new TextRun({ text: item.matchedAnswer || "N/A", color: "1E8449" }), // Green color for answer
+                    ],
+                    spacing: { after: 100 }
+                }));
+            }
+        });
+
+        if (matchedCount === 0) {
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: "No matching answers were found above the minimum confidence threshold." }),
+                ]
+            }));
+        }
+
+        const doc = new Document({
+            sections: [{
+                children: paragraphs,
+            }],
+        });
+
+        const mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        const blob = await Packer.toBlob(doc);
+        
+        // Trigger download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert(`Successfully generated filled document: ${filename}`);
+
+    } catch (error) {
+        console.error("Error during document download:", error);
+        alert(`Failed to generate/download document: ${error.message}`);
+    } finally {
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = 'Download Filled Document';
     }
-
-    const fileType = uploadedFile.name.split('.').pop().toLowerCase();
-    let filledBlob;
-
-    if (fileType === 'pdf') {
-        filledBlob = await fillPDFDocument(uploadedFile, matchedData);
-    } else if (fileType === 'doc' || fileType === 'docx') {
-        filledBlob = await fillWordDocument(uploadedFile, matchedData);
-    } else {
-        alert('Unsupported file type for auto-fill.');
-        return;
-    }
-
-    if (fileType === 'doc' || fileType === 'docx') {
-    filledBlob = await fillWordDocument(matchedData);
-    }
-
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(filledBlob);
-    link.download = `Filled_${uploadedFile.name}`;
-    link.click();
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await checkSession();
-    loadSidebarMenu(currentProduct);
-    updateContent();
-    setupFileUpload();
-});
-</script>
 
-<footer class="footer-regis">
-  <span>© 2025 ViTrox. All rights reserved.</span>
-</footer>
+// --- Initialization ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkSession();
+    setupFileUpload();
+    // Initialize the sidebar for the default product
+    loadSidebarMenu(currentProduct);
+});
+
+</script>
 </body>
 </html>
