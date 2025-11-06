@@ -906,36 +906,31 @@ async function extractTextFromPDF(file) {
       try {
         const typedArray = new Uint8Array(e.target.result);
         const pdf = await pdfjsLib.getDocument(typedArray).promise;
-        let fullText = '';
-        
+
+        const allPageItems = [];
+
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
-          
-          // Group text items by their vertical position (y-coordinate)
-          // This helps reconstruct table rows better
+
           const itemsByY = {};
           textContent.items.forEach(item => {
             const y = Math.round(item.transform[5]); // Y coordinate
-            if (!itemsByY[y]) {
-              itemsByY[y] = [];
-            }
-            itemsByY[y].push(item);
+            const x = Math.round(item.transform[4]); // X coordinate
+            if (!itemsByY[y]) itemsByY[y] = [];
+            itemsByY[y].push({ str: item.str, x });
           });
-          
-          // Sort by Y position (top to bottom) and then by X position (left to right)
-          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); // Descending Y
-          
+
+          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); // Descending
           sortedY.forEach(y => {
-            const items = itemsByY[y].sort((a, b) => a.transform[4] - b.transform[4]); // Ascending X
-            const lineText = items.map(item => item.str).join(' ');
-            fullText += lineText + '\n';
+            const items = itemsByY[y].sort((a, b) => a.x - b.x); // left -> right
+            const lineText = items.map(i => i.str).join(' ');
+            // Save each line with coordinates and page number
+            allPageItems.push({ text: lineText, x: items[0].x, y: y, page: i });
           });
-          
-          fullText += '\n'; // Add page break
         }
-        
-        resolve(fullText);
+
+        resolve(allPageItems); // Return all pages' items with positions
       } catch (error) {
         reject(error);
       }
@@ -1197,6 +1192,28 @@ async function fillWordDocument(matchedData) {
 }
 
 async function downloadFilledDocument() {
+    const arrayBuffer = await uploadedFile.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+    const pages = pdfDoc.getPages();
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+    matchedData.forEach(match => {
+      if (!match.matchedAnswer) return;
+      const page = pages[0]; // if multiple pages, adjust page index
+      // Use extracted x/y from processDocument
+      const x = match.x || 50;  // fallback if no coordinates
+      const y = match.y || 700; // fallback if no coordinates
+      page.drawText(match.matchedAnswer, { x, y, size: 10, font });
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'filled-survey.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
     if (!uploadedFile || !uploadedFile.name) {
         alert('Please upload a file first.');
         return;
