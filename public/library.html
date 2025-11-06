@@ -402,39 +402,27 @@ function updateContent() {
   const categoryName = currentCat ? currentCat.label : currentCategory;
   
   const productName = productNames[currentProduct];
-
+  
   let html = `
     <h2>${productName} - ${categoryName}</h2>
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
 
-  // Replace grid with table
-  html += `
-    <table class="resource-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Document Name</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>${productName} ${categoryName}</td>
-          <td>
-            <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
-              <i class="fas fa-eye"></i> View
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+html += `
+    <div class="resource-grid">
+      <div class="resource-card">
+        <div class="resource-title">${productName} ${categoryName}</div>
+        <div class="resource-actions">
+          <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
+            <i class="fas fa-eye"></i> View
+          </button>
+        </div>
+      </div>
+    </div>
   `;
-
+  
   content.innerHTML = html;
 }
-
 
 function viewDocument(url) {
   if (url && url !== '#') {
@@ -999,8 +987,7 @@ function matchQuestionsWithLibrary(questions, product) {
       confidence: Math.round(highestScore * 100),
       matched: bestMatch !== null && highestScore > 0.25
     });
-    
-    // Debug: log matches for verification
+
     if (bestMatch) {
       console.log(`✓ Match: "${question.text}" -> "${bestMatch.question}" (${Math.round(highestScore * 100)}%)`);
     } else {
@@ -1022,8 +1009,7 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const norm1 = normalize(str1);
   const norm2 = normalize(str2);
-  
-  // Direct substring match gets highest priority for specs
+
   if (norm1.includes(norm2) || norm2.includes(norm1)) {
     const shorter = norm1.length < norm2.length ? norm1 : norm2;
     const longer = norm1.length < norm2.length ? norm2 : norm1;
@@ -1032,8 +1018,7 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const words1 = norm1.split(/\s+/).filter(w => w.length > 2);
   const words2 = norm2.split(/\s+/).filter(w => w.length > 2);
-  
-  // If either is very short, use exact word matching
+
   if (words1.length <= 3 || words2.length <= 3) {
     const set1 = new Set(words1);
     const set2 = new Set(words2);
@@ -1049,8 +1034,7 @@ function calculateEnhancedSimilarity(str1, str2) {
   const union = new Set([...set1, ...set2]);
   
   const jaccardScore = union.size > 0 ? intersection.size / union.size : 0;
-  
-  // Check for partial word matches (important for abbreviations)
+
   let partialMatches = 0;
   for (const w1 of words1) {
     for (const w2 of words2) {
@@ -1062,8 +1046,6 @@ function calculateEnhancedSimilarity(str1, str2) {
     }
   }
   const partialScore = partialMatches / Math.max(words1.length, words2.length);
-  
-  // Extract and compare key technical terms
   const keyTerms1 = extractKeyTerms(str1);
   const keyTerms2 = extractKeyTerms(str2);
   
@@ -1077,8 +1059,7 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const keyTermScore = Math.max(keyTerms1.length, keyTerms2.length) > 0 ?
     keyTermMatches / Math.max(keyTerms1.length, keyTerms2.length) : 0;
-  
-  // Weighted combination favoring key terms and exact matches
+
   const finalScore = (jaccardScore * 0.3) + (partialScore * 0.3) + (keyTermScore * 0.4);
   
   return finalScore;
@@ -1088,7 +1069,6 @@ function extractKeyTerms(text) {
   const normalized = text.toLowerCase();
   const words = normalized.split(/\s+/);
 
-  // Extended common words to filter out
   const commonWords = new Set(['what', 'how', 'why', 'when', 'where', 'who', 'which', 
     'that', 'this', 'these', 'those', 'with', 'from', 'have', 'about', 'your', 
     'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe',
@@ -1100,17 +1080,11 @@ function extractKeyTerms(text) {
     'over', 'part', 'such', 'take', 'than', 'them', 'then', 'very', 'want', 'well',
     'went', 'were', 'what', 'when', 'work', 'year', 'your']);
   
-  // Keep technical specification terms
   const technicalTerms = [];
   
   for (let word of words) {
-    word = word.replace(/[^\w]/g, ''); // Remove punctuation
-    
-    // Keep if:
-    // - Length > 3 and not common word
-    // - Contains numbers (like V310i, 12MP)
-    // - All caps (like PCB, SPI, AOI)
-    // - Technical suffixes
+    word = word.replace(/[^\w]/g, '');
+  
     if (word.length > 3 && !commonWords.has(word) && !/^\d+$/.test(word)) {
       technicalTerms.push(word);
     } else if (/\d/.test(word) && word.length > 1) {
@@ -1161,173 +1135,87 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
+async function fillPDFDocument(templateFile, matchedData) {
+    const { PDFDocument, rgb, StandardFonts } = PDFLib;
+
+    const arrayBuffer = await templateFile.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(arrayBuffer);
+
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+    const { width, height } = firstPage.getSize();
+
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    // Simple example: add matched Q&A to the bottom of the first page
+    let yPos = height - 50;
+    matchedData.forEach(item => {
+        const text = `${item.question}: ${item.matchedAnswer || ''}`;
+        firstPage.drawText(text, {
+            x: 50,
+            y: yPos,
+            size: 10,
+            font: font,
+            color: rgb(0, 0, 0),
+        });
+        yPos -= 15;
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    return new Blob([pdfBytes], { type: 'application/pdf' });
+}
+
+async function fillWordDocument(templateFile, matchedData) {
+    // Read the uploaded template as ArrayBuffer
+    const arrayBuffer = await templateFile.arrayBuffer();
+
+    // Load the template (simple example)
+    const { Document, Packer, Paragraph, TextRun } = window.docx;
+
+    // Create new document
+    const doc = new Document();
+
+    matchedData.forEach(item => {
+        const answerText = item.matchedAnswer || '';
+        doc.addSection({
+            children: [
+                new Paragraph({
+                    children: [
+                        new TextRun({ text: item.question + ': ', bold: true }),
+                        new TextRun({ text: answerText })
+                    ]
+                })
+            ]
+        });
+    });
+
+    // Generate the Word file
+    const blob = await Packer.toBlob(doc);
+    return blob;
+}
+
 async function downloadFilledDocument() {
-  if (!uploadedFile || matchedData.length === 0) {
-    alert('Please upload and process a document first.');
-    return;
-  }
+    if (!uploadedFile || !matchedData) return;
 
-  try {
-    // For Word documents, fill in the original
-    if (uploadedFile.type.includes('word') || uploadedFile.name.endsWith('.docx')) {
-      await fillWordDocument();
-    } 
-    // For PDF, convert to filled Word document
-    else if (uploadedFile.type === 'application/pdf') {
-      await fillPDFAsWord();
+    const fileType = uploadedFile.name.split('.').pop().toLowerCase();
+    let filledBlob;
+
+    if (fileType === 'pdf') {
+        filledBlob = await fillPDFDocument(uploadedFile, matchedData);
+    } else if (fileType === 'doc' || fileType === 'docx') {
+        filledBlob = await fillWordDocument(uploadedFile, matchedData);
+    } else {
+        alert('Unsupported file type for auto-fill.');
+        return;
     }
-  } catch (error) {
-    console.error('Error creating filled document:', error);
-    alert('Error creating document: ' + error.message);
-  }
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(filledBlob);
+    link.download = `Filled_${uploadedFile.name}`;
+    link.click();
 }
 
-async function fillWordDocument() {
-  // Read the original Word file
-  const arrayBuffer = await uploadedFile.arrayBuffer();
-  
-  // Extract the raw text to find where to insert answers
-  const result = await mammoth.extractRawText({ arrayBuffer });
-  let documentText = result.value;
-  
-  console.log('Original document text length:', documentText.length);
-  
-  // Create a map of field names to their answers
-  const answerMap = new Map();
-  matchedData.forEach(item => {
-    if (item.matched && item.matchedAnswer) {
-      answerMap.set(item.question.toLowerCase().trim(), item.matchedAnswer);
-    }
-  });
-  
-  // Fill in the blanks by finding field names and adding answers after them
-  matchedData.forEach(item => {
-    if (item.matched && item.matchedAnswer) {
-      // Look for patterns like "Field Name:" followed by whitespace or newline
-      const patterns = [
-        new RegExp(`(${escapeRegex(item.question)}\\s*[:：]\\s*)(?=\\n|$)`, 'gi'),
-        new RegExp(`(${escapeRegex(item.question)}\\s*)(?=\\n|$)`, 'gi')
-      ];
-      
-      for (const pattern of patterns) {
-        if (pattern.test(documentText)) {
-          documentText = documentText.replace(pattern, `$1${item.matchedAnswer}`);
-          console.log(`Filled: ${item.question} -> ${item.matchedAnswer.substring(0, 50)}...`);
-          break;
-        }
-      }
-    }
-  });
-  
-  // Create a new Word document with the filled content
-  const { Document, Packer, Paragraph, TextRun } = window.docx;
-  
-  const paragraphs = documentText.split('\n').map(line => 
-    new Paragraph({
-      children: [new TextRun(line)]
-    })
-  );
-  
-  const doc = new Document({
-    sections: [{
-      properties: {},
-      children: paragraphs
-    }]
-  });
-  
-  // Download
-  const blob = await Packer.toBlob(doc);
-  downloadBlob(blob, 'filled_' + uploadedFile.name);
-}
 
-async function fillPDFAsWord() {
-  const { Document, Packer, Paragraph, TextRun } = window.docx;
-  
-  // Split text into lines
-  const lines = extractedText.split('\n');
-  const filledLines = [];
-  
-  // Create answer map for quick lookup
-  const answerMap = new Map();
-  matchedData.forEach(item => {
-    if (item.matched && item.matchedAnswer) {
-      answerMap.set(item.question.toLowerCase().trim(), item.matchedAnswer);
-    }
-  });
-  
-  // Process each line
-  for (let line of lines) {
-    const trimmedLine = line.trim();
-    if (!trimmedLine) {
-      filledLines.push(line);
-      continue;
-    }
-    
-    // Check if this line is a field that needs filling
-    let filled = false;
-    for (const [fieldName, answer] of answerMap.entries()) {
-      if (trimmedLine.toLowerCase().includes(fieldName)) {
-        // Check if line already has an answer (not empty after field name)
-        const colonIndex = line.indexOf(':');
-        if (colonIndex !== -1) {
-          const afterColon = line.substring(colonIndex + 1).trim();
-          if (!afterColon || afterColon.length < 3) {
-            // Empty or very short - fill it
-            filledLines.push(line + (colonIndex === line.length - 1 ? ' ' : '') + answer);
-            filled = true;
-            break;
-          }
-        } else {
-          // No colon, add colon and answer
-          filledLines.push(line + ': ' + answer);
-          filled = true;
-          break;
-        }
-      }
-    }
-    
-    if (!filled) {
-      filledLines.push(line);
-    }
-  }
-  
-  // Create Word document with filled content
-  const paragraphs = filledLines.map(line => 
-    new Paragraph({
-      children: [new TextRun(line)]
-    })
-  );
-  
-  const doc = new Document({
-    sections: [{
-      properties: {},
-      children: paragraphs
-    }]
-  });
-  
-  // Download
-  const blob = await Packer.toBlob(doc);
-  const filename = uploadedFile.name.replace(/\.pdf$/i, '') + '_filled.docx';
-  downloadBlob(blob, filename);
-}
-
-function escapeRegex(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function downloadBlob(blob, filename) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
-  
-  console.log('Document downloaded:', filename);
-  alert('Document filled and downloaded successfully! Please review the content.');
-}
-    
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
     loadSidebarMenu(currentProduct);
@@ -1341,5 +1229,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
-
