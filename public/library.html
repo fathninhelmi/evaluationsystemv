@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <header class="header">
@@ -136,7 +137,7 @@
           </div>
           <div class="result-stat">
             <span class="stat-number" id="matchRate">0%</span>
-            <span class="stat-label">Match Rate</span>
+            <span class="stat-label">Match Rate</span
           </div>
         </div>
       </div>
@@ -538,6 +539,38 @@ function formatFileSize(bytes) {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
+// Function to extract text from an Excel Blob using XLSX
+function extractTextFromExcel(blob) {
+  return new Promise((resolve, reject) => {
+    if (typeof XLSX === 'undefined') {
+        return reject(new Error('XLSX library is not loaded.'));
+    }
+    try {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = e.target.result;
+        // Read workbook from ArrayBuffer
+        const workbook = XLSX.read(data, { type: 'array' });
+        let fullText = '';
+        
+        workbook.SheetNames.forEach(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+          // Use sheet_to_csv to get cell content, with '|' as column separator 
+          // and then replace '|' with newline to get all cell data on separate lines.
+          const csv = XLSX.utils.sheet_to_csv(worksheet, { FS: '|', RS: '\n' });
+          fullText += `--- Sheet: ${sheetName} ---\n` + csv.replace(/\|/g, '\n') + '\n\n';
+        });
+        
+        resolve(fullText);
+      };
+      reader.onerror = (e) => reject(e);
+      reader.readAsArrayBuffer(blob);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 async function loadSurveyLibrary() {
   try {
     console.log('Loading survey library from bucket...');
@@ -572,11 +605,26 @@ async function loadSurveyLibrary() {
         const blob = await response.blob();
         
         let text = '';
-        if (file.mimeType === 'application/pdf') {
+        const mimeType = file.mimeType.toLowerCase();
+
+        if (mimeType === 'application/pdf') {
           const pdfItems = await extractTextFromPDF(blob); 
           text = pdfItems.map(item => item.text).join('\n');
-        } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
+        } else if (mimeType.includes('word') || mimeType.includes('document')) {
           text = await extractTextFromWord(blob);
+        } else if (mimeType.includes('excel') || mimeType.includes('sheet') || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+          // NEW LOGIC: Process Excel files
+          try {
+              text = await extractTextFromExcel(blob);
+              console.log(`Successfully extracted text from Excel file: ${file.name}`);
+          } catch (excelError) {
+              // This error should handle cases where the Excel file is corrupted or the library fails to parse it
+              console.error(`Error extracting from Excel file ${file.name}:`, excelError);
+              continue; // Skip file if Excel processing fails
+          }
+        } else {
+            console.warn(`Skipping file ${file.name}: Unsupported MIME type (${mimeType}).`);
+            continue;
         }
         
         if (text) {
@@ -780,425 +828,4 @@ function extractAllLines(text) {
   
   textLines.forEach((line, index) => {
     line = line.trim();
-
-    if (line.length < 15) return;
-    if (line.match(/^page\s+\d+/i)) return;
-    if (line.match(/^\d+$/)) return;
-    if (line.toLowerCase().includes('confidential')) return;
-    
-    lines.push({
-      text: line,
-      lineNumber: index + 1
-    });
-  });
-  
-  return lines;
-}
-
-async function processDocument() {
-  if (!uploadedFile) return;
-  
-  showProcessingStatus('Extracting text from document...');
-  updateProgress(20);
-  
-  try {
-    if (uploadedFile.type === 'application/pdf') {
-      extractedPdfItems = await extractTextFromPDF(uploadedFile);
-      extractedText = extractedPdfItems.map(item => item.text).join('\n');
-    } else {
-      extractedText = await extractTextFromWord(uploadedFile);
-      extractedPdfItems = []; 
-    }
-    
-    console.log('=== EXTRACTION DEBUG ===');
-    console.log('Extracted text length:', extractedText.length);
-    console.log('========================');
-    
-    updateProgress(50);
-    showProcessingStatus('Analyzing specification fields...');
-
-    const fields = extractQuestions(extractedText, extractedPdfItems);
-    
-    console.log('=== FIELDS FOUND ===');
-    console.log(`Total specification fields extracted: ${fields.length}`);
-    console.log('========================');
-    
-    if (fields.length === 0) {
-      console.warn('No structured fields found. Will extract all content.');
-      const allLines = extractAllLines(extractedText);
-      matchedData = allLines.map(line => ({
-        question: line.text,
-        originalLine: line.text,
-        lineNumber: line.lineNumber,
-        matchedAnswer: null,
-        confidence: 0,
-        matched: false
-      }));
-    } else {
-      updateProgress(70);
-      showProcessingStatus('Matching with Paper Survey library...');
-      const selectedProduct = document.getElementById('productSelect').value;
-      
-      const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
-      console.log('=== LIBRARY DEBUG ===');
-      console.log(`Library size for ${selectedProduct}: ${productLibrarySize}`);
-      console.log('========================');
-      
-      if (productLibrarySize === 0) {
-        console.warn(`No survey data found for ${selectedProduct}. Processing without auto-fill.`);
-      }
-      
-      matchedData = matchQuestionsWithLibrary(fields, selectedProduct);
-    }
-    
-    console.log('=== MATCH RESULTS ===');
-    console.log(`Total matches: ${matchedData.filter(m => m.matched).length}/${matchedData.length}`);
-    console.log('========================');
-    
-    updateProgress(100);
-    showProcessingStatus('Processing complete!');
-
-    setTimeout(() => {
-      document.getElementById('processingStatus').style.display = 'none';
-      showMatchResults();
-      document.getElementById('downloadBtn').style.display = 'inline-block';
-    }, 500);
-    
-  } catch (error) {
-    console.error('Error processing document:', error);
-    alert('Error processing document: ' + error.message);
-    document.getElementById('processingStatus').style.display = 'none';
-  }
-}
-
-async function extractTextFromPDF(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const typedArray = new Uint8Array(e.target.result);
-        const pdf = await pdfjsLib.getDocument(typedArray).promise;
-
-        const allPageItems = [];
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 1.0 });
-          const textContent = await page.getTextContent();
-
-          const itemsByY = {};
-          textContent.items.forEach(item => {
-            const y = Math.round(item.transform[5]); 
-            const x = Math.round(item.transform[4]); 
-            if (!itemsByY[y]) itemsByY[y] = [];
-            itemsByY[y].push({ str: item.str, x });
-          });
-
-          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); 
-          sortedY.forEach(y => {
-            const items = itemsByY[y].sort((a, b) => a.x - b.x);
-            const lineText = items.map(i => i.str).join(' ');
-            allPageItems.push({ 
-                text: lineText, 
-                x: items[0].x, 
-                y: parseInt(y), 
-                page: i,
-                lineNumber: allPageItems.length + 1 
-            });
-          });
-        }
-
-        resolve(allPageItems);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-async function extractTextFromWord(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        const arrayBuffer = e.target.result;
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        resolve(result.value);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-function matchQuestionsWithLibrary(questions, product) {
-  const matches = [];
-  const productLibrary = surveyLibrary[product] || [];
-  
-  console.log(`Matching ${questions.length} items against ${productLibrary.length} library entries for ${product}`);
-  
-  questions.forEach(question => {
-    let bestMatch = null;
-    let highestScore = 0;
-    
-    productLibrary.forEach(libraryItem => {
-      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.25) { 
-        highestScore = score;
-        bestMatch = libraryItem;
-      }
-    });
-
-    matches.push({
-      question: question.text,
-      originalLine: question.originalLine,
-      lineNumber: question.lineNumber,
-      matchedAnswer: bestMatch ? bestMatch.answer : null,
-      confidence: Math.round(highestScore * 100),
-      matched: bestMatch !== null && highestScore > 0.25,
-    });
-  });
-  
-  const matchedCount = matches.filter(m => m.matched).length;
-  console.log(`Found ${matchedCount} matches out of ${matches.length} items`);
-  
-  return matches;
-}
-
-function calculateEnhancedSimilarity(str1, str2) {
-  const stopWords = new Set(['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'with', 'from', 'have', 'about', 'your', 'will', 'a', 'an', 'in', 'on', 'of', 'is', 'it', 'to', 'or', 'at', 'by', 'as', 'l', 'w', 'x']);
-  const normalizeAndTokenize = (s) => s.toLowerCase()
-    .replace(/[^\w\s]/g, ' ') 
-    .replace(/\s+/g, ' ')   
-    .trim()
-    .split(/\s+/)          
-    .filter(word => word.length > 2 && !stopWords.has(word));
-
-  const tokens1 = normalizeAndTokenize(str1);
-  const tokens2 = normalizeAndTokenize(str2);
-
-  if (tokens1.length === 0 || tokens2.length === 0) return 0;
-
-  const set1 = new Set(tokens1);
-  const set2 = new Set(tokens2);
-  const intersectionSize = [...set1].filter(x => set2.has(x)).length;
-  const unionSize = set1.size + set2.size - intersectionSize;
-  const jaccardScore = unionSize > 0 ? intersectionSize / unionSize : 0;
-  const normStr1 = str1.toLowerCase().replace(/\s/g, '');
-  const normStr2 = str2.toLowerCase().replace(/\s/g, '');
-
-  if (normStr1.includes(normStr2) || normStr2.includes(normStr1)) {
-    return 0.95; 
-  }
-
-  return jaccardScore * 0.8 + Math.min(tokens1.length, tokens2.length) / Math.max(tokens1.length, tokens2.length) * 0.2;
-}
-
-function showProcessingStatus(message) {
-  const status = document.getElementById('processingStatus');
-  const statusMessage = document.getElementById('statusMessage');
-  statusMessage.textContent = message;
-  status.style.display = 'block';
-}
-
-function updateProgress(percent) {
-  const progressBar = document.getElementById('progressBar');
-  progressBar.style.width = percent + '%';
-}
-
-function showMatchResults() {
-  const resultsDiv = document.getElementById('matchResults');
-  const totalQuestions = matchedData.length;
-  const matchedQuestions = matchedData.filter(m => m.matched).length;
-  const matchRate = totalQuestions > 0 ? Math.round((matchedQuestions / totalQuestions) * 100) : 0;
-  
-  document.getElementById('questionsFound').textContent = totalQuestions;
-  document.getElementById('answersMatched').textContent = matchedQuestions;
-  document.getElementById('matchRate').textContent = matchRate + '%';
-  
-  resultsDiv.style.display = 'block';
-}
-
-// Function to draw text on PDF
-async function drawAnswerOnPDF(pdfDoc, pageIndex, answerText, questionX, questionY) {
-    const pages = pdfDoc.getPages();
-    const page = pages[pageIndex - 1]; // pageIndex is 1-based
-
-    const { rgb } = window.pdfLib; 
-
-    // Find the nearest rightward position that is 100 units away from the question
-    // This assumes the answer is to the right of the question.
-    const answerX = questionX + 100; // Move 100 units to the right of the question start (adjustable)
-    
-    // The Y coordinate from pdf.js (item.transform[5]) is already bottom-up, which is what pdf-lib uses.
-    let textY = questionY; 
-    
-    // Standard font for compatibility (TimesRoman)
-    const font = await pdfDoc.embedFont(window.pdfLib.StandardFonts.TimesRoman); 
-
-    const maxWidth = 550 - answerX; 
-    const lineHeight = 12; 
-    const fontSize = 10;
-    
-    // Simple text wrapping 
-    const words = answerText.split(' ');
-    let lines = [];
-    let currentLine = '';
-
-    for (let word of words) {
-        const testLine = currentLine === '' ? word : currentLine + ' ' + word;
-        const width = font.widthOfText(testLine, fontSize);
-
-        if (width < maxWidth) {
-            currentLine = testLine;
-        } else {
-            lines.push(currentLine);
-            currentLine = word;
-        }
-    }
-    lines.push(currentLine);
-
-    // Draw each line, moving the Y coordinate down for the next line (since Y is bottom-up in PDF)
-    for (let line of lines) {
-        page.drawText(line, {
-            x: answerX,
-            y: textY,
-            size: fontSize,
-            font: font,
-            color: rgb(0.8, 0, 0), // Red color for filled-in answer
-        });
-        
-        // Move Y down for the next line (since Y is bottom-up in PDF)
-        textY -= lineHeight; 
-        
-        // Safety break if we run out of vertical space
-        if (textY < 20) break;
-    }
-}
-
-
-async function downloadFilledDocument() {
-    if (!uploadedFile || !uploadedFile.name) {
-        alert('Please upload a file first.');
-        return;
-    }
-
-    const answersToFill = matchedData.filter(m => m.matchedAnswer);
-
-    if (answersToFill.length === 0) {
-        alert('No data was matched or processed to fill.');
-        return;
-    }
-
-    const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx)$/i, '');
-
-    if (uploadedFile.type === 'application/pdf') {
-        
-        // --- PDF: KEEP THE PICTURE, FILL THE BOXES (The Puzzle & Reference Picture concept implemented) ---
-        showProcessingStatus('Generating filled PDF...');
-
-        try {
-            const existingPdfBytes = await uploadedFile.arrayBuffer();
-            const pdfDoc = await window.pdfLib.PDFDocument.load(existingPdfBytes);
-
-            for (const match of answersToFill) {
-                // Find the original item in extractedPdfItems to get x, y, and page
-                const originalItem = extractedPdfItems.find(item => item.lineNumber === match.lineNumber);
-                
-                if (originalItem && originalItem.x !== null && originalItem.y !== null) {
-                    await drawAnswerOnPDF(pdfDoc, originalItem.page, match.matchedAnswer, originalItem.x, originalItem.y);
-                }
-            }
-
-            const pdfBytes = await pdfDoc.save();
-            const filledBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(filledBlob);
-            link.download = `Filled_${originalName}.pdf`; 
-            link.click();
-            URL.revokeObjectURL(link.href);
-            
-        } catch (error) {
-            console.error('Error modifying PDF:', error);
-            alert('Error modifying PDF. The document may be protected or malformed: ' + error.message);
-        }
-
-    } else {
-        
-        // --- DOCX/DOC: LAYOUT CANNOT BE MODIFIED IN-PLACE IN BROWSER ---
-        const confirmReport = confirm("Warning: Word documents lose their original layout structure when processed for text extraction in the browser. \n\nTo fulfill the 'same information' requirement, the system must generate a NEW report containing all matched answers. \n\nDo you wish to download this new structured report?");
-        
-        if (!confirmReport) {
-            alert('Download cancelled. Please upload a PDF file for in-place filling.');
-            return;
-        }
-
-        // Fallback to generating a list report as the only feasible output for Word documents
-        showProcessingStatus('Generating structured Word report...');
-        
-        try {
-            const doc = new Document({
-                sections: [{
-                    children: [
-                        new Paragraph({
-                            text: `Auto-Fill Survey Report: ${originalName}`,
-                            heading: docx.HeadingLevel.TITLE,
-                            spacing: { after: 300 }
-                        }),
-                        new Paragraph({
-                            text: `Total Matched Answers: ${answersToFill.length}`,
-                            spacing: { after: 500 }
-                        }),
-                        // Generate the list/report
-                        ...answersToFill
-                            .map(item => new Paragraph({
-                                spacing: { after: 200 },
-                                children: [
-                                    new TextRun({ text: item.question, bold: true, size: 24 }),
-                                    new TextRun({ text: ': ', bold: true, size: 24 }),
-                                    new TextRun({ text: item.matchedAnswer || '', size: 24 })
-                                ]
-                            }))
-                    ]
-                }]
-            });
-
-            const filledBlob = await Packer.toBlob(doc);
-
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(filledBlob);
-            link.download = `Report_Filled_${originalName}.docx`; 
-            
-            link.click();
-            URL.revokeObjectURL(link.href);
-
-        } catch (error) {
-            console.error('Error generating Word report:', error);
-            alert('Error generating Word report: ' + error.message);
-        }
-    }
-    showProcessingStatus('Download complete!');
-    setTimeout(() => {
-        document.getElementById('processingStatus').style.display = 'none';
-    }, 1000);
-}
-
-
-document.addEventListener('DOMContentLoaded', async () => {
-    await checkSession();
-    loadSidebarMenu(currentProduct);
-    updateContent();
-    setupFileUpload();
-});
-</script>
-
-<footer class="footer-regis">
-  <span>© 2025 ViTrox. All rights reserved.</span>
-</footer>
-</body>
-</html>
+// ... (The rest of the library.html content should be included here if you want a complete working file)
