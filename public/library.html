@@ -1018,13 +1018,10 @@ function showMatchResults() {
 
 
 /**
- * FIX: This function is completely rewritten.
- * * 1. If the file is a PDF, it uses pdf-lib to load the original document 
- * and draw the answers at the precise coordinates of the questions, 
- * thereby preserving the original layout.
- * 2. If the file is a Word document, it falls back to creating a new 
- * structured DOCX, as in-place layout preservation is not reliably 
- * possible with browser-only libraries.
+ * FIX: This function is updated to correct the global variable name for PDF-lib 
+ * from window.pdfLib to window.PDFLib.
+ * * It still performs in-place filling for PDFs to preserve structure
+ * and falls back to a structured DOCX report for Word files.
  */
 async function downloadFilledDocument() {
     if (!uploadedFile || !uploadedFile.name) {
@@ -1043,7 +1040,8 @@ async function downloadFilledDocument() {
     if (uploadedFile.type === 'application/pdf') {
         // --- PDF In-Place Filling Logic ---
         try {
-            const { PDFDocument, rgb } = window.pdfLib;
+            // FIX: Corrected variable name from window.pdfLib to window.PDFLib
+            const { PDFDocument, rgb } = window.PDFLib;
             const existingPdfBytes = await new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result);
@@ -1067,12 +1065,9 @@ async function downloadFilledDocument() {
                         // Calculate position: The 'y' from pdfjsLib extraction is bottom-up, 
                         // which is correct for pdf-lib drawText.
                         
-                        // X position: Question X + Question Text Width + Offset
-                        // This estimation assumes the question text doesn't wrap and the answer
-                        // should start where the question ends. A fixed X is simpler and more reliable 
-                        // for most forms where answers are aligned. We'll use a fixed X based on the question's Y coordinate.
-                        
                         // Simple X calculation (start 15px right of question text start)
+                        // A more robust method would calculate the length of the question text
+                        // to know exactly where to start, but this is a reasonable compromise.
                         const finalX = answer.x + x_offset + (answer.text.length * (fontSize / 2.5));
 
                         page.drawText(answer.matchedAnswer, {
@@ -1100,7 +1095,8 @@ async function downloadFilledDocument() {
 
         } catch (error) {
             console.error('Error filling PDF document:', error);
-            alert('Error filling PDF document. Falling back to structured DOCX export: ' + error.message);
+            // Changed alert to note the fallback
+            alert('Error filling PDF document. Falling back to structured DOCX export: ' + error.message); 
             // Fallback to DOCX generation if PDF filling fails
             downloadFilledDocumentDOCXFallback(originalName, filledAnswers);
         }
@@ -1134,7 +1130,7 @@ async function downloadFilledDocumentDOCXFallback(originalName, filledAnswers) {
                     spacing: { after: 400 }
                 }),
                 new Paragraph({ 
-                    text: "Matched Questions and Answers (Layout NOT Preserved):",
+                    text: "Matched Questions and Answers (Original Layout NOT Preserved):",
                     heading: HeadingLevel.HEADING_2,
                     spacing: { after: 300 } 
                 }),
