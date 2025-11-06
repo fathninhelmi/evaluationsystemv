@@ -1164,7 +1164,7 @@ async function downloadFilledDocument() {
         const filledBlob = await Packer.toBlob(doc);
         
         const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx|xlsx|xls)$/i, '');
-        const filename = `Generated_Survey_${originalName}.docx`; 
+        const filename = `Filled_${originalName}.docx`;
         
         downloadBlob(filledBlob, filename);
         
@@ -1196,3 +1196,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
