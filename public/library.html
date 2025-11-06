@@ -175,7 +175,6 @@ let surveyLibrary = {};
 let uploadedFile = null;
 let extractedText = '';
 let matchedData = [];
-let extractedPdfItems = []; 
 
 async function checkSession() {
     try {
@@ -248,6 +247,17 @@ function loadNavigation(role) {
         console.log('Logout button clicked');
         logout();
     });
+}
+
+async function logout() {
+  try {
+    await account.deleteSession("current");
+    console.log('Logged out successfully');
+  } catch (err) {
+    console.warn('Could not delete session (maybe already logged out):', err);
+  } finally {
+    window.location.href = "index.html";
+  }
 }
 
 function getSidebarCategories(product) {
@@ -390,25 +400,35 @@ function updateContent() {
   const categoryName = currentCat ? currentCat.label : currentCategory;
   
   const productName = productNames[currentProduct];
-  
+
   let html = `
     <h2>${productName} - ${categoryName}</h2>
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
 
-html += `
-    <div class="resource-grid">
-      <div class="resource-card">
-        <div class="resource-title">${productName} ${categoryName}</div>
-        <div class="resource-actions">
-          <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
-            <i class="fas fa-eye"></i> View
-          </button>
-        </div>
-      </div>
-    </div>
+  html += `
+    <table class="resource-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Document Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>${productName} ${categoryName}</td>
+          <td>
+            <button class="btn-resource btn-view" onclick="viewDocument('${getDocumentLink(currentProduct, currentCategory)}')">
+              <i class="fas fa-eye"></i> View
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   `;
-  
+
   content.innerHTML = html;
 }
 
@@ -433,7 +453,6 @@ function resetUploadForm() {
   uploadedFile = null;
   extractedText = '';
   matchedData = [];
-  extractedPdfItems = []; 
   document.getElementById('fileInput').value = '';
   document.getElementById('filePreview').style.display = 'none';
   document.getElementById('processingStatus').style.display = 'none';
@@ -560,8 +579,7 @@ async function loadSurveyLibrary() {
         
         let text = '';
         if (file.mimeType === 'application/pdf') {
-          const pdfItems = await extractTextFromPDF(blob); 
-          text = pdfItems.map(item => item.text).join('\n');
+          text = await extractTextFromPDF(blob);
         } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
           text = await extractTextFromWord(blob);
         }
@@ -622,11 +640,11 @@ function parseQuestionsAndAnswers(text) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line || line.length < 3) continue;
-   
+    
     if (line.match(/^page\s+\d+/i) || line.match(/^\d+$/) || line.toLowerCase().includes('confidential')) {
       continue;
     }
-
+    
     const questionPatterns = [
       /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]\s*(.+)/,
       /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
@@ -643,7 +661,7 @@ function parseQuestionsAndAnswers(text) {
         
         if (hasSpecKeyword || /^(Maximum|Minimum|Total|System|Operating|PCB|Board)/.test(potentialField)) {
           isQuestion = true;
-
+          
           if (currentQuestion && currentAnswer.trim()) {
             qaData.push({
               question: currentQuestion,
@@ -652,6 +670,7 @@ function parseQuestionsAndAnswers(text) {
           }
           
           currentQuestion = potentialField;
+          
           if (match[2]) {
             currentAnswer = match[2].trim() + ' ';
           } else {
@@ -661,7 +680,7 @@ function parseQuestionsAndAnswers(text) {
         }
       }
     }
-
+    
     if (!isQuestion && currentQuestion) {
       const looksLikeField = /^[A-Z][A-Za-z\s]{10,}$/.test(line);
       if (!looksLikeField) {
@@ -669,6 +688,7 @@ function parseQuestionsAndAnswers(text) {
       }
     }
   }
+  
   if (currentQuestion && currentAnswer.trim()) {
     qaData.push({
       question: currentQuestion,
@@ -684,17 +704,17 @@ function parseQuestionsAndAnswers(text) {
   return qaData;
 }
 
-function extractQuestions(text, pdfItems = []) {
+function extractQuestions(text) {
   const fields = [];
   const lines = text.split('\n');
-
+  
   const fieldPatterns = [
     /^([A-Za-z][A-Za-z\s\-\/&()]+?)(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
     /^([A-Za-z][A-Za-z\s\-\/&]+\([^)]+\))(?:\s*[\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff]+)?$/,
     /^((?:Maximum|Minimum|Total|System|Operating|Optical|Inspection|Board|PCB|Installation|Power|Air|Top|Bottom|Camera|Conveyor)[A-Za-z\s\-\/&()]+?)$/i,
     /^([A-Za-z][A-Za-z\s\-\/&()]+?)\s*[:：]/
   ];
-
+  
   const specKeywords = [
     'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
     'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
@@ -709,7 +729,7 @@ function extractQuestions(text, pdfItems = []) {
   lines.forEach((line, index) => {
     const originalLine = line;
     line = line.trim();
-
+    
     if (line.length < 5 || 
         line.length > 150 || 
         line.match(/^page\s*\d+/i) || 
@@ -718,7 +738,7 @@ function extractQuestions(text, pdfItems = []) {
         line.toLowerCase().includes('confidential')) {
       return;
     }
-
+    
     let fieldName = null;
     
     for (const pattern of fieldPatterns) {
@@ -728,26 +748,21 @@ function extractQuestions(text, pdfItems = []) {
         break;
       }
     }
-
+    
     if (fieldName) {
       const lowerField = fieldName.toLowerCase();
       const hasSpecKeyword = specKeywords.some(keyword => lowerField.includes(keyword));
+      
       const wordCount = fieldName.split(/\s+/).length;
       const startsWithCap = /^[A-Z]/.test(fieldName);
       
       if ((hasSpecKeyword || (startsWithCap && wordCount >= 2 && wordCount <= 8)) && 
           !fields.some(f => f.text === fieldName)) {
-
-        const pdfItem = pdfItems.find(item => item.lineNumber === index + 1);
         
         fields.push({
           text: fieldName,
           originalLine: originalLine.trim(),
-          lineNumber: index + 1,
-          
-          x: pdfItem ? pdfItem.x : null,
-          y: pdfItem ? pdfItem.y : null,
-          page: pdfItem ? pdfItem.page : null
+          lineNumber: index + 1
         });
       }
     }
@@ -790,24 +805,25 @@ async function processDocument() {
   
   try {
     if (uploadedFile.type === 'application/pdf') {
-      extractedPdfItems = await extractTextFromPDF(uploadedFile);
-      extractedText = extractedPdfItems.map(item => item.text).join('\n');
+      extractedText = await extractTextFromPDF(uploadedFile);
     } else {
       extractedText = await extractTextFromWord(uploadedFile);
-      extractedPdfItems = []; 
     }
     
     console.log('=== EXTRACTION DEBUG ===');
     console.log('Extracted text length:', extractedText.length);
+    console.log('First 1000 chars:', extractedText.substring(0, 1000));
     console.log('========================');
     
     updateProgress(50);
     showProcessingStatus('Analyzing specification fields...');
-
-    const fields = extractQuestions(extractedText, extractedPdfItems);
+    const fields = extractQuestions(extractedText);
     
     console.log('=== FIELDS FOUND ===');
     console.log(`Total specification fields extracted: ${fields.length}`);
+    fields.slice(0, 15).forEach((q, i) => {
+      console.log(`${i + 1}. ${q.text}`);
+    });
     console.log('========================');
     
     if (fields.length === 0) {
@@ -829,6 +845,12 @@ async function processDocument() {
       const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
       console.log('=== LIBRARY DEBUG ===');
       console.log(`Library size for ${selectedProduct}: ${productLibrarySize}`);
+      if (productLibrarySize > 0) {
+        console.log('Sample library entries:');
+        surveyLibrary[selectedProduct].slice(0, 5).forEach((item, i) => {
+          console.log(`${i + 1}. Q: "${item.question}" A: "${item.answer.substring(0, 80)}..."`);
+        });
+      }
       console.log('========================');
       
       if (productLibrarySize === 0) {
@@ -840,6 +862,9 @@ async function processDocument() {
     
     console.log('=== MATCH RESULTS ===');
     console.log(`Total matches: ${matchedData.filter(m => m.matched).length}/${matchedData.length}`);
+    matchedData.filter(m => m.matched).slice(0, 10).forEach((m, i) => {
+      console.log(`${i + 1}. "${m.question}" (${m.confidence}%) -> "${m.matchedAnswer?.substring(0, 60)}..."`);
+    });
     console.log('========================');
     
     updateProgress(100);
@@ -865,45 +890,33 @@ async function extractTextFromPDF(file) {
       try {
         const typedArray = new Uint8Array(e.target.result);
         const pdf = await pdfjsLib.getDocument(typedArray).promise;
-
-        const allPageItems = [];
-
+        let fullText = '';
+        
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 1.0 });
           const textContent = await page.getTextContent();
-
+          
           const itemsByY = {};
           textContent.items.forEach(item => {
-            // Use the PDF coordinate system (origin bottom-left)
-            const y = item.transform[5]; 
-            const x = item.transform[4]; 
-            if (!itemsByY[y]) itemsByY[y] = [];
-            itemsByY[y].push({ str: item.str, x });
+            const y = Math.round(item.transform[5]);
+            if (!itemsByY[y]) {
+              itemsByY[y] = [];
+            }
+            itemsByY[y].push(item);
           });
-
-          // Sort by Y (top to bottom) then X (left to right)
-          const sortedY = Object.keys(itemsByY).map(y => parseFloat(y)).sort((a, b) => b - a); 
+          
+          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a);
+          
           sortedY.forEach(y => {
-            const items = itemsByY[y].sort((a, b) => a.x - b.x);
-            const lineText = items.map(i => i.str).join(' ');
-            
-            // For PDF-lib drawing, we need Y relative to the bottom of the page
-            // textContent.items Y is from bottom of the page (good for pdf-lib)
-            // We'll use the Y as-is for pdf-lib text drawing position
-            
-            allPageItems.push({ 
-                text: lineText, 
-                x: items[0].x, 
-                y: y, // Y coordinate from PDF content stream (bottom-up)
-                page: i,
-                pageHeight: viewport.height, // Store page height for context
-                lineNumber: allPageItems.length + 1 
-            });
+            const items = itemsByY[y].sort((a, b) => a.transform[4] - b.transform[4]);
+            const lineText = items.map(item => item.str).join(' ');
+            fullText += lineText + '\n';
           });
+          
+          fullText += '\n';
         }
-
-        resolve(allPageItems);
+        
+        resolve(fullText);
       } catch (error) {
         reject(error);
       }
@@ -942,18 +955,26 @@ function matchQuestionsWithLibrary(questions, product) {
     
     productLibrary.forEach(libraryItem => {
       const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.25) { 
+      if (score > highestScore && score > 0.25) {
         highestScore = score;
         bestMatch = libraryItem;
       }
     });
-
+    
     matches.push({
-      ...question, // FIX: Ensure x, y, page, etc., are carried forward for PDF filling
+      question: question.text,
+      originalLine: question.originalLine,
+      lineNumber: question.lineNumber,
       matchedAnswer: bestMatch ? bestMatch.answer : null,
       confidence: Math.round(highestScore * 100),
-      matched: bestMatch !== null && highestScore > 0.25,
+      matched: bestMatch !== null && highestScore > 0.25
     });
+    
+    if (bestMatch) {
+      console.log(`✓ Match: "${question.text}" -> "${bestMatch.question}" (${Math.round(highestScore * 100)}%)`);
+    } else {
+      console.log(`✗ No match: "${question.text}"`);
+    }
   });
   
   const matchedCount = matches.filter(m => m.matched).length;
@@ -963,32 +984,113 @@ function matchQuestionsWithLibrary(questions, product) {
 }
 
 function calculateEnhancedSimilarity(str1, str2) {
-  const stopWords = new Set(['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'with', 'from', 'have', 'about', 'your', 'will', 'a', 'an', 'in', 'on', 'of', 'is', 'it', 'to', 'or', 'at', 'by', 'as', 'l', 'w', 'x']);
-  const normalizeAndTokenize = (s) => s.toLowerCase()
-    .replace(/[^\w\s]/g, ' ') 
-    .replace(/\s+/g, ' ')   
-    .trim()
-    .split(/\s+/)          
-    .filter(word => word.length > 2 && !stopWords.has(word));
-
-  const tokens1 = normalizeAndTokenize(str1);
-  const tokens2 = normalizeAndTokenize(str2);
-
-  if (tokens1.length === 0 || tokens2.length === 0) return 0;
-
-  const set1 = new Set(tokens1);
-  const set2 = new Set(tokens2);
-  const intersectionSize = [...set1].filter(x => set2.has(x)).length;
-  const unionSize = set1.size + set2.size - intersectionSize;
-  const jaccardScore = unionSize > 0 ? intersectionSize / unionSize : 0;
-  const normStr1 = str1.toLowerCase().replace(/\s/g, '');
-  const normStr2 = str2.toLowerCase().replace(/\s/g, '');
-
-  if (normStr1.includes(normStr2) || normStr2.includes(normStr1)) {
-    return 0.95; 
+  const normalize = (s) => s.toLowerCase()
+    .replace(/[^\w\s]/g, ' ')  
+    .replace(/\s+/g, ' ')       
+    .trim();
+  
+  const norm1 = normalize(str1);
+  const norm2 = normalize(str2);
+  
+  if (norm1.includes(norm2) || norm2.includes(norm1)) {
+    const shorter = norm1.length < norm2.length ? norm1 : norm2;
+    const longer = norm1.length < norm2.length ? norm2 : norm1;
+    return 0.85 + (shorter.length / longer.length) * 0.15;
   }
+  
+  const words1 = norm1.split(/\s+/).filter(w => w.length > 2);
+  const words2 = norm2.split(/\s+/).filter(w => w.length > 2);
+  
+  if (words1.length <= 3 || words2.length <= 3) {
+    const set1 = new Set(words1);
+    const set2 = new Set(words2);
+    const matches = [...set1].filter(x => set2.has(x)).length;
+    const total = Math.max(set1.size, set2.size);
+    return total > 0 ? matches / total : 0;
+  }
+  
+  const set1 = new Set(words1);
+  const set2 = new Set(words2);
+  
+  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const union = new Set([...set1, ...set2]);
+  
+  const jaccardScore = union.size > 0 ? intersection.size / union.size : 0;
+  
+  let partialMatches = 0;
+  for (const w1 of words1) {
+    for (const w2 of words2) {
+      if (w1.length > 3 && w2.length > 3) {
+        if (w1.includes(w2) || w2.includes(w1)) {
+          partialMatches++;
+        }
+      }
+    }
+  }
+  const partialScore = partialMatches / Math.max(words1.length, words2.length);
+  
+  const keyTerms1 = extractKeyTerms(str1);
+  const keyTerms2 = extractKeyTerms(str2);
+  
+  const keyTermMatches = keyTerms1.filter(term => 
+    keyTerms2.some(t => 
+      t.toLowerCase() === term.toLowerCase() ||
+      t.toLowerCase().includes(term.toLowerCase()) || 
+      term.toLowerCase().includes(t.toLowerCase())
+    )
+  ).length;
+  
+  const keyTermScore = Math.max(keyTerms1.length, keyTerms2.length) > 0 ?
+    keyTermMatches / Math.max(keyTerms1.length, keyTerms2.length) : 0;
+  
+  const finalScore = (jaccardScore * 0.3) + (partialScore * 0.3) + (keyTermScore * 0.4);
+  
+  return finalScore;
+}
 
-  return jaccardScore * 0.8 + Math.min(tokens1.length, tokens2.length) / Math.max(tokens1.length, tokens2.length) * 0.2;
+function extractKeyTerms(text) {
+  const normalized = text.toLowerCase();
+  const words = normalized.split(/\s+/);
+
+  const commonWords = new Set(['what', 'how', 'why', 'when', 'where', 'who', 'which', 
+    'that', 'this', 'these', 'those', 'with', 'from', 'have', 'about', 'your', 
+    'will', 'would', 'could', 'should', 'does', 'please', 'provide', 'describe',
+    'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'her', 'was',
+    'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'its', 'may', 'see',
+    'she', 'than', 'them', 'they', 'said', 'each', 'tell', 'also', 'back', 'been',
+    'call', 'come', 'even', 'find', 'give', 'good', 'hand', 'here', 'just', 'know',
+    'last', 'long', 'made', 'make', 'many', 'more', 'most', 'must', 'name', 'only',
+    'over', 'part', 'such', 'take', 'than', 'them', 'then', 'very', 'want', 'well',
+    'went', 'were', 'what', 'when', 'work', 'year', 'your']);
+  
+  const technicalTerms = [];
+  
+  for (let word of words) {
+    word = word.replace(/[^\w]/g, '');
+    
+    if (word.length > 3 && !commonWords.has(word) && !/^\d+$/.test(word)) {
+      technicalTerms.push(word);
+    } else if (/\d/.test(word) && word.length > 1) {
+      technicalTerms.push(word);
+    } else if (word === word.toUpperCase() && word.length >= 2 && /[A-Z]/.test(word)) {
+      technicalTerms.push(word.toLowerCase());
+    }
+  }
+  
+  return technicalTerms;
+}
+
+function calculateSimilarity(str1, str2) {
+  const words1 = str1.toLowerCase().split(/\s+/);
+  const words2 = str2.toLowerCase().split(/\s+/);
+  
+  const set1 = new Set(words1);
+  const set2 = new Set(words2);
+  
+  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const union = new Set([...set1, ...set2]);
+  
+  return intersection.size / union.size;
 }
 
 function showProcessingStatus(message) {
@@ -1016,148 +1118,359 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
-
-/**
- * FIX: This function is updated to correct the font encoding error.
- * * Switched from 'Helvetica' to 'Times-Roman' to resolve the WinAnsi encoding issue with the 'μ' character.
- */
 async function downloadFilledDocument() {
-    if (!uploadedFile || !uploadedFile.name) {
-        alert('Please upload a file first.');
-        return;
+  if (!uploadedFile || matchedData.length === 0) {
+    alert('Please upload and process a document first.');
+    return;
+  }
+
+  try {
+    showProcessingStatus('Preparing filled document...');
+    
+    if (uploadedFile.type.includes('word') || uploadedFile.name.endsWith('.docx')) {
+      await fillWordDocument();
+    } 
+    else if (uploadedFile.type === 'application/pdf') {
+      await fillPDFAsWord();
     }
+    
+    document.getElementById('processingStatus').style.display = 'none';
+  } catch (error) {
+    console.error('Error creating filled document:', error);
+    document.getElementById('processingStatus').style.display = 'none';
+    alert('Error creating document: ' + error.message);
+  }
+}
 
-    const filledAnswers = matchedData.filter(m => m.matchedAnswer && m.matched);
-    const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx)$/i, '');
-
-    if (!filledAnswers || filledAnswers.length === 0) {
-        alert('No data was matched or processed to fill.');
-        return;
+async function fillWordDocument() {
+  const arrayBuffer = await uploadedFile.arrayBuffer();
+  
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = window.docx;
+  
+  const htmlResult = await mammoth.convertToHtml({ arrayBuffer });
+  const htmlContent = htmlResult.value;
+  
+  console.log('Processing Word document with tables...');
+  console.log('Found', matchedData.filter(m => m.matched).length, 'matched answers to fill');
+  
+  const answerLookup = new Map();
+  matchedData.forEach(item => {
+    if (item.matched && item.matchedAnswer) {
+      const normalizedQuestion = item.question.toLowerCase().trim().replace(/[:\s]+$/, '');
+      answerLookup.set(normalizedQuestion, item.matchedAnswer);
     }
-
-    if (uploadedFile.type === 'application/pdf') {
-        // --- PDF In-Place Filling Logic ---
-        try {
-            const { PDFDocument, rgb } = window.PDFLib;
-            const existingPdfBytes = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.readAsArrayBuffer(uploadedFile);
-            });
-
-            const pdfDoc = await PDFDocument.load(existingPdfBytes);
-            const pages = pdfDoc.getPages();
-            
-            // FIX: Switched from 'Helvetica' to 'Times-Roman' to support a wider range of characters (like 'μ').
-            const font = await pdfDoc.embedFont('Times-Roman');
-            const fontSize = 9; 
-            const x_offset = 15; // Space to move the answer right of the question
-
-            filledAnswers.forEach(answer => {
-                if (answer.page && answer.x !== null && answer.y !== null) {
-                    const pageIndex = answer.page - 1;
-                    if (pageIndex >= 0 && pageIndex < pages.length) {
-                        const page = pages[pageIndex];
-                        
-                        // Calculate position
-                        const finalX = answer.x + x_offset + (answer.text.length * (fontSize / 2.5));
-
-                        page.drawText(answer.matchedAnswer, {
-                            x: finalX,
-                            y: answer.y, // Use the extracted Y
-                            size: fontSize,
-                            font: font,
-                            color: rgb(0.8, 0, 0), // Use a distinct color (red) for filled answer
-                        });
-                    }
+  });
+  
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
+  
+  const docElements = [];
+  
+  const bodyChildren = doc.body.children;
+  
+  for (let element of bodyChildren) {
+    if (element.tagName === 'TABLE') {
+      const tableRows = [];
+      const rows = element.querySelectorAll('tr');
+      
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td, th');
+        const tableCells = [];
+        
+        cells.forEach((cell, index) => {
+          let cellText = cell.textContent.trim();
+          const cellLower = cellText.toLowerCase();
+          let isBold = false;
+          
+          if (index === 0) {
+            const nextCell = cells[index + 1];
+            if (nextCell) {
+              const nextText = nextCell.textContent.trim();
+              
+              for (const [fieldName, answer] of answerLookup.entries()) {
+                if (cellLower.includes(fieldName)) {
+                  nextCell.setAttribute('data-fill', answer);
+                  break;
                 }
-            });
-
-            const pdfBytes = await pdfDoc.save();
-            const filledBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(filledBlob);
-            link.download = `Filled_${originalName}_Layout_Preserved.pdf`; 
-            
-            link.click();
-            URL.revokeObjectURL(link.href);
-            
-            alert(`Document filled successfully. Note: Answers were placed near the question coordinates and colored red for visibility.`);
-
-        } catch (error) {
-            console.error('Error filling PDF document:', error);
-            // Fallback to DOCX generation if PDF filling fails
-            downloadFilledDocumentDOCXFallback(originalName, filledAnswers);
-        }
-
-    } else {
-        // --- DOCX/DOC Fallback Logic (New Document Generation) ---
-        // As in-place Word document modification is not feasible in the browser, 
-        // we create a structured document listing the matched Q&A.
-        downloadFilledDocumentDOCXFallback(originalName, filledAnswers);
-    }
-}
-
-async function downloadFilledDocumentDOCXFallback(originalName, filledAnswers) {
-    try {
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
-
-        const docTitle = `Auto-Filled Survey Report: ${originalName}`;
-
-        const documentSections = [{
-            children: [
-                new Paragraph({ 
-                    heading: HeadingLevel.TITLE, 
-                    alignment: 'center', 
-                    children: [new TextRun({ text: docTitle, size: 48, bold: true, color: "1F4E79" })]
-                }),
-                new Paragraph({ 
-                    children: [
-                        new TextRun({ text: `Processing Date: ${new Date().toLocaleDateString()}`, size: 24, break: 1 }),
-                        new TextRun({ text: `Answers Auto-Matched: ${filledAnswers.length} of ${matchedData.length}`, break: 1 })
-                    ],
-                    spacing: { after: 400 }
-                }),
-                new Paragraph({ 
-                    text: "Matched Questions and Answers (Original Layout NOT Preserved):",
-                    heading: HeadingLevel.HEADING_2,
-                    spacing: { after: 300 } 
-                }),
-                
-                // Structured list of Q&A
-                ...filledAnswers.map(item => new Paragraph({
-                    spacing: { after: 200 },
-                    children: [
-                        new TextRun({ text: item.question, bold: true, size: 24 }),
-                        new TextRun({ text: ': ', bold: true, size: 24 }),
-                        new TextRun({ text: item.matchedAnswer || 'No answer found.', size: 24 })
-                    ]
-                }))
-            ]
-        }];
-
-        const doc = new Document({
-            sections: documentSections
+              }
+            }
+          }
+          else if (cell.hasAttribute('data-fill')) {
+            cellText = cell.getAttribute('data-fill');
+            isBold = true;
+            console.log(`✓ Filled table cell with: ${cellText.substring(0, 50)}...`);
+          }
+          else if ((!cellText || cellText.length < 5) && index > 0) {
+            const prevCell = cells[index - 1];
+            if (prevCell) {
+              const prevText = prevCell.textContent.trim().toLowerCase();
+              for (const [fieldName, answer] of answerLookup.entries()) {
+                if (prevText.includes(fieldName)) {
+                  cellText = answer;
+                  isBold = true;
+                  console.log(`✓ Filled empty cell with: ${cellText.substring(0, 50)}...`);
+                  break;
+                }
+              }
+            }
+          }
+          
+          tableCells.push(
+            new TableCell({
+              children: [new Paragraph({
+                children: [new TextRun({ text: cellText, bold: isBold })]
+              })],
+              width: { size: index === 0 ? 40 : 60, type: WidthType.PERCENTAGE }
+            })
+          );
         });
-
-        const filledBlob = await Packer.toBlob(doc);
-
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(filledBlob);
-        link.download = `Report_${originalName}_Structured.docx`; 
         
-        link.click();
-        URL.revokeObjectURL(link.href);
+        if (tableCells.length > 0) {
+          tableRows.push(new TableRow({ children: tableCells }));
+        }
+      });
+      
+      if (tableRows.length > 0) {
+        docElements.push(new Table({
+          rows: tableRows,
+          width: { size: 100, type: WidthType.PERCENTAGE }
+        }));
+      }
+    } else if (element.tagName === 'P') {
+      let text = element.textContent.trim();
+      let isBold = false;
+      
+      if (text) {
+        const textLower = text.toLowerCase();
         
-        alert("The original document layout (tables/spacing) could not be preserved for this file type. A new, structured DOCX report was downloaded instead.");
-
-    } catch (error) {
-        console.error('Error in DOCX fallback:', error);
-        alert('Fatal Error: Could not generate download document.');
+        for (const [fieldName, answer] of answerLookup.entries()) {
+          if (textLower.includes(fieldName) && text.includes(':')) {
+            const parts = text.split(':');
+            if (parts[1] && parts[1].trim().length < 5) {
+              text = `${parts[0]}: ${answer}`;
+              isBold = true;
+              console.log(`✓ Filled paragraph: ${parts[0]} -> ${answer.substring(0, 50)}...`);
+              break;
+            }
+          }
+        }
+      }
+      
+      docElements.push(new Paragraph({
+        children: [new TextRun({ text: text, bold: isBold })]
+      }));
     }
+  }
+  
+  const newDoc = new Document({
+    sections: [{
+      properties: {},
+      children: docElements
+    }]
+  });
+  
+  const blob = await Packer.toBlob(newDoc);
+  const filename = uploadedFile.name.replace(/\.docx?$/i, '') + '_filled.docx';
+  downloadBlob(blob, filename);
+  
+  console.log('Word document with tables filled successfully');
 }
 
+async function fillPDFAsWord() {
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = window.docx;
+  
+  console.log('Converting PDF to filled Word document with table structure...');
+  
+  const answerLookup = new Map();
+  matchedData.forEach(item => {
+    if (item.matched && item.matchedAnswer) {
+      const normalizedQuestion = item.question.toLowerCase().trim().replace(/[:\s]+$/, '');
+      answerLookup.set(normalizedQuestion, item.matchedAnswer);
+    }
+  });
+  
+  console.log('Filling', answerLookup.size, 'fields in PDF content');
+  
+  const docElements = [];
+  
+  const lines = extractedText.split('\n');
+  let currentTable = [];
+  let inTable = false;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    if (!line) {
+      if (inTable && currentTable.length > 0) {
+        docElements.push(createTableFromLines(currentTable, answerLookup));
+        currentTable = [];
+        inTable = false;
+      }
+      docElements.push(new Paragraph({ children: [new TextRun('')] }));
+      continue;
+    }
+    
+    const hasColon = line.includes(':');
+    const looksLikeField = /^[A-Za-z][A-Za-z\s\-\/&()]{3,}/.test(line) && line.length < 150;
+    
+    if ((hasColon || looksLikeField) && !line.match(/^(page|confidential)/i)) {
+      inTable = true;
+      currentTable.push(line);
+    } else {
+      if (inTable && currentTable.length > 0) {
+        docElements.push(createTableFromLines(currentTable, answerLookup));
+        currentTable = [];
+        inTable = false;
+      }
+      
+      let text = line;
+      let isBold = false;
+      const lineLower = line.toLowerCase();
+      
+      for (const [fieldName, answer] of answerLookup.entries()) {
+        if (lineLower.includes(fieldName) && line.includes(':')) {
+          const parts = line.split(':');
+          if (parts[1] && parts[1].trim().length < 5) {
+            text = `${parts[0]}: ${answer}`;
+            isBold = true;
+            break;
+          }
+        }
+      }
+      
+      docElements.push(new Paragraph({
+        children: [new TextRun({ text, bold: isBold })]
+      }));
+    }
+  }
+  
+  if (currentTable.length > 0) {
+    docElements.push(createTableFromLines(currentTable, answerLookup));
+  }
+  
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: docElements
+    }]
+  });
+  
+  const blob = await Packer.toBlob(doc);
+  const filename = uploadedFile.name.replace(/\.pdf$/i, '') + '_filled.docx';
+  downloadBlob(blob, filename);
+  
+  console.log('PDF converted to filled Word document with tables successfully');
+}
+
+function createTableFromLines(lines, answerLookup) {
+  const { Table, TableRow, TableCell, Paragraph, TextRun, WidthType } = window.docx;
+  
+  const tableRows = [];
+  
+  lines.forEach(line => {
+    const colonIndex = line.indexOf(':');
+    
+    if (colonIndex !== -1) {
+      const field = line.substring(0, colonIndex).trim();
+      let value = line.substring(colonIndex + 1).trim();
+      const fieldLower = field.toLowerCase();
+      let isBold = false;
+      
+      for (const [fieldName, answer] of answerLookup.entries()) {
+        if (fieldLower.includes(fieldName) || fieldName.includes(fieldLower)) {
+          if (!value || value.length < 5 || value === '_____' || value === '---') {
+            value = answer;
+            isBold = true;
+            console.log(`✓ Filled table: ${field} -> ${answer.substring(0, 50)}...`);
+            break;
+          }
+        }
+      }
+      
+      tableRows.push(new TableRow({
+        children: [
+          new TableCell({
+            children: [new Paragraph({ children: [new TextRun(field)] })],
+            width: { size: 40, type: WidthType.PERCENTAGE }
+          }),
+          new TableCell({
+            children: [new Paragraph({ children: [new TextRun({ text: value, bold: isBold })] })],
+            width: { size: 60, type: WidthType.PERCENTAGE }
+          })
+        ]
+      }));
+    } else {
+      const lineLower = line.toLowerCase();
+      let value = '';
+      let isBold = false;
+      
+      for (const [fieldName, answer] of answerLookup.entries()) {
+        if (lineLower.includes(fieldName) || fieldName.includes(lineLower)) {
+          value = answer;
+          isBold = true;
+          console.log(`✓ Filled table row: ${line} -> ${answer.substring(0, 50)}...`);
+          break;
+        }
+      }
+      
+      if (value) {
+        tableRows.push(new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun(line)] })],
+              width: { size: 40, type: WidthType.PERCENTAGE }
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: value, bold: isBold })] })],
+              width: { size: 60, type: WidthType.PERCENTAGE }
+            })
+          ]
+        }));
+      } else {
+        tableRows.push(new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun(line)] })],
+              columnSpan: 2
+            })
+          ]
+        }));
+      }
+    }
+  });
+  
+  return new Table({
+    rows: tableRows,
+    width: { size: 100, type: WidthType.PERCENTAGE }
+  });
+}
+
+function downloadBlob(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  
+  console.log('✓ Document downloaded:', filename);
+  
+  const matchedCount = matchedData.filter(m => m.matched).length;
+  const originalFormat = uploadedFile.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'Word';
+  
+  alert(`Document filled successfully!\n\n` +
+        `• Original format: ${originalFormat}\n` +
+        `• Output format: Word (DOCX)\n` +
+        `• ${matchedCount} fields were auto-filled with matched answers\n` +
+        `• Filled fields are shown in bold for easy review\n` +
+        `• File saved as: ${filename}\n\n` +
+        `Please review the content before sending to customer.`);
+}
+
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);');
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
@@ -1172,3 +1485,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
