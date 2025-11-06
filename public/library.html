@@ -179,6 +179,7 @@ let uploadedFile = null;
 let extractedText = '';
 let matchedData = [];
 let extractedPdfItems = []; 
+let originalWordContentHTML = null; 
 
 async function checkSession() {
     try {
@@ -448,6 +449,7 @@ function resetUploadForm() {
   extractedText = '';
   matchedData = [];
   extractedPdfItems = []; 
+  originalWordContentHTML = null; 
   document.getElementById('fileInput').value = '';
   document.getElementById('filePreview').style.display = 'none';
   document.getElementById('processingStatus').style.display = 'none';
@@ -487,7 +489,7 @@ function setupFileUpload() {
 function handleFileSelect(file) {
   if (!file) return;
   
-  // UPDATED: Added Excel MIME types
+  // UPDATED: Added Excel MIME types and checks
   const validTypes = [
     'application/pdf', 
     'application/msword', 
@@ -629,6 +631,7 @@ async function loadSurveyLibrary() {
           const pdfItems = await extractTextFromPDF(blob); 
           text = pdfItems.map(item => item.text).join('\n');
         } else if (mimeType.includes('word') || mimeType.includes('document')) {
+          // Use raw text for matching/library building
           text = await extractTextFromWord(blob);
         } else if (mimeType.includes('excel') || mimeType.includes('sheet') || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
             // NEW LOGIC: Process Excel files
@@ -863,21 +866,22 @@ function extractAllLines(text) {
 async function processDocument() {
   if (!uploadedFile) return;
   
-  showProcessingStatus('Extracting text from document...');
+  showProcessingStatus('Extracting fields from template...');
   updateProgress(20);
   
   try {
     const fileMimeType = uploadedFile.type.toLowerCase();
     const isExcelFile = fileMimeType.includes('excel') || fileMimeType.includes('sheet') || uploadedFile.name.toLowerCase().endsWith('.xlsx') || uploadedFile.name.toLowerCase().endsWith('.xls');
+    const isWordFile = fileMimeType.includes('word') || fileMimeType.includes('document');
 
     if (fileMimeType === 'application/pdf') {
       extractedPdfItems = await extractTextFromPDF(uploadedFile);
       extractedText = extractedPdfItems.map(item => item.text).join('\n');
-    } else if (fileMimeType.includes('word') || fileMimeType.includes('document')) {
+    } else if (isWordFile) {
+      // For Word, we only need the raw text to identify fields
       extractedText = await extractTextFromWord(uploadedFile);
       extractedPdfItems = []; 
     } else if (isExcelFile) {
-      // NEW LOGIC: Route Excel to the new extractor
       extractedText = await extractTextFromExcel(uploadedFile);
       extractedPdfItems = []; 
     } else {
@@ -889,8 +893,9 @@ async function processDocument() {
     console.log('========================');
     
     updateProgress(50);
-    showProcessingStatus('Analyzing specification fields...');
+    showProcessingStatus('Analyzing template fields...');
 
+    // Extract questions/fields from the uploaded template (empty or not)
     const fields = extractQuestions(extractedText, extractedPdfItems);
     
     console.log('=== FIELDS FOUND ===');
@@ -898,19 +903,11 @@ async function processDocument() {
     console.log('========================');
     
     if (fields.length === 0) {
-      console.warn('No structured fields found. Will extract all content.');
-      const allLines = extractAllLines(extractedText);
-      matchedData = allLines.map(line => ({
-        question: line.text,
-        originalLine: line.text,
-        lineNumber: line.lineNumber,
-        matchedAnswer: null,
-        confidence: 0,
-        matched: false
-      }));
+      alert('Could not identify any structured question fields in the uploaded template. Please check the document format.');
+      throw new Error('No structured fields found.');
     } else {
       updateProgress(70);
-      showProcessingStatus('Matching with Paper Survey library...');
+      showProcessingStatus('Matching fields with survey library answers...');
       const selectedProduct = document.getElementById('productSelect').value;
       
       const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
@@ -930,7 +927,7 @@ async function processDocument() {
     console.log('========================');
     
     updateProgress(100);
-    showProcessingStatus('Processing complete!');
+    showProcessingStatus('Generation complete!');
 
     setTimeout(() => {
       document.getElementById('processingStatus').style.display = 'none';
@@ -940,7 +937,10 @@ async function processDocument() {
     
   } catch (error) {
     console.error('Error processing document:', error);
-    alert('Error processing document: ' + error.message);
+    // Error alert is now in the catch block above
+    if (error.message !== 'No structured fields found.') {
+        alert('Error processing document: ' + error.message);
+    }
     document.getElementById('processingStatus').style.display = 'none';
   }
 }
@@ -997,8 +997,9 @@ async function extractTextFromWord(file) {
     reader.onload = async function(e) {
       try {
         const arrayBuffer = e.target.result;
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        resolve(result.value);
+        // Only get raw text for matching/field extraction
+        const rawTextResult = await mammoth.extractRawText({ arrayBuffer });
+        resolve(rawTextResult.value); 
       } catch (error) {
         reject(error);
       }
@@ -1096,18 +1097,33 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
+// NEW UTILITY FUNCTION TO HANDLE DOWNLOAD
+function downloadBlob(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+}
+
+
 async function downloadFilledDocument() {
     if (!uploadedFile || !uploadedFile.name) {
         alert('Please upload a file first.');
         return;
     }
 
-    if (!matchedData || matchedData.filter(m => m.matchedAnswer).length === 0) {
-        alert('No data was matched or processed to fill.');
+    const answersFound = matchedData.filter(m => m.matchedAnswer).length;
+
+    if (answersFound === 0) {
+        alert('No answers were found in the library for the fields in your template. Cannot generate a filled document.');
         return;
     }
-
+    
     try {
+        // GENERATE A NEW DOCX FILE containing only the matched Q&A pairs.
         const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
 
         const doc = new Document({
@@ -1115,7 +1131,7 @@ async function downloadFilledDocument() {
                 children: [
                     new Paragraph({
                         children: [
-                            new TextRun({ text: "Auto-Filled Survey Results\n\n", size: 36, bold: true })
+                            new TextRun({ text: "Auto-Generated Survey Results\n\n", size: 36, bold: true })
                         ]
                     }),
                     ...matchedData
@@ -1133,19 +1149,22 @@ async function downloadFilledDocument() {
         });
 
         const filledBlob = await Packer.toBlob(doc);
-
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(filledBlob);
         
         const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx|xlsx|xls)$/i, '');
-        link.download = `Filled_${originalName}.docx`; 
+        const filename = `Generated_Survey_${originalName}.docx`; 
         
-        link.click();
-        URL.revokeObjectURL(link.href);
+        downloadBlob(filledBlob, filename);
+        console.log('Downloaded generated survey DOCX.');
+        
+        alert(`Successfully generated a document!\n\n` +
+              `✅ File saved as: ${filename}\n` +
+              `📊 ${answersFound} questions were auto-filled with answers from the library.\n\n` +
+              `The new document contains a clean list of all matched Question: Answer pairs.`);
+        return;
 
     } catch (error) {
-        console.error('Error downloading filled document:', error);
-        alert('Error downloading filled document: ' + error.message);
+        console.error('Error generating document:', error);
+        alert('Error generating document: ' + error.message);
     }
 }
 
