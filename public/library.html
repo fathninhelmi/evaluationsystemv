@@ -630,9 +630,8 @@ async function loadSurveyLibrary() {
         const filenameLower = file.name.toLowerCase();
 
         if (mimeType === 'application/pdf') {
-          // Note: Using the basic text extraction for library parsing is sufficient
-          const pdfItems = await extractTextFromPDF(blob, true); 
-          text = pdfItems.map(item => item.text).join('\n');
+          // FIX APPLIED HERE: extractTextFromPDF(..., true) returns a string, so assign directly.
+          text = await extractTextFromPDF(blob, true); 
         } else if (mimeType.includes('word') || mimeType.includes('document')) {
           text = await extractTextFromWord(blob);
         } else if (mimeType.includes('excel') || mimeType.includes('sheet') || filenameLower.endsWith('.xlsx') || filenameLower.endsWith('.xls')) {
