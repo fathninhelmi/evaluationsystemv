@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="./style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@7.7.0/build/index.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -157,6 +156,8 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc ='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const { Client, Account, Databases, Query, Storage } = window.Appwrite;
+const { PDFDocument, rgb } = window.pdfLib;
+
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
 .setProject("68ddd7de00255d4f5c96");
@@ -240,6 +241,8 @@ function loadNavigation(role) {
             <a href="library.html" class="nav-link active">Library</a>
             <a href="#" class="nav-link" id="logoutBtn">Logout</a>
         `;
+        // In the provided code, user role 'staff' links to staff.html
+        // Assuming user flow from previous turns is retained
     }
     
     navMenu.innerHTML = navHTML;
@@ -522,13 +525,6 @@ function displayFilePreview(file) {
   }
 }
 
-function removeFile() {
-  uploadedFile = null;
-  document.getElementById('filePreview').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-  document.getElementById('processBtn').disabled = true;
-}
-
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -778,7 +774,8 @@ function extractQuestions(text, pdfItems = []) {
       if ((hasSpecKeyword || (startsWithCap && wordCount >= 2 && wordCount <= 8)) && 
           !fields.some(f => f.text === fieldName)) {
         
-        // Find the corresponding PDF item to get the coordinates (even if not used for DOCX output)
+        // Find the corresponding PDF item to get the coordinates
+        // This relies on the index of the line in the full extractedText matching the lineNumber in the pdfItem
         const pdfItem = pdfItems.find(item => item.lineNumber === index + 1);
         
         fields.push({
@@ -836,8 +833,10 @@ async function processDocument() {
       extractedPdfItems = await extractTextFromPDF(uploadedFile);
       extractedText = extractedPdfItems.map(item => item.text).join('\n');
     } else {
+      // For Word/DOCX, we don't have coordinates, so we lose layout
       extractedText = await extractTextFromWord(uploadedFile);
-      extractedPdfItems = []; // Clear PDF items for Word documents
+      extractedPdfItems = []; 
+      alert("Note: Word/DOCX files will lose layout structure as we cannot precisely insert answers without coordinates. PDF is recommended for auto-filling into tables.");
     }
     
     console.log('=== EXTRACTION DEBUG ===');
@@ -855,16 +854,8 @@ async function processDocument() {
     console.log('========================');
     
     if (fields.length === 0) {
-      console.warn('No structured fields found. Will extract all content.');
-      const allLines = extractAllLines(extractedText);
-      matchedData = allLines.map(line => ({
-        question: line.text,
-        originalLine: line.text,
-        lineNumber: line.lineNumber,
-        matchedAnswer: null,
-        confidence: 0,
-        matched: false
-      }));
+      console.warn('No structured fields found. Auto-fill will likely fail to place answers correctly.');
+      matchedData = []; // Clear matched data if no fields are found
     } else {
       updateProgress(70);
       showProcessingStatus('Matching with Paper Survey library...');
@@ -918,29 +909,36 @@ async function extractTextFromPDF(file) {
 
           const itemsByY = {};
           textContent.items.forEach(item => {
-            const y = Math.round(item.transform[5]); // Y coordinate (bottom edge of text)
-            const x = Math.round(item.transform[4]); // X coordinate (left edge of text)
+            // PDF coordinates: (0, 0) is bottom-left. We need y-coordinates from top.
+            // Text matrix: [scaleX, skewY, skewX, scaleY, offsetX, offsetY]
+            // item.transform[5] is the offsetY (bottom of line).
+            const y = Math.round(item.transform[5]); 
+            const x = Math.round(item.transform[4]); 
             if (!itemsByY[y]) itemsByY[y] = [];
             itemsByY[y].push({ str: item.str, x });
           });
 
-          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); // Descending (top to bottom)
+          // Sort descending Y (from top of page to bottom)
+          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); 
           sortedY.forEach(y => {
-            const items = itemsByY[y].sort((a, b) => a.x - b.x); // left -> right
+            // Sort ascending X (from left to right)
+            const items = itemsByY[y].sort((a, b) => a.x - b.x); 
             const lineText = items.map(i => i.str).join(' ');
-            // Save each line with coordinates and page number
+            
+            // Get the first item's x-coordinate (left alignment)
+            const firstItem = items[0];
+            
             allPageItems.push({ 
                 text: lineText, 
-                x: items[0].x, 
-                y: parseInt(y), // Ensure y is a number
+                x: firstItem.x, 
+                y: parseInt(y), // Y is the bottom edge of the text
                 page: i,
-                // The lineNumber matches the line index in the final extractedText string + 1
                 lineNumber: allPageItems.length + 1 
             });
           });
         }
 
-        resolve(allPageItems); // Return all pages' items with positions
+        resolve(allPageItems); 
       } catch (error) {
         reject(error);
       }
@@ -979,19 +977,18 @@ function matchQuestionsWithLibrary(questions, product) {
     
     productLibrary.forEach(libraryItem => {
       const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
-      if (score > highestScore && score > 0.25) { // Lower threshold for table-based specs
+      if (score > highestScore && score > 0.25) { 
         highestScore = score;
         bestMatch = libraryItem;
       }
     });
     
-    // Coordinates are captured in extractQuestions, but are NOT used for DOCX output.
-    // They are left in the question object just in case you switch back to PDF filling.
-
+    // Crucially, preserve the coordinates and page for filling the original document
     matches.push({
       question: question.text,
-      originalLine: question.originalLine,
-      lineNumber: question.lineNumber,
+      x: question.x,
+      y: question.y,
+      page: question.page,
       matchedAnswer: bestMatch ? bestMatch.answer : null,
       confidence: Math.round(highestScore * 100),
       matched: bestMatch !== null && highestScore > 0.25,
@@ -1004,25 +1001,22 @@ function matchQuestionsWithLibrary(questions, product) {
   return matches;
 }
 
-// *** UPDATED SIMILARITY FUNCTION TO HANDLE GARBLED TEXT ***
+// *** IMPROVED SIMILARITY FUNCTION (Retained for robust matching) ***
 function calculateEnhancedSimilarity(str1, str2) {
-  // 1. Stop words (common, non-technical words to ignore)
   const stopWords = new Set(['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'with', 'from', 'have', 'about', 'your', 'will', 'a', 'an', 'in', 'on', 'of', 'is', 'it', 'to', 'or', 'at', 'by', 'as', 'l', 'w', 'x']);
 
-  // 2. Normalization and Tokenization
   const normalizeAndTokenize = (s) => s.toLowerCase()
-    .replace(/[^\w\s]/g, ' ') // Replace punctuation with space
-    .replace(/\s+/g, ' ')    // Collapse multiple spaces
+    .replace(/[^\w\s]/g, ' ') 
+    .replace(/\s+/g, ' ')    
     .trim()
-    .split(/\s+/)            // Split into words
-    .filter(word => word.length > 2 && !stopWords.has(word)); // Remove short words and stop words
+    .split(/\s+/)            
+    .filter(word => word.length > 2 && !stopWords.has(word)); 
 
   const tokens1 = normalizeAndTokenize(str1);
   const tokens2 = normalizeAndTokenize(str2);
 
   if (tokens1.length === 0 || tokens2.length === 0) return 0;
 
-  // 3. Jaccard Index (Set-based matching)
   const set1 = new Set(tokens1);
   const set2 = new Set(tokens2);
   
@@ -1031,20 +1025,15 @@ function calculateEnhancedSimilarity(str1, str2) {
   
   const jaccardScore = unionSize > 0 ? intersectionSize / unionSize : 0;
 
-  // 4. Fallback for containment (e.g., if one phrase is contained in another)
   const normStr1 = str1.toLowerCase().replace(/\s/g, '');
   const normStr2 = str2.toLowerCase().replace(/\s/g, '');
 
   if (normStr1.includes(normStr2) || normStr2.includes(normStr1)) {
-    // Give a very high score if one clean string contains the other
     return 0.95; 
   }
 
-  // 5. Final weighted score: Focus on token match and length ratio
   return jaccardScore * 0.8 + Math.min(tokens1.length, tokens2.length) / Math.max(tokens1.length, tokens2.length) * 0.2;
 }
-// *** END UPDATED SIMILARITY FUNCTION ***
-
 
 function showProcessingStatus(message) {
   const status = document.getElementById('processingStatus');
@@ -1071,64 +1060,122 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
-// *** REVISED DOWNLOAD FUNCTION TO ALWAYS OUTPUT DOCX ***
+// *** NEW PDF FILLING FUNCTION ***
+async function fillPDFDocument(file, matches) {
+    const existingPdfBytes = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+    // Get all pages for easier access
+    const pages = pdfDoc.getPages();
+    const helveticaFont = await pdfDoc.embedFont('Helvetica-Bold'); 
+
+    // Filter for answers that were actually matched
+    const answersToFill = matches.filter(m => m.matchedAnswer && m.x !== null);
+
+    if (answersToFill.length === 0) {
+        throw new Error("No answers were matched and no coordinates found to fill the PDF.");
+    }
+    
+    console.log(`Starting to fill ${answersToFill.length} answers across ${pages.length} pages.`);
+
+    answersToFill.forEach(match => {
+        try {
+            // PDF pages are 1-indexed
+            const pageIndex = match.page - 1; 
+            if (pageIndex < 0 || pageIndex >= pages.length) return;
+
+            const page = pages[pageIndex];
+            const { height: pageHeight } = page.getSize();
+            
+            // Determine Insertion Coordinates:
+            // 1. X-Coordinate: Assumed right-hand answer column (e.g., 350-400 is common for centered content)
+            //    We'll use 400 as a standard start for the right column.
+            const insertX = 400; 
+
+            // 2. Y-Coordinate: Convert the bottom-left based coordinate (match.y) to the top-left based coordinate system required by drawText.
+            //    match.y is the bottom edge of the question text. Subtracting a small margin ensures it sits neatly on the line.
+            const insertY = pageHeight - match.y - 10; // 10 is a small margin adjustment
+
+            page.drawText(match.matchedAnswer, {
+                x: insertX,
+                y: insertY,
+                size: 10,
+                font: helveticaFont,
+                color: rgb(0.1, 0.1, 0.1), // Dark gray text
+            });
+            console.log(`Filled: ${match.question} at (${insertX}, ${insertY}) on Page ${match.page}`);
+
+        } catch (e) {
+            console.error(`Failed to draw text for question: ${match.question}`, e);
+        }
+    });
+
+    // Save the modified PDF
+    const pdfBytes = await pdfDoc.save();
+    return new Blob([pdfBytes], { type: 'application/pdf' });
+}
+
 async function downloadFilledDocument() {
     if (!uploadedFile || !uploadedFile.name) {
         alert('Please upload a file first.');
         return;
     }
 
-    // Only proceed if at least one answer was matched
     if (!matchedData || matchedData.filter(m => m.matchedAnswer).length === 0) {
-        alert('No data was matched or processed to fill.');
+        alert('No answers were successfully matched to fill the document.');
         return;
     }
 
+    const fileType = uploadedFile.name.split('.').pop().toLowerCase();
+    let filledBlob;
+    let newFileName = `Filled_${uploadedFile.name}`;
+
     try {
-        // --- DOCX Creation Logic (Always used for editable output) ---
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+        if (fileType === 'pdf') {
+            filledBlob = await fillPDFDocument(uploadedFile, matchedData);
+            newFileName = newFileName.replace('.pdf', '_filled.pdf');
+            
+        } else if (fileType === 'doc' || fileType === 'docx') {
+             // Word file filling logic is removed as it's not feasible client-side to preserve layout.
+             // We will revert to the list output for Word files, but warn the user.
+             alert("For Word documents, the structure cannot be preserved during auto-fill. Downloading a summary list of Q&A pairs instead.");
+             
+             const { Document, Packer, Paragraph, TextRun } = window.docx;
+             const doc = new Document({
+                 sections: [{
+                     children: matchedData
+                         .filter(item => item.matchedAnswer) 
+                         .map(item => new Paragraph({
+                             spacing: { after: 200 },
+                             children: [
+                                 new TextRun({ text: item.question, bold: true, size: 24 }),
+                                 new TextRun({ text: ': ', bold: true, size: 24 }),
+                                 new TextRun({ text: item.matchedAnswer || '', size: 24 })
+                             ]
+                         }))
+                 }]
+             });
+             filledBlob = await Packer.toBlob(doc);
+             newFileName = newFileName.replace(`.${fileType}`, '_QA_list.docx');
 
-        const doc = new Document({
-            sections: [{
-                children: [
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: "Auto-Filled Survey Results\n\n", size: 36, bold: true })
-                        ]
-                    }),
-                    // Map the matched data to DOCX paragraphs
-                    ...matchedData
-                        .filter(item => item.matchedAnswer) // Only include items with an answer
-                        .map(item => new Paragraph({
-                            spacing: { after: 200 },
-                            children: [
-                                new TextRun({ text: item.question, bold: true, size: 24 }),
-                                new TextRun({ text: ': ', bold: true, size: 24 }),
-                                new TextRun({ text: item.matchedAnswer || '', size: 24 })
-                            ]
-                        }))
-                ]
-            }]
-        });
-
-        const filledBlob = await Packer.toBlob(doc);
+        } else {
+            alert('Unsupported file type for auto-fill. Only PDF files can preserve layout.');
+            return;
+        }
 
         // --- Download ---
         const link = document.createElement('a');
         link.href = URL.createObjectURL(filledBlob);
-        
-        // Ensure the downloaded file is always a .docx
-        const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx)$/i, '');
-        link.download = `Filled_${originalName}.docx`; 
-        
+        link.download = newFileName;
         link.click();
         URL.revokeObjectURL(link.href);
 
     } catch (error) {
-        console.error('Error downloading filled document:', error);
+        console.error('Error in downloadFilledDocument:', error);
         alert('Error downloading filled document: ' + error.message);
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
