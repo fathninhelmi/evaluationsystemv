@@ -250,17 +250,6 @@ function loadNavigation(role) {
     });
 }
 
-async function logout() {
-  try {
-    await account.deleteSession("current");
-    console.log('Logged out successfully');
-  } catch (err) {
-    console.warn('Could not delete session (maybe already logged out):', err);
-  } finally {
-    window.location.href = "index.html";
-  }
-}
-
 function getSidebarCategories(product) {
   const categories = {
     'spi': [
@@ -1022,8 +1011,8 @@ function showMatchResults() {
 
 /**
  * FIX: This function is updated to create a highly structured, new DOCX file 
- * containing the matched data, which is the closest practical alternative to 
- * modifying the original file's complex layout using only browser-based docx libraries.
+ * containing the matched data, now presented in a clean, two-column table 
+ * format to simulate the structural layout requested by the user.
  */
 async function downloadFilledDocument() {
     if (!uploadedFile || !uploadedFile.name) {
@@ -1039,55 +1028,79 @@ async function downloadFilledDocument() {
     }
 
     try {
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } = window.docx;
 
         const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx)$/i, '');
         const docTitle = `Auto-Filled Survey: ${originalName}`;
 
-        // Create the DOCX content section
+        // 1. Define the Table Header
+        const tableHeader = new TableRow({
+            children: [
+                new TableCell({
+                    children: [new Paragraph({ children: [new TextRun({ text: "QUESTION FIELD", bold: true, color: "FFFFFF" })] })],
+                    shading: { fill: "1F4E79", val: "clear" },
+                    width: { size: 50, type: WidthType.PERCENTAGE },
+                }),
+                new TableCell({
+                    children: [new Paragraph({ children: [new TextRun({ text: "AUTO-FILLED ANSWER", bold: true, color: "FFFFFF" })] })],
+                    shading: { fill: "1F4E79", val: "clear" },
+                    width: { size: 50, type: WidthType.PERCENTAGE },
+                }),
+            ],
+        });
+
+        // 2. Map Matched Data to Table Rows
+        const tableRows = filledAnswers.map(item => new TableRow({
+            children: [
+                new TableCell({
+                    children: [new Paragraph({ children: [new TextRun({ text: item.question, bold: true })] })],
+                    verticalAlign: "center",
+                    margins: { top: 100, bottom: 100, left: 100, right: 100 }
+                }),
+                new TableCell({
+                    children: [new Paragraph({ children: [new TextRun({ text: item.matchedAnswer || 'N/A' })] })],
+                    verticalAlign: "center",
+                    margins: { top: 100, bottom: 100, left: 100, right: 100 }
+                }),
+            ],
+            // Add a subtle border or separator if needed
+            tableHeader: false, // Ensure this isn't repeated on every page
+        }));
+
+
+        // 3. Assemble the Document Structure
         const documentSections = [{
             children: [
-                new Paragraph({ // Document Title
-                    heading: HeadingLevel.TITLE,
-                    alignment: 'center',
-                    children: [
-                        new TextRun({ text: docTitle, size: 48, bold: true, color: "1F4E79" })
-                    ]
+                new Paragraph({ 
+                    heading: HeadingLevel.TITLE, 
+                    alignment: 'center', 
+                    children: [new TextRun({ text: docTitle, size: 48, bold: true, color: "1F4E79" })]
                 }),
-                new Paragraph({ // Subtitle/Status
+                new Paragraph({ 
                     children: [
                         new TextRun({ text: `Processing Date: ${new Date().toLocaleDateString()}`, size: 24, break: 1 }),
-                        new TextRun({ text: `Total Fields Found: ${matchedData.length}`, break: 1 }),
-                        new TextRun({ text: `Answers Auto-Matched: ${filledAnswers.length}`, break: 1 })
+                        new TextRun({ text: `Answers Auto-Matched: ${filledAnswers.length} of ${matchedData.length}`, break: 1 })
                     ],
                     spacing: { after: 400 }
                 }),
+                new Paragraph({ text: "Matched Data Summary:", spacing: { after: 200 } }),
                 
-                // List the matched Q&A pairs
-                ...filledAnswers.map(item => [
-                    new Paragraph({
-                        children: [
-                            new TextRun({ 
-                                text: `${item.question}`, 
-                                bold: true, 
-                                size: 28, 
-                                color: "000000" 
-                            })
-                        ],
-                        spacing: { before: 300 }
-                    }),
-                    new Paragraph({
-                        children: [
-                            new TextRun({ 
-                                text: item.matchedAnswer || 'No answer found.', 
-                                size: 26,
-                                color: "333333" 
-                            })
-                        ],
-                        indent: { left: 360 }, // Indent the answer slightly
-                        spacing: { after: 200 }
-                    })
-                ]).flat() // Flattens the array of [Question, Answer] pairs
+                // Add the Table
+                new Table({
+                    rows: [tableHeader, ...tableRows],
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: {
+                        top: { style: "single", size: 6, color: "D3D3D3" },
+                        bottom: { style: "single", size: 6, color: "D3D3D3" },
+                        left: { style: "single", size: 6, color: "D3D3D3" },
+                        right: { style: "single", size: 6, color: "D3D3D3" },
+                        insideHorizontal: { style: "single", size: 6, color: "D3D3D3" },
+                        insideVertical: { style: "single", size: 6, color: "D3D3D3" },
+                    },
+                    margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                }),
+
+                new Paragraph({ text: "", spacing: { after: 400 } }) // Final spacer
             ]
         }];
 
@@ -1099,7 +1112,7 @@ async function downloadFilledDocument() {
 
         const link = document.createElement('a');
         link.href = URL.createObjectURL(filledBlob);
-        link.download = `Filled_${originalName}.docx`; 
+        link.download = `Filled_${originalName}_Table.docx`; 
         
         link.click();
         URL.revokeObjectURL(link.href);
