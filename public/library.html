@@ -1173,14 +1173,9 @@ async function fillPDFDocument(templateFile, matchedData) {
 }
 
 
-async function fillWordDocument(templateFile, matchedData) {
-    // Read the uploaded template as ArrayBuffer
-    const arrayBuffer = await templateFile.arrayBuffer();
-
-    // Load the template (simple example)
+async function fillWordDocument(matchedData) {
     const { Document, Packer, Paragraph, TextRun } = window.docx;
 
-    // Create new document
     const doc = new Document();
 
     matchedData.forEach(item => {
@@ -1197,7 +1192,6 @@ async function fillWordDocument(templateFile, matchedData) {
         });
     });
 
-    // Generate the Word file
     const blob = await Packer.toBlob(doc);
     return blob;
 }
@@ -1225,6 +1219,10 @@ async function downloadFilledDocument() {
         return;
     }
 
+    if (fileType === 'doc' || fileType === 'docx') {
+    filledBlob = await fillWordDocument(matchedData);
+    }
+
     const link = document.createElement('a');
     link.href = URL.createObjectURL(filledBlob);
     link.download = `Filled_${uploadedFile.name}`;
@@ -1244,6 +1242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
 
