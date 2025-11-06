@@ -870,25 +870,34 @@ async function extractTextFromPDF(file) {
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 1.0 });
           const textContent = await page.getTextContent();
 
           const itemsByY = {};
           textContent.items.forEach(item => {
-            const y = Math.round(item.transform[5]); 
-            const x = Math.round(item.transform[4]); 
+            // Use the PDF coordinate system (origin bottom-left)
+            const y = item.transform[5]; 
+            const x = item.transform[4]; 
             if (!itemsByY[y]) itemsByY[y] = [];
             itemsByY[y].push({ str: item.str, x });
           });
 
-          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); 
+          // Sort by Y (top to bottom) then X (left to right)
+          const sortedY = Object.keys(itemsByY).map(y => parseFloat(y)).sort((a, b) => b - a); 
           sortedY.forEach(y => {
             const items = itemsByY[y].sort((a, b) => a.x - b.x);
             const lineText = items.map(i => i.str).join(' ');
+            
+            // For PDF-lib drawing, we need Y relative to the bottom of the page
+            // textContent.items Y is from bottom of the page (good for pdf-lib)
+            // We'll use the Y as-is for pdf-lib text drawing position
+            
             allPageItems.push({ 
                 text: lineText, 
                 x: items[0].x, 
-                y: parseInt(y), 
+                y: y, // Y coordinate from PDF content stream (bottom-up)
                 page: i,
+                pageHeight: viewport.height, // Store page height for context
                 lineNumber: allPageItems.length + 1 
             });
           });
@@ -940,9 +949,7 @@ function matchQuestionsWithLibrary(questions, product) {
     });
 
     matches.push({
-      question: question.text,
-      originalLine: question.originalLine,
-      lineNumber: question.lineNumber,
+      ...question, // FIX: Ensure x, y, page, etc., are carried forward for PDF filling
       matchedAnswer: bestMatch ? bestMatch.answer : null,
       confidence: Math.round(highestScore * 100),
       matched: bestMatch !== null && highestScore > 0.25,
@@ -1009,10 +1016,15 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
+
 /**
- * FIX: This function is updated to create a highly structured, new DOCX file 
- * containing the matched data, now presented in a clean, two-column table 
- * format to simulate the structural layout requested by the user.
+ * FIX: This function is completely rewritten.
+ * * 1. If the file is a PDF, it uses pdf-lib to load the original document 
+ * and draw the answers at the precise coordinates of the questions, 
+ * thereby preserving the original layout.
+ * 2. If the file is a Word document, it falls back to creating a new 
+ * structured DOCX, as in-place layout preservation is not reliably 
+ * possible with browser-only libraries.
  */
 async function downloadFilledDocument() {
     if (!uploadedFile || !uploadedFile.name) {
@@ -1020,55 +1032,93 @@ async function downloadFilledDocument() {
         return;
     }
 
-    const filledAnswers = matchedData.filter(m => m.matchedAnswer);
+    const filledAnswers = matchedData.filter(m => m.matchedAnswer && m.matched);
+    const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx)$/i, '');
 
     if (!filledAnswers || filledAnswers.length === 0) {
         alert('No data was matched or processed to fill.');
         return;
     }
 
+    if (uploadedFile.type === 'application/pdf') {
+        // --- PDF In-Place Filling Logic ---
+        try {
+            const { PDFDocument, rgb } = window.pdfLib;
+            const existingPdfBytes = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.readAsArrayBuffer(uploadedFile);
+            });
+
+            const pdfDoc = await PDFDocument.load(existingPdfBytes);
+            const pages = pdfDoc.getPages();
+            
+            // Get a standard font
+            const font = await pdfDoc.embedFont('Helvetica');
+            const fontSize = 9; 
+            const x_offset = 15; // Space to move the answer right of the question
+
+            filledAnswers.forEach(answer => {
+                if (answer.page && answer.x !== null && answer.y !== null) {
+                    const pageIndex = answer.page - 1;
+                    if (pageIndex >= 0 && pageIndex < pages.length) {
+                        const page = pages[pageIndex];
+                        
+                        // Calculate position: The 'y' from pdfjsLib extraction is bottom-up, 
+                        // which is correct for pdf-lib drawText.
+                        
+                        // X position: Question X + Question Text Width + Offset
+                        // This estimation assumes the question text doesn't wrap and the answer
+                        // should start where the question ends. A fixed X is simpler and more reliable 
+                        // for most forms where answers are aligned. We'll use a fixed X based on the question's Y coordinate.
+                        
+                        // Simple X calculation (start 15px right of question text start)
+                        const finalX = answer.x + x_offset + (answer.text.length * (fontSize / 2.5));
+
+                        page.drawText(answer.matchedAnswer, {
+                            x: finalX,
+                            y: answer.y, // Use the extracted Y
+                            size: fontSize,
+                            font: font,
+                            color: rgb(0.8, 0, 0), // Use a distinct color (red) for filled answer
+                        });
+                    }
+                }
+            });
+
+            const pdfBytes = await pdfDoc.save();
+            const filledBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(filledBlob);
+            link.download = `Filled_${originalName}_Layout_Preserved.pdf`; 
+            
+            link.click();
+            URL.revokeObjectURL(link.href);
+            
+            alert(`Document filled successfully. Note: Answers were placed near the question coordinates and colored red for visibility.`);
+
+        } catch (error) {
+            console.error('Error filling PDF document:', error);
+            alert('Error filling PDF document. Falling back to structured DOCX export: ' + error.message);
+            // Fallback to DOCX generation if PDF filling fails
+            downloadFilledDocumentDOCXFallback(originalName, filledAnswers);
+        }
+
+    } else {
+        // --- DOCX/DOC Fallback Logic (New Document Generation) ---
+        // As in-place Word document modification is not feasible in the browser, 
+        // we create a structured document listing the matched Q&A.
+        downloadFilledDocumentDOCXFallback(originalName, filledAnswers);
+    }
+}
+
+async function downloadFilledDocumentDOCXFallback(originalName, filledAnswers) {
     try {
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } = window.docx;
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
 
-        const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx)$/i, '');
-        const docTitle = `Auto-Filled Survey: ${originalName}`;
+        const docTitle = `Auto-Filled Survey Report: ${originalName}`;
 
-        // 1. Define the Table Header
-        const tableHeader = new TableRow({
-            children: [
-                new TableCell({
-                    children: [new Paragraph({ children: [new TextRun({ text: "QUESTION FIELD", bold: true, color: "FFFFFF" })] })],
-                    shading: { fill: "1F4E79", val: "clear" },
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                }),
-                new TableCell({
-                    children: [new Paragraph({ children: [new TextRun({ text: "AUTO-FILLED ANSWER", bold: true, color: "FFFFFF" })] })],
-                    shading: { fill: "1F4E79", val: "clear" },
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                }),
-            ],
-        });
-
-        // 2. Map Matched Data to Table Rows
-        const tableRows = filledAnswers.map(item => new TableRow({
-            children: [
-                new TableCell({
-                    children: [new Paragraph({ children: [new TextRun({ text: item.question, bold: true })] })],
-                    verticalAlign: "center",
-                    margins: { top: 100, bottom: 100, left: 100, right: 100 }
-                }),
-                new TableCell({
-                    children: [new Paragraph({ children: [new TextRun({ text: item.matchedAnswer || 'N/A' })] })],
-                    verticalAlign: "center",
-                    margins: { top: 100, bottom: 100, left: 100, right: 100 }
-                }),
-            ],
-            // Add a subtle border or separator if needed
-            tableHeader: false, // Ensure this isn't repeated on every page
-        }));
-
-
-        // 3. Assemble the Document Structure
         const documentSections = [{
             children: [
                 new Paragraph({ 
@@ -1083,24 +1133,21 @@ async function downloadFilledDocument() {
                     ],
                     spacing: { after: 400 }
                 }),
-                new Paragraph({ text: "Matched Data Summary:", spacing: { after: 200 } }),
-                
-                // Add the Table
-                new Table({
-                    rows: [tableHeader, ...tableRows],
-                    width: { size: 100, type: WidthType.PERCENTAGE },
-                    borders: {
-                        top: { style: "single", size: 6, color: "D3D3D3" },
-                        bottom: { style: "single", size: 6, color: "D3D3D3" },
-                        left: { style: "single", size: 6, color: "D3D3D3" },
-                        right: { style: "single", size: 6, color: "D3D3D3" },
-                        insideHorizontal: { style: "single", size: 6, color: "D3D3D3" },
-                        insideVertical: { style: "single", size: 6, color: "D3D3D3" },
-                    },
-                    margins: { top: 200, bottom: 200, left: 200, right: 200 }
+                new Paragraph({ 
+                    text: "Matched Questions and Answers (Layout NOT Preserved):",
+                    heading: HeadingLevel.HEADING_2,
+                    spacing: { after: 300 } 
                 }),
-
-                new Paragraph({ text: "", spacing: { after: 400 } }) // Final spacer
+                
+                // Structured list of Q&A
+                ...filledAnswers.map(item => new Paragraph({
+                    spacing: { after: 200 },
+                    children: [
+                        new TextRun({ text: item.question, bold: true, size: 24 }),
+                        new TextRun({ text: ': ', bold: true, size: 24 }),
+                        new TextRun({ text: item.matchedAnswer || 'No answer found.', size: 24 })
+                    ]
+                }))
             ]
         }];
 
@@ -1112,14 +1159,16 @@ async function downloadFilledDocument() {
 
         const link = document.createElement('a');
         link.href = URL.createObjectURL(filledBlob);
-        link.download = `Filled_${originalName}_Table.docx`; 
+        link.download = `Report_${originalName}_Structured.docx`; 
         
         link.click();
         URL.revokeObjectURL(link.href);
+        
+        alert("The original document layout (tables/spacing) could not be preserved for this file type. A new, structured DOCX report was downloaded instead.");
 
     } catch (error) {
-        console.error('Error downloading filled document:', error);
-        alert('Error downloading filled document: ' + error.message);
+        console.error('Error in DOCX fallback:', error);
+        alert('Fatal Error: Could not generate download document.');
     }
 }
 
