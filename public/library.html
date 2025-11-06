@@ -86,8 +86,8 @@
       <div class="file-drop-zone" id="dropZone">
         <i class="fas fa-cloud-upload-alt"></i>
         <p>Drag & drop your file here or click to browse</p>
-        <p class="file-info">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
-        <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
+        <p class="file-info">Supported formats: PDF, DOC, DOCX, XLSX, XLS (Max 10MB)</p>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xlsx,.xls" style="display: none;">
       </div>
       
       <div id="filePreview" class="file-preview" style="display: none;">
@@ -137,7 +137,7 @@
           </div>
           <div class="result-stat">
             <span class="stat-number" id="matchRate">0%</span>
-            <span class="stat-label">Match Rate</span
+            <span class="stat-label">Match Rate</span>
           </div>
         </div>
       </div>
@@ -158,7 +158,7 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc ='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const { Client, Account, Databases, Query, Storage } = window.Appwrite;
-const { Packer, Document, Paragraph, TextRun } = docx;
+const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx; // Ensure docx imports are here
 
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -487,11 +487,22 @@ function setupFileUpload() {
 function handleFileSelect(file) {
   if (!file) return;
   
-  const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  // UPDATED: Added Excel MIME types
+  const validTypes = [
+    'application/pdf', 
+    'application/msword', 
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-excel' // .xls
+  ];
+  // Check against file extension as well for more robustness
+  const isExcel = file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls');
+  
   const maxSize = 10 * 1024 * 1024;
   
-  if (!validTypes.includes(file.type)) {
-    alert('Please upload only PDF or Word documents.');
+  // UPDATED: Check for valid types or Excel file extension
+  if (!validTypes.includes(file.type) && !isExcel) {
+    alert('Please upload only PDF, Word, or Excel documents.');
     return;
   }
   
@@ -509,15 +520,21 @@ function displayFilePreview(file) {
   const preview = document.getElementById('filePreview');
   const fileName = document.getElementById('fileName');
   const fileSize = document.getElementById('fileSize');
+  const fileType = file.type.toLowerCase();
   
   fileName.textContent = file.name;
   fileSize.textContent = formatFileSize(file.size);
   preview.style.display = 'block';
   
   const icon = preview.querySelector('.fa-file-pdf');
-  if (file.type.includes('word')) {
+  
+  // UPDATED: Added logic for Excel icon
+  if (fileType.includes('word')) {
     icon.className = 'fas fa-file-word';
     icon.style.color = '#2B579A';
+  } else if (fileType.includes('excel') || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+    icon.className = 'fas fa-file-excel';
+    icon.style.color = '#217346';
   } else {
     icon.className = 'fas fa-file-pdf';
     icon.style.color = '#E74C3C';
@@ -539,7 +556,7 @@ function formatFileSize(bytes) {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
-// Function to extract text from an Excel Blob using XLSX
+// NEW FUNCTION: Extract text from Excel Blob using XLSX
 function extractTextFromExcel(blob) {
   return new Promise((resolve, reject) => {
     if (typeof XLSX === 'undefined') {
@@ -570,6 +587,7 @@ function extractTextFromExcel(blob) {
     }
   });
 }
+
 
 async function loadSurveyLibrary() {
   try {
@@ -613,15 +631,14 @@ async function loadSurveyLibrary() {
         } else if (mimeType.includes('word') || mimeType.includes('document')) {
           text = await extractTextFromWord(blob);
         } else if (mimeType.includes('excel') || mimeType.includes('sheet') || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
-          // NEW LOGIC: Process Excel files
-          try {
-              text = await extractTextFromExcel(blob);
-              console.log(`Successfully extracted text from Excel file: ${file.name}`);
-          } catch (excelError) {
-              // This error should handle cases where the Excel file is corrupted or the library fails to parse it
-              console.error(`Error extracting from Excel file ${file.name}:`, excelError);
-              continue; // Skip file if Excel processing fails
-          }
+            // NEW LOGIC: Process Excel files
+            try {
+                text = await extractTextFromExcel(blob);
+                console.log(`Successfully extracted text from Excel file: ${file.name}`);
+            } catch (excelError) {
+                console.error(`Error extracting from Excel file ${file.name}:`, excelError);
+                continue; // Skip file if Excel processing fails
+            }
         } else {
             console.warn(`Skipping file ${file.name}: Unsupported MIME type (${mimeType}).`);
             continue;
@@ -828,4 +845,320 @@ function extractAllLines(text) {
   
   textLines.forEach((line, index) => {
     line = line.trim();
-// ... (The rest of the library.html content should be included here if you want a complete working file)
+
+    if (line.length < 15) return;
+    if (line.match(/^page\s+\d+/i)) return;
+    if (line.match(/^\d+$/)) return;
+    if (line.toLowerCase().includes('confidential')) return;
+    
+    lines.push({
+      text: line,
+      lineNumber: index + 1
+    });
+  });
+  
+  return lines;
+}
+
+async function processDocument() {
+  if (!uploadedFile) return;
+  
+  showProcessingStatus('Extracting text from document...');
+  updateProgress(20);
+  
+  try {
+    const fileMimeType = uploadedFile.type.toLowerCase();
+    const isExcelFile = fileMimeType.includes('excel') || fileMimeType.includes('sheet') || uploadedFile.name.toLowerCase().endsWith('.xlsx') || uploadedFile.name.toLowerCase().endsWith('.xls');
+
+    if (fileMimeType === 'application/pdf') {
+      extractedPdfItems = await extractTextFromPDF(uploadedFile);
+      extractedText = extractedPdfItems.map(item => item.text).join('\n');
+    } else if (fileMimeType.includes('word') || fileMimeType.includes('document')) {
+      extractedText = await extractTextFromWord(uploadedFile);
+      extractedPdfItems = []; 
+    } else if (isExcelFile) {
+      // NEW LOGIC: Route Excel to the new extractor
+      extractedText = await extractTextFromExcel(uploadedFile);
+      extractedPdfItems = []; 
+    } else {
+      throw new Error(`Unsupported file type for processing: ${uploadedFile.name} (${uploadedFile.type})`);
+    }
+
+    console.log('=== EXTRACTION DEBUG ===');
+    console.log('Extracted text length:', extractedText.length);
+    console.log('========================');
+    
+    updateProgress(50);
+    showProcessingStatus('Analyzing specification fields...');
+
+    const fields = extractQuestions(extractedText, extractedPdfItems);
+    
+    console.log('=== FIELDS FOUND ===');
+    console.log(`Total specification fields extracted: ${fields.length}`);
+    console.log('========================');
+    
+    if (fields.length === 0) {
+      console.warn('No structured fields found. Will extract all content.');
+      const allLines = extractAllLines(extractedText);
+      matchedData = allLines.map(line => ({
+        question: line.text,
+        originalLine: line.text,
+        lineNumber: line.lineNumber,
+        matchedAnswer: null,
+        confidence: 0,
+        matched: false
+      }));
+    } else {
+      updateProgress(70);
+      showProcessingStatus('Matching with Paper Survey library...');
+      const selectedProduct = document.getElementById('productSelect').value;
+      
+      const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
+      console.log('=== LIBRARY DEBUG ===');
+      console.log(`Library size for ${selectedProduct}: ${productLibrarySize}`);
+      console.log('========================');
+      
+      if (productLibrarySize === 0) {
+        console.warn(`No survey data found for ${selectedProduct}. Processing without auto-fill.`);
+      }
+      
+      matchedData = matchQuestionsWithLibrary(fields, selectedProduct);
+    }
+    
+    console.log('=== MATCH RESULTS ===');
+    console.log(`Total matches: ${matchedData.filter(m => m.matched).length}/${matchedData.length}`);
+    console.log('========================');
+    
+    updateProgress(100);
+    showProcessingStatus('Processing complete!');
+
+    setTimeout(() => {
+      document.getElementById('processingStatus').style.display = 'none';
+      showMatchResults();
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error processing document:', error);
+    alert('Error processing document: ' + error.message);
+    document.getElementById('processingStatus').style.display = 'none';
+  }
+}
+
+async function extractTextFromPDF(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const typedArray = new Uint8Array(e.target.result);
+        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+
+        const allPageItems = [];
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+
+          const itemsByY = {};
+          textContent.items.forEach(item => {
+            const y = Math.round(item.transform[5]); 
+            const x = Math.round(item.transform[4]); 
+            if (!itemsByY[y]) itemsByY[y] = [];
+            itemsByY[y].push({ str: item.str, x });
+          });
+
+          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); 
+          sortedY.forEach(y => {
+            const items = itemsByY[y].sort((a, b) => a.x - b.x);
+            const lineText = items.map(i => i.str).join(' ');
+            allPageItems.push({ 
+                text: lineText, 
+                x: items[0].x, 
+                y: parseInt(y), 
+                page: i,
+                lineNumber: allPageItems.length + 1 
+            });
+          });
+        }
+
+        resolve(allPageItems);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function extractTextFromWord(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        const arrayBuffer = e.target.result;
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        resolve(result.value);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function matchQuestionsWithLibrary(questions, product) {
+  const matches = [];
+  const productLibrary = surveyLibrary[product] || [];
+  
+  console.log(`Matching ${questions.length} items against ${productLibrary.length} library entries for ${product}`);
+  
+  questions.forEach(question => {
+    let bestMatch = null;
+    let highestScore = 0;
+    
+    productLibrary.forEach(libraryItem => {
+      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);
+      if (score > highestScore && score > 0.25) { 
+        highestScore = score;
+        bestMatch = libraryItem;
+      }
+    });
+
+    matches.push({
+      question: question.text,
+      originalLine: question.originalLine,
+      lineNumber: question.lineNumber,
+      matchedAnswer: bestMatch ? bestMatch.answer : null,
+      confidence: Math.round(highestScore * 100),
+      matched: bestMatch !== null && highestScore > 0.25,
+    });
+  });
+  
+  const matchedCount = matches.filter(m => m.matched).length;
+  console.log(`Found ${matchedCount} matches out of ${matches.length} items`);
+  
+  return matches;
+}
+
+function calculateEnhancedSimilarity(str1, str2) {
+  const stopWords = new Set(['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'with', 'from', 'have', 'about', 'your', 'will', 'a', 'an', 'in', 'on', 'of', 'is', 'it', 'to', 'or', 'at', 'by', 'as', 'l', 'w', 'x']);
+  const normalizeAndTokenize = (s) => s.toLowerCase()
+    .replace(/[^\w\s]/g, ' ') 
+    .replace(/\s+/g, ' ')   
+    .trim()
+    .split(/\s+/)          
+    .filter(word => word.length > 2 && !stopWords.has(word));
+
+  const tokens1 = normalizeAndTokenize(str1);
+  const tokens2 = normalizeAndTokenize(str2);
+
+  if (tokens1.length === 0 || tokens2.length === 0) return 0;
+
+  const set1 = new Set(tokens1);
+  const set2 = new Set(tokens2);
+  const intersectionSize = [...set1].filter(x => set2.has(x)).length;
+  const unionSize = set1.size + set2.size - intersectionSize;
+  const jaccardScore = unionSize > 0 ? intersectionSize / unionSize : 0;
+  const normStr1 = str1.toLowerCase().replace(/\s/g, '');
+  const normStr2 = str2.toLowerCase().replace(/\s/g, '');
+
+  if (normStr1.includes(normStr2) || normStr2.includes(normStr1)) {
+    return 0.95; 
+  }
+
+  return jaccardScore * 0.8 + Math.min(tokens1.length, tokens2.length) / Math.max(tokens1.length, tokens2.length) * 0.2;
+}
+
+function showProcessingStatus(message) {
+  const status = document.getElementById('processingStatus');
+  const statusMessage = document.getElementById('statusMessage');
+  statusMessage.textContent = message;
+  status.style.display = 'block';
+}
+
+function updateProgress(percent) {
+  const progressBar = document.getElementById('progressBar');
+  progressBar.style.width = percent + '%';
+}
+
+function showMatchResults() {
+  const resultsDiv = document.getElementById('matchResults');
+  const totalQuestions = matchedData.length;
+  const matchedQuestions = matchedData.filter(m => m.matched).length;
+  const matchRate = totalQuestions > 0 ? Math.round((matchedQuestions / totalQuestions) * 100) : 0;
+  
+  document.getElementById('questionsFound').textContent = totalQuestions;
+  document.getElementById('answersMatched').textContent = matchedQuestions;
+  document.getElementById('matchRate').textContent = matchRate + '%';
+  
+  resultsDiv.style.display = 'block';
+}
+
+async function downloadFilledDocument() {
+    if (!uploadedFile || !uploadedFile.name) {
+        alert('Please upload a file first.');
+        return;
+    }
+
+    if (!matchedData || matchedData.filter(m => m.matchedAnswer).length === 0) {
+        alert('No data was matched or processed to fill.');
+        return;
+    }
+
+    try {
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+
+        const doc = new Document({
+            sections: [{
+                children: [
+                    new Paragraph({
+                        children: [
+                            new TextRun({ text: "Auto-Filled Survey Results\n\n", size: 36, bold: true })
+                        ]
+                    }),
+                    ...matchedData
+                        .filter(item => item.matchedAnswer) 
+                        .map(item => new Paragraph({
+                            spacing: { after: 200 },
+                            children: [
+                                new TextRun({ text: item.question, bold: true, size: 24 }),
+                                new TextRun({ text: ': ', bold: true, size: 24 }),
+                                new TextRun({ text: item.matchedAnswer || '', size: 24 })
+                            ]
+                        }))
+                ]
+            }]
+        });
+
+        const filledBlob = await Packer.toBlob(doc);
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(filledBlob);
+        
+        const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx|xlsx|xls)$/i, '');
+        link.download = `Filled_${originalName}.docx`; 
+        
+        link.click();
+        URL.revokeObjectURL(link.href);
+
+    } catch (error) {
+        console.error('Error downloading filled document:', error);
+        alert('Error downloading filled document: ' + error.message);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkSession();
+    loadSidebarMenu(currentProduct);
+    updateContent();
+    setupFileUpload();
+});
+</script>
+
+<footer class="footer-regis">
+  <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+</body>
+</html>
