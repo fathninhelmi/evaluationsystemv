@@ -1202,35 +1202,33 @@ async function fillWordDocument(templateFile, matchedData) {
     return blob;
 }
 
-async function downloadFilledDocument(file, matchedData) {
-    const fileName = file.name;
-    const extension = fileName.split('.').pop().toLowerCase();
-
-    let blob;
-
-    try {
-        if (extension === 'pdf') {
-            // PDF workflow
-            blob = await fillPDFDocument(file, matchedData);
-        } else if (extension === 'docx') {
-            // DOCX workflow
-            blob = await fillWordDocument(file, matchedData);
-        } else {
-            alert('Unsupported file type! Please upload PDF or DOCX.');
-            return;
-        }
-
-        // Trigger download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        URL.revokeObjectURL(url);
-    } catch (err) {
-        console.error('Error filling document:', err);
-        alert('Failed to fill document. Check console for details.');
+async function downloadFilledDocument() {
+    if (!uploadedFile || !uploadedFile.name) {
+        alert('Please upload a file first.');
+        return;
     }
+
+    if (!matchedData) {
+        alert('No data to fill.');
+        return;
+    }
+
+    const fileType = uploadedFile.name.split('.').pop().toLowerCase();
+    let filledBlob;
+
+    if (fileType === 'pdf') {
+        filledBlob = await fillPDFDocument(uploadedFile, matchedData);
+    } else if (fileType === 'doc' || fileType === 'docx') {
+        filledBlob = await fillWordDocument(uploadedFile, matchedData);
+    } else {
+        alert('Unsupported file type for auto-fill.');
+        return;
+    }
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(filledBlob);
+    link.download = `Filled_${uploadedFile.name}`;
+    link.click();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1246,5 +1244,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
