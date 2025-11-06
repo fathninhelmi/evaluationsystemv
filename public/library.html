@@ -29,7 +29,6 @@
       </button>
     </div>
 
-    <!-- tab solution-->
     <div class="content-tabs">
       <div class="tab-headers">
         <button class="tab-header active" onclick="switchProduct('spi')">
@@ -63,7 +62,6 @@
           </div>
         </div>
 
-        <!-- sub product -->
         <div class="library-sidebar">
           <div class="sidebar-menu">
             <div class="sidebar-header" id="sidebarTitle">SUB MENU</div>
@@ -77,7 +75,6 @@
   </div>
 </main>
 
-<!-- Upload Modal -->
 <div id="uploadModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeUploadModal()">&times;</span>
@@ -178,6 +175,8 @@ let surveyLibrary = {};
 let uploadedFile = null;
 let extractedText = '';
 let matchedData = [];
+// 🚨 ADDED: Variable to store structured PDF text (with coordinates)
+let extractedPdfItems = []; 
 
 async function checkSession() {
     try {
@@ -446,6 +445,7 @@ function resetUploadForm() {
   uploadedFile = null;
   extractedText = '';
   matchedData = [];
+  extractedPdfItems = []; // 🚨 ADDED: Clear structured PDF data
   document.getElementById('fileInput').value = '';
   document.getElementById('filePreview').style.display = 'none';
   document.getElementById('processingStatus').style.display = 'none';
@@ -572,7 +572,9 @@ async function loadSurveyLibrary() {
         
         let text = '';
         if (file.mimeType === 'application/pdf') {
-          text = await extractTextFromPDF(blob);
+          // Note: When loading library, we just need text, not structured items
+          const pdfItems = await extractTextFromPDF(blob); 
+          text = pdfItems.map(item => item.text).join('\n');
         } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
           text = await extractTextFromWord(blob);
         }
@@ -710,7 +712,8 @@ function parseQuestionsAndAnswers(text) {
   return qaData;
 }
 
-function extractQuestions(text) {
+// 🚨 MODIFIED: Passed pdfItems array to function signature
+function extractQuestions(text, pdfItems = []) {
   const fields = [];
   const lines = text.split('\n');
   
@@ -775,10 +778,18 @@ function extractQuestions(text) {
       if ((hasSpecKeyword || (startsWithCap && wordCount >= 2 && wordCount <= 8)) && 
           !fields.some(f => f.text === fieldName)) {
         
+        // 🚨 ADDED: Find the corresponding PDF item to get the coordinates
+        const pdfItem = pdfItems.find(item => item.lineNumber === index + 1);
+        
         fields.push({
           text: fieldName,
           originalLine: originalLine.trim(),
-          lineNumber: index + 1
+          lineNumber: index + 1,
+          
+          // 🚨 ADDED: Capture coordinates and page from the PDF item
+          x: pdfItem ? pdfItem.x : null,
+          y: pdfItem ? pdfItem.y : null,
+          page: pdfItem ? pdfItem.page : null
         });
       }
     }
@@ -821,9 +832,12 @@ async function processDocument() {
   
   try {
     if (uploadedFile.type === 'application/pdf') {
-      extractedText = await extractTextFromPDF(uploadedFile);
+      // 🚨 MODIFIED: Store structured data and create text string from it
+      extractedPdfItems = await extractTextFromPDF(uploadedFile);
+      extractedText = extractedPdfItems.map(item => item.text).join('\n');
     } else {
       extractedText = await extractTextFromWord(uploadedFile);
+      extractedPdfItems = []; // Clear PDF items for Word documents
     }
     
     console.log('=== EXTRACTION DEBUG ===');
@@ -833,7 +847,9 @@ async function processDocument() {
     
     updateProgress(50);
     showProcessingStatus('Analyzing specification fields...');
-    const fields = extractQuestions(extractedText);
+    
+    // 🚨 MODIFIED: Pass the structured PDF items if available
+    const fields = extractQuestions(extractedText, extractedPdfItems);
     
     console.log('=== FIELDS FOUND ===');
     console.log(`Total specification fields extracted: ${fields.length}`);
@@ -915,18 +931,25 @@ async function extractTextFromPDF(file) {
 
           const itemsByY = {};
           textContent.items.forEach(item => {
-            const y = Math.round(item.transform[5]); // Y coordinate
-            const x = Math.round(item.transform[4]); // X coordinate
+            const y = Math.round(item.transform[5]); // Y coordinate (bottom edge of text)
+            const x = Math.round(item.transform[4]); // X coordinate (left edge of text)
             if (!itemsByY[y]) itemsByY[y] = [];
             itemsByY[y].push({ str: item.str, x });
           });
 
-          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); // Descending
+          const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); // Descending (top to bottom)
           sortedY.forEach(y => {
             const items = itemsByY[y].sort((a, b) => a.x - b.x); // left -> right
             const lineText = items.map(i => i.str).join(' ');
             // Save each line with coordinates and page number
-            allPageItems.push({ text: lineText, x: items[0].x, y: y, page: i });
+            allPageItems.push({ 
+                text: lineText, 
+                x: items[0].x, 
+                y: parseInt(y), // Ensure y is a number
+                page: i,
+                // The lineNumber matches the line index in the final extractedText string + 1
+                lineNumber: allPageItems.length + 1 
+            });
           });
         }
 
@@ -975,13 +998,34 @@ function matchQuestionsWithLibrary(questions, product) {
       }
     });
     
+    // 🚨 ADDED: Coordinate Calculation
+    let insertX = null;
+    let insertY = null;
+    let insertPage = null;
+
+    if (bestMatch && question.x !== null && question.y !== null) {
+        // Assuming the question is on the left, shift the X coordinate to the right.
+        // 350 is a common X position for the answer column in a typical 2-column table. Tune this value if needed.
+        insertX = 350; 
+        
+        // Adjust Y slightly down (e.g., -5) so the text sits right on the line/blank space.
+        // PDF Y-coordinates increase upwards, so a smaller number is lower.
+        insertY = question.y - 5; 
+        insertPage = question.page;
+    }
+    // 🚨 END ADDED: Coordinate Calculation
+
     matches.push({
       question: question.text,
       originalLine: question.originalLine,
       lineNumber: question.lineNumber,
       matchedAnswer: bestMatch ? bestMatch.answer : null,
       confidence: Math.round(highestScore * 100),
-      matched: bestMatch !== null && highestScore > 0.25
+      matched: bestMatch !== null && highestScore > 0.25,
+      // 🚨 ADDED: Store the calculated coordinates for insertion
+      x: insertX, 
+      y: insertY, 
+      page: insertPage
     });
 
     if (bestMatch) {
@@ -1131,120 +1175,97 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
-async function fillPDFDocument(templateFile, matchedData) {
-    const { PDFDocument, rgb, StandardFonts } = PDFLib;
-
-    const arrayBuffer = await templateFile.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(arrayBuffer);
-
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-    const { width, height } = firstPage.getSize();
-
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-    // Helper to remove unsupported characters for WinAnsi font
-    function sanitizeText(text) {
-        return text.replace(/[^\x00-\xFF]/g, ''); // removes non-WinAnsi chars
-    }
-
-    // Simple example: add matched Q&A to the bottom of the first page
-    let yPos = height - 50;
-    matchedData.forEach(item => {
-        const rawText = `${item.question}: ${item.matchedAnswer || ''}`;
-        const text = sanitizeText(rawText); // sanitize text
-        firstPage.drawText(text, {
-            x: 50,
-            y: yPos,
-            size: 10,
-            font: font,
-            color: rgb(0, 0, 0),
-        });
-        yPos -= 15;
-    });
-
-    const pdfBytes = await pdfDoc.save();
-    return new Blob([pdfBytes], { type: 'application/pdf' });
-}
-
-
-async function fillWordDocument(matchedData) {
-    const { Document, Packer, Paragraph, TextRun } = window.docx;
-
-    const doc = new Document();
-
-    matchedData.forEach(item => {
-        const answerText = item.matchedAnswer || '';
-        doc.addSection({
-            children: [
-                new Paragraph({
-                    children: [
-                        new TextRun({ text: item.question + ': ', bold: true }),
-                        new TextRun({ text: answerText })
-                    ]
-                })
-            ]
-        });
-    });
-
-    const blob = await Packer.toBlob(doc);
-    return blob;
-}
-
+// 🚨 MODIFIED: Consolidated PDF filling logic to use coordinates
 async function downloadFilledDocument() {
-    const arrayBuffer = await uploadedFile.arrayBuffer();
-    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-    const pages = pdfDoc.getPages();
-    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-
-    matchedData.forEach(match => {
-      if (!match.matchedAnswer) return;
-      const page = pages[0]; // if multiple pages, adjust page index
-      // Use extracted x/y from processDocument
-      const x = match.x || 50;  // fallback if no coordinates
-      const y = match.y || 700; // fallback if no coordinates
-      page.drawText(match.matchedAnswer, { x, y, size: 10, font });
-    });
-
-    const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'filled-survey.pdf';
-    a.click();
-    URL.revokeObjectURL(url);
     if (!uploadedFile || !uploadedFile.name) {
         alert('Please upload a file first.');
         return;
     }
 
-    if (!matchedData) {
-        alert('No data to fill.');
+    if (!matchedData || matchedData.filter(m => m.matchedAnswer).length === 0) {
+        alert('No data was matched or processed to fill.');
         return;
     }
 
     const fileType = uploadedFile.name.split('.').pop().toLowerCase();
     let filledBlob;
 
-    if (fileType === 'pdf') {
-        filledBlob = await fillPDFDocument(uploadedFile, matchedData);
-    } else if (fileType === 'doc' || fileType === 'docx') {
-        filledBlob = await fillWordDocument(uploadedFile, matchedData);
-    } else {
-        alert('Unsupported file type for auto-fill.');
-        return;
-    }
+    try {
+        if (fileType === 'pdf') {
+            const { PDFDocument, StandardFonts, rgb } = PDFLib;
+            const arrayBuffer = await uploadedFile.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(arrayBuffer);
+            const pages = pdfDoc.getPages();
+            // Embed font once
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    if (fileType === 'doc' || fileType === 'docx') {
-    filledBlob = await fillWordDocument(matchedData);
-    }
+            // Helper to remove unsupported characters for WinAnsi font
+            function sanitizeText(text) {
+                // Removes non-WinAnsi chars, which can break PDF text drawing
+                return text.replace(/[^\x00-\xFF]/g, ''); 
+            }
 
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(filledBlob);
-    link.download = `Filled_${uploadedFile.name}`;
-    link.click();
+            matchedData.forEach(match => {
+                // 🚨 Crucial Check: Only draw if we have an answer AND valid coordinates
+                if (match.matchedAnswer && match.x !== null && match.y !== null && match.page !== null) {
+                    
+                    // Get the correct page (PDFLib pages array is 0-indexed, your page number is 1-indexed)
+                    const targetPage = pages[match.page - 1]; 
+                    
+                    if (targetPage) {
+                        const sanitizedAnswer = sanitizeText(match.matchedAnswer);
+                        
+                        // 🚨 Use the calculated coordinates for precise placement
+                        targetPage.drawText(sanitizedAnswer, { 
+                            x: match.x, 
+                            y: match.y, 
+                            size: 10, 
+                            font: font,
+                            color: rgb(0, 0, 0) // Ensure black color
+                        });
+                    }
+                }
+            });
+
+            const pdfBytes = await pdfDoc.save();
+            filledBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+            
+        } else if (fileType === 'doc' || fileType === 'docx') {
+            // Logic for Word documents (re-implemented from original using docx library)
+            const { Document, Packer, Paragraph, TextRun } = window.docx;
+
+            const doc = new Document({
+                sections: matchedData.map(item => ({
+                    children: [
+                        new Paragraph({
+                            children: [
+                                new TextRun({ text: item.question + ': ', bold: true }),
+                                new TextRun({ text: item.matchedAnswer || '' })
+                            ]
+                        })
+                    ]
+                }))
+            });
+
+            filledBlob = await Packer.toBlob(doc);
+
+        } else {
+            alert('Unsupported file type for auto-fill.');
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(filledBlob);
+        link.download = `Filled_${uploadedFile.name}`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+
+    } catch (error) {
+        console.error('Error downloading filled document:', error);
+        alert('Error downloading filled document: ' + error.message);
+    }
 }
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
