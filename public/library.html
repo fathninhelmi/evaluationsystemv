@@ -1020,13 +1020,20 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
+/**
+ * FIX: This function is updated to create a highly structured, new DOCX file 
+ * containing the matched data, which is the closest practical alternative to 
+ * modifying the original file's complex layout using only browser-based docx libraries.
+ */
 async function downloadFilledDocument() {
     if (!uploadedFile || !uploadedFile.name) {
         alert('Please upload a file first.');
         return;
     }
 
-    if (!matchedData || matchedData.filter(m => m.matchedAnswer).length === 0) {
+    const filledAnswers = matchedData.filter(m => m.matchedAnswer);
+
+    if (!filledAnswers || filledAnswers.length === 0) {
         alert('No data was matched or processed to fill.');
         return;
     }
@@ -1034,34 +1041,64 @@ async function downloadFilledDocument() {
     try {
         const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
 
-        const doc = new Document({
-            sections: [{
-                children: [
+        const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx)$/i, '');
+        const docTitle = `Auto-Filled Survey: ${originalName}`;
+
+        // Create the DOCX content section
+        const documentSections = [{
+            children: [
+                new Paragraph({ // Document Title
+                    heading: HeadingLevel.TITLE,
+                    alignment: 'center',
+                    children: [
+                        new TextRun({ text: docTitle, size: 48, bold: true, color: "1F4E79" })
+                    ]
+                }),
+                new Paragraph({ // Subtitle/Status
+                    children: [
+                        new TextRun({ text: `Processing Date: ${new Date().toLocaleDateString()}`, size: 24, break: 1 }),
+                        new TextRun({ text: `Total Fields Found: ${matchedData.length}`, break: 1 }),
+                        new TextRun({ text: `Answers Auto-Matched: ${filledAnswers.length}`, break: 1 })
+                    ],
+                    spacing: { after: 400 }
+                }),
+                
+                // List the matched Q&A pairs
+                ...filledAnswers.map(item => [
                     new Paragraph({
                         children: [
-                            new TextRun({ text: "Auto-Filled Survey Results\n\n", size: 36, bold: true })
-                        ]
+                            new TextRun({ 
+                                text: `${item.question}`, 
+                                bold: true, 
+                                size: 28, 
+                                color: "000000" 
+                            })
+                        ],
+                        spacing: { before: 300 }
                     }),
-                    ...matchedData
-                        .filter(item => item.matchedAnswer) 
-                        .map(item => new Paragraph({
-                            spacing: { after: 200 },
-                            children: [
-                                new TextRun({ text: item.question, bold: true, size: 24 }),
-                                new TextRun({ text: ': ', bold: true, size: 24 }),
-                                new TextRun({ text: item.matchedAnswer || '', size: 24 })
-                            ]
-                        }))
-                ]
-            }]
+                    new Paragraph({
+                        children: [
+                            new TextRun({ 
+                                text: item.matchedAnswer || 'No answer found.', 
+                                size: 26,
+                                color: "333333" 
+                            })
+                        ],
+                        indent: { left: 360 }, // Indent the answer slightly
+                        spacing: { after: 200 }
+                    })
+                ]).flat() // Flattens the array of [Question, Answer] pairs
+            ]
+        }];
+
+        const doc = new Document({
+            sections: documentSections
         });
 
         const filledBlob = await Packer.toBlob(doc);
 
         const link = document.createElement('a');
         link.href = URL.createObjectURL(filledBlob);
-        
-        const originalName = uploadedFile.name.replace(/\.(pdf|doc|docx)$/i, '');
         link.download = `Filled_${originalName}.docx`; 
         
         link.click();
@@ -1072,6 +1109,7 @@ async function downloadFilledDocument() {
         alert('Error downloading filled document: ' + error.message);
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
