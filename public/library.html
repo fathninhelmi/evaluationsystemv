@@ -8,10 +8,9 @@
 <link rel="stylesheet" href="./style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@7.7.0/build/index.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <header class="header">
@@ -147,7 +146,7 @@
           <i class="fas fa-magic"></i> Process & Auto-Fill
         </button>
         <button class="btn-success" id="downloadBtn" onclick="downloadFilledDocument()" style="display: none;">
-          <i class="fas fa-download"></i> Download Filled Document
+          <i class="fas fa-download"></i> Download Filled Spreadsheet
         </button>
       </div>
     </div>
@@ -1080,19 +1079,6 @@ function extractKeyTerms(text) {
   return technicalTerms;
 }
 
-function calculateSimilarity(str1, str2) {
-  const words1 = str1.toLowerCase().split(/\s+/);
-  const words2 = str2.toLowerCase().split(/\s+/);
-  
-  const set1 = new Set(words1);
-  const set2 = new Set(words2);
-  
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
-  const union = new Set([...set1, ...set2]);
-  
-  return intersection.size / union.size;
-}
-
 function showProcessingStatus(message) {
   const status = document.getElementById('processingStatus');
   const statusMessage = document.getElementById('statusMessage');
@@ -1125,327 +1111,131 @@ async function downloadFilledDocument() {
   }
 
   try {
-    showProcessingStatus('Preparing filled document...');
+    showProcessingStatus('Preparing filled spreadsheet...');
     
-    if (uploadedFile.type.includes('word') || uploadedFile.name.endsWith('.docx')) {
-      await fillWordDocument();
-    } 
-    else if (uploadedFile.type === 'application/pdf') {
-      await fillPDFAsWord();
-    }
+    // Create Excel workbook
+    await fillExcelSpreadsheet();
     
     document.getElementById('processingStatus').style.display = 'none';
   } catch (error) {
-    console.error('Error creating filled document:', error);
+    console.error('Error creating filled spreadsheet:', error);
     document.getElementById('processingStatus').style.display = 'none';
-    alert('Error creating document: ' + error.message);
+    alert('Error creating spreadsheet: ' + error.message);
   }
 }
 
-async function fillWordDocument() {
-  const arrayBuffer = await uploadedFile.arrayBuffer();
+async function fillExcelSpreadsheet() {
+  console.log('Creating Excel spreadsheet with filled data...');
   
-  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = window.docx;
+  // Prepare data for Excel
+  const excelData = [];
   
-  const htmlResult = await mammoth.convertToHtml({ arrayBuffer });
-  const htmlContent = htmlResult.value;
+  // Add header row
+  excelData.push(['Field/Question', 'Answer/Value', 'Match Confidence', 'Status']);
   
-  console.log('Processing Word document with tables...');
-  console.log('Found', matchedData.filter(m => m.matched).length, 'matched answers to fill');
-  
-  const answerLookup = new Map();
+  // Add all matched data
   matchedData.forEach(item => {
-    if (item.matched && item.matchedAnswer) {
-      const normalizedQuestion = item.question.toLowerCase().trim().replace(/[:\s]+$/, '');
-      answerLookup.set(normalizedQuestion, item.matchedAnswer);
-    }
+    const row = [
+      item.question,
+      item.matchedAnswer || '',
+      item.matched ? `${item.confidence}%` : 'No Match',
+      item.matched ? 'Auto-Filled' : 'Manual Entry Required'
+    ];
+    excelData.push(row);
   });
   
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlContent, 'text/html');
+  // Create workbook
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(excelData);
   
-  const docElements = [];
+  // Set column widths
+  const colWidths = [
+    { wch: 50 },  // Field/Question column
+    { wch: 60 },  // Answer/Value column
+    { wch: 15 },  // Match Confidence column
+    { wch: 20 }   // Status column
+  ];
+  ws['!cols'] = colWidths;
   
-  const bodyChildren = doc.body.children;
+  // Style header row (row 1)
+  const headerStyle = {
+    font: { bold: true, color: { rgb: "FFFFFF" } },
+    fill: { fgColor: { rgb: "4472C4" } },
+    alignment: { horizontal: "center", vertical: "center" }
+  };
   
-  for (let element of bodyChildren) {
-    if (element.tagName === 'TABLE') {
-      const tableRows = [];
-      const rows = element.querySelectorAll('tr');
+  // Apply styling to filled cells (highlight auto-filled answers)
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let R = 0; R <= range.e.r; R++) {
+    for (let C = 0; C <= range.e.c; C++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+      if (!ws[cellAddress]) continue;
       
-      rows.forEach(row => {
-        const cells = row.querySelectorAll('td, th');
-        const tableCells = [];
-        
-        cells.forEach((cell, index) => {
-          let cellText = cell.textContent.trim();
-          const cellLower = cellText.toLowerCase();
-          let isBold = false;
-          
-          if (index === 0) {
-            const nextCell = cells[index + 1];
-            if (nextCell) {
-              const nextText = nextCell.textContent.trim();
-              
-              for (const [fieldName, answer] of answerLookup.entries()) {
-                if (cellLower.includes(fieldName)) {
-                  nextCell.setAttribute('data-fill', answer);
-                  break;
-                }
-              }
-            }
-          }
-          else if (cell.hasAttribute('data-fill')) {
-            cellText = cell.getAttribute('data-fill');
-            isBold = true;
-            console.log(`✓ Filled table cell with: ${cellText.substring(0, 50)}...`);
-          }
-          else if ((!cellText || cellText.length < 5) && index > 0) {
-            const prevCell = cells[index - 1];
-            if (prevCell) {
-              const prevText = prevCell.textContent.trim().toLowerCase();
-              for (const [fieldName, answer] of answerLookup.entries()) {
-                if (prevText.includes(fieldName)) {
-                  cellText = answer;
-                  isBold = true;
-                  console.log(`✓ Filled empty cell with: ${cellText.substring(0, 50)}...`);
-                  break;
-                }
-              }
-            }
-          }
-          
-          tableCells.push(
-            new TableCell({
-              children: [new Paragraph({
-                children: [new TextRun({ text: cellText, bold: isBold })]
-              })],
-              width: { size: index === 0 ? 40 : 60, type: WidthType.PERCENTAGE }
-            })
-          );
-        });
-        
-        if (tableCells.length > 0) {
-          tableRows.push(new TableRow({ children: tableCells }));
-        }
-      });
-      
-      if (tableRows.length > 0) {
-        docElements.push(new Table({
-          rows: tableRows,
-          width: { size: 100, type: WidthType.PERCENTAGE }
-        }));
+      // Header row styling
+      if (R === 0) {
+        ws[cellAddress].s = headerStyle;
       }
-    } else if (element.tagName === 'P') {
-      let text = element.textContent.trim();
-      let isBold = false;
-      
-      if (text) {
-        const textLower = text.toLowerCase();
-        
-        for (const [fieldName, answer] of answerLookup.entries()) {
-          if (textLower.includes(fieldName) && text.includes(':')) {
-            const parts = text.split(':');
-            if (parts[1] && parts[1].trim().length < 5) {
-              text = `${parts[0]}: ${answer}`;
-              isBold = true;
-              console.log(`✓ Filled paragraph: ${parts[0]} -> ${answer.substring(0, 50)}...`);
-              break;
-            }
-          }
-        }
+      // Highlight auto-filled answers in column B (Answer/Value)
+      else if (C === 1 && matchedData[R - 1] && matchedData[R - 1].matched) {
+        ws[cellAddress].s = {
+          fill: { fgColor: { rgb: "C6EFCE" } },  // Light green background
+          font: { bold: true }
+        };
       }
-      
-      docElements.push(new Paragraph({
-        children: [new TextRun({ text: text, bold: isBold })]
-      }));
+      // Highlight empty answers that need manual entry
+      else if (C === 1 && (!matchedData[R - 1] || !matchedData[R - 1].matched)) {
+        ws[cellAddress].s = {
+          fill: { fgColor: { rgb: "FFC7CE" } }  // Light red background
+        };
+      }
     }
   }
   
-  const newDoc = new Document({
-    sections: [{
-      properties: {},
-      children: docElements
-    }]
-  });
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(wb, ws, 'Survey Data');
   
-  const blob = await Packer.toBlob(newDoc);
-  const filename = uploadedFile.name.replace(/\.docx?$/i, '') + '_filled.docx';
-  downloadBlob(blob, filename);
+  // Add summary sheet
+  const summaryData = [
+    ['Paper Survey Processing Summary'],
+    [''],
+    ['Original File:', uploadedFile.name],
+    ['Product Category:', document.getElementById('productSelect').value.toUpperCase()],
+    ['Processing Date:', new Date().toLocaleString()],
+    [''],
+    ['Statistics:'],
+    ['Total Fields Found:', matchedData.length],
+    ['Auto-Filled Fields:', matchedData.filter(m => m.matched).length],
+    ['Manual Entry Required:', matchedData.filter(m => !m.matched).length],
+    ['Match Rate:', `${Math.round((matchedData.filter(m => m.matched).length / matchedData.length) * 100)}%`],
+    [''],
+    ['Instructions:'],
+    ['1. Green highlighted cells = Auto-filled from library (please review)'],
+    ['2. Red highlighted cells = Require manual entry'],
+    ['3. Review all auto-filled content before sending to customer'],
+    ['4. Fill in any missing information in red cells'],
+    ['5. You can edit any cell as needed']
+  ];
   
-  console.log('Word document with tables filled successfully');
-}
-
-async function fillPDFAsWord() {
-  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = window.docx;
+  const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+  summaryWs['!cols'] = [{ wch: 30 }, { wch: 50 }];
   
-  console.log('Converting PDF to filled Word document with table structure...');
-  
-  const answerLookup = new Map();
-  matchedData.forEach(item => {
-    if (item.matched && item.matchedAnswer) {
-      const normalizedQuestion = item.question.toLowerCase().trim().replace(/[:\s]+$/, '');
-      answerLookup.set(normalizedQuestion, item.matchedAnswer);
-    }
-  });
-  
-  console.log('Filling', answerLookup.size, 'fields in PDF content');
-  
-  const docElements = [];
-  
-  const lines = extractedText.split('\n');
-  let currentTable = [];
-  let inTable = false;
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    
-    if (!line) {
-      if (inTable && currentTable.length > 0) {
-        docElements.push(createTableFromLines(currentTable, answerLookup));
-        currentTable = [];
-        inTable = false;
-      }
-      docElements.push(new Paragraph({ children: [new TextRun('')] }));
-      continue;
-    }
-    
-    const hasColon = line.includes(':');
-    const looksLikeField = /^[A-Za-z][A-Za-z\s\-\/&()]{3,}/.test(line) && line.length < 150;
-    
-    if ((hasColon || looksLikeField) && !line.match(/^(page|confidential)/i)) {
-      inTable = true;
-      currentTable.push(line);
-    } else {
-      if (inTable && currentTable.length > 0) {
-        docElements.push(createTableFromLines(currentTable, answerLookup));
-        currentTable = [];
-        inTable = false;
-      }
-      
-      let text = line;
-      let isBold = false;
-      const lineLower = line.toLowerCase();
-      
-      for (const [fieldName, answer] of answerLookup.entries()) {
-        if (lineLower.includes(fieldName) && line.includes(':')) {
-          const parts = line.split(':');
-          if (parts[1] && parts[1].trim().length < 5) {
-            text = `${parts[0]}: ${answer}`;
-            isBold = true;
-            break;
-          }
-        }
-      }
-      
-      docElements.push(new Paragraph({
-        children: [new TextRun({ text, bold: isBold })]
-      }));
-    }
+  // Style summary sheet title
+  if (summaryWs['A1']) {
+    summaryWs['A1'].s = {
+      font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "4472C4" } },
+      alignment: { horizontal: "center" }
+    };
   }
   
-  if (currentTable.length > 0) {
-    docElements.push(createTableFromLines(currentTable, answerLookup));
-  }
+  XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
   
-  const doc = new Document({
-    sections: [{
-      properties: {},
-      children: docElements
-    }]
-  });
+  // Generate Excel file
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   
-  const blob = await Packer.toBlob(doc);
-  const filename = uploadedFile.name.replace(/\.pdf$/i, '') + '_filled.docx';
-  downloadBlob(blob, filename);
-  
-  console.log('PDF converted to filled Word document with tables successfully');
-}
-
-function createTableFromLines(lines, answerLookup) {
-  const { Table, TableRow, TableCell, Paragraph, TextRun, WidthType } = window.docx;
-  
-  const tableRows = [];
-  
-  lines.forEach(line => {
-    const colonIndex = line.indexOf(':');
-    
-    if (colonIndex !== -1) {
-      const field = line.substring(0, colonIndex).trim();
-      let value = line.substring(colonIndex + 1).trim();
-      const fieldLower = field.toLowerCase();
-      let isBold = false;
-      
-      for (const [fieldName, answer] of answerLookup.entries()) {
-        if (fieldLower.includes(fieldName) || fieldName.includes(fieldLower)) {
-          if (!value || value.length < 5 || value === '_____' || value === '---') {
-            value = answer;
-            isBold = true;
-            console.log(`✓ Filled table: ${field} -> ${answer.substring(0, 50)}...`);
-            break;
-          }
-        }
-      }
-      
-      tableRows.push(new TableRow({
-        children: [
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun(field)] })],
-            width: { size: 40, type: WidthType.PERCENTAGE }
-          }),
-          new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: value, bold: isBold })] })],
-            width: { size: 60, type: WidthType.PERCENTAGE }
-          })
-        ]
-      }));
-    } else {
-      const lineLower = line.toLowerCase();
-      let value = '';
-      let isBold = false;
-      
-      for (const [fieldName, answer] of answerLookup.entries()) {
-        if (lineLower.includes(fieldName) || fieldName.includes(lineLower)) {
-          value = answer;
-          isBold = true;
-          console.log(`✓ Filled table row: ${line} -> ${answer.substring(0, 50)}...`);
-          break;
-        }
-      }
-      
-      if (value) {
-        tableRows.push(new TableRow({
-          children: [
-            new TableCell({
-              children: [new Paragraph({ children: [new TextRun(line)] })],
-              width: { size: 40, type: WidthType.PERCENTAGE }
-            }),
-            new TableCell({
-              children: [new Paragraph({ children: [new TextRun({ text: value, bold: isBold })] })],
-              width: { size: 60, type: WidthType.PERCENTAGE }
-            })
-          ]
-        }));
-      } else {
-        tableRows.push(new TableRow({
-          children: [
-            new TableCell({
-              children: [new Paragraph({ children: [new TextRun(line)] })],
-              columnSpan: 2
-            })
-          ]
-        }));
-      }
-    }
-  });
-  
-  return new Table({
-    rows: tableRows,
-    width: { size: 100, type: WidthType.PERCENTAGE }
-  });
-}
-
-function downloadBlob(blob, filename) {
+  // Download file
+  const filename = uploadedFile.name.replace(/\.(pdf|docx?)$/i, '') + '_filled.xlsx';
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = filename;
@@ -1454,22 +1244,23 @@ function downloadBlob(blob, filename) {
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
   
-  console.log('✓ Document downloaded:', filename);
+  console.log('✓ Excel spreadsheet downloaded:', filename);
   
   const matchedCount = matchedData.filter(m => m.matched).length;
-  const originalFormat = uploadedFile.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'Word';
+  const totalCount = matchedData.length;
+  const unmatchedCount = totalCount - matchedCount;
   
-  alert(`Document filled successfully!\n\n` +
-        `• Original format: ${originalFormat}\n` +
-        `• Output format: Word (DOCX)\n` +
-        `• ${matchedCount} fields were auto-filled with matched answers\n` +
-        `• Filled fields are shown in bold for easy review\n` +
-        `• File saved as: ${filename}\n\n` +
-        `Please review the content before sending to customer.`);
-}
-
-function escapeRegex(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\      const score = calculateEnhancedSimilarity(question.text, libraryItem.question);');
+  alert(`Spreadsheet created successfully!\n\n` +
+        `📊 Summary:\n` +
+        `• Total fields: ${totalCount}\n` +
+        `• Auto-filled: ${matchedCount} (highlighted in green)\n` +
+        `• Manual entry needed: ${unmatchedCount} (highlighted in red)\n` +
+        `• Match rate: ${Math.round((matchedCount / totalCount) * 100)}%\n\n` +
+        `📝 The spreadsheet contains:\n` +
+        `• Sheet 1: Survey data in table format\n` +
+        `• Sheet 2: Summary and instructions\n\n` +
+        `✅ File saved as: ${filename}\n\n` +
+        `Please review and complete all fields before sending to customer.`);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1485,4 +1276,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
