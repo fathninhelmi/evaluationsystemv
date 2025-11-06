@@ -1148,10 +1148,16 @@ async function fillPDFDocument(templateFile, matchedData) {
 
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
+    // Helper to remove unsupported characters for WinAnsi font
+    function sanitizeText(text) {
+        return text.replace(/[^\x00-\xFF]/g, ''); // removes non-WinAnsi chars
+    }
+
     // Simple example: add matched Q&A to the bottom of the first page
     let yPos = height - 50;
     matchedData.forEach(item => {
-        const text = `${item.question}: ${item.matchedAnswer || ''}`;
+        const rawText = `${item.question}: ${item.matchedAnswer || ''}`;
+        const text = sanitizeText(rawText); // sanitize text
         firstPage.drawText(text, {
             x: 50,
             y: yPos,
@@ -1165,6 +1171,7 @@ async function fillPDFDocument(templateFile, matchedData) {
     const pdfBytes = await pdfDoc.save();
     return new Blob([pdfBytes], { type: 'application/pdf' });
 }
+
 
 async function fillWordDocument(templateFile, matchedData) {
     // Read the uploaded template as ArrayBuffer
@@ -1195,27 +1202,36 @@ async function fillWordDocument(templateFile, matchedData) {
     return blob;
 }
 
-async function downloadFilledDocument() {
-    if (!uploadedFile || !matchedData) return;
+async function downloadFilledDocument(file, matchedData) {
+    const fileName = file.name;
+    const extension = fileName.split('.').pop().toLowerCase();
 
-    const fileType = uploadedFile.name.split('.').pop().toLowerCase();
-    let filledBlob;
+    let blob;
 
-    if (fileType === 'pdf') {
-        filledBlob = await fillPDFDocument(uploadedFile, matchedData);
-    } else if (fileType === 'doc' || fileType === 'docx') {
-        filledBlob = await fillWordDocument(uploadedFile, matchedData);
-    } else {
-        alert('Unsupported file type for auto-fill.');
-        return;
+    try {
+        if (extension === 'pdf') {
+            // PDF workflow
+            blob = await fillPDFDocument(file, matchedData);
+        } else if (extension === 'docx') {
+            // DOCX workflow
+            blob = await fillWordDocument(file, matchedData);
+        } else {
+            alert('Unsupported file type! Please upload PDF or DOCX.');
+            return;
+        }
+
+        // Trigger download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error('Error filling document:', err);
+        alert('Failed to fill document. Check console for details.');
     }
-
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(filledBlob);
-    link.download = `Filled_${uploadedFile.name}`;
-    link.click();
 }
-
 
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
@@ -1230,4 +1246,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
