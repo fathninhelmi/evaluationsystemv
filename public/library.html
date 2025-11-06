@@ -14,10 +14,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
+
 <header class="header">
     <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
-    <nav class="nav-desktop" id="navMenu">
-    </nav>
+    <nav class="nav-desktop" id="navMenu"></nav>
 </header>
 
 <main class="main-library">
@@ -29,33 +29,18 @@
       </button>
     </div>
 
-    <!-- tab solution-->
     <div class="content-tabs">
       <div class="tab-headers">
-        <button class="tab-header active" onclick="switchProduct('spi')">
-          <i></i> SPI
-        </button>
-        <button class="tab-header" onclick="switchProduct('aoi')">
-          <i></i> AOI
-        </button>
-        <button class="tab-header" onclick="switchProduct('axi')">
-          <i></i> AXI
-        </button>
-        <button class="tab-header" onclick="switchProduct('arv')">
-          <i></i> ARV
-        </button>
-        <button class="tab-header" onclick="switchProduct('vone')">
-          <i></i> V-ONE
-        </button>
-        <button class="tab-header" onclick="switchProduct('xc')">
-          <i></i> XC
-        </button>
-        <button class="tab-header" onclick="switchProduct('xs')">
-          <i></i> XS
-        </button>
+        <button class="tab-header active" onclick="switchProduct('spi')">SPI</button>
+        <button class="tab-header" onclick="switchProduct('aoi')">AOI</button>
+        <button class="tab-header" onclick="switchProduct('axi')">AXI</button>
+        <button class="tab-header" onclick="switchProduct('arv')">ARV</button>
+        <button class="tab-header" onclick="switchProduct('vone')">V-ONE</button>
+        <button class="tab-header" onclick="switchProduct('xc')">XC</button>
+        <button class="tab-header" onclick="switchProduct('xs')">XS</button>
       </div>
 
-        <div class="library-layout">
+      <div class="library-layout">
         <div class="library-content">
           <div class="content-box" id="mainContent">
             <h2>Welcome to the Product Paper Survey Library</h2>
@@ -63,13 +48,10 @@
           </div>
         </div>
 
-        <!-- sub product -->
         <div class="library-sidebar">
           <div class="sidebar-menu">
             <div class="sidebar-header" id="sidebarTitle">SUB MENU</div>
-            <div id="sidebarLinks">
-            </div>
-            </div>
+            <div id="sidebarLinks"></div>
           </div>
         </div>
       </div>
@@ -91,7 +73,7 @@
         <p class="file-info">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
         <input type="file" id="fileInput" accept=".pdf,.doc,.docx" style="display: none;">
       </div>
-      
+
       <div id="filePreview" class="file-preview" style="display: none;">
         <div class="file-preview-item">
           <i class="fas fa-file-pdf"></i>
@@ -99,12 +81,10 @@
             <span class="file-name" id="fileName"></span>
             <span class="file-size" id="fileSize"></span>
           </div>
-          <button class="btn-remove" onclick="removeFile()">
-            <i class="fas fa-times"></i>
-          </button>
+          <button class="btn-remove" onclick="removeFile()"><i class="fas fa-times"></i></button>
         </div>
       </div>
-      
+
       <div class="product-select-group">
         <label for="productSelect">Select Product Category:</label>
         <select id="productSelect" class="product-select">
@@ -117,7 +97,7 @@
           <option value="xs">SMART CODE READER</option>
         </select>
       </div>
-      
+
       <div id="processingStatus" class="processing-status" style="display: none;">
         <div class="spinner"></div>
         <p id="statusMessage">Processing document...</p>
@@ -125,7 +105,7 @@
           <div class="progress-fill" id="progressBar"></div>
         </div>
       </div>
-      
+
       <div id="matchResults" class="match-results" style="display: none;">
         <h3><i class="fas fa-check-circle"></i> Processing Complete</h3>
         <div class="results-summary">
@@ -143,7 +123,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
         <button class="btn-primary" id="processBtn" onclick="processDocument()" disabled>
@@ -159,10 +139,9 @@
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc ='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const { Client, Account, Databases, Query, Storage } = window.Appwrite;
+const { Client, Account, Databases, Storage } = window.Appwrite;
 const client = new Client();
-client.setEndpoint("https://fra.cloud.appwrite.io/v1")
-.setProject("68ddd7de00255d4f5c96");
+client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255d4f5c96");
 
 const account = new Account(client);
 const databases = new Databases(client);
@@ -178,6 +157,11 @@ let surveyLibrary = {};
 let uploadedFile = null;
 let extractedText = '';
 let matchedData = [];
+
+// --- Initialization ---
+checkSession();
+setupFileUpload();
+loadSidebarMenu(currentProduct);
 
 async function checkSession() {
     try {
@@ -1196,53 +1180,65 @@ async function fillWordDocument(matchedData) {
     return blob;
 }
 
-async function downloadFilledDocument() {
-    if (!uploadedFile || !uploadedFile.name) {
-        alert('Please upload a file first.');
-        return;
-    }
+function downloadFilledDocument() {
+  if (!matchedData || matchedData.length === 0) {
+    alert("No data to download.");
+    return;
+  }
+  
+  const { Document, Packer, Paragraph, TextRun } = window.docx;
+  const doc = new Document();
 
-    if (!matchedData) {
-        alert('No data to fill.');
-        return;
-    }
+  matchedData.forEach(item => {
+    const question = item.question;
+    const answer = item.matchedAnswer || '';
+    doc.addSection({
+      properties: {},
+      children: [
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Q: " + question, bold: true }),
+          ]
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: "A: " + answer }),
+          ]
+        }),
+        new Paragraph({ text: "" })
+      ]
+    });
+  });
 
-    const fileType = uploadedFile.name.split('.').pop().toLowerCase();
-    let filledBlob;
-
-    if (fileType === 'pdf') {
-        filledBlob = await fillPDFDocument(uploadedFile, matchedData);
-    } else if (fileType === 'doc' || fileType === 'docx') {
-        filledBlob = await fillWordDocument(uploadedFile, matchedData);
-    } else {
-        alert('Unsupported file type for auto-fill.');
-        return;
-    }
-
-    if (fileType === 'doc' || fileType === 'docx') {
-    filledBlob = await fillWordDocument(matchedData);
-    }
-
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(filledBlob);
-    link.download = `Filled_${uploadedFile.name}`;
-    link.click();
+  Packer.toBlob(doc).then(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'AutoFilled_Survey.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await checkSession();
-    loadSidebarMenu(currentProduct);
-    updateContent();
-    setupFileUpload();
-});
-</script>
+function showProcessingStatus(message) {
+  document.getElementById('processingStatus').style.display = 'block';
+  document.getElementById('statusMessage').textContent = message;
+}
 
-<footer class="footer-regis">
-  <span>© 2025 ViTrox. All rights reserved.</span>
-</footer>
+function updateProgress(percent) {
+  document.getElementById('progressBar').style.width = percent + '%';
+}
+
+function showMatchResults() {
+  const total = matchedData.length;
+  const matched = matchedData.filter(m => m.matched).length;
+  const rate = total ? Math.round((matched / total) * 100) : 0;
+
+  document.getElementById('questionsFound').textContent = total;
+  document.getElementById('answersMatched').textContent = matched;
+  document.getElementById('matchRate').textContent = rate + '%';
+  document.getElementById('matchResults').style.display = 'block';
+}
+</script>
 </body>
 </html>
-
-
-
-
