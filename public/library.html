@@ -80,7 +80,7 @@
   <div class="modal-content">
     <span class="close" onclick="closeUploadModal()">&times;</span>
     <h2><i class="fas fa-file-upload"></i> Upload Paper Survey Document</h2>
-    <p class="modal-description">Upload a customer Paper Survey document (PDF or Word). The system will automatically match questions with answers from previous surveys.</p>
+    <p class="modal-description">Upload a customer Paper Survey document (PDF, Word, or Excel) as a template. The system will auto-fill questions with answers from previous surveys.</p>
     
     <div class="upload-section">
       <div class="file-drop-zone" id="dropZone">
@@ -133,7 +133,7 @@
           </div>
           <div class="result-stat">
             <span class="stat-number" id="answersMatched">0</span>
-            <span class="stat-label">Answers Matched</span>
+            <span class="stat-label">Answers Matched (New DOCX)</span>
           </div>
           <div class="result-stat">
             <span class="stat-number" id="matchRate">0%</span>
@@ -158,7 +158,8 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc ='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const { Client, Account, Databases, Query, Storage } = window.Appwrite;
-const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx; // Ensure docx imports are here
+// Destructure all necessary docx components
+const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, BorderStyle } = window.docx; 
 
 const client = new Client();
 client.setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -411,7 +412,7 @@ function updateContent() {
     <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
   `;
 
-html += `
+  html += `
     <div class="resource-grid">
       <div class="resource-card">
         <div class="resource-title">${productName} ${categoryName}</div>
@@ -531,10 +532,10 @@ function displayFilePreview(file) {
   const icon = preview.querySelector('.fa-file-pdf');
   
   // UPDATED: Added logic for Excel icon
-  if (fileType.includes('word')) {
+  if (fileType.includes('word') || fileType.includes('document')) {
     icon.className = 'fas fa-file-word';
     icon.style.color = '#2B579A';
-  } else if (fileType.includes('excel') || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+  } else if (fileType.includes('excel') || fileType.includes('sheet') || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
     icon.className = 'fas fa-file-excel';
     icon.style.color = '#217346';
   } else {
@@ -626,21 +627,20 @@ async function loadSurveyLibrary() {
         
         let text = '';
         const mimeType = file.mimeType.toLowerCase();
+        const filenameLower = file.name.toLowerCase();
 
         if (mimeType === 'application/pdf') {
-          const pdfItems = await extractTextFromPDF(blob); 
+          // Note: Using the basic text extraction for library parsing is sufficient
+          const pdfItems = await extractTextFromPDF(blob, true); 
           text = pdfItems.map(item => item.text).join('\n');
         } else if (mimeType.includes('word') || mimeType.includes('document')) {
-          // Use raw text for matching/library building
           text = await extractTextFromWord(blob);
-        } else if (mimeType.includes('excel') || mimeType.includes('sheet') || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
-            // NEW LOGIC: Process Excel files
+        } else if (mimeType.includes('excel') || mimeType.includes('sheet') || filenameLower.endsWith('.xlsx') || filenameLower.endsWith('.xls')) {
             try {
                 text = await extractTextFromExcel(blob);
-                console.log(`Successfully extracted text from Excel file: ${file.name}`);
             } catch (excelError) {
                 console.error(`Error extracting from Excel file ${file.name}:`, excelError);
-                continue; // Skip file if Excel processing fails
+                continue; 
             }
         } else {
             console.warn(`Skipping file ${file.name}: Unsupported MIME type (${mimeType}).`);
@@ -653,7 +653,6 @@ async function loadSurveyLibrary() {
           
           if (surveyLibrary[productType]) {
             surveyLibrary[productType].push(...qaData);
-            console.log(`Added ${qaData.length} Q&A pairs to ${productType}`);
           }
         }
       } catch (fileError) {
@@ -704,7 +703,7 @@ function parseQuestionsAndAnswers(text) {
     const line = lines[i].trim();
     if (!line || line.length < 3) continue;
    
-    if (line.match(/^page\s+\d+/i) || line.match(/^\d+$/) || line.toLowerCase().includes('confidential')) {
+    if (line.match(/^page\s+\d+/i) || line.match(/^\d+$/) || line.toLowerCase().includes('confidential') || line.includes('--- Sheet:')) {
       continue;
     }
 
@@ -757,11 +756,6 @@ function parseQuestionsAndAnswers(text) {
     });
   }
   
-  console.log(`Parsed ${qaData.length} Q&A pairs from library document`);
-  if (qaData.length > 0) {
-    console.log('Sample Q&A:', qaData.slice(0, 3));
-  }
-  
   return qaData;
 }
 
@@ -796,7 +790,8 @@ function extractQuestions(text, pdfItems = []) {
         line.match(/^page\s*\d+/i) || 
         line.match(/^\d+$/) ||
         line.match(/^[0-9\s\.\-]+$/) ||
-        line.toLowerCase().includes('confidential')) {
+        line.toLowerCase().includes('confidential') || 
+        line.includes('--- Sheet:')) {
       return;
     }
 
@@ -834,33 +829,7 @@ function extractQuestions(text, pdfItems = []) {
     }
   });
   
-  console.log(`Extracted ${fields.length} specification fields from survey document`);
-  if (fields.length > 0) {
-    console.log('First 10 fields:', fields.slice(0, 10).map(f => f.text));
-  }
-  
   return fields;
-}
-
-function extractAllLines(text) {
-  const lines = [];
-  const textLines = text.split('\n');
-  
-  textLines.forEach((line, index) => {
-    line = line.trim();
-
-    if (line.length < 15) return;
-    if (line.match(/^page\s+\d+/i)) return;
-    if (line.match(/^\d+$/)) return;
-    if (line.toLowerCase().includes('confidential')) return;
-    
-    lines.push({
-      text: line,
-      lineNumber: index + 1
-    });
-  });
-  
-  return lines;
 }
 
 async function processDocument() {
@@ -871,14 +840,14 @@ async function processDocument() {
   
   try {
     const fileMimeType = uploadedFile.type.toLowerCase();
-    const isExcelFile = fileMimeType.includes('excel') || fileMimeType.includes('sheet') || uploadedFile.name.toLowerCase().endsWith('.xlsx') || uploadedFile.name.toLowerCase().endsWith('.xls');
+    const filenameLower = uploadedFile.name.toLowerCase();
+    const isExcelFile = fileMimeType.includes('excel') || fileMimeType.includes('sheet') || filenameLower.endsWith('.xlsx') || filenameLower.endsWith('.xls');
     const isWordFile = fileMimeType.includes('word') || fileMimeType.includes('document');
 
     if (fileMimeType === 'application/pdf') {
-      extractedPdfItems = await extractTextFromPDF(uploadedFile);
+      extractedPdfItems = await extractTextFromPDF(uploadedFile, false);
       extractedText = extractedPdfItems.map(item => item.text).join('\n');
     } else if (isWordFile) {
-      // For Word, we only need the raw text to identify fields
       extractedText = await extractTextFromWord(uploadedFile);
       extractedPdfItems = []; 
     } else if (isExcelFile) {
@@ -887,21 +856,13 @@ async function processDocument() {
     } else {
       throw new Error(`Unsupported file type for processing: ${uploadedFile.name} (${uploadedFile.type})`);
     }
-
-    console.log('=== EXTRACTION DEBUG ===');
-    console.log('Extracted text length:', extractedText.length);
-    console.log('========================');
     
     updateProgress(50);
     showProcessingStatus('Analyzing template fields...');
 
-    // Extract questions/fields from the uploaded template (empty or not)
+    // Extract questions/fields from the uploaded template
     const fields = extractQuestions(extractedText, extractedPdfItems);
-    
-    console.log('=== FIELDS FOUND ===');
-    console.log(`Total specification fields extracted: ${fields.length}`);
-    console.log('========================');
-    
+        
     if (fields.length === 0) {
       alert('Could not identify any structured question fields in the uploaded template. Please check the document format.');
       throw new Error('No structured fields found.');
@@ -911,20 +872,13 @@ async function processDocument() {
       const selectedProduct = document.getElementById('productSelect').value;
       
       const productLibrarySize = (surveyLibrary[selectedProduct] || []).length;
-      console.log('=== LIBRARY DEBUG ===');
-      console.log(`Library size for ${selectedProduct}: ${productLibrarySize}`);
-      console.log('========================');
-      
+            
       if (productLibrarySize === 0) {
         console.warn(`No survey data found for ${selectedProduct}. Processing without auto-fill.`);
       }
       
       matchedData = matchQuestionsWithLibrary(fields, selectedProduct);
     }
-    
-    console.log('=== MATCH RESULTS ===');
-    console.log(`Total matches: ${matchedData.filter(m => m.matched).length}/${matchedData.length}`);
-    console.log('========================');
     
     updateProgress(100);
     showProcessingStatus('Generation complete!');
@@ -937,7 +891,6 @@ async function processDocument() {
     
   } catch (error) {
     console.error('Error processing document:', error);
-    // Error alert is now in the catch block above
     if (error.message !== 'No structured fields found.') {
         alert('Error processing document: ' + error.message);
     }
@@ -945,7 +898,8 @@ async function processDocument() {
   }
 }
 
-async function extractTextFromPDF(file) {
+// isLibraryCall is used to control line break logic
+async function extractTextFromPDF(file, isLibraryCall) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async function(e) {
@@ -961,16 +915,21 @@ async function extractTextFromPDF(file) {
 
           const itemsByY = {};
           textContent.items.forEach(item => {
+            // Group text items by their rounded Y-coordinate (line)
             const y = Math.round(item.transform[5]); 
             const x = Math.round(item.transform[4]); 
             if (!itemsByY[y]) itemsByY[y] = [];
             itemsByY[y].push({ str: item.str, x });
           });
 
+          // Sort lines from top (highest Y) to bottom (lowest Y)
           const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); 
           sortedY.forEach(y => {
+            // Sort items within a line by X-coordinate (left to right)
             const items = itemsByY[y].sort((a, b) => a.x - b.x);
             const lineText = items.map(i => i.str).join(' ');
+            
+            // Invert the y-coordinate for better positional reasoning if needed
             allPageItems.push({ 
                 text: lineText, 
                 x: items[0].x, 
@@ -981,7 +940,14 @@ async function extractTextFromPDF(file) {
           });
         }
 
-        resolve(allPageItems);
+        if (isLibraryCall) {
+            // For the library, just return the raw joined text
+            resolve(allPageItems.map(item => item.text).join('\n'));
+        } else {
+            // For template processing, return structured items
+            resolve(allPageItems);
+        }
+
       } catch (error) {
         reject(error);
       }
@@ -997,7 +963,6 @@ async function extractTextFromWord(file) {
     reader.onload = async function(e) {
       try {
         const arrayBuffer = e.target.result;
-        // Only get raw text for matching/field extraction
         const rawTextResult = await mammoth.extractRawText({ arrayBuffer });
         resolve(rawTextResult.value); 
       } catch (error) {
@@ -1012,9 +977,7 @@ async function extractTextFromWord(file) {
 function matchQuestionsWithLibrary(questions, product) {
   const matches = [];
   const productLibrary = surveyLibrary[product] || [];
-  
-  console.log(`Matching ${questions.length} items against ${productLibrary.length} library entries for ${product}`);
-  
+    
   questions.forEach(question => {
     let bestMatch = null;
     let highestScore = 0;
@@ -1036,9 +999,6 @@ function matchQuestionsWithLibrary(questions, product) {
       matched: bestMatch !== null && highestScore > 0.25,
     });
   });
-  
-  const matchedCount = matches.filter(m => m.matched).length;
-  console.log(`Found ${matchedCount} matches out of ${matches.length} items`);
   
   return matches;
 }
@@ -1097,7 +1057,7 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
-// NEW UTILITY FUNCTION TO HANDLE DOWNLOAD
+// UTILITY FUNCTION TO HANDLE DOWNLOAD
 function downloadBlob(blob, filename) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1123,27 +1083,81 @@ async function downloadFilledDocument() {
     }
     
     try {
-        // GENERATE A NEW DOCX FILE containing only the matched Q&A pairs.
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+        showProcessingStatus('Generating structured DOCX document...');
+        
+        // Prepare the rows for the table
+        const tableRows = [
+            // Header Row
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [new Paragraph({ children: [new TextRun({ text: "Question Field", bold: true, size: 28 })] })],
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        shading: { fill: "DCDCDC" } // Light gray background for header
+                    }),
+                    new TableCell({
+                        children: [new Paragraph({ children: [new TextRun({ text: "Auto-Filled Answer", bold: true, size: 28 })] })],
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        shading: { fill: "DCDCDC" } // Light gray background for header
+                    }),
+                ],
+            }),
+            // Data Rows
+            ...matchedData
+                .filter(item => item.matchedAnswer) // Only include matched items
+                .map(item => new TableRow({
+                    children: [
+                        new TableCell({
+                            children: [new Paragraph({ children: [new TextRun({ text: item.question, bold: true, size: 24 })] })],
+                            verticalAlign: 'center',
+                            borders: { top: { style: BorderStyle.SINGLE } }
+                        }),
+                        new TableCell({
+                            children: [new Paragraph({ children: [new TextRun({ text: item.matchedAnswer || '', size: 24 })] })],
+                            verticalAlign: 'center',
+                            borders: { top: { style: BorderStyle.SINGLE } }
+                        }),
+                    ],
+                }))
+        ];
 
+
+        // Create the document
         const doc = new Document({
             sections: [{
                 children: [
                     new Paragraph({
+                        spacing: { after: 300 },
+                        alignment: 'center',
                         children: [
-                            new TextRun({ text: "Auto-Generated Survey Results\n\n", size: 36, bold: true })
+                            new TextRun({ text: "Auto-Generated Survey Results", size: 48, bold: true, color: '1F4E79' })
                         ]
                     }),
-                    ...matchedData
-                        .filter(item => item.matchedAnswer) 
-                        .map(item => new Paragraph({
-                            spacing: { after: 200 },
-                            children: [
-                                new TextRun({ text: item.question, bold: true, size: 24 }),
-                                new TextRun({ text: ': ', bold: true, size: 24 }),
-                                new TextRun({ text: item.matchedAnswer || '', size: 24 })
-                            ]
-                        }))
+                    new Paragraph({
+                        spacing: { after: 300 },
+                        children: [
+                            new TextRun({ text: "The document below contains the list of questions extracted from your template and the corresponding auto-filled answers from the historical library.", size: 24 })
+                        ]
+                    }),
+                    // Add the Table
+                    new Table({
+                        rows: tableRows,
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                        borders: {
+                            top: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+                            bottom: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+                            left: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+                            right: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+                            insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: "000000" },
+                            insideVertical: { style: BorderStyle.SINGLE, size: 4, color: "000000" },
+                        }
+                    }),
+                    new Paragraph({
+                        spacing: { before: 300 },
+                        children: [
+                             new TextRun({ text: "--- End of Auto-Filled Section ---", size: 20, italics: true }),
+                        ]
+                    }),
                 ]
             }]
         });
@@ -1154,19 +1168,21 @@ async function downloadFilledDocument() {
         const filename = `Generated_Survey_${originalName}.docx`; 
         
         downloadBlob(filledBlob, filename);
-        console.log('Downloaded generated survey DOCX.');
         
         alert(`Successfully generated a document!\n\n` +
               `✅ File saved as: ${filename}\n` +
-              `📊 ${answersFound} questions were auto-filled with answers from the library.\n\n` +
-              `The new document contains a clean list of all matched Question: Answer pairs.`);
+              `📊 ${answersFound} questions were auto-filled in a structured two-column table format.`);
+        
+        document.getElementById('processingStatus').style.display = 'none';
         return;
 
     } catch (error) {
         console.error('Error generating document:', error);
+        document.getElementById('processingStatus').style.display = 'none';
         alert('Error generating document: ' + error.message);
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession();
