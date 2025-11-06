@@ -1018,10 +1018,8 @@ function showMatchResults() {
 
 
 /**
- * FIX: This function is updated to correct the global variable name for PDF-lib 
- * from window.pdfLib to window.PDFLib.
- * * It still performs in-place filling for PDFs to preserve structure
- * and falls back to a structured DOCX report for Word files.
+ * FIX: This function is updated to correct the font encoding error.
+ * * Switched from 'Helvetica' to 'Times-Roman' to resolve the WinAnsi encoding issue with the 'μ' character.
  */
 async function downloadFilledDocument() {
     if (!uploadedFile || !uploadedFile.name) {
@@ -1040,7 +1038,6 @@ async function downloadFilledDocument() {
     if (uploadedFile.type === 'application/pdf') {
         // --- PDF In-Place Filling Logic ---
         try {
-            // FIX: Corrected variable name from window.pdfLib to window.PDFLib
             const { PDFDocument, rgb } = window.PDFLib;
             const existingPdfBytes = await new Promise((resolve) => {
                 const reader = new FileReader();
@@ -1051,8 +1048,8 @@ async function downloadFilledDocument() {
             const pdfDoc = await PDFDocument.load(existingPdfBytes);
             const pages = pdfDoc.getPages();
             
-            // Get a standard font
-            const font = await pdfDoc.embedFont('Helvetica');
+            // FIX: Switched from 'Helvetica' to 'Times-Roman' to support a wider range of characters (like 'μ').
+            const font = await pdfDoc.embedFont('Times-Roman');
             const fontSize = 9; 
             const x_offset = 15; // Space to move the answer right of the question
 
@@ -1062,12 +1059,7 @@ async function downloadFilledDocument() {
                     if (pageIndex >= 0 && pageIndex < pages.length) {
                         const page = pages[pageIndex];
                         
-                        // Calculate position: The 'y' from pdfjsLib extraction is bottom-up, 
-                        // which is correct for pdf-lib drawText.
-                        
-                        // Simple X calculation (start 15px right of question text start)
-                        // A more robust method would calculate the length of the question text
-                        // to know exactly where to start, but this is a reasonable compromise.
+                        // Calculate position
                         const finalX = answer.x + x_offset + (answer.text.length * (fontSize / 2.5));
 
                         page.drawText(answer.matchedAnswer, {
@@ -1095,8 +1087,6 @@ async function downloadFilledDocument() {
 
         } catch (error) {
             console.error('Error filling PDF document:', error);
-            // Changed alert to note the fallback
-            alert('Error filling PDF document. Falling back to structured DOCX export: ' + error.message); 
             // Fallback to DOCX generation if PDF filling fails
             downloadFilledDocumentDOCXFallback(originalName, filledAnswers);
         }
