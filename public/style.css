@@ -3747,7 +3747,7 @@ label {
   justify-content: center;
   gap: 6px;
   font-weight: 600;
-  min-width: 100px;
+  min-width: 90px;
   height: 32px;
   text-align: center;
   white-space: nowrap;
@@ -4521,3 +4521,4 @@ label {
     padding: 12px;
   }
 }
+
