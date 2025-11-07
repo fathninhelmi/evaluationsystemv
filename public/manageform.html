@@ -41,6 +41,7 @@
         <tr>
           <th rowspan="2">Username</th>
           <th rowspan="2">Type</th>
+          <th rowspan="2">Category</th>
           <th colspan="3">Status</th>
           <th rowspan="2">Created On</th>
           <th rowspan="2">Actions</th>
@@ -65,13 +66,19 @@
       <form id="editForm">
         <div class="form-group">
           <label>Type</label>
-          <select id="editType">
+          <select id="editType" onchange="updateCategoryOptions()">
             <option value="SPI">SPI</option>
             <option value="AOI">AOI</option>
             <option value="ARV">ARV</option>
             <option value="AXI">AXI</option>
             <option value="XC">Smart Camera (XC)</option>
             <option value="XS">Smart Code Reader (XS)</option>
+          </select>
+        </div>
+        <div class="form-group" id="editCategoryGroup" style="display: none;">
+          <label>Product Category</label>
+          <select id="editCategory">
+            <option value="">Select Category</option>
           </select>
         </div>
         <div class="form-group">
@@ -125,6 +132,53 @@ const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 let forms = [];
 let editingFormId = null;
 
+const productCategoryOptions = {
+  'SPI': [
+    { value: 'semicon', label: 'Back-end Semiconductor' },
+    { value: 'smt', label: 'SMT PCB Assembly' }
+  ],
+  'AOI': [
+    { value: 'semicon', label: 'Back-end Semiconductor' },
+    { value: 'smt', label: 'SMT PCB Assembly' },
+    { value: 'finalAssembly', label: 'Final Assembly' }
+  ],
+  'AXI': [
+    { value: 'smt', label: 'High-Speed' },
+    { value: 'finalAssembly', label: 'High-Resolution' }
+  ],
+  'ARV': [
+    { value: 'smt', label: 'High Speed Inline System' },
+    { value: 'finalAssembly', label: 'High Flexibility Offline System' }
+  ]
+};
+
+function getCategoryLabel(type, value) {
+  if (!type || !value || !productCategoryOptions[type]) return '-';
+  const option = productCategoryOptions[type].find(opt => opt.value === value);
+  return option ? option.label : value;
+}
+
+function updateCategoryOptions() {
+  const productType = document.getElementById("editType").value;
+  const categoryGroup = document.getElementById("editCategoryGroup");
+  const categorySelect = document.getElementById("editCategory");
+  
+  if (productCategoryOptions[productType]) {
+    categoryGroup.style.display = "block";
+    categorySelect.innerHTML = '<option value="">Select Category</option>';
+    
+    productCategoryOptions[productType].forEach(option => {
+      const optionEl = document.createElement("option");
+      optionEl.value = option.value;
+      optionEl.textContent = option.label;
+      categorySelect.appendChild(optionEl);
+    });
+  } else {
+    categoryGroup.style.display = "none";
+    categorySelect.innerHTML = '<option value="">Select Category</option>';
+  }
+}
+
 async function checkSession() {
     try {
         const user = await account.get();
@@ -155,6 +209,7 @@ async function loadForms() {
         id: doc.$id,
         username: doc.username || doc.$createdBy || "Unknown",
         type: doc.productType || "",
+        category: doc.productCategory || "",
         pre_eval: await getFormStatus(preEvalCollectionId, doc.$id),
         eval: await getFormStatus(evalCollectionId, doc.$id),
         post_eval: await getFormStatus(postEvalCollectionId, doc.$id),
@@ -201,7 +256,7 @@ function renderTable(data) {
   tbody.innerHTML = "";
 
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px;">No forms found</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px;">No forms found</td></tr>`;
     return;
   }
 
@@ -210,6 +265,7 @@ function renderTable(data) {
     row.innerHTML = `
       <td>${form.username}</td>
       <td>${form.type}</td>
+      <td>${getCategoryLabel(form.type, form.category)}</td>
       <td><span class="status-badge ${form.pre_eval}">${getStatusText(form.pre_eval)}</span></td>
       <td><span class="status-badge ${form.eval}">${getStatusText(form.eval)}</span></td>
       <td><span class="status-badge ${form.post_eval}">${getStatusText(form.post_eval)}</span></td>
@@ -243,6 +299,13 @@ function editForm(formId) {
   document.getElementById("editPreEvalStatus").value = form.pre_eval;
   document.getElementById("editEvalStatus").value = form.eval;
   document.getElementById("editPostEvalStatus").value = form.post_eval;
+  
+  updateCategoryOptions();
+  
+  if (form.category && productCategoryOptions[form.type]) {
+    document.getElementById("editCategory").value = form.category;
+  }
+  
   document.getElementById("editTitle").textContent = "Edit Form - " + form.type;
   document.getElementById("editModal").style.display = "flex";
 }
@@ -251,15 +314,21 @@ async function saveFormChanges() {
   if (!editingFormId) return;
 
   const newType = document.getElementById("editType").value;
+  const newCategory = document.getElementById("editCategory").value;
   const newPre = document.getElementById("editPreEvalStatus").value;
   const newEval = document.getElementById("editEvalStatus").value;
   const newPost = document.getElementById("editPostEvalStatus").value;
 
   try {
-    await databases.updateDocument(databaseId, collectionId, editingFormId, { 
-      productType: newType 
-    });
-    const statusUpdates = [];
+    const updateData = { productType: newType };
+    
+    if (productCategoryOptions[newType] && newCategory) {
+      updateData.productCategory = newCategory;
+    } else {
+      updateData.productCategory = "";
+    }
+    
+    await databases.updateDocument(databaseId, collectionId, editingFormId, updateData);
 
     try {
       await databases.updateDocument(databaseId, preEvalCollectionId, editingFormId, { status: newPre });
@@ -282,6 +351,7 @@ async function saveFormChanges() {
     const form = forms.find(f => f.id === editingFormId);
     if (form) {
       form.type = newType;
+      form.category = newCategory;
       form.pre_eval = newPre;
       form.eval = newEval;
       form.post_eval = newPost;
@@ -368,6 +438,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 </body>
 
 </html>
-
-
-
