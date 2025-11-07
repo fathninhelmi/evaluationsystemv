@@ -137,21 +137,21 @@ let editingFormId = null;
 
 const productCategoryOptions = {
   'SPI': [
-    { value: 'semicon', label: 'Back-end Semiconductor' },
-    { value: 'smt', label: 'SMT PCB Assembly' }
+    { value: 'semiconspi', label: 'Back-end Semiconductor' },
+    { value: 'smtspi', label: 'SMT PCB Assembly' }
   ],
   'AOI': [
-    { value: 'semicon', label: 'Back-end Semiconductor' },
-    { value: 'smt', label: 'SMT PCB Assembly' },
+    { value: 'semiconaoi', label: 'Back-end Semiconductor' },
+    { value: 'smtaoi', label: 'SMT PCB Assembly' },
     { value: 'finalAssembly', label: 'Final Assembly' }
   ],
   'AXI': [
-    { value: 'smt', label: 'High-Speed' },
-    { value: 'finalAssembly', label: 'High-Resolution' }
+    { value: 'highspeed', label: 'High-Speed' },
+    { value: 'highresolution', label: 'High-Resolution' }
   ],
   'ARV': [
-    { value: 'smt', label: 'High Speed Inline System' },
-    { value: 'finalAssembly', label: 'High Flexibility Offline System' }
+    { value: 'speedinline', label: 'High Speed Inline System' },
+    { value: 'flexibilityoffline', label: 'High Flexibility Offline System' }
   ]
 };
 
@@ -464,3 +464,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
