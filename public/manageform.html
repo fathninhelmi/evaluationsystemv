@@ -24,7 +24,7 @@
 
 <main class="form-wrapper">
     <div class="controls">
-        <select id="typeFilter" onchange="applyFilters()">
+        <select id="typeFilter" onchange="updateCategoryFilter(); applyFilters()">
             <option value="All">All Types</option>
             <option value="SPI">SPI</option>
             <option value="AOI">AOI</option>
@@ -32,6 +32,9 @@
             <option value="AXI">AXI</option>
             <option value="XC">Smart Camera (XC)</option>
             <option value="XS">Smart Code Reader (XS)</option>
+        </select>
+        <select id="categoryFilter" onchange="applyFilters()" style="display: none;">
+            <option value="All">All Categories</option>
         </select>
         <label>From: <input type="date" id="startDate" onchange="applyFilters()"></label>
         <label>To: <input type="date" id="endDate" onchange="applyFilters()"></label>
@@ -227,8 +230,29 @@ async function loadForms() {
   }
 }
 
+function updateCategoryFilter() {
+  const typeFilter = document.getElementById("typeFilter").value;
+  const categoryFilter = document.getElementById("categoryFilter");
+  
+  if (typeFilter !== "All" && productCategoryOptions[typeFilter]) {
+    categoryFilter.style.display = "inline-block";
+    categoryFilter.innerHTML = '<option value="All">All Categories</option>';
+    
+    productCategoryOptions[typeFilter].forEach(option => {
+      const optionEl = document.createElement("option");
+      optionEl.value = option.value;
+      optionEl.textContent = option.label;
+      categoryFilter.appendChild(optionEl);
+    });
+  } else {
+    categoryFilter.style.display = "none";
+    categoryFilter.value = "All";
+  }
+}
+
 function applyFilters() {
   const typeFilter = document.getElementById("typeFilter").value;
+  const categoryFilter = document.getElementById("categoryFilter").value;
   const startDate = document.getElementById("startDate").value ? new Date(document.getElementById("startDate").value) : null;
   const endDate = document.getElementById("endDate").value ? new Date(document.getElementById("endDate").value) : null;
 
@@ -236,6 +260,10 @@ function applyFilters() {
 
   if (typeFilter !== "All") {
     filtered = filtered.filter(f => f.type === typeFilter);
+  }
+  
+  if (categoryFilter !== "All") {
+    filtered = filtered.filter(f => f.category === categoryFilter);
   }
   
   if (startDate) {
@@ -434,7 +462,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 <footer class="footer-regis">
     <span>© 2025 ViTrox. All rights reserved.</span>
 </footer>
-
 </body>
-
 </html>
