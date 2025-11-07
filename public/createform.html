@@ -36,6 +36,13 @@
           <option value="XS">Smart Code Reader (XS)</option>
         </select>
       </div>
+
+      <div class="form-group" id="productCategoryGroup" style="display: none;">
+        <select id="productCategory" required>
+          <option value="" disabled selected>Select Product Category</option>
+        </select>
+      </div>
+
       <div class="form-group">
         <input type="text" id="eventName" placeholder="Enter product name" required>
       </div>
@@ -72,6 +79,50 @@ const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 
 let currentUser = null;
 let geocodeTimeout = null;
+
+const productCategoryOptions = {
+  'SPI': [
+    { value: 'semicon', label: 'Back-end Semiconductor' },
+    { value: 'smt', label: 'SMT PCB Assembly' }
+  ],
+  'AOI': [
+    { value: 'semicon', label: 'Back-end Semiconductor' },
+    { value: 'smt', label: 'SMT PCB Assembly' },
+    { value: 'finalAssembly', label: 'Final Assembly' }
+  ],
+  'AXI': [
+    { value: 'smt', label: 'High-Speed' },
+    { value: 'finalAssembly', label: 'High-Resolution' }
+  ],
+  'ARV': [
+    { value: 'smt', label: 'High Speed Inline System' },
+    { value: 'finalAssembly', label: 'High Flexibility Offline System' }
+  ]
+};
+
+document.getElementById("productType").addEventListener("change", (e) => {
+  const productType = e.target.value;
+  const categoryGroup = document.getElementById("productCategoryGroup");
+  const categorySelect = document.getElementById("productCategory");
+  
+  if (productCategoryOptions[productType]) {
+    categoryGroup.style.display = "block";
+    categorySelect.innerHTML = `<option value="" disabled selected>Select ${productType} Product Category</option>`;
+    
+    productCategoryOptions[productType].forEach(option => {
+      const optionEl = document.createElement("option");
+      optionEl.value = option.value;
+      optionEl.textContent = option.label;
+      categorySelect.appendChild(optionEl);
+    });
+    
+    categorySelect.required = true;
+  } else {
+    categoryGroup.style.display = "none";
+    categorySelect.required = false;
+    categorySelect.innerHTML = '<option value="" disabled selected>Select Product Category</option>';
+  }
+});
 
 document.getElementById("customerLocation").addEventListener("input", (e) => {
   clearTimeout(geocodeTimeout);
@@ -248,6 +299,7 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const productType = document.getElementById("productType").value;
+  const productCategory = document.getElementById("productCategory").value;
   const eventName = document.getElementById("eventName").value.trim();
   const customerCompany = document.getElementById("customerCompany").value.trim();
   const customerLocation = document.getElementById("customerLocation").value.trim();
@@ -257,8 +309,13 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  if (productCategoryOptions[productType] && !productCategory) {
+    alert("Please select a product category");
+    return;
+  }
+
   try {
-    const mainForm = await databases.createDocument(databaseId, collectionId, ID.unique(), {
+    const formData = {
       productType,
       prodname: eventName,
       customerCompany,
@@ -267,7 +324,13 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
       email: currentUser.email,
       createDate: new Date().toISOString(),
       status: "draft"
-    });
+    };
+
+    if (productCategory) {
+      formData.productCategory = productCategory;
+    }
+
+    const mainForm = await databases.createDocument(databaseId, collectionId, ID.unique(), formData);
     await databases.createDocument(databaseId, preEvalCollectionId, mainForm.$id, { status: "draft" });
     await databases.createDocument(databaseId, evalCollectionId, mainForm.$id, { status: "draft" });
     await databases.createDocument(databaseId, postEvalCollectionId, mainForm.$id, { status: "draft" });
@@ -275,6 +338,7 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
     alert("Evaluation form created successfully!");
     document.getElementById("eventForm").reset();
     document.getElementById("locationPreview").classList.remove("active");
+    document.getElementById("productCategoryGroup").style.display = "none";
     loadForms();
 
   } catch (err) {
@@ -291,5 +355,3 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 
 </body>
 </html>
-
-
