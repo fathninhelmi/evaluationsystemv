@@ -490,12 +490,18 @@
         <!-- Attachment Section -->
         <div class="form-section">
             <div class="section-title">Attachment</div>
-            <div class="form-group-evalxc">
-                <label>Upload File (Optional)</label>
-                <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+            <div class="form-group-evalxc" style="display: block;">
+                <label style="font-weight: 500; margin-bottom: 8px; display: block;">Upload File (Optional)</label>
+            </div>
+            <div class="form-group-evalxc" style="display: block;">
+                <div style="font-size: 0.85em; color: #666; margin-bottom: 12px;">
                     Please upload the file in PNG or PDF only
                 </div>
-                <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" style="margin-bottom: 10px;">
+            </div>
+            <div class="form-group-evalxc" style="display: block;">
+                <div style="border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; background: white;">
+                    <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" style="width: 100%; border: none; outline: none; cursor: pointer;">
+                </div>
                 <div id="attachmentPreview" style="margin-top: 10px;"></div>
             </div>
         </div>
@@ -1091,6 +1097,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
