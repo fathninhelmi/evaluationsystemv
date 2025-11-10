@@ -344,22 +344,22 @@ function getDocumentLink(product, category) {
       'overview': 'https://docs.google.com/document/d/1sTY7HmWfhYWMUqZfc9p6EbBrF01UrN2t3xm_ZgyPGug/edit?usp=sharing'
     },
     'axi': {
-      'overview': ''
+      'overview': 'https://docs.google.com/document/d/1CrrU0zrI841Cft38jBtLCsoqEgOtmzFrfUxxWUVEoAA/edit?usp=sharing'
     },
     'spi': {
       'overview': 'https://docs.google.com/document/d/1UXpRskb7nlmZyPadUM9oPY86_OsKAfckJKh35o3dloU/edit?usp=sharing'
     },
     'arv': {
-      'overview': '#'
+      'overview': 'https://docs.google.com/document/d/1TwzhMRfpBbpdYTen0MeLLdIoLuuqYnzXFPKisDjtxfo/edit?usp=sharing'
     },
     'vone': {
-      'overview': '#'
+      'overview': 'https://docs.google.com/document/d/1U9O015Ha7GJ62Jm44FA8USc6Y5S1ASU9zNV6WbJDZn4/edit?usp=sharing'
     },
     'xc': {
-      'overview': '#'
+      'overview': 'https://docs.google.com/document/d/1eJJF_HkRSswYJh2t_KCkEu0OJ72vHdidh4LinirykTE/edit?usp=sharing'
     },
     'xs': {
-      'overview': '#'
+      'overview': 'https://docs.google.com/document/d/1Tn7vGVRFnRMzYUBplfVQTR3MOhVV5aDIcldIlYTEFks/edit?usp=sharing'
     }
   };
   
@@ -467,21 +467,17 @@ function setupFileUpload() {
 
 function handleFileSelect(file) {
   if (!file) return;
-  
-  // UPDATED: Added Excel MIME types and checks
+
   const validTypes = [
     'application/pdf', 
     'application/msword', 
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-    'application/vnd.ms-excel' // .xls
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+    'application/vnd.ms-excel' 
   ];
-  // Check against file extension as well for more robustness
   const isExcel = file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls');
   
   const maxSize = 10 * 1024 * 1024;
-  
-  // UPDATED: Check for valid types or Excel file extension
   if (!validTypes.includes(file.type) && !isExcel) {
     alert('Please upload only PDF, Word, or Excel documents.');
     return;
@@ -508,8 +504,7 @@ function displayFilePreview(file) {
   preview.style.display = 'block';
   
   const icon = preview.querySelector('.fa-file-pdf');
-  
-  // UPDATED: Added logic for Excel icon
+
   if (fileType.includes('word') || fileType.includes('document')) {
     icon.className = 'fas fa-file-word';
     icon.style.color = '#2B579A';
@@ -553,8 +548,6 @@ function extractTextFromExcel(blob) {
         
         workbook.SheetNames.forEach(sheetName => {
           const worksheet = workbook.Sheets[sheetName];
-          // Use sheet_to_csv to get cell content, with '|' as column separator 
-          // and then replace '|' with newline to get all cell data on separate lines.
           const csv = XLSX.utils.sheet_to_csv(worksheet, { FS: '|', RS: '\n' });
           fullText += `--- Sheet: ${sheetName} ---\n` + csv.replace(/\|/g, '\n') + '\n\n';
         });
@@ -1174,6 +1167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
 
