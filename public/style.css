@@ -4523,7 +4523,7 @@ label {
 }
 
 .doc-preview-container {
-  width: 800px;
+  width: 700px;
   height: 700px;
   margin: 15px 0;
   border: 1px solid #e0e0e0;
@@ -4537,6 +4537,7 @@ label {
   height: 100%;
   border: none;
 }
+
 
 
 
