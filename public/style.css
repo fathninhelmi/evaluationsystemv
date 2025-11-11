@@ -3916,16 +3916,15 @@ label {
   text-align: center;
 }
 
-content-box {
+.content-box {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   padding: 30px;
-  min-height: 800px;
-  height: auto;
+  min-height: 600px;
+  height: 600px;
   overflow-y: auto;
-  width: 100%;
-  max-width: 1200px;
+  width: 850px;
 }
 
 .content-box h2 {
@@ -3954,6 +3953,7 @@ content-box {
   padding: 20px;
   border: 1px solid #e9ecef;
   transition: transform 0.2s, box-shadow 0.2s;
+  width: 500px;
 }
 
 .resource-card:hover {
@@ -4538,6 +4538,7 @@ content-box {
   height: 100%;
   border: none;
 }
+
 
 
 
