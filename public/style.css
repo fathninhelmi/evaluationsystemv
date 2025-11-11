@@ -3951,7 +3951,7 @@ label {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 20px;
-  border: 1px solid #e9ecef;
+  border: 2px solid #0e2952;
   transition: transform 0.2s, box-shadow 0.2s;
   width: 750px;
 }
@@ -4538,6 +4538,7 @@ label {
   height: 100%;
   border: none;
 }
+
 
 
 
