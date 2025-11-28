@@ -275,15 +275,15 @@ const productCategories = {
   'xs': ['Overview']
 };
 
-// FIXED: Store the actual spreadsheet IDs instead of published URLs
-const spreadsheetIds = {
-  'spi': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
-  'aoi': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
-  'axi': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
-  'arv': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
-  'vone': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
-  'xc': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
-  'xs': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo'
+// Store the published spreadsheet key (the part after /e/ in published URLs)
+const publishedSpreadsheetKeys = {
+  'spi': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'aoi': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'axi': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'arv': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'vone': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'xc': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'xs': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo'
 };
 
 const sheetGids = {
@@ -327,11 +327,11 @@ function switchCategory(category, event) {
   updateContent();
 }
 
-// FIXED: Corrected URL construction
+// FIXED: Use published spreadsheet embed format
 function getGoogleSheetsPreviewLink(product, category) {
-  const sheetId = spreadsheetIds[product];
-  if (!sheetId) {
-    console.error('No spreadsheet ID found for product:', product);
+  const publishedKey = publishedSpreadsheetKeys[product];
+  if (!publishedKey) {
+    console.error('No published spreadsheet key found for product:', product);
     return '';
   }
 
@@ -339,14 +339,15 @@ function getGoogleSheetsPreviewLink(product, category) {
   const gidIndex = categories.indexOf(category);
   const gid = (sheetGids[product] && sheetGids[product][gidIndex]) || '0';
   
-  return `https://docs.google.com/spreadsheets/d/${sheetId}/embed?gid=${gid}&single=true&widget=true&headers=false`;
+  // Use the published embed format
+  return `https://docs.google.com/spreadsheets/d/e/${publishedKey}/pubhtml?gid=${gid}&single=true&widget=true&headers=false`;
 }
 
-// FIXED: Also update the full spreadsheet link
+// Full spreadsheet link using published format
 function getFullSpreadsheetLink(product) {
-  const sheetId = spreadsheetIds[product];
-  if (!sheetId) return '';
-  return `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+  const publishedKey = publishedSpreadsheetKeys[product];
+  if (!publishedKey) return '';
+  return `https://docs.google.com/spreadsheets/d/e/${publishedKey}/pubhtml?widget=true&headers=false`;
 }
 
 function updateContent() {
@@ -1126,6 +1127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
 
