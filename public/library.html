@@ -366,19 +366,30 @@ function getDocumentLink(product, category) {
   return documentLinks[product]?.[category] || '#';
 }
 
-function getGoogleDocsPreviewLink(docUrl) {
-  if (!docUrl || docUrl === '#') return '';
+function getGoogleSheetsPreviewLink(sheetUrl, product) {
+  if (!sheetUrl || sheetUrl === '#') return '';
   
-  // Extract document ID from Google Docs URL
-  const docIdMatch = docUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-  if (docIdMatch && docIdMatch[1]) {
-    const docId = docIdMatch[1];
-    return `https://docs.google.com/document/d/${docId}/preview`;
+  const sheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (sheetIdMatch && sheetIdMatch[1]) {
+    const sheetId = sheetIdMatch[1];
+    
+    // Map each product to its specific sheet GID
+    const sheetGids = {
+      'spi': '1133782264',     
+      'aoi': '0',    
+      'axi': '1261267589',    
+      'arv': '487763420',     
+      'vone': '934774948',     
+      'xc': '1566133309',      
+      'xs': '128997642'      
+    };
+    
+    const gid = sheetGids[product] || '0';
+    return `https://docs.google.com/spreadsheets/d/${sheetId}/preview?gid=${gid}`;
   }
   
-  return docUrl;
+  return sheetUrl;
 }
-
 function updateContent() {
   const content = document.getElementById('mainContent');
   
@@ -1186,7 +1197,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
-
-
-
