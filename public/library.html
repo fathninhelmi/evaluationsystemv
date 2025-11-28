@@ -372,7 +372,7 @@ function getGoogleSheetsPreviewLink(sheetUrl, product) {
   const sheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
   if (sheetIdMatch && sheetIdMatch[1]) {
     const sheetId = sheetIdMatch[1];
-
+    
     const sheetGids = {
       'spi': '1133782264',     
       'aoi': '0',    
@@ -389,6 +389,7 @@ function getGoogleSheetsPreviewLink(sheetUrl, product) {
   
   return sheetUrl;
 }
+
 function updateContent() {
   const content = document.getElementById('mainContent');
   
@@ -410,7 +411,7 @@ function updateContent() {
   
   let html = `
     <h2>${productName} - ${categoryName}</h2>
-    <p>Browse ${productName} ${categoryName.toLowerCase()} and documentation.</p>
+    <p>Browse ${productName} ${categoryName.toLowerCase()} specifications and documentation.</p>
   `;
 
   const docLink = getDocumentLink(currentProduct, currentCategory);
@@ -419,7 +420,7 @@ function updateContent() {
   html += `
     <div class="resource-grid">
       <div class="resource-card">
-        <div class="resource-title">${productName} PAPER SURVEY</div>
+        <div class="resource-title">${productName} SPECIFICATIONS</div>
         <div class="doc-preview-container">
           <iframe src="${previewLink}" class="doc-preview-iframe"></iframe>
         </div>
@@ -1196,5 +1197,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
