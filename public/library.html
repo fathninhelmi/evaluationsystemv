@@ -384,7 +384,7 @@ function getGoogleSheetsPreviewLink(sheetUrl, product) {
     };
     
     const gid = sheetGids[product] || '0';
-    return `https://docs.google.com/spreadsheets/d/${sheetId}/preview?gid=${gid}`;
+    return `https://docs.google.com/spreadsheets/d/${sheetId}/embed?gid=${gid}&single=true&widget=true&headers=false`;
   }
   
   return sheetUrl;
@@ -425,7 +425,7 @@ function updateContent() {
         </div>
         <div class="resource-actions">
           <button class="btn-resource btn-view" onclick="viewDocument('${docLink}')">
-            <i class="fas fa-external-link-alt"></i> Open Full Document
+            <i class="fas fa-external-link-alt"></i> Open Full Spreadsheet
           </button>
         </div>
       </div>
@@ -1196,4 +1196,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
