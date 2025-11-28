@@ -276,6 +276,7 @@ const productCategories = {
 };
 
 // Store the published spreadsheet key (the part after /e/ in published URLs)
+// Note: All products currently share the same published spreadsheet with different gids (sheet tabs)
 const publishedSpreadsheetKeys = {
   'spi': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
   'aoi': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
@@ -286,14 +287,16 @@ const publishedSpreadsheetKeys = {
   'xs': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo'
 };
 
+// Map each product category to its corresponding sheet gid
+// Each array corresponds to the categories in productCategories (e.g., ['Overview', 'QA'] for AOI)
 const sheetGids = {
-  'spi': ['1133782264'], 
-  'aoi': ['0','1761256867'],
-  'axi': ['1261267589'],
-  'arv': ['487763420'],
-  'vone': ['934774948'],
-  'xc': ['1566133309'],
-  'xs': ['128997642']
+  'spi': ['1133782264', '37803899'], 
+  'aoi': ['0', '1761256867', '1256221185'],  // Overview, QA, (third sheet if exists)
+  'axi': ['1261267589', '992933642'],
+  'arv': ['487763420', '468007016'],
+  'vone': ['934774948', '0'],
+  'xc': ['1566133309', '0'],
+  'xs': ['128997642', '0']
 };
 
 function loadSidebarMenu(product) {
@@ -343,17 +346,24 @@ function getGoogleSheetsPreviewLink(product, category) {
   return `https://docs.google.com/spreadsheets/d/e/${publishedKey}/pubhtml?gid=${gid}&single=true&widget=true&headers=false`;
 }
 
-// Full spreadsheet link using published format
-function getFullSpreadsheetLink(product) {
+// Full spreadsheet link using published format - opens to the specific sheet tab
+function getFullSpreadsheetLink(product, category) {
   const publishedKey = publishedSpreadsheetKeys[product];
   if (!publishedKey) return '';
-  return `https://docs.google.com/spreadsheets/d/e/${publishedKey}/pubhtml?widget=true&headers=false`;
+  
+  // Get the specific gid for the current category
+  const categories = productCategories[product] || [];
+  const gidIndex = categories.indexOf(category);
+  const gid = (sheetGids[product] && sheetGids[product][gidIndex]) || '0';
+  
+  // Return URL that opens to the specific sheet tab
+  return `https://docs.google.com/spreadsheets/d/e/${publishedKey}/pubhtml?gid=${gid}&widget=true&headers=false`;
 }
 
 function updateContent() {
   const content = document.getElementById('mainContent');
   const previewLink = getGoogleSheetsPreviewLink(currentProduct, currentCategory);
-  const fullLink = getFullSpreadsheetLink(currentProduct);
+  const fullLink = getFullSpreadsheetLink(currentProduct, currentCategory);
 
   content.innerHTML = `
     <h2>${currentProduct.toUpperCase()} - ${currentCategory}</h2>
@@ -1127,6 +1137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
 
