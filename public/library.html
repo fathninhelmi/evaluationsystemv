@@ -266,143 +266,100 @@ async function logout() {
   }
 }
 
-function getSidebarCategories(product) {
-  const categories = {
-    'spi': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'aoi': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'axi': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'arv': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'vone': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'xc': [
-      { id: 'overview', label: 'Overview'}
-    ],
-    'xs': [
-      { id: 'overview', label: 'Overview'}
-    ]
-  };
-  
-  return categories[product] || categories['aoi'];
-}
+// Define all categories/tabs for each product
+const productCategories = {
+  'spi': ['Overview', 'Sources'],
+  'aoi': ['Overview', 'QA', 'Sources'],
+  'axi': ['Overview', 'Sources'],
+  'arv': ['Overview', 'Sources'],
+  'vone': ['Overview', 'Sources'],
+  'xc': ['Overview', 'Sources'],
+  'xs': ['Overview', 'Sources']
+};
 
+// Define Google Sheet published links (entire spreadsheet)
+const spreadsheetLinks = {
+  'spi': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
+  'aoi': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
+  'axi': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
+  'arv': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
+  'vone': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
+  'xc': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
+  'xs': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false'
+};
+
+// Map each product to the gid of its sheets
+const sheetGids = {
+  'spi': ['1133782264', '37803899'], 
+  'aoi': ['0','1761256867','1256221185'],
+  'axi': ['1261267589','992933642'],
+  'arv': ['487763420','468007016'],
+  'vone': ['934774948',''],
+  'xc': ['1566133309',''],
+  'xs': ['128997642','']
+};
+
+// Sidebar menu generator
 function loadSidebarMenu(product) {
   const sidebarLinks = document.getElementById('sidebarLinks');
-  const categories = getSidebarCategories(product);
+  const categories = productCategories[product] || ['Overview'];
   
   let html = '';
   categories.forEach((cat, index) => {
     const activeClass = index === 0 ? 'active' : '';
-    html += `
-      <div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat.id}')">
-        <i class="${cat.icon}"></i>
-        <span>${cat.label}</span>
-      </div>
-    `;
+    html += `<div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat}')">${cat}</div>`;
   });
-  
   sidebarLinks.innerHTML = html;
 }
 
-function switchProduct(product) {
+// Switch product tab
+function switchProduct(product, event) {
   currentProduct = product;
+  currentCategory = productCategories[product][0];
+
   document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
-  event.target.closest('.tab-header').classList.add("active");
-  const titles = {
-    'aoi': 'AOI Product',
-    'axi': 'AXI Product',
-    'spi': 'SPI Product',
-    'arv': 'ARV Product',
-    'vone': 'V-ONE Product',
-    'xc': 'SMART CAMERA Product',
-    'xs': 'SMART CODE READER Product'
-  };
-  document.getElementById('sidebarTitle').textContent = titles[product];
+  event.currentTarget.classList.add("active");
+
+  document.getElementById('sidebarTitle').textContent = product.toUpperCase() + ' Product';
   loadSidebarMenu(product);
-  currentCategory = getSidebarCategories(product)[0].id;
-  updateContent();
+  updateContent(currentProduct, currentCategory);
 }
 
+// Switch sidebar category
 function switchCategory(category) {
   currentCategory = category;
   document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
-  event.target.closest('.sidebar-link').classList.add("active");
-  updateContent();
+  event.currentTarget.classList.add("active");
+  updateContent(currentProduct, currentCategory);
 }
 
-// Map each product & category to its published link
-function getDocumentLink(product, category) {
-  const documentLinks = {
-    'spi': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
-    'aoi': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
-    'arv': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
-    'axi': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
-    'vone': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
-    'xc': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
-    'xs': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' }
-  };
-
-  return documentLinks[product]?.[category] || '#';
-}
-
-// Convert published link to embeddable iframe link
-function getGoogleSheetsPreviewLink(sheetUrl, product) {
-  if (!sheetUrl || sheetUrl === '#') return '';
+// Convert published link to embeddable iframe link for the correct sheet/tab
+function getGoogleSheetsPreviewLink(product, category) {
+  const baseUrl = spreadsheetLinks[product];
+  const gidIndex = productCategories[product].indexOf(category);
+  const gid = sheetGids[product][gidIndex] || '0';
   
-  const sheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-  if (!sheetIdMatch) return sheetUrl;
-
+  const sheetIdMatch = baseUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (!sheetIdMatch) return baseUrl;
   const sheetId = sheetIdMatch[1];
-  const sheetGids = {
-    'spi': '1133782264',
-    'aoi': '0',
-    'arv': '487763420',
-    'axi': '1261267589',
-    'vone': '934774948',
-    'xc': '1566133309',
-    'xs': '128997642'
-  };
 
-  const gid = sheetGids[product] || '0';
   return `https://docs.google.com/spreadsheets/d/${sheetId}/embed?gid=${gid}&single=true&widget=true&headers=false`;
 }
 
 // Update main content dynamically
 function updateContent(product, category) {
   const content = document.getElementById('mainContent');
-  const productNames = {
-    'spi': 'SPI',
-    'aoi': 'AOI',
-    'arv': 'ARV',
-    'axi': 'AXI',
-    'vone': 'V-ONE',
-    'xc': 'SMART CAMERA',
-    'xs': 'SMART CODE READER'
-  };
-
-  const productName = productNames[product] || product.toUpperCase();
-  const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
-
-  const docLink = getDocumentLink(product, category);
-  const previewLink = getGoogleSheetsPreviewLink(docLink, product);
+  const previewLink = getGoogleSheetsPreviewLink(product, category);
 
   content.innerHTML = `
-    <h2>${productName} - ${categoryName}</h2>
-    <p>Browse ${productName} ${categoryName.toLowerCase()} specifications and documentation.</p>
+    <h2>${product.toUpperCase()} - ${category}</h2>
+    <p>Browse ${product.toUpperCase()} ${category.toLowerCase()} specifications and documentation.</p>
     <div class="resource-card">
       <div class="doc-preview-container">
         <iframe src="${previewLink}" class="doc-preview-iframe" width="100%" height="600px"></iframe>
       </div>
       <div class="resource-actions">
-        <button onclick="viewDocument('${docLink}')">Open Full Spreadsheet</button>
+        <button onclick="viewDocument('${spreadsheetLinks[product]}')">Open Full Spreadsheet</button>
       </div>
     </div>
   `;
@@ -410,11 +367,8 @@ function updateContent(product, category) {
 
 // Open full spreadsheet in a new tab
 function viewDocument(url) {
-  if (url && url !== '#') {
-    window.open(url, '_blank');
-  } else {
-    alert('Document link not available.');
-  }
+  if (url) window.open(url, '_blank');
+  else alert('Document link not available.');
 }
 
 function openUploadModal() {
@@ -1170,4 +1124,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
