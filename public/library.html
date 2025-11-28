@@ -294,10 +294,14 @@ const sheetGids = {
   'aoi': ['0','1761256867','1256221185'],
   'axi': ['1261267589','992933642'],
   'arv': ['487763420','468007016'],
-  'vone': ['934774948',''],
-  'xc': ['1566133309',''],
-  'xs': ['128997642','']
+  'vone': ['934774948','0'],
+  'xc': ['1566133309','0'],
+  'xs': ['128997642','0']
 };
+
+// Global current product/category
+let currentProduct = 'aoi';
+let currentCategory = 'Overview';
 
 // Sidebar menu generator
 function loadSidebarMenu(product) {
@@ -306,8 +310,8 @@ function loadSidebarMenu(product) {
   
   let html = '';
   categories.forEach((cat, index) => {
-    const activeClass = index === 0 ? 'active' : '';
-    html += `<div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat}')">${cat}</div>`;
+    const activeClass = (cat === currentCategory) ? 'active' : '';
+    html += `<div class="sidebar-link ${activeClass}" onclick="switchCategory('${cat}', event)">${cat}</div>`;
   });
   sidebarLinks.innerHTML = html;
 }
@@ -315,29 +319,30 @@ function loadSidebarMenu(product) {
 // Switch product tab
 function switchProduct(product, event) {
   currentProduct = product;
-  currentCategory = productCategories[product][0];
+  currentCategory = productCategories[product][0] || 'Overview';
 
   document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
-  event.currentTarget.classList.add("active");
+  if(event?.currentTarget) event.currentTarget.classList.add("active");
 
   document.getElementById('sidebarTitle').textContent = product.toUpperCase() + ' Product';
   loadSidebarMenu(product);
-  updateContent(currentProduct, currentCategory);
+  updateContent();
 }
 
 // Switch sidebar category
-function switchCategory(category) {
+function switchCategory(category, event) {
   currentCategory = category;
   document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
-  event.currentTarget.classList.add("active");
-  updateContent(currentProduct, currentCategory);
+  if(event?.currentTarget) event.currentTarget.classList.add("active");
+  updateContent();
 }
 
 // Convert published link to embeddable iframe link for the correct sheet/tab
 function getGoogleSheetsPreviewLink(product, category) {
   const baseUrl = spreadsheetLinks[product];
-  const gidIndex = productCategories[product].indexOf(category);
-  const gid = sheetGids[product][gidIndex] || '0';
+  const categories = productCategories[product] || [];
+  const gidIndex = categories.indexOf(category);
+  const gid = (sheetGids[product] && sheetGids[product][gidIndex]) || '0';
   
   const sheetIdMatch = baseUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
   if (!sheetIdMatch) return baseUrl;
@@ -347,19 +352,19 @@ function getGoogleSheetsPreviewLink(product, category) {
 }
 
 // Update main content dynamically
-function updateContent(product, category) {
+function updateContent() {
   const content = document.getElementById('mainContent');
-  const previewLink = getGoogleSheetsPreviewLink(product, category);
+  const previewLink = getGoogleSheetsPreviewLink(currentProduct, currentCategory);
 
   content.innerHTML = `
-    <h2>${product.toUpperCase()} - ${category}</h2>
-    <p>Browse ${product.toUpperCase()} ${category.toLowerCase()} specifications and documentation.</p>
+    <h2>${currentProduct.toUpperCase()} - ${currentCategory}</h2>
+    <p>Browse ${currentProduct.toUpperCase()} ${currentCategory.toLowerCase()} specifications and documentation.</p>
     <div class="resource-card">
       <div class="doc-preview-container">
         <iframe src="${previewLink}" class="doc-preview-iframe" width="100%" height="600px"></iframe>
       </div>
       <div class="resource-actions">
-        <button onclick="viewDocument('${spreadsheetLinks[product]}')">Open Full Spreadsheet</button>
+        <button onclick="viewDocument('${spreadsheetLinks[currentProduct]}')">Open Full Spreadsheet</button>
       </div>
     </div>
   `;
@@ -1124,5 +1129,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
