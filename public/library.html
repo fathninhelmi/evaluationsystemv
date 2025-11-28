@@ -372,8 +372,7 @@ function getGoogleSheetsPreviewLink(sheetUrl, product) {
   const sheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
   if (sheetIdMatch && sheetIdMatch[1]) {
     const sheetId = sheetIdMatch[1];
-    
-    // Map each product to its specific sheet GID
+
     const sheetGids = {
       'spi': '1133782264',     
       'aoi': '0',    
@@ -415,7 +414,7 @@ function updateContent() {
   `;
 
   const docLink = getDocumentLink(currentProduct, currentCategory);
-  const previewLink = getGoogleDocsPreviewLink(docLink);
+  const previewLink = getGoogleSheetsPreviewLink(docLink, currentProduct);
   
   html += `
     <div class="resource-grid">
@@ -1197,3 +1196,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
