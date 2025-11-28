@@ -338,109 +338,82 @@ function switchCategory(category) {
   updateContent();
 }
 
+// Map each product & category to its published link
 function getDocumentLink(product, category) {
   const documentLinks = {
-    'aoi': {
-      'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&amp;headers=false'
-    },
-    'axi': {
-      'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&amp;headers=false'
-    },
-    'spi': {
-      'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&amp;headers=false'
-    },
-    'arv': {
-      'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&amp;headers=false'
-    },
-    'vone': {
-      'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&amp;headers=false'
-    },
-    'xc': {
-      'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&amp;headers=false'
-    },
-    'xs': {
-      'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&amp;headers=false'
-    }
+    'spi': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
+    'aoi': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
+    'arv': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
+    'axi': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
+    'vone': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
+    'xc': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' },
+    'xs': { 'overview': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false' }
   };
-  
+
   return documentLinks[product]?.[category] || '#';
 }
 
+// Convert published link to embeddable iframe link
 function getGoogleSheetsPreviewLink(sheetUrl, product) {
   if (!sheetUrl || sheetUrl === '#') return '';
   
   const sheetIdMatch = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-  if (sheetIdMatch && sheetIdMatch[1]) {
-    const sheetId = sheetIdMatch[1];
-    
-    const sheetGids = {
-      'spi': '1133782264',     
-      'aoi': '0',    
-      'axi': '1261267589',    
-      'arv': '487763420',     
-      'vone': '934774948',     
-      'xc': '1566133309',      
-      'xs': '128997642'      
-    };
-    
-    const gid = sheetGids[product] || '0';
-    return `https://docs.google.com/spreadsheets/d/${sheetId}/embed?gid=${gid}&single=true&widget=true&headers=false`;
-  }
-  
-  return sheetUrl;
+  if (!sheetIdMatch) return sheetUrl;
+
+  const sheetId = sheetIdMatch[1];
+  const sheetGids = {
+    'spi': '1133782264',
+    'aoi': '0',
+    'arv': '487763420',
+    'axi': '1261267589',
+    'vone': '934774948',
+    'xc': '1566133309',
+    'xs': '128997642'
+  };
+
+  const gid = sheetGids[product] || '0';
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/embed?gid=${gid}&single=true&widget=true&headers=false`;
 }
 
-function updateContent() {
+// Update main content dynamically
+function updateContent(product, category) {
   const content = document.getElementById('mainContent');
-  
   const productNames = {
-    'aoi': 'AOI',
-    'axi': 'AXI',
     'spi': 'SPI',
+    'aoi': 'AOI',
     'arv': 'ARV',
+    'axi': 'AXI',
     'vone': 'V-ONE',
     'xc': 'SMART CAMERA',
     'xs': 'SMART CODE READER'
   };
 
-  const categories = getSidebarCategories(currentProduct);
-  const currentCat = categories.find(cat => cat.id === currentCategory);
-  const categoryName = currentCat ? currentCat.label : currentCategory;
-  
-  const productName = productNames[currentProduct];
-  
-  let html = `
+  const productName = productNames[product] || product.toUpperCase();
+  const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+
+  const docLink = getDocumentLink(product, category);
+  const previewLink = getGoogleSheetsPreviewLink(docLink, product);
+
+  content.innerHTML = `
     <h2>${productName} - ${categoryName}</h2>
     <p>Browse ${productName} ${categoryName.toLowerCase()} specifications and documentation.</p>
-  `;
-
-  const docLink = getDocumentLink(currentProduct, currentCategory);
-  const previewLink = getGoogleSheetsPreviewLink(docLink, currentProduct);
-  
-  html += `
-    <div class="resource-grid">
-      <div class="resource-card">
-        <div class="resource-title">${productName} SPECIFICATIONS</div>
-        <div class="doc-preview-container">
-          <iframe src="${previewLink}" class="doc-preview-iframe"></iframe>
-        </div>
-        <div class="resource-actions">
-          <button class="btn-resource btn-view" onclick="viewDocument('${docLink}')">
-            <i class="fas fa-external-link-alt"></i> Open Full Spreadsheet
-          </button>
-        </div>
+    <div class="resource-card">
+      <div class="doc-preview-container">
+        <iframe src="${previewLink}" class="doc-preview-iframe" width="100%" height="600px"></iframe>
+      </div>
+      <div class="resource-actions">
+        <button onclick="viewDocument('${docLink}')">Open Full Spreadsheet</button>
       </div>
     </div>
   `;
-  
-  content.innerHTML = html;
 }
 
+// Open full spreadsheet in a new tab
 function viewDocument(url) {
   if (url && url !== '#') {
     window.open(url, '_blank');
   } else {
-    alert('Document link not available for this category.');
+    alert('Document link not available.');
   }
 }
 
@@ -1197,3 +1170,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
