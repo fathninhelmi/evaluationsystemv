@@ -158,7 +158,6 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc ='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const { Client, Account, Databases, Query, Storage } = window.Appwrite;
-// Destructure all necessary docx components
 const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, BorderStyle } = window.docx; 
 
 const client = new Client();
@@ -266,29 +265,27 @@ async function logout() {
   }
 }
 
-// Define all categories/tabs for each product
 const productCategories = {
-  'spi': ['Overview', 'Sources'],
-  'aoi': ['Overview', 'QA', 'Sources'],
-  'axi': ['Overview', 'Sources'],
-  'arv': ['Overview', 'Sources'],
-  'vone': ['Overview', 'Sources'],
-  'xc': ['Overview', 'Sources'],
-  'xs': ['Overview', 'Sources']
+  'spi': ['Overview'],
+  'aoi': ['Overview', 'QA'],
+  'axi': ['Overview'],
+  'arv': ['Overview'],
+  'vone': ['Overview'],
+  'xc': ['Overview'],
+  'xs': ['Overview']
 };
 
-// Define Google Sheet published links (entire spreadsheet)
-const spreadsheetLinks = {
-  'spi': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
-  'aoi': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
-  'axi': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
-  'arv': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
-  'vone': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
-  'xc': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false',
-  'xs': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo/pubhtml?widget=true&headers=false'
+// FIXED: Store the actual spreadsheet IDs instead of published URLs
+const spreadsheetIds = {
+  'spi': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'aoi': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'axi': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'arv': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'vone': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'xc': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
+  'xs': '1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo'
 };
 
-// Map each product to the gid of its sheets
 const sheetGids = {
   'spi': ['1133782264', '37803899'], 
   'aoi': ['0','1761256867','1256221185'],
@@ -299,7 +296,6 @@ const sheetGids = {
   'xs': ['128997642','0']
 };
 
-// Sidebar menu generator
 function loadSidebarMenu(product) {
   const sidebarLinks = document.getElementById('sidebarLinks');
   const categories = productCategories[product] || ['Overview'];
@@ -312,7 +308,6 @@ function loadSidebarMenu(product) {
   sidebarLinks.innerHTML = html;
 }
 
-// Switch product tab
 function switchProduct(product, event) {
   currentProduct = product;
   currentCategory = productCategories[product][0] || 'Overview';
@@ -325,7 +320,6 @@ function switchProduct(product, event) {
   updateContent();
 }
 
-// Switch sidebar category
 function switchCategory(category, event) {
   currentCategory = category;
   document.querySelectorAll(".sidebar-link").forEach(link => link.classList.remove("active"));
@@ -333,24 +327,32 @@ function switchCategory(category, event) {
   updateContent();
 }
 
-// Convert published link to embeddable iframe link for the correct sheet/tab
+// FIXED: Corrected URL construction
 function getGoogleSheetsPreviewLink(product, category) {
-  const baseUrl = spreadsheetLinks[product];
+  const sheetId = spreadsheetIds[product];
+  if (!sheetId) {
+    console.error('No spreadsheet ID found for product:', product);
+    return '';
+  }
+
   const categories = productCategories[product] || [];
   const gidIndex = categories.indexOf(category);
   const gid = (sheetGids[product] && sheetGids[product][gidIndex]) || '0';
   
-  const sheetIdMatch = baseUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-  if (!sheetIdMatch) return baseUrl;
-  const sheetId = sheetIdMatch[1];
-
   return `https://docs.google.com/spreadsheets/d/${sheetId}/embed?gid=${gid}&single=true&widget=true&headers=false`;
 }
 
-// Update main content dynamically
+// FIXED: Also update the full spreadsheet link
+function getFullSpreadsheetLink(product) {
+  const sheetId = spreadsheetIds[product];
+  if (!sheetId) return '';
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+}
+
 function updateContent() {
   const content = document.getElementById('mainContent');
   const previewLink = getGoogleSheetsPreviewLink(currentProduct, currentCategory);
+  const fullLink = getFullSpreadsheetLink(currentProduct);
 
   content.innerHTML = `
     <h2>${currentProduct.toUpperCase()} - ${currentCategory}</h2>
@@ -360,18 +362,17 @@ function updateContent() {
         <iframe src="${previewLink}" class="doc-preview-iframe" width="100%" height="600px"></iframe>
       </div>
       <div class="resource-actions">
-        <button onclick="viewDocument('${spreadsheetLinks[currentProduct]}')">Open Full Spreadsheet</button>
+        <button onclick="viewDocument('${fullLink}')">Open Full Spreadsheet</button>
       </div>
     </div>
   `;
 }
 
-// Open full spreadsheet in a new tab
 function viewDocument(url) {
   if (url) window.open(url, '_blank');
   else alert('Document link not available.');
 }
-
+    
 function openUploadModal() {
   document.getElementById('uploadModal').style.display = 'flex';
 }
@@ -1125,6 +1126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
 
