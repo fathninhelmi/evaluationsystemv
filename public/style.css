@@ -3850,6 +3850,7 @@ label {
   max-width: 2000px;
   margin: 0 auto;
   flex-direction: row-reverse;
+  grid-template-columns: 200px 1fr;
 }
 
 .library-content {
@@ -3924,7 +3925,7 @@ label {
   min-height: 600px;
   height: 600px;
   overflow-y: auto;
-  width: 850px;
+  width: 1000px;
 }
 
 .content-box h2 {
@@ -4524,7 +4525,7 @@ label {
 }
 
 .doc-preview-container {
-  width: 700px;
+  width: 900px;
   height: 700px;
   margin: 15px 0;
   border: 1px solid #e0e0e0;
@@ -4538,13 +4539,3 @@ label {
   height: 100%;
   border: none;
 }
-
-
-
-
-
-
-
-
-
-
