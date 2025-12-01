@@ -3927,7 +3927,7 @@ label {
   min-height: 600px;
   height: 600px;
   overflow-y: auto;
-  width: 1000px !important;
+  width: 1800px !important;
 }
 
 .content-box h2 {
@@ -4542,6 +4542,7 @@ label {
   height: 100% !important;
   border: none;
 }
+
 
 
 
