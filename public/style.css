@@ -3849,7 +3849,7 @@ label {
   padding: 20px;
   width: 2000px !important;
   margin: 0 auto;
-  flex-direction: row-reverse;
+  
 }
 
 .library-content {
@@ -4541,3 +4541,4 @@ label {
   height: 100% !important;
   border: none;
 }
+
