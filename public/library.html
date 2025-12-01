@@ -359,7 +359,7 @@ function updateContent() {
     <p>Browse ${currentProduct.toUpperCase()} ${currentCategory.toLowerCase()} specifications and documentation.</p>
     <div class="resource-card">
       <div class="doc-preview-container">
-        <iframe src="${previewLink}" class="doc-preview-iframe" width="100%" height="400px"></iframe>
+        <iframe src="${previewLink}" class="doc-preview-iframe"></iframe>
       </div>
       <div class="resource-actions">
         <button onclick="viewDocument('${fullLink}')">Open Full Spreadsheet</button>
@@ -1106,6 +1106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
 
