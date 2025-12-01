@@ -3847,7 +3847,7 @@ label {
   display: flex;
   gap: 20px;
   padding: 20px;
-  width: 1000px !important;
+  width: 2000px !important;
   margin: 0 auto;
   flex-direction: row;
 }
@@ -3855,7 +3855,7 @@ label {
 .library-content {
   flex: 1;
   min-width: 0;
-  width: 1000px !important;
+  width: 900px !important;
   max-width: none !important;
   order:1;
 }
@@ -4543,6 +4543,7 @@ label {
   height: 100% !important;
   border: none;
 }
+
 
 
 
