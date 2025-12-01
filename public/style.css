@@ -3956,7 +3956,7 @@ label {
   padding: 20px;
   border: 2px solid #0e2952;
   transition: transform 0.2s, box-shadow 0.2s;
-  width: 1000px !important;
+  width: 1650px !important;
 }
 
 .resource-card:hover {
@@ -4542,6 +4542,7 @@ label {
   height: 100% !important;
   border: none;
 }
+
 
 
 
