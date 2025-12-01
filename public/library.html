@@ -275,8 +275,6 @@ const productCategories = {
   'xs': ['Overview']
 };
 
-// Store the published spreadsheet key (the part after /e/ in published URLs)
-// Note: All products currently share the same published spreadsheet with different gids (sheet tabs)
 const publishedSpreadsheetKeys = {
   'spi': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
   'aoi': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo',
@@ -287,11 +285,9 @@ const publishedSpreadsheetKeys = {
   'xs': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo'
 };
 
-// Map each product category to its corresponding sheet gid
-// Each array corresponds to the categories in productCategories (e.g., ['Overview', 'QA'] for AOI)
 const sheetGids = {
   'spi': ['1133782264', '37803899'], 
-  'aoi': ['0', '1761256867', '1256221185'],  // Overview, QA, (third sheet if exists)
+  'aoi': ['0', '1761256867', '1256221185'],
   'axi': ['1261267589', '992933642'],
   'arv': ['487763420', '468007016'],
   'vone': ['934774948', '0'],
@@ -314,14 +310,18 @@ function loadSidebarMenu(product) {
 function switchProduct(product, event) {
   currentProduct = product;
   currentCategory = productCategories[product][0] || 'Overview';
-
   document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
-  if(event?.currentTarget) event.currentTarget.classList.add("active");
-
-  document.getElementById('sidebarTitle').textContent = product.toUpperCase() + ' Product';
-  loadSidebarMenu(product);
-  updateContent();
-}
+  if(event?.currentTarget) {
+    event.currentTarget.classList.add("active");
+  } else {
+    const tabs = document.querySelectorAll(".tab-header");
+    tabs.forEach(tab => {
+      const onclickAttr = tab.getAttribute("onclick");
+      if(onclickAttr && onclickAttr.includes(`'${product}'`)) {
+        tab.classList.add("active");
+      }
+    });
+  }
 
 function switchCategory(category, event) {
   currentCategory = category;
@@ -330,7 +330,6 @@ function switchCategory(category, event) {
   updateContent();
 }
 
-// FIXED: Use published spreadsheet embed format
 function getGoogleSheetsPreviewLink(product, category) {
   const publishedKey = publishedSpreadsheetKeys[product];
   if (!publishedKey) {
@@ -341,22 +340,16 @@ function getGoogleSheetsPreviewLink(product, category) {
   const categories = productCategories[product] || [];
   const gidIndex = categories.indexOf(category);
   const gid = (sheetGids[product] && sheetGids[product][gidIndex]) || '0';
-  
-  // Use the published embed format
   return `https://docs.google.com/spreadsheets/d/e/${publishedKey}/pubhtml?gid=${gid}&single=true&widget=true&headers=false`;
 }
 
-// Full spreadsheet link using published format - opens to the specific sheet tab
 function getFullSpreadsheetLink(product, category) {
   const publishedKey = publishedSpreadsheetKeys[product];
   if (!publishedKey) return '';
-  
-  // Get the specific gid for the current category
+
   const categories = productCategories[product] || [];
   const gidIndex = categories.indexOf(category);
   const gid = (sheetGids[product] && sheetGids[product][gidIndex]) || '0';
-  
-  // Return URL that opens to the specific sheet tab
   return `https://docs.google.com/spreadsheets/d/e/${publishedKey}/pubhtml?gid=${gid}&widget=true&headers=false`;
 }
 
@@ -502,7 +495,6 @@ function formatFileSize(bytes) {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
-// NEW FUNCTION: Extract text from Excel Blob using XLSX
 function extractTextFromExcel(blob) {
   return new Promise((resolve, reject) => {
     if (typeof XLSX === 'undefined') {
@@ -512,7 +504,6 @@ function extractTextFromExcel(blob) {
       const reader = new FileReader();
       reader.onload = function(e) {
         const data = e.target.result;
-        // Read workbook from ArrayBuffer
         const workbook = XLSX.read(data, { type: 'array' });
         let fullText = '';
         
@@ -571,7 +562,6 @@ async function loadSurveyLibrary() {
         const filenameLower = file.name.toLowerCase();
 
         if (mimeType === 'application/pdf') {
-          // FIX APPLIED HERE: extractTextFromPDF(..., true) returns a string, so assign directly.
           text = await extractTextFromPDF(blob, true); 
         } else if (mimeType.includes('word') || mimeType.includes('document')) {
           text = await extractTextFromWord(blob);
@@ -800,7 +790,6 @@ async function processDocument() {
     updateProgress(50);
     showProcessingStatus('Analyzing template fields...');
 
-    // Extract questions/fields from the uploaded template
     const fields = extractQuestions(extractedText, extractedPdfItems);
         
     if (fields.length === 0) {
@@ -838,7 +827,6 @@ async function processDocument() {
   }
 }
 
-// isLibraryCall is used to control line break logic
 async function extractTextFromPDF(file, isLibraryCall) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -855,21 +843,16 @@ async function extractTextFromPDF(file, isLibraryCall) {
 
           const itemsByY = {};
           textContent.items.forEach(item => {
-            // Group text items by their rounded Y-coordinate (line)
             const y = Math.round(item.transform[5]); 
             const x = Math.round(item.transform[4]); 
             if (!itemsByY[y]) itemsByY[y] = [];
             itemsByY[y].push({ str: item.str, x });
           });
-
-          // Sort lines from top (highest Y) to bottom (lowest Y)
           const sortedY = Object.keys(itemsByY).sort((a, b) => b - a); 
           sortedY.forEach(y => {
-            // Sort items within a line by X-coordinate (left to right)
             const items = itemsByY[y].sort((a, b) => a.x - b.x);
             const lineText = items.map(i => i.str).join(' ');
-            
-            // Invert the y-coordinate for better positional reasoning if needed
+
             allPageItems.push({ 
                 text: lineText, 
                 x: items[0].x, 
@@ -881,10 +864,8 @@ async function extractTextFromPDF(file, isLibraryCall) {
         }
 
         if (isLibraryCall) {
-            // For the library, just return the raw joined text
             resolve(allPageItems.map(item => item.text).join('\n'));
         } else {
-            // For template processing, return structured items
             resolve(allPageItems);
         }
 
@@ -997,7 +978,6 @@ function showMatchResults() {
   resultsDiv.style.display = 'block';
 }
 
-// UTILITY FUNCTION TO HANDLE DOWNLOAD
 function downloadBlob(blob, filename) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1007,7 +987,6 @@ function downloadBlob(blob, filename) {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 }
-
 
 async function downloadFilledDocument() {
     if (!uploadedFile || !uploadedFile.name) {
@@ -1024,27 +1003,23 @@ async function downloadFilledDocument() {
     
     try {
         showProcessingStatus('Generating structured DOCX document...');
-        
-        // Prepare the rows for the table
         const tableRows = [
-            // Header Row
             new TableRow({
                 children: [
                     new TableCell({
                         children: [new Paragraph({ children: [new TextRun({ text: "Question Field", bold: true, size: 28 })] })],
                         width: { size: 50, type: WidthType.PERCENTAGE },
-                        shading: { fill: "DCDCDC" } // Light gray background for header
+                        shading: { fill: "DCDCDC" }
                     }),
                     new TableCell({
                         children: [new Paragraph({ children: [new TextRun({ text: "Auto-Filled Answer", bold: true, size: 28 })] })],
                         width: { size: 50, type: WidthType.PERCENTAGE },
-                        shading: { fill: "DCDCDC" } // Light gray background for header
+                        shading: { fill: "DCDCDC" }
                     }),
                 ],
             }),
-            // Data Rows
             ...matchedData
-                .filter(item => item.matchedAnswer) // Only include matched items
+                .filter(item => item.matchedAnswer)
                 .map(item => new TableRow({
                     children: [
                         new TableCell({
@@ -1061,8 +1036,6 @@ async function downloadFilledDocument() {
                 }))
         ];
 
-
-        // Create the document
         const doc = new Document({
             sections: [{
                 children: [
@@ -1079,7 +1052,6 @@ async function downloadFilledDocument() {
                             new TextRun({ text: "The document below contains the list of questions extracted from your template and the corresponding auto-filled answers from the historical library.", size: 24 })
                         ]
                     }),
-                    // Add the Table
                     new Table({
                         rows: tableRows,
                         width: { size: 100, type: WidthType.PERCENTAGE },
@@ -1138,6 +1110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
 
 
 
