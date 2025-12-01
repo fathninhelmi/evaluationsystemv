@@ -3849,14 +3849,15 @@ label {
   padding: 20px;
   width: 2000px !important;
   margin: 0 auto;
-  flex-direction: row-reverse;
+  flex-direction: row;
 }
 
 .library-content {
   flex: 1;
   min-width: 0;
   width: 1000px !important;
-  max-width: 1000px !important;
+  max-width: none !important;
+  
 }
 
 .library-sidebar {
@@ -4527,7 +4528,7 @@ label {
 
 .doc-preview-container {
   width: 1000px !important;
-  max-width: 1000px !important;
+  max-width: none !important;
   height: 700px;
   margin: 15px 0;
   border: 1px solid #e0e0e0;
