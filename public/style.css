@@ -4460,7 +4460,7 @@ label {
 
 .container-lib {
   background: #173a6a;
-  max-width: 2000px;
+  width: 4000px !important;
   margin: 0 auto;
   padding: 2rem 2.5rem;
   border-radius: 12px;
@@ -4542,4 +4542,5 @@ label {
   height: 100% !important;
   border: none;
 }
+
 
