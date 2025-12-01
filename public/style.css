@@ -4527,8 +4527,8 @@ label {
 }
 
 .doc-preview-container {
-  width: 100% !important;
-  max-width: 100% !important;
+  width: 1000px !important;
+  max-width: 1000px !important;
   height: 700px;
   margin: 15px 0;
   border: 1px solid #e0e0e0;
@@ -4542,3 +4542,4 @@ label {
   height: 100% !important;
   border: none;
 }
+
