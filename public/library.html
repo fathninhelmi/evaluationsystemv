@@ -310,18 +310,14 @@ function loadSidebarMenu(product) {
 function switchProduct(product, event) {
   currentProduct = product;
   currentCategory = productCategories[product][0] || 'Overview';
+
   document.querySelectorAll(".tab-header").forEach(h => h.classList.remove("active"));
-  if(event?.currentTarget) {
-    event.currentTarget.classList.add("active");
-  } else {
-    const tabs = document.querySelectorAll(".tab-header");
-    tabs.forEach(tab => {
-      const onclickAttr = tab.getAttribute("onclick");
-      if(onclickAttr && onclickAttr.includes(`'${product}'`)) {
-        tab.classList.add("active");
-      }
-    });
-  }
+  if(event?.currentTarget) event.currentTarget.classList.add("active");
+
+  document.getElementById('sidebarTitle').textContent = product.toUpperCase() + ' Product';
+  loadSidebarMenu(product);
+  updateContent();
+}
 
 function switchCategory(category, event) {
   currentCategory = category;
@@ -1110,3 +1106,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
+
