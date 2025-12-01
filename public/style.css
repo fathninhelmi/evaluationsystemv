@@ -3849,7 +3849,7 @@ label {
   padding: 20px;
   width: 2000px !important;
   margin: 0 auto;
-  flex-direction: row;
+  flex-direction: row-reverse;
 }
 
 .library-content {
@@ -3860,7 +3860,7 @@ label {
 }
 
 .library-sidebar {
-  width: 200px;
+  width: 150px;
   flex-shrink: 0;
 }
 
@@ -3926,7 +3926,7 @@ label {
   min-height: 600px;
   height: 600px;
   overflow-y: auto;
-  width: 1000px !important;
+  width: 2000px !important;
 }
 
 .content-box h2 {
@@ -3955,7 +3955,7 @@ label {
   padding: 20px;
   border: 2px solid #0e2952;
   transition: transform 0.2s, box-shadow 0.2s;
-  width: 750px;
+  width: 2000px !important;
 }
 
 .resource-card:hover {
@@ -4541,5 +4541,3 @@ label {
   height: 100% !important;
   border: none;
 }
-
-
