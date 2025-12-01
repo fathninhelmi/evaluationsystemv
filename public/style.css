@@ -3855,9 +3855,8 @@ label {
 .library-content {
   flex: 1;
   min-width: 0;
-  width: 1000px !important;
+  width: 100% !important;
   max-width: none !important;
-  
 }
 
 .library-sidebar {
@@ -4527,7 +4526,7 @@ label {
 }
 
 .doc-preview-container {
-  width: 1000px !important;
+  width: 100% !important;
   max-width: none !important;
   height: 700px;
   margin: 15px 0;
@@ -4542,3 +4541,4 @@ label {
   height: 100% !important;
   border: none;
 }
+
