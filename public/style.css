@@ -3855,7 +3855,7 @@ label {
 .library-content {
   flex: 1;
   min-width: 0;
-  width: 900px !important;
+  width: 700px !important;
   max-width: none !important;
   order:1;
 }
@@ -4543,6 +4543,7 @@ label {
   height: 100% !important;
   border: none;
 }
+
 
 
 
