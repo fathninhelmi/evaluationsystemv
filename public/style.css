@@ -3857,11 +3857,13 @@ label {
   min-width: 0;
   width: 100% !important;
   max-width: none !important;
+  order:1;
 }
 
 .library-sidebar {
   width: 150px;
   flex-shrink: 0;
+  order:0;
 }
 
 .sidebar-menu {
@@ -4541,5 +4543,6 @@ label {
   height: 100% !important;
   border: none;
 }
+
 
 
