@@ -3847,7 +3847,7 @@ label {
   display: flex;
   gap: 20px;
   padding: 20px;
-  width: 2000px !important;
+  width: 1000px !important;
   margin: 0 auto;
   flex-direction: row;
 }
@@ -4543,6 +4543,7 @@ label {
   height: 100% !important;
   border: none;
 }
+
 
 
 
