@@ -381,12 +381,12 @@ function initCharts() {
     const loseReasonStats = {};
 
     evaluationData.forEach(item => {
-        const cat = item.category;
+        const cat = item.category || 'Other';
         if (!productStats[cat]) {
             productStats[cat] = { total: 0, win: 0, lose: 0, loseReasons: {} };
         }
         productStats[cat].total++;
-        
+
         if (item.winlose) {
             const status = item.winlose.toLowerCase();
             if (status === 'win') {
@@ -395,17 +395,15 @@ function initCharts() {
             } else if (status === 'lose' || status === 'loss') {
                 productStats[cat].lose++;
                 totalLoses++;
-                
-                // Count lose reasons
+
                 if (item.loseReason) {
+                    // All non-predefined reasons are considered "Others"
                     const reason = item.loseReason === 'others' && item.otherReason 
-                        ? item.otherReason 
+                        ? 'Others'
                         : formatLoseReason(item.loseReason);
-                    
-                    // Global lose reasons
+
                     loseReasonStats[reason] = (loseReasonStats[reason] || 0) + 1;
-                    
-                    // Per-category lose reasons
+
                     if (!productStats[cat].loseReasons[reason]) {
                         productStats[cat].loseReasons[reason] = 0;
                     }
@@ -415,9 +413,11 @@ function initCharts() {
         }
     });
 
+    // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
+    // Category breakdown
     const breakdownHTML = `
     <div style="
         display: grid;
@@ -429,66 +429,62 @@ function initCharts() {
         justify-items: center;
         text-align: center;
     ">
-        ${Object.entries(productStats)
-        .map(([cat, stats]) => `
+        ${Object.entries(productStats).map(([cat, stats]) => `
             <div>${cat}: ${stats.win}W / ${stats.lose}L</div>
-        `)
-        .join('')}
+        `).join('')}
     </div>`;
     document.getElementById('categoryBreakdown').innerHTML = breakdownHTML;
 
     const categories = Object.keys(productStats);
     const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
+    // Product chart
     const productCtx = document.getElementById('productChart');
-    if (!productCtx) return;
-
-    if (window.productChartInstance) window.productChartInstance.destroy();
-
-    window.productChartInstance = new Chart(productCtx, {
-        type: 'doughnut',
-        data: { 
-            labels: categories,
-            datasets: [{ 
-                label: 'Evaluations by Category',
-                data: categories.map(cat => productStats[cat].total), 
-                backgroundColor: colors
-            }] 
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { position: 'bottom', labels: { font: { size: 10 } } },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const cat = categories[context.dataIndex];
-                            const total = productStats[cat].total;
-                            const wins = productStats[cat].win;
-                            const loses = productStats[cat].lose;
-                            return `${cat}: ${total} (${wins}W/${loses}L)`;
+    if (productCtx) {
+        if (window.productChartInstance) window.productChartInstance.destroy();
+        window.productChartInstance = new Chart(productCtx, {
+            type: 'doughnut',
+            data: { 
+                labels: categories,
+                datasets: [{ 
+                    label: 'Evaluations by Category',
+                    data: categories.map(cat => productStats[cat].total), 
+                    backgroundColor: colors
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { position: 'bottom', labels: { font: { size: 10 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const cat = categories[context.dataIndex];
+                                const total = productStats[cat].total;
+                                const wins = productStats[cat].win;
+                                const loses = productStats[cat].lose;
+                                return `${cat}: ${total} (${wins}W/${loses}L)`;
+                            }
                         }
                     }
-                }
-            } 
-        }
-    });
+                } 
+            }
+        });
+    }
 
-    // Create Lose Reason Chart - organized by product category
+    // Lose Reason Chart
     const loseReasonCtx = document.getElementById('loseReasonChart');
     if (loseReasonCtx && Object.keys(loseReasonStats).length > 0) {
         if (window.loseReasonChartInstance) window.loseReasonChartInstance.destroy();
 
         const allReasons = Object.keys(loseReasonStats);
         const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
-        
-        // Create datasets for each product category
+
         const datasets = categories.map((cat, idx) => {
-            const categoryData = allReasons.map(reason => 
+            const categoryData = allReasons.map(reason =>
                 productStats[cat].loseReasons[reason] || 0
             );
-            
             return {
                 label: cat,
                 data: categoryData,
@@ -508,11 +504,7 @@ function initCharts() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { 
-                        display: true,
-                        position: 'top',
-                        labels: { font: { size: 10 } }
-                    },
+                    legend: { display: true, position: 'top', labels: { font: { size: 10 } } },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -522,78 +514,65 @@ function initCharts() {
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            font: { size: 10 }
-                        }
-                    }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { ticks: { font: { size: 10 } } }
                 }
             }
         });
 
-        // Display breakdown text by category
+        // Only display "Others" in loseReasonBreakdown
         const breakdownText = categories.map(cat => {
-            const categoryReasons = productStats[cat].loseReasons;
-            if (Object.keys(categoryReasons).length === 0) return '';
-            
-            const reasonText = Object.entries(categoryReasons)
-                .map(([reason, count]) => `${reason}: ${count}`)
-                .join(', ');
-            
-            return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> ${reasonText}</div>`;
+            const othersCount = productStats[cat].loseReasons['Others'] || 0;
+            if (othersCount === 0) return '';
+            return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> Others: ${othersCount}</div>`;
         }).filter(text => text).join('');
-        
+
         document.getElementById('loseReasonBreakdown').innerHTML = breakdownText || '<div style="color: #999;">No lose reasons recorded</div>';
+
     } else if (loseReasonCtx) {
         document.getElementById('loseReasonBreakdown').innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No lose data available</div>';
     }
 
+    // Monthly Progress Chart
     const monthlyData = getMonthlyProgressData();
     const progressCtx = document.getElementById('progressChart');
-    if (!progressCtx) return;
-
-    if (window.progressChartInstance) window.progressChartInstance.destroy();
-
-    window.progressChartInstance = new Chart(progressCtx, {
-        type: 'line',
-        data: {
-            labels: monthlyData.labels,
-            datasets: [
-                { 
-                    label: 'Completed', 
-                    data: monthlyData.completed, 
-                    borderColor: '#2ecc71', 
-                    backgroundColor: 'rgba(46,204,113,0.1)', 
-                    fill: true, 
-                    tension: 0.4, 
-                    pointBackgroundColor: '#2ecc71', 
-                    pointRadius: 5 
-                },
-                { 
-                    label: 'Total', 
-                    data: monthlyData.total, 
-                    borderColor: '#3498db', 
-                    backgroundColor: 'rgba(52,152,219,0.1)', 
-                    fill: false, 
-                    tension: 0.4, 
-                    pointBackgroundColor: '#3498db', 
-                    pointRadius: 5 
-                }
-            ]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { legend: { position: 'top' } }, 
-            scales: { y: { beginAtZero: true } } 
-        }
-    });
+    if (progressCtx) {
+        if (window.progressChartInstance) window.progressChartInstance.destroy();
+        window.progressChartInstance = new Chart(progressCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.labels,
+                datasets: [
+                    { 
+                        label: 'Completed', 
+                        data: monthlyData.completed, 
+                        borderColor: '#2ecc71', 
+                        backgroundColor: 'rgba(46,204,113,0.1)', 
+                        fill: true, 
+                        tension: 0.4, 
+                        pointBackgroundColor: '#2ecc71', 
+                        pointRadius: 5 
+                    },
+                    { 
+                        label: 'Total', 
+                        data: monthlyData.total, 
+                        borderColor: '#3498db', 
+                        backgroundColor: 'rgba(52,152,219,0.1)', 
+                        fill: false, 
+                        tension: 0.4, 
+                        pointBackgroundColor: '#3498db', 
+                        pointRadius: 5 
+                    }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { position: 'top' } }, 
+                scales: { y: { beginAtZero: true } } 
+            }
+        });
+    }
 }
 
 function formatLoseReason(reason) {
@@ -825,12 +804,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
