@@ -34,6 +34,26 @@
                 </div>
                 <input type="hidden" name="result" id="result" required>
             </div>
+            
+            <!-- Reason for Lose (only shown when Lose is selected) -->
+            <div id="loseReasonSection" style="display: none; margin-top: 20px;">
+                <div class="form-group-eval">
+                    <label>Reason for Lose:</label>
+                    <select name="loseReason" id="loseReason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+                        <option value="">Select a reason</option>
+                        <option value="expensive">Expensive</option>
+                        <option value="better_product">Better Product</option>
+                        <option value="advance_features">Competitor got advance features</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+                <div id="otherReasonSection" style="display: none;">
+                    <div class="form-group-eval">
+                        <label>Please specify:</label>
+                        <textarea name="otherReason" id="otherReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Performance Scoring Section -->
@@ -727,3 +747,4 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
