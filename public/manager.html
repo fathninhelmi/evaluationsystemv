@@ -86,39 +86,43 @@
       </div>
 
         <div class="widget">
-        <div class="widget-header">
-          <div class="widget-title">
-            Product Categories
-          </div>
-        </div>
-        <div class="chart-container">
-          <canvas id="productChart"></canvas>
-        </div>
-        <div style="padding: 15px; border-top: 1px solid #e0e0e0;">
-          <div style="display: flex; justify-content: space-around; text-align: center;">
-            <div style="flex: 1;">
-              <div style="font-size: 24px; font-weight: bold; color: #2ecc71;" id="totalWins">0</div>
-              <div style="font-size: 14px; color: #666;">Total Wins</div>
-            </div>
-            <div style="flex: 1;">
-              <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="totalLoses">0</div>
-              <div style="font-size: 14px; color: #666;">Total Loses</div>
-            </div>
-          <div id="categoryBreakdown" style="margin-top: 15px; font-size: 13px; color: #333;"></div>
-        <div class="widget-header" style="display:block; width:100%; margin-top:20px;">
-          <div class="widget-title">
-            Reasons for Loses
-          </div>
-        </div>
-        </div>
-        <div class="chart-container">
-          <canvas id="loseReasonChart"></canvas>
-        </div>
-        <div style="padding: 15px; border-top: 1px solid #e0e0e0;">
-          <div id="loseReasonBreakdown" style="font-size: 13px; color: #333;"></div>
-        </div>
+  <div class="widget-header">
+    <div class="widget-title">
+      Product Categories
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="productChart"></canvas>
+  </div>
+
+  <div style="padding: 15px; border-top: 1px solid #e0e0e0;">
+    <div style="display: flex; justify-content: space-around; text-align: center;">
+      <div style="flex: 1;">
+        <div style="font-size: 24px; font-weight: bold; color: #2ecc71;" id="totalWins">0</div>
+        <div style="font-size: 14px; color: #666;">Total Wins</div>
+      </div>
+      <div style="flex: 1;">
+        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="totalLoses">0</div>
+        <div style="font-size: 14px; color: #666;">Total Loses</div>
       </div>
     </div>
+    <div id="categoryBreakdown" style="margin-top: 15px; font-size: 13px; color: #333;"></div>
+  </div>
+  <div class="widget-header" style="margin-top: 20px;">
+    <div class="widget-title">
+      Reasons for Loses
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="loseReasonChart"></canvas>
+  </div>
+
+  <div style="padding: 15px; border-top: 1px solid #e0e0e0;">
+    <div id="loseReasonBreakdown" style="font-size: 13px; color: #333;"></div>
+  </div>
+</div>
 
      <div class="widget">
         <div class="widget-header">
@@ -821,6 +825,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
