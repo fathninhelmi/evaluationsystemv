@@ -379,7 +379,6 @@ function initCharts() {
     let totalWins = 0;
     let totalLoses = 0;
     const loseReasonStats = {};
-
     evaluationData.forEach(item => {
         const cat = item.category || 'Other';
         if (!productStats[cat]) {
@@ -397,9 +396,8 @@ function initCharts() {
                 totalLoses++;
 
                 if (item.loseReason) {
-                    // All non-predefined reasons are considered "Others"
                     const reason = item.loseReason === 'others' && item.otherReason 
-                        ? 'Others'
+                        ? item.otherReason 
                         : formatLoseReason(item.loseReason);
 
                     loseReasonStats[reason] = (loseReasonStats[reason] || 0) + 1;
@@ -412,12 +410,8 @@ function initCharts() {
             }
         }
     });
-
-    // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
-
-    // Category breakdown
     const breakdownHTML = `
     <div style="
         display: grid;
@@ -493,7 +487,6 @@ function initCharts() {
                 borderWidth: 1
             };
         });
-
         window.loseReasonChartInstance = new Chart(loseReasonCtx, {
             type: 'bar',
             data: {
@@ -519,16 +512,15 @@ function initCharts() {
                 }
             }
         });
-
-        // Only display "Others" in loseReasonBreakdown
         const breakdownText = categories.map(cat => {
-            const othersCount = productStats[cat].loseReasons['Others'] || 0;
-            if (othersCount === 0) return '';
-            return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> Others: ${othersCount}</div>`;
+            const categoryReasons = productStats[cat].loseReasons;
+            if (Object.keys(categoryReasons).length === 0) return '';
+            const reasonText = Object.entries(categoryReasons)
+                .map(([reason, count]) => `${reason}: ${count}`)
+                .join(', ');
+            return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> ${reasonText}</div>`;
         }).filter(text => text).join('');
-
         document.getElementById('loseReasonBreakdown').innerHTML = breakdownText || '<div style="color: #999;">No lose reasons recorded</div>';
-
     } else if (loseReasonCtx) {
         document.getElementById('loseReasonBreakdown').innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No lose data available</div>';
     }
