@@ -615,15 +615,17 @@ function parseQuestionsAndAnswers(text) {
   let currentQuestion = null;
   let currentAnswer = '';
   
-  const specKeywords = [
-    'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
-    'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
-    'technologies', 'functions', 'traceability', 'hardware', 'software', 
-    'coverage', 'inspection', 'operating', 'optical', 'transport', 'edge',
-    'board', 'level', 'panel', 'camera', 'lighting', 'module', 'conveyor',
-    'adjustment', 'requirement', 'specification', 'footprint', 'supplies',
-    'pcb', 'maximum', 'minimum', 'total', 'installation', 'type', 'area'
-  ];
+  const specKeywords = [ 'Size/Footprint (WxHxD)', 'Weight', 'Power Requirement', 'Air Requirement', 'Operating System',
+                        'Computer System', 'Camera', 'FOV Size', 'Optical Resolution', 'Inspection Speed', '3D Technologies',
+                        'Lighting Module', 'X-Y-Z Axis Repeatability', 'Minimum PCB Size (LxW)', 'Maximum PCB Size (LxW)',
+                        'Maximum PCB Inspectable Area (LxW)', 'Maximum PCB Weight', 'Minimum PCB Thickness', 'Maximum PCB Thickness',
+                        'Maximum Component Height (Clearance)', 'Minimum Thickness Measurement', 'Top Side Clearance',
+                        'Bottom Side Clearance', 'Board Edge Clearance / PCB Edge Clearance', 'Conveyor Height / Working Height',
+                        'PCB Temperature', 'System Configurations', 'Height Resolution', 'Lighting System', 'Z-Resolution',
+                        'Image Color', 'Imaging Method', 'Pixel Size', 'System Hardware', 'PCB Clamping', 'PCB Conveyor',
+                        'PCB Green Solder Paste Compensation', 'PCB Green Thickness Measurement', 'Width Adjustment',
+                        'Conveyor Height', 'Conveyor Width', 'Conveyor Speed', 'Conveyor Flow', 'Rail Fixed', 
+                        'Height Measurement Accuracy', 'AOI Scanning Method', 'Process Edge' ];
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -697,14 +699,17 @@ function extractQuestions(text, pdfItems = []) {
   ];
 
   const specKeywords = [
-    'dimension', 'size', 'width', 'height', 'thickness', 'weight', 'temperature', 
-    'speed', 'resolution', 'system', 'power', 'air', 'clearance', 'fov', 
-    'technologies', 'functions', 'traceability', 'hardware', 'software', 
-    'coverage', 'inspection', 'operating', 'optical', 'transport', 'edge',
-    'board', 'level', 'panel', 'camera', 'lighting', 'module', 'conveyor',
-    'adjustment', 'requirement', 'specification', 'footprint', 'supplies',
-    'pcb', 'maximum', 'minimum', 'total', 'installation', 'type', 'area',
-    'footprint', 'conveyor'
+      'Size/Footprint (WxHxD)', 'Weight', 'Power Requirement', 'Air Requirement', 'Operating System',
+      'Computer System', 'Camera', 'FOV Size', 'Optical Resolution', 'Inspection Speed', '3D Technologies',
+      'Lighting Module', 'X-Y-Z Axis Repeatability', 'Minimum PCB Size (LxW)', 'Maximum PCB Size (LxW)',
+      'Maximum PCB Inspectable Area (LxW)', 'Maximum PCB Weight', 'Minimum PCB Thickness', 'Maximum PCB Thickness',
+      'Maximum Component Height (Clearance)', 'Minimum Thickness Measurement', 'Top Side Clearance',
+      'Bottom Side Clearance', 'Board Edge Clearance / PCB Edge Clearance', 'Conveyor Height / Working Height',
+      'PCB Temperature', 'System Configurations', 'Height Resolution', 'Lighting System', 'Z-Resolution',
+      'Image Color', 'Imaging Method', 'Pixel Size', 'System Hardware', 'PCB Clamping', 'PCB Conveyor',
+      'PCB Green Solder Paste Compensation', 'PCB Green Thickness Measurement', 'Width Adjustment',
+      'Conveyor Height', 'Conveyor Width', 'Conveyor Speed', 'Conveyor Flow', 'Rail Fixed', 
+      'Height Measurement Accuracy', 'AOI Scanning Method', 'Process Edge'
   ];
   
   lines.forEach((line, index) => {
@@ -1106,7 +1111,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
-
-
-
