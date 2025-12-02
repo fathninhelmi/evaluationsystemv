@@ -175,8 +175,32 @@ function initScoreButtons() {
             this.classList.add('active');
             const resultValue = this.dataset.result;
             document.getElementById('result').value = resultValue;
+            
+            // Show/hide lose reason section
+            const loseReasonSection = document.getElementById('loseReasonSection');
+            if (resultValue === 'lose') {
+                loseReasonSection.style.display = 'block';
+            } else {
+                loseReasonSection.style.display = 'none';
+                // Clear lose reason fields when switching to Win
+                document.getElementById('loseReason').value = '';
+                document.getElementById('otherReason').value = '';
+                document.getElementById('otherReasonSection').style.display = 'none';
+            }
+            
             await autoSaveResult(resultValue);
         });
+    });
+    
+    // Handle lose reason dropdown
+    document.getElementById('loseReason').addEventListener('change', function() {
+        const otherReasonSection = document.getElementById('otherReasonSection');
+        if (this.value === 'others') {
+            otherReasonSection.style.display = 'block';
+        } else {
+            otherReasonSection.style.display = 'none';
+            document.getElementById('otherReason').value = '';
+        }
     });
 }
 
@@ -255,8 +279,7 @@ function handleFileSelect(event) {
         return;
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
         alert('File size must be less than 10MB.');
         event.target.value = '';
@@ -371,6 +394,21 @@ async function loadForm() {
                     btn.classList.add('active');
                 }
             });
+            
+            // Show lose reason section if result is lose
+            if (evDoc.result === 'lose') {
+                document.getElementById('loseReasonSection').style.display = 'block';
+                
+                // Load lose reason data
+                if (evDoc.loseReason) {
+                    document.getElementById('loseReason').value = evDoc.loseReason;
+                    
+                    if (evDoc.loseReason === 'others' && evDoc.otherReason) {
+                        document.getElementById('otherReasonSection').style.display = 'block';
+                        document.getElementById('otherReason').value = evDoc.otherReason;
+                    }
+                }
+            }
         }
         
         if (evDoc.score !== undefined && evDoc.score !== null) {
@@ -569,6 +607,9 @@ function deleteKeywordRow(button) {
 function validateForm(status) {
     const resultValue = document.getElementById('result').value.trim();
     const scoreValue = document.getElementById('score').value.trim();
+    const loseReasonValue = document.getElementById('loseReason').value;
+    const otherReasonValue = document.getElementById('otherReason').value.trim();
+    
     const competitorInputs = document.querySelectorAll('[name^="competitorInfo_"]');
     const competitorInfoArray = Array.from(competitorInputs)
         .map(input => input.value.trim())
@@ -584,6 +625,21 @@ function validateForm(status) {
             alert("Please select Win or Lose.");
             return false;
         }
+        
+        // Validate lose reason if result is lose
+        if (resultValue === 'lose') {
+            if (!loseReasonValue) {
+                alert("Please select a reason for losing.");
+                document.getElementById('loseReason').focus();
+                return false;
+            }
+            if (loseReasonValue === 'others' && !otherReasonValue) {
+                alert("Please specify the other reason for losing.");
+                document.getElementById('otherReason').focus();
+                return false;
+            }
+        }
+        
         if (!scoreValue) {
             alert("Score is required for submission.");
             document.getElementById('score').focus();
@@ -602,14 +658,14 @@ function validateForm(status) {
             return false;
         }
     }
-    return { resultValue, scoreValue, competitorInfoArray, keywordArray };
+    return { resultValue, scoreValue, loseReasonValue, otherReasonValue, competitorInfoArray, keywordArray };
 }
 
 async function saveForm(status = "draft") {
     const validationResult = validateForm(status);
     if (!validationResult) return;
 
-    const { resultValue, scoreValue, competitorInfoArray, keywordArray } = validationResult;
+    const { resultValue, scoreValue, loseReasonValue, otherReasonValue, competitorInfoArray, keywordArray } = validationResult;
     
     // Upload file if new file is selected
     const fileInput = document.getElementById('attachmentInput');
@@ -626,6 +682,13 @@ async function saveForm(status = "draft") {
 
     if (resultValue) data.result = resultValue;
     if (scoreValue) data.score = scoreValue;
+    // Save lose reason data
+    if (resultValue === 'lose') {
+        if (loseReasonValue) data.loseReason = loseReasonValue;
+        if (loseReasonValue === 'others' && otherReasonValue) {
+            data.otherReason = otherReasonValue;
+        }
+    }
     if (competitorInfoArray.length > 0) data.competitorInfo = competitorInfoArray;
     if (keywordArray.length > 0) data.keyword = keywordArray;
     if (uploadedFileId) {
@@ -747,4 +810,3 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
-
