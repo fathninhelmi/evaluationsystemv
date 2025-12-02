@@ -1721,7 +1721,7 @@ textarea::placeholder {
 }
 
 .evaluation-list {
-    max-height: 600px; 
+    max-height: 800px; 
     overflow-y: auto;
 }
 
@@ -4542,6 +4542,7 @@ label {
   height: 100% !important;
   border: none;
 }
+
 
 
 
