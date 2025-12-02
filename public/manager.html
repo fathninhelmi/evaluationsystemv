@@ -379,6 +379,7 @@ function initCharts() {
     let totalWins = 0;
     let totalLoses = 0;
     const loseReasonStats = {};
+
     evaluationData.forEach(item => {
         const cat = item.category || 'Other';
         if (!productStats[cat]) {
@@ -396,8 +397,9 @@ function initCharts() {
                 totalLoses++;
 
                 if (item.loseReason) {
+                    // All non-predefined reasons are considered "Others"
                     const reason = item.loseReason === 'others' && item.otherReason 
-                        ? item.otherReason 
+                        ? 'Others'
                         : formatLoseReason(item.loseReason);
 
                     loseReasonStats[reason] = (loseReasonStats[reason] || 0) + 1;
@@ -410,8 +412,12 @@ function initCharts() {
             }
         }
     });
+
+    // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
+
+    // Category breakdown
     const breakdownHTML = `
     <div style="
         display: grid;
@@ -487,6 +493,7 @@ function initCharts() {
                 borderWidth: 1
             };
         });
+
         window.loseReasonChartInstance = new Chart(loseReasonCtx, {
             type: 'bar',
             data: {
@@ -512,18 +519,29 @@ function initCharts() {
                 }
             }
         });
+        // Lose Reason Breakdown (show only user-filled "otherReason")
         const breakdownText = categories.map(cat => {
-            const categoryReasons = productStats[cat].loseReasons;
-            if (Object.keys(categoryReasons).length === 0) return '';
-            const reasonText = Object.entries(categoryReasons)
+            // Get all "otherReason" values for this category
+            const otherReasons = evaluationData
+                .filter(item => item.category === cat && item.loseReason === 'others' && item.otherReason)
+                .map(item => item.otherReason);
+
+            if (otherReasons.length === 0) return '';
+
+            // Count each user-entered reason (if repeated, show count)
+            const reasonCounts = {};
+            otherReasons.forEach(reason => {
+                reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+            });
+
+            const reasonText = Object.entries(reasonCounts)
                 .map(([reason, count]) => `${reason}: ${count}`)
                 .join(', ');
+
             return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> ${reasonText}</div>`;
         }).filter(text => text).join('');
-        document.getElementById('loseReasonBreakdown').innerHTML = breakdownText || '<div style="color: #999;">No lose reasons recorded</div>';
-    } else if (loseReasonCtx) {
-        document.getElementById('loseReasonBreakdown').innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No lose data available</div>';
-    }
+
+        document.getElementById('loseReasonBreakdown').innerHTML = breakdownText || '<div style="color: #999;">No user-entered reasons recorded</div>';
 
     // Monthly Progress Chart
     const monthlyData = getMonthlyProgressData();
@@ -565,7 +583,7 @@ function initCharts() {
             }
         });
     }
-}
+}}
 
 function formatLoseReason(reason) {
     const reasonMap = {
