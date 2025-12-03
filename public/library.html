@@ -266,13 +266,13 @@ async function logout() {
 }
 
 const productCategories = {
-  'spi': ['Overview'],
-  'aoi': ['Overview', 'QA'],
-  'axi': ['Overview'],
-  'arv': ['Overview'],
-  'vone': ['Overview'],
-  'xc': ['Overview'],
-  'xs': ['Overview']
+  'spi': ['Overview', 'Certification Status'],
+  'aoi': ['Overview', 'QA', 'Certification Status'],
+  'axi': ['Overview', 'Certification Status'],
+  'arv': ['Overview', 'Certification Status'],
+  'vone': ['Overview', 'Certification Status'],
+  'xc': ['Overview', 'Certification Status'],
+  'xs': ['Overview', 'Certification Status']
 };
 
 const publishedSpreadsheetKeys = {
@@ -285,14 +285,16 @@ const publishedSpreadsheetKeys = {
   'xs': '2PACX-1vR7IrfiDt2YMYNBjPr7dmwh-alOXhlWv0KPNMvthDZDp0niPzcq8UZZ-inaN8B_SkGlVUwJNcrrNFqo'
 };
 
+const certificationSpreadsheetKey = '2PACX-1vQDzVgkl5WEPuJxx72hjKJAXTHarPWn53Ad4Co77_6e65Zjo9KF54XOBhA6q2aS7i2mfNyeTkq9tgDC';
+
 const sheetGids = {
-  'spi': ['1133782264', '37803899'], 
-  'aoi': ['0', '1761256867', '1256221185'],
-  'axi': ['1261267589', '992933642'],
-  'arv': ['487763420', '468007016'],
-  'vone': ['934774948', '0'],
-  'xc': ['1566133309', '0'],
-  'xs': ['128997642', '0']
+  'spi': ['1133782264' ], 
+  'aoi': ['0', '1761256867'],
+  'axi': ['1261267589'],
+  'arv': ['487763420'],
+  'vone': ['934774948'],
+  'xc': ['1566133309'],
+  'xs': ['128997642']
 };
 
 function loadSidebarMenu(product) {
@@ -327,7 +329,14 @@ function switchCategory(category, event) {
 }
 
 function getGoogleSheetsPreviewLink(product, category) {
-  const publishedKey = publishedSpreadsheetKeys[product];
+  let publishedKey;
+  
+  if (category === 'Certification Status') {
+    publishedKey = certificationSpreadsheetKey;
+  } else {
+    publishedKey = publishedSpreadsheetKeys[product];
+  }
+  
   if (!publishedKey) {
     console.error('No published spreadsheet key found for product:', product);
     return '';
@@ -340,7 +349,14 @@ function getGoogleSheetsPreviewLink(product, category) {
 }
 
 function getFullSpreadsheetLink(product, category) {
-  const publishedKey = publishedSpreadsheetKeys[product];
+  let publishedKey;
+
+  if (category === 'Certification Status') {
+    publishedKey = certificationSpreadsheetKey;
+  } else {
+    publishedKey = publishedSpreadsheetKeys[product];
+  }
+  
   if (!publishedKey) return '';
 
   const categories = productCategories[product] || [];
