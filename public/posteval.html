@@ -166,6 +166,7 @@ let currentStatus = "draft";
 let competitorRowCount = 1;
 let keywordRowCount = 1;
 let uploadedFileId = null;
+let userRole = null;
 
 function initScoreButtons() {
     document.querySelectorAll('.result-btn').forEach(btn => {
@@ -358,6 +359,12 @@ async function initForm() {
     try {
         document.getElementById("loadingIndicator").style.display = "block";
 
+        const user = await account.get();
+        userRole = user.prefs.role || null;  
+        if (userRole === "manager") {
+            setViewMode();
+        }
+
         if (!eventId) {
             alert("No event ID found. Please start from the Details page.");
             window.location.href = "/createform.html";
@@ -371,10 +378,13 @@ async function initForm() {
         initFileUpload();
         await loadForm();
 
-        if (viewMode) setViewMode();
+        if (viewMode && userRole !== "manager") {
+            setViewMode();
+        }
 
         document.getElementById("loadingIndicator").style.display = "none";
         document.getElementById("postEvalForm").style.display = "block";
+
     } catch (error) {
         console.error("Error initializing form:", error);
         document.getElementById("loadingIndicator").style.display = "none";
