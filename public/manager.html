@@ -69,7 +69,6 @@
               <option value="all">All Locations</option>
               <option value="complete">Complete</option>
               <option value="progress">In Progress</option>
-              <option value="draft">Draft</option>
             </select>
             <label>From: <input type="date" id="startDate" onchange="applyFilters()"></label>
             <label>To: <input type="date" id="endDate" onchange="applyFilters()"></label>
@@ -423,25 +422,40 @@ function initCharts() {
         }
     });
 
+    // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
-    const breakdownHTML = `
-    <div style="
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 4px;
-        padding-left: 0;
-        margin: 0;
-        list-style: none;
-        justify-items: center;
-        text-align: center;
-    ">
-        ${Object.entries(productStats).map(([cat, stats]) => `
-            <div>${cat}: ${stats.win}W / ${stats.lose}L</div>
-        `).join('')}
-    </div>`;
-    document.getElementById('categoryBreakdown').innerHTML = breakdownHTML;
+    function renderCategoryTable(breakdownData) {
+    let html = `
+      <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr style="background: #f7f7f7; text-align: left;">
+            <th style="padding: 8px; border-bottom: 1px solid #ddd;">Category</th>
+            <th style="padding: 8px; border-bottom: 1px solid #ddd; text-align:center;">Wins</th>
+            <th style="padding: 8px; border-bottom: 1px solid #ddd; text-align:center;">Loses</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    breakdownData.forEach(item => {
+        html += `
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.category}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align:center; color:#2ecc71; font-weight:600;">${item.wins}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align:center; color:#e74c3c; font-weight:600;">${item.loses}</td>
+          </tr>
+        `;
+    });
+
+    html += `
+        </tbody>
+      </table>
+    `;
+
+    document.getElementById("categoryBreakdown").innerHTML = html;
+}
 
     const categories = Object.keys(productStats);
     const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
@@ -533,6 +547,8 @@ function initCharts() {
             .map(item => item.otherReason);
     
         if (otherReasons.length === 0) return '';
+    
+        // Count each user-entered reason (if repeated, show count)
         const reasonCounts = {};
         otherReasons.forEach(reason => {
             reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
@@ -711,13 +727,10 @@ function updateMapMarkers() {
             });
 
             const marker = L.marker(e.location, { icon });
-            
-            // Determine if status is clickable (not complete)
+
             const isClickable = e.status !== 'complete';
             const statusText = e.status === 'complete' ? '✅ Complete' : 
                             e.status === 'progress' ? '⏳ In Progress' : '📝 Draft';
-
-            // Create status badge - clickable if not complete
             const statusBadge = isClickable 
                 ? `<a href="detail.html?id=${e.id}" style="
                     display: inline-block;
@@ -779,6 +792,7 @@ function updateMapMarkers() {
                     </div>
                 </div>
             `;
+
             marker.bindPopup(popupContent);
             markerClusterGroup.addLayer(marker);
             displayedCount++;
@@ -857,7 +871,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
-
-
-
