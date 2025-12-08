@@ -69,6 +69,7 @@
               <option value="all">All Locations</option>
               <option value="complete">Complete</option>
               <option value="progress">In Progress</option>
+              <option value="draft">Draft</option>
             </select>
             <label>From: <input type="date" id="startDate" onchange="applyFilters()"></label>
             <label>To: <input type="date" id="endDate" onchange="applyFilters()"></label>
@@ -422,11 +423,9 @@ function initCharts() {
         }
     });
 
-    // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
-    // Category breakdown
     const breakdownHTML = `
     <div style="
         display: grid;
@@ -534,8 +533,6 @@ function initCharts() {
             .map(item => item.otherReason);
     
         if (otherReasons.length === 0) return '';
-    
-        // Count each user-entered reason (if repeated, show count)
         const reasonCounts = {};
         otherReasons.forEach(reason => {
             reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
@@ -715,6 +712,42 @@ function updateMapMarkers() {
 
             const marker = L.marker(e.location, { icon });
             
+            // Determine if status is clickable (not complete)
+            const isClickable = e.status !== 'complete';
+            const statusText = e.status === 'complete' ? '✅ Complete' : 
+                            e.status === 'progress' ? '⏳ In Progress' : '📝 Draft';
+
+            // Create status badge - clickable if not complete
+            const statusBadge = isClickable 
+                ? `<a href="detail.html?id=${e.id}" style="
+                    display: inline-block;
+                    padding: 8px 16px;
+                    background: ${color};
+                    color: white;
+                    border-radius: 6px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    text-decoration: none;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                " onmouseover="this.style.opacity='0.8'; this.style.transform='scale(1.05)';" 
+                onmouseout="this.style.opacity='1'; this.style.transform='scale(1)';">
+                    ${statusText} →
+                </a>`
+                : `<span style="
+                    display: inline-block;
+                    padding: 8px 16px;
+                    background: ${color};
+                    color: white;
+                    border-radius: 6px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                ">
+                    ${statusText}
+                </span>`;
+    
             const popupContent = `
                 <div style="min-width: 260px; font-family: Arial, sans-serif;">
                     <div style="font-weight: bold; font-size: 16px; margin-bottom: 12px; color: #333; border-bottom: 3px solid ${color}; padding-bottom: 8px;">
@@ -728,24 +761,24 @@ function updateMapMarkers() {
                         <div><strong>📅 Date:</strong> ${e.date}</div>
                         ${e.searchQuery ? `<div style="font-size: 11px; color: #999; margin-top: 8px;"><em>Found via: "${e.searchQuery}"</em></div>` : ''}
                     </div>
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: center;">
-                        <span style="
-                            display: inline-block;
-                            padding: 8px 16px;
-                            background: ${color};
-                            color: white;
-                            border-radius: 6px;
-                            font-size: 13px;
-                            font-weight: bold;
-                            text-transform: uppercase;
-                        ">
-                            ${e.status === 'complete' ? '✅ Complete' : 
-                              e.status === 'progress' ? '⏳ In Progress' : '📝 Draft'}
-                        </span>
+                    <div style=
+                        "margin-top: 12px; 
+                        padding-top: 12px; 
+                        border-top: 1px solid #eee; 
+                        text-align: center;">
+                        
+                        ${statusBadge}
+                        ${isClickable ? 
+                        
+                        `<div style=
+                        "font-size: 11px; 
+                        color: #666; 
+                        margin-top: 6px;"> 
+                        Click to view details
+                        </div>` : ''}
                     </div>
                 </div>
             `;
-
             marker.bindPopup(popupContent);
             markerClusterGroup.addLayer(marker);
             displayedCount++;
@@ -824,6 +857,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
