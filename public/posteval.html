@@ -35,7 +35,25 @@
                 <input type="hidden" name="result" id="result" required>
             </div>
             
-            <!-- Reason for Lose (only shown when Lose is selected) -->
+            <div id="winReasonSection" style="display: none; margin-top: 20px;">
+                <div class="form-group-eval">
+                    <label>Reason for Win:</label>
+                    <select name="winReason" id="winReason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+                        <option value="">Select a reason</option>
+                        <option value="goodvalue">Good value of money</option>
+                        <option value="best_product">Best Product</option>
+                        <option value="advance_features">Advance features</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+                <div id="otherReasonSection" style="display: none;">
+                    <div class="form-group-eval">
+                        <label>Please specify:</label>
+                        <textarea name="otherwinReason" id="otherwinReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
+                    </div>
+                </div>
+            </div>
+            
             <div id="loseReasonSection" style="display: none; margin-top: 20px;">
                 <div class="form-group-eval">
                     <label>Reason for Lose:</label>
@@ -50,7 +68,7 @@
                 <div id="otherReasonSection" style="display: none;">
                     <div class="form-group-eval">
                         <label>Please specify:</label>
-                        <textarea name="otherReason" id="otherReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
+                        <textarea name="otherloseReason" id="otherloseReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
                     </div>
                 </div>
             </div>
@@ -810,3 +828,4 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
