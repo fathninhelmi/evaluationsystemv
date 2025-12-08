@@ -787,8 +787,8 @@ function getFilteredData() {
         : null;
 
     return evaluationData.filter(e => {
-        if (locationFilter !== 'all' && e.location !== locationFilter) return false;
-        if (productFilter !== 'all' && e.product !== productFilter) return false;
+        if (locationFilter !== 'all' && e.status !== locationFilter) return false;
+        if (productFilter !== 'all' && e.category !== productFilter) return false;
         const d = new Date(e.date);
         if (start && d < start) return false;
         if (end) {
@@ -816,7 +816,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (user) {
         await loadEvaluations();
         setupRealTimeUpdates();
-        document.getElementById('locationFilter').addEventListener('change', updateMapMarkers);
+        document.getElementById('locationFilter').addEventListener('change', applyFilters);
+        document.getElementById('productFilter').addEventListener('change', applyFilters);
         document.getElementById('startDate').addEventListener('change', applyFilters);
         document.getElementById('endDate').addEventListener('change', applyFilters);
     }
@@ -829,3 +830,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
