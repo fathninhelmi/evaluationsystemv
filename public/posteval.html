@@ -46,7 +46,7 @@
                         <option value="others">Others</option>
                     </select>
                 </div>
-                <div id="otherReasonSection" style="display: none;">
+                <div id="otherWinReasonSection" style="display: none;">
                     <div class="form-group-eval">
                         <label>Please specify:</label>
                         <textarea name="otherwinReason" id="otherwinReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
@@ -65,7 +65,7 @@
                         <option value="others">Others</option>
                     </select>
                 </div>
-                <div id="otherReasonSection" style="display: none;">
+                <div id="otherLoseReasonSection" style="display: none;">
                     <div class="form-group-eval">
                         <label>Please specify:</label>
                         <textarea name="otherloseReason" id="otherloseReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
@@ -194,30 +194,48 @@ function initScoreButtons() {
             const resultValue = this.dataset.result;
             document.getElementById('result').value = resultValue;
             
-            // Show/hide lose reason section
+            const winReasonSection = document.getElementById('winReasonSection');
             const loseReasonSection = document.getElementById('loseReasonSection');
-            if (resultValue === 'lose') {
-                loseReasonSection.style.display = 'block';
-            } else {
+            
+            if (resultValue === 'win') {
+                winReasonSection.style.display = 'block';
                 loseReasonSection.style.display = 'none';
-                // Clear lose reason fields when switching to Win
+                // Clear lose reason fields
                 document.getElementById('loseReason').value = '';
-                document.getElementById('otherReason').value = '';
-                document.getElementById('otherReasonSection').style.display = 'none';
+                document.getElementById('otherloseReason').value = '';
+                document.getElementById('otherLoseReasonSection').style.display = 'none';
+            } else if (resultValue === 'lose') {
+                loseReasonSection.style.display = 'block';
+                winReasonSection.style.display = 'none';
+                // Clear win reason fields
+                document.getElementById('winReason').value = '';
+                document.getElementById('otherwinReason').value = '';
+                document.getElementById('otherWinReasonSection').style.display = 'none';
             }
             
             await autoSaveResult(resultValue);
         });
     });
     
+    // Handle win reason dropdown
+    document.getElementById('winReason').addEventListener('change', function() {
+        const otherWinReasonSection = document.getElementById('otherWinReasonSection');
+        if (this.value === 'others') {
+            otherWinReasonSection.style.display = 'block';
+        } else {
+            otherWinReasonSection.style.display = 'none';
+            document.getElementById('otherwinReason').value = '';
+        }
+    });
+    
     // Handle lose reason dropdown
     document.getElementById('loseReason').addEventListener('change', function() {
-        const otherReasonSection = document.getElementById('otherReasonSection');
+        const otherLoseReasonSection = document.getElementById('otherLoseReasonSection');
         if (this.value === 'others') {
-            otherReasonSection.style.display = 'block';
+            otherLoseReasonSection.style.display = 'block';
         } else {
-            otherReasonSection.style.display = 'none';
-            document.getElementById('otherReason').value = '';
+            otherLoseReasonSection.style.display = 'none';
+            document.getElementById('otherloseReason').value = '';
         }
     });
 }
@@ -412,6 +430,21 @@ async function loadForm() {
                     btn.classList.add('active');
                 }
             });
+
+                // Show win reason section if result is win
+            if (evDoc.result === 'win') {
+                document.getElementById('winReasonSection').style.display = 'block';
+                
+                // Load win reason data
+                if (evDoc.winReason) {
+                    document.getElementById('winReason').value = evDoc.winReason;
+                    
+                    if (evDoc.winReason === 'others' && evDoc.otherwinReason) {
+                        document.getElementById('otherWinReasonSection').style.display = 'block';
+                        document.getElementById('otherwinReason').value = evDoc.otherwinReason;
+                    }
+                }
+            }
             
             // Show lose reason section if result is lose
             if (evDoc.result === 'lose') {
@@ -626,7 +659,9 @@ function validateForm(status) {
     const resultValue = document.getElementById('result').value.trim();
     const scoreValue = document.getElementById('score').value.trim();
     const loseReasonValue = document.getElementById('loseReason').value;
-    const otherReasonValue = document.getElementById('otherReason').value.trim();
+    const otherLoseReasonValue = document.getElementById('otherloseReason').value.trim();
+    const winReasonValue = document.getElementById('winReason').value;
+    const otherWinReasonValue = document.getElementById('otherwinReason').value.trim();
     
     const competitorInputs = document.querySelectorAll('[name^="competitorInfo_"]');
     const competitorInfoArray = Array.from(competitorInputs)
@@ -644,6 +679,20 @@ function validateForm(status) {
             return false;
         }
         
+        // Validate win reason if result is win
+        if (resultValue === 'win') {
+            if (!winReasonValue) {
+                alert("Please select a reason for winning.");
+                document.getElementById('winReason').focus();
+                return false;
+            }
+            if (winReasonValue === 'others' && !otherWinReasonValue) {
+                alert("Please specify the other reason for winning.");
+                document.getElementById('otherwinReason').focus();
+                return false;
+            }
+        }
+        
         // Validate lose reason if result is lose
         if (resultValue === 'lose') {
             if (!loseReasonValue) {
@@ -651,9 +700,9 @@ function validateForm(status) {
                 document.getElementById('loseReason').focus();
                 return false;
             }
-            if (loseReasonValue === 'others' && !otherReasonValue) {
+            if (loseReasonValue === 'others' && !otherLoseReasonValue) {
                 alert("Please specify the other reason for losing.");
-                document.getElementById('otherReason').focus();
+                document.getElementById('otherloseReason').focus();
                 return false;
             }
         }
@@ -676,14 +725,14 @@ function validateForm(status) {
             return false;
         }
     }
-    return { resultValue, scoreValue, loseReasonValue, otherReasonValue, competitorInfoArray, keywordArray };
+    return { resultValue, scoreValue, loseReasonValue, otherLoseReasonValue, winReasonValue, otherWinReasonValue, competitorInfoArray, keywordArray };
 }
-
+    
 async function saveForm(status = "draft") {
     const validationResult = validateForm(status);
     if (!validationResult) return;
 
-    const { resultValue, scoreValue, loseReasonValue, otherReasonValue, competitorInfoArray, keywordArray } = validationResult;
+    const { resultValue, scoreValue, loseReasonValue, otherLoseReasonValue, winReasonValue, otherWinReasonValue, competitorInfoArray, keywordArray } = validationResult;
     
     // Upload file if new file is selected
     const fileInput = document.getElementById('attachmentInput');
@@ -700,13 +749,23 @@ async function saveForm(status = "draft") {
 
     if (resultValue) data.result = resultValue;
     if (scoreValue) data.score = scoreValue;
+    
+    // Save win reason data
+    if (resultValue === 'win') {
+        if (winReasonValue) data.winReason = winReasonValue;
+        if (winReasonValue === 'others' && otherWinReasonValue) {
+            data.otherwinReason = otherWinReasonValue;
+        }
+    }
+    
     // Save lose reason data
     if (resultValue === 'lose') {
         if (loseReasonValue) data.loseReason = loseReasonValue;
-        if (loseReasonValue === 'others' && otherReasonValue) {
-            data.otherReason = otherReasonValue;
+        if (loseReasonValue === 'others' && otherLoseReasonValue) {
+            data.otherloseReason = otherLoseReasonValue;
         }
     }
+    
     if (competitorInfoArray.length > 0) data.competitorInfo = competitorInfoArray;
     if (keywordArray.length > 0) data.keyword = keywordArray;
     if (uploadedFileId) {
@@ -828,4 +887,5 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
