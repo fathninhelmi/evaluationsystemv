@@ -32,6 +32,7 @@ const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id");
+const fromPage = params.get("from"); // Check where user came from
 
 const eventCard = document.getElementById("eventCard");
 
@@ -55,19 +56,28 @@ async function loadEvent() {
 
         console.log('Form statuses:', { preEvalStatus, evalStatus, postEvalStatus });
 
+        // Check if user is from manager (view-only mode)
+        const isViewMode = fromPage === 'manager';
+        const viewModeIndicator = isViewMode 
+            ? `<div style="background: #ffc107; color: #333; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: 500;">
+                 👁️ View-Only Mode (Manager Access)
+               </div>` 
+            : '';
+
         eventCard.innerHTML = `
             <h1>${ev.prodname} (${ev.createDate ? formatDate(ev.createDate) : ""})</h1>
+            ${viewModeIndicator}
             <div class="wizard">
               <div class="step-container">
-                <div class="step ${getStepClass(preEvalStatus)}" onclick="goToStep('preeval.html', '${eventId}')">1</div>
+                <div class="step ${getStepClass(preEvalStatus)}" onclick="goToStep('preeval.html', '${eventId}', ${isViewMode})">1</div>
                 <div class="step-label">Pre Evaluation</div>
               </div>
               <div class="step-container">
-                <div class="step ${getStepClass(evalStatus)}" onclick="goToStep('eval.html', '${eventId}')">2</div>
+                <div class="step ${getStepClass(evalStatus)}" onclick="goToStep('eval.html', '${eventId}', ${isViewMode})">2</div>
                 <div class="step-label">Evaluation</div>
               </div>
               <div class="step-container">
-                <div class="step ${getStepClass(postEvalStatus)}" onclick="goToStep('posteval.html', '${eventId}')">3</div>
+                <div class="step ${getStepClass(postEvalStatus)}" onclick="goToStep('posteval.html', '${eventId}', ${isViewMode})">3</div>
                 <div class="step-label">Post Evaluation</div>
               </div>
             </div>
@@ -98,10 +108,16 @@ function formatDate(dateStr) {
 }
 
 function goBack() { 
-   window.location.href = "createform.html";
+    // Check if user came from manager page
+    if (fromPage === 'manager') {
+        window.location.href = "manager.html";
+    } else {
+        // Default to createform.html for staff users
+        window.location.href = "createform.html";
+    }
 }
 
-async function goToStep(page, eventId) {
+async function goToStep(page, eventId, isViewMode = false) {
     try {
         const mainDoc = await databases.getDocument(databaseId, mainCollectionId, eventId);
         console.log("Product Type from database:", mainDoc.productType); 
@@ -117,16 +133,22 @@ async function goToStep(page, eventId) {
             console.log("Form document exists:", formDoc);
         } catch (err) {
             if (err.message.includes("Document with the requested ID could not be found")) {
-                console.log("Creating new form document with ID:", eventId);
-                formDoc = await databases.createDocument(databaseId, collectionId, eventId, {
-                    status: "draft",
-                    username: (mainDoc.username && typeof mainDoc.username === "string") ? mainDoc.username : "Unknown",
-                    email: (mainDoc.email && typeof mainDoc.email === "string") ? mainDoc.email : "no-email@system.local",
-                    customerCompany: mainDoc.customerCompany || "",
-                    prodname: mainDoc.prodname || "",
-                    productType: mainDoc.productType || ""
-                });
-                console.log("Created new form document:", formDoc);
+                // Only create document if NOT in view mode
+                if (!isViewMode) {
+                    console.log("Creating new form document with ID:", eventId);
+                    formDoc = await databases.createDocument(databaseId, collectionId, eventId, {
+                        status: "draft",
+                        username: (mainDoc.username && typeof mainDoc.username === "string") ? mainDoc.username : "Unknown",
+                        email: (mainDoc.email && typeof mainDoc.email === "string") ? mainDoc.email : "no-email@system.local",
+                        customerCompany: mainDoc.customerCompany || "",
+                        prodname: mainDoc.prodname || "",
+                        productType: mainDoc.productType || ""
+                    });
+                    console.log("Created new form document:", formDoc);
+                } else {
+                    alert("This form has not been created yet. Nothing to view.");
+                    return;
+                }
             } else {
                 throw err;
             }
@@ -155,7 +177,10 @@ async function goToStep(page, eventId) {
             page = preevalPage;
         }
         console.log("Final page to navigate to:", page); 
-        window.location.href = `${page}?id=${eventId}`;
+        
+        // Add 'mode=view' parameter when in view mode (from manager)
+        const viewModeParam = isViewMode ? '&mode=view' : '';
+        window.location.href = `${page}?id=${eventId}${viewModeParam}`;
 
     } catch (err) {
         console.error("Failed to navigate to step:", err);
