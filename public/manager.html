@@ -422,11 +422,17 @@ function initCharts() {
         }
     });
 
-    // Update total wins/loses
+// Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
-    function renderCategoryTable(breakdownData) {
+    // Build category breakdown table
+    const breakdown = categories.map(cat => ({
+        category: cat,
+        wins: productStats[cat].win,
+        loses: productStats[cat].lose
+    }));
+
     let html = `
       <table style="width:100%; border-collapse: collapse; font-size: 13px;">
         <thead>
@@ -439,7 +445,7 @@ function initCharts() {
         <tbody>
     `;
 
-    breakdownData.forEach(item => {
+    breakdown.forEach(item => {
         html += `
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.category}</td>
@@ -455,10 +461,6 @@ function initCharts() {
     `;
 
     document.getElementById("categoryBreakdown").innerHTML = html;
-    renderCategoryTable(breakdown);
-
-}
-
     const categories = Object.keys(productStats);
     const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
@@ -873,4 +875,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
