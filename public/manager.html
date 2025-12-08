@@ -455,6 +455,8 @@ function initCharts() {
     `;
 
     document.getElementById("categoryBreakdown").innerHTML = html;
+    renderCategoryTable(breakdown);
+
 }
 
     const categories = Object.keys(productStats);
@@ -871,3 +873,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
