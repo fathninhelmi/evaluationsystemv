@@ -702,21 +702,15 @@ function updateMapMarkers() {
             const icon = L.divIcon({
                 className: 'custom-marker-icon',
                 html: `<div style="
-                    width: 32px;
-                    height: 32px;
+                    width: 24px;
+                    height: 24px;
                     background: ${color};
-                    border: 4px solid white;
+                    border: 3px solid white;
                     border-radius: 50%;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-weight: bold;
-                    font-size: 12px;
-                    color: white;
-                </div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
+                    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+                "></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
             });
 
             const marker = L.marker(e.location, { icon });
@@ -830,5 +824,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
