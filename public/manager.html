@@ -528,25 +528,25 @@ function initCharts() {
                 }
             }
         });
-        const breakdownText = categories.map(cat => 
-            const otherReasons = evaluationData
-                .filter(item => item.category === cat && item.loseReason === 'others' && item.otherReason)
-                .map(item => item.otherReason);
-
-            if (otherReasons.length === 0) return '';
-
-            // Count each user-entered reason (if repeated, show count)
-            const reasonCounts = {};
-            otherReasons.forEach(reason => {
-                reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
-            });
-
-            const reasonText = Object.entries(reasonCounts)
-                .map(([reason, count]) => `${reason}: ${count}`)
-                .join(', ');
-
-            return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> ${reasonText}</div>`;
-        }).filter(text => text).join('');
+        const breakdownText = categories.map(cat => {
+        const otherReasons = evaluationData
+            .filter(item => item.category === cat && item.loseReason === 'others' && item.otherReason)
+            .map(item => item.otherReason);
+    
+        if (otherReasons.length === 0) return '';
+    
+        // Count each user-entered reason (if repeated, show count)
+        const reasonCounts = {};
+        otherReasons.forEach(reason => {
+            reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+        });
+    
+        const reasonText = Object.entries(reasonCounts)
+            .map(([reason, count]) => `${reason}: ${count}`)
+            .join(', ');
+    
+        return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> ${reasonText}</div>`;
+    }).filter(text => text).join('');
 
         document.getElementById('loseReasonBreakdown').innerHTML = breakdownText || '<div style="color: #999;">No user-entered reasons recorded</div>';
 
@@ -829,5 +829,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
-
