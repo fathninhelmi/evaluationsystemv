@@ -429,7 +429,7 @@ function initCharts() {
                 if (item.winReason) {
                     const reason = item.winReason === 'others' && item.otherWinReason 
                         ? 'Others'
-                        : formatWinReason(item.winReason);
+                        : formatwinReason(item.winReason);
 
                     winReasonStats[reason] = (winReasonStats[reason] || 0) + 1;
 
@@ -541,11 +541,11 @@ function initCharts() {
     if (winReasonCtx && Object.keys(winReasonStats).length > 0) {
         if (window.winReasonChartInstance) window.winReasonChartInstance.destroy();
 
-        const allWinReasons = Object.keys(winReasonStats);
+        const allwinReasons = Object.keys(winReasonStats);
         const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
         const winDatasets = categories.map((cat, idx) => {
-            const categoryData = allWinReasons.map(reason =>
+            const categoryData = allwinReasons.map(reason =>
                 productStats[cat].winReasons[reason] || 0
             );
             return {
@@ -560,7 +560,7 @@ function initCharts() {
         window.winReasonChartInstance = new Chart(winReasonCtx, {
             type: 'bar',
             data: {
-                labels: allWinReasons,
+                labels: allwinReasons,
                 datasets: winDatasets
             },
             options: {
@@ -584,14 +584,14 @@ function initCharts() {
         });
 
         const winBreakdownText = categories.map(cat => {
-            const otherWinReasons = evaluationData
+            const otherwinReasons = evaluationData
                 .filter(item => item.category === cat && item.winReason === 'others' && item.otherWinReason)
-                .map(item => item.otherWinReason);
+                .map(item => item.otherwinReason);
         
-            if (otherWinReasons.length === 0) return '';
+            if (otherwinReasons.length === 0) return '';
         
             const reasonCounts = {};
-            otherWinReasons.forEach(reason => {
+            otherwinReasons.forEach(reason => {
                 reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
             });
         
@@ -729,12 +729,11 @@ function formatLoseReason(reason) {
     return reasonMap[reason] || reason;
 }
 
-function formatWinReason(reason) {
+function formatwinReason(reason) {
     const reasonMap = {
-        'competitive_price': 'Competitive Price',
-        'superior_features': 'Superior Features',
-        'better_support': 'Better Support',
-        'brand_reputation': 'Brand Reputation',
+        'good_value': 'Good value of money',
+        'bestproduct': 'Best Product',
+        'advanced_features': 'Advanced features',
         'others': 'Others'
     };
     return reasonMap[reason] || reason;
@@ -996,8 +995,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
-
-
 
 
