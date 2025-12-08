@@ -129,19 +129,20 @@
         <div class="evaluation-list" id="evaluationList"></div>
       </div>
     </div>
+    
  <div class="widget">
- <div class="widget-header" style="margin-top: 20px;">
+ <div class="widget-header">
     <div class="widget-title">
       Reasons for Wins
     </div>
   </div>
 
   <div class="chart-container">
-    <canvas id="loseReasonChart"></canvas>
+    <canvas id="winReasonChart"></canvas>
   </div>
 
   <div style="padding: 15px; border-top: 1px solid #e0e0e0;">
-    <div id="loseReasonBreakdown" style="font-size: 13px; color: #333;"></div>
+    <div id="winReasonBreakdown" style="font-size: 13px; color: #333;"></div>
   </div>
 
  <div class="widget-header" style="margin-top: 20px;">
@@ -158,7 +159,7 @@
     <div id="loseReasonBreakdown" style="font-size: 13px; color: #333;"></div>
   </div>
  </div>
-
+    
       <div class="widget">
         <div class="widget-header">
           <div class="widget-title">
@@ -290,6 +291,8 @@ async function loadEvaluations() {
             let winLoseStatus = null;
             let loseReason = null;
             let otherReason = null;
+            let winReason = null;
+            let otherWinReason = null;
 
             try { preDoc = await databases.getDocument(databaseId, preEvalCollectionId, doc.$id); preStatus = preDoc.status || 'draft'; } catch {}
             try { evalDoc = await databases.getDocument(databaseId, evalCollectionId, doc.$id); evalStatus = evalDoc.status || 'draft'; } catch {}
@@ -298,7 +301,9 @@ async function loadEvaluations() {
                 postStatus = postDoc.status || 'draft';
                 winLoseStatus = postDoc.result || postDoc.winlose || postDoc.winLose || null;
                 loseReason = postDoc.loseReason || null;
-                otherReason = postDoc.otherReason || null;
+                otherReason = postDoc.otherReason || postDoc.otherlosereason || null;
+                winReason = postDoc.winReason || null;
+                otherWinReason = postDoc.otherWinReason || postDoc.otherwinReason || null;
             } catch {}
 
             const overallStatus = computeOverallStatus(preStatus, evalStatus, postStatus);
@@ -329,7 +334,9 @@ async function loadEvaluations() {
                 status: overallStatus,
                 winlose: winLoseStatus,
                 loseReason: loseReason,
-                otherReason: otherReason
+                otherReason: otherReason,
+                winReason: winReason,
+                otherWinReason: otherWinReason
             });
         }
 
@@ -404,11 +411,12 @@ function initCharts() {
     let totalWins = 0;
     let totalLoses = 0;
     const loseReasonStats = {};
+    const winReasonStats = {};
 
     evaluationData.forEach(item => {
         const cat = item.category || 'Other';
         if (!productStats[cat]) {
-            productStats[cat] = { total: 0, win: 0, lose: 0, loseReasons: {} };
+            productStats[cat] = { total: 0, win: 0, lose: 0, loseReasons: {}, winReasons: {} };
         }
         productStats[cat].total++;
 
@@ -417,12 +425,24 @@ function initCharts() {
             if (status === 'win') {
                 productStats[cat].win++;
                 totalWins++;
+
+                if (item.winReason) {
+                    const reason = item.winReason === 'others' && item.otherWinReason 
+                        ? 'Others'
+                        : formatWinReason(item.winReason);
+
+                    winReasonStats[reason] = (winReasonStats[reason] || 0) + 1;
+
+                    if (!productStats[cat].winReasons[reason]) {
+                        productStats[cat].winReasons[reason] = 0;
+                    }
+                    productStats[cat].winReasons[reason]++;
+                }
             } else if (status === 'lose' || status === 'loss') {
                 productStats[cat].lose++;
                 totalLoses++;
 
                 if (item.loseReason) {
-                    // All non-predefined reasons are considered "Others"
                     const reason = item.loseReason === 'others' && item.otherReason 
                         ? 'Others'
                         : formatLoseReason(item.loseReason);
@@ -442,10 +462,10 @@ function initCharts() {
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
-    // Build category breakdown table
     const categories = Object.keys(productStats);
     const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
+    // Build category breakdown table
     const breakdown = categories.map(cat => ({
         category: cat,
         wins: productStats[cat].win,
@@ -516,6 +536,77 @@ function initCharts() {
         });
     }
 
+    // Win Reason Chart
+    const winReasonCtx = document.getElementById('winReasonChart');
+    if (winReasonCtx && Object.keys(winReasonStats).length > 0) {
+        if (window.winReasonChartInstance) window.winReasonChartInstance.destroy();
+
+        const allWinReasons = Object.keys(winReasonStats);
+        const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
+
+        const winDatasets = categories.map((cat, idx) => {
+            const categoryData = allWinReasons.map(reason =>
+                productStats[cat].winReasons[reason] || 0
+            );
+            return {
+                label: cat,
+                data: categoryData,
+                backgroundColor: categoryColors[idx % categoryColors.length],
+                borderColor: categoryColors[idx % categoryColors.length],
+                borderWidth: 1
+            };
+        });
+
+        window.winReasonChartInstance = new Chart(winReasonCtx, {
+            type: 'bar',
+            data: {
+                labels: allWinReasons,
+                datasets: winDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, position: 'top', labels: { font: { size: 10 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y} win(s)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+
+        const winBreakdownText = categories.map(cat => {
+            const otherWinReasons = evaluationData
+                .filter(item => item.category === cat && item.winReason === 'others' && item.otherWinReason)
+                .map(item => item.otherWinReason);
+        
+            if (otherWinReasons.length === 0) return '';
+        
+            const reasonCounts = {};
+            otherWinReasons.forEach(reason => {
+                reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+            });
+        
+            const reasonText = Object.entries(reasonCounts)
+                .map(([reason, count]) => `${reason}: ${count}`)
+                .join(', ');
+        
+            return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> ${reasonText}</div>`;
+        }).filter(text => text).join('');
+
+        document.getElementById('winReasonBreakdown').innerHTML = winBreakdownText || '<div style="color: #999;">No user-entered win reasons recorded</div>';
+    } else {
+        document.getElementById('winReasonBreakdown').innerHTML = '<div style="color: #999;">No win reasons recorded yet</div>';
+    }
+
     // Lose Reason Chart
     const loseReasonCtx = document.getElementById('loseReasonChart');
     if (loseReasonCtx && Object.keys(loseReasonStats).length > 0) {
@@ -562,27 +653,30 @@ function initCharts() {
                 }
             }
         });
+
         const breakdownText = categories.map(cat => {
-        const otherReasons = evaluationData
-            .filter(item => item.category === cat && item.loseReason === 'others' && item.otherReason)
-            .map(item => item.otherReason);
-    
-        if (otherReasons.length === 0) return '';
-    
-        // Count each user-entered reason (if repeated, show count)
-        const reasonCounts = {};
-        otherReasons.forEach(reason => {
-            reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
-        });
-    
-        const reasonText = Object.entries(reasonCounts)
-            .map(([reason, count]) => `${reason}: ${count}`)
-            .join(', ');
-    
-        return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> ${reasonText}</div>`;
-    }).filter(text => text).join('');
+            const otherReasons = evaluationData
+                .filter(item => item.category === cat && item.loseReason === 'others' && item.otherReason)
+                .map(item => item.otherReason);
+        
+            if (otherReasons.length === 0) return '';
+        
+            const reasonCounts = {};
+            otherReasons.forEach(reason => {
+                reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+            });
+        
+            const reasonText = Object.entries(reasonCounts)
+                .map(([reason, count]) => `${reason}: ${count}`)
+                .join(', ');
+        
+            return `<div style="margin-bottom: 8px;"><strong>${cat}:</strong> ${reasonText}</div>`;
+        }).filter(text => text).join('');
 
         document.getElementById('loseReasonBreakdown').innerHTML = breakdownText || '<div style="color: #999;">No user-entered reasons recorded</div>';
+    } else {
+        document.getElementById('loseReasonBreakdown').innerHTML = '<div style="color: #999;">No lose reasons recorded yet</div>';
+    }
 
     // Monthly Progress Chart
     const monthlyData = getMonthlyProgressData();
@@ -624,13 +718,23 @@ function initCharts() {
             }
         });
     }
-}}
-
+}
 function formatLoseReason(reason) {
     const reasonMap = {
         'expensive': 'Expensive',
         'better_product': 'Better Product',
         'advance_features': 'Advance Features',
+        'others': 'Others'
+    };
+    return reasonMap[reason] || reason;
+}
+
+function formatWinReason(reason) {
+    const reasonMap = {
+        'competitive_price': 'Competitive Price',
+        'superior_features': 'Superior Features',
+        'better_support': 'Better Support',
+        'brand_reputation': 'Brand Reputation',
         'others': 'Others'
     };
     return reasonMap[reason] || reason;
@@ -892,6 +996,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
