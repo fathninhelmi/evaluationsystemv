@@ -108,13 +108,7 @@ function formatDate(dateStr) {
 }
 
 function goBack() { 
-    // Check if user came from manager page
-    if (fromPage === 'manager') {
-        window.location.href = "manager.html";
-    } else {
-        // Default to createform.html for staff users
-        window.location.href = "createform.html";
-    }
+    window.history.back();
 }
 
 async function goToStep(page, eventId, isViewMode = false) {
@@ -197,3 +191,4 @@ loadEvent();
 </body>
 
 </html>
+
