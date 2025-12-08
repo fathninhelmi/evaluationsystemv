@@ -158,7 +158,6 @@ const bucketId = "69015d8b0030f329c599";
 
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id");
-const viewMode = params.get("mode") === "view";
 const showNavigation = params.get("showNavigation") === "true";
 
 let evDoc = null;
@@ -820,3 +819,4 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
