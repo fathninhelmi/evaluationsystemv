@@ -290,9 +290,9 @@ async function loadEvaluations() {
             let preStatus = 'draft', evalStatus = 'draft', postStatus = 'draft';
             let winLoseStatus = null;
             let loseReason = null;
-            let otherReason = null;
+            let otherloseReason = null;
             let winReason = null;
-            let otherWinReason = null;
+            let otherwinReason = null;
 
             try { preDoc = await databases.getDocument(databaseId, preEvalCollectionId, doc.$id); preStatus = preDoc.status || 'draft'; } catch {}
             try { evalDoc = await databases.getDocument(databaseId, evalCollectionId, doc.$id); evalStatus = evalDoc.status || 'draft'; } catch {}
@@ -301,9 +301,9 @@ async function loadEvaluations() {
                 postStatus = postDoc.status || 'draft';
                 winLoseStatus = postDoc.result || postDoc.winlose || postDoc.winLose || null;
                 loseReason = postDoc.loseReason || null;
-                otherReason = postDoc.otherReason || postDoc.otherlosereason || null;
+                otherloseReason = postDoc.otherloseReason || postDoc.otherloseReason || null;
                 winReason = postDoc.winReason || null;
-                otherWinReason = postDoc.otherWinReason || postDoc.otherwinReason || null;
+                otherwinReason = postDoc.otherwinReason || postDoc.otherwinReason || null;
             } catch {}
 
             const overallStatus = computeOverallStatus(preStatus, evalStatus, postStatus);
@@ -334,9 +334,9 @@ async function loadEvaluations() {
                 status: overallStatus,
                 winlose: winLoseStatus,
                 loseReason: loseReason,
-                otherReason: otherReason,
+                otherloseReason: otherloseReason,
                 winReason: winReason,
-                otherWinReason: otherWinReason
+                otherwinReason: otherwinReason
             });
         }
 
@@ -443,7 +443,7 @@ function initCharts() {
                 totalLoses++;
 
                 if (item.loseReason) {
-                    const reason = item.loseReason === 'others' && item.otherReason 
+                    const reason = item.loseReason === 'others' && item.otherloseReason 
                         ? 'Others'
                         : formatLoseReason(item.loseReason);
 
@@ -655,14 +655,14 @@ function initCharts() {
         });
 
         const breakdownText = categories.map(cat => {
-            const otherReasons = evaluationData
-                .filter(item => item.category === cat && item.loseReason === 'others' && item.otherReason)
-                .map(item => item.otherReason);
+            const otherloseReasons = evaluationData
+                .filter(item => item.category === cat && item.loseReason === 'others' && item.otherloseReason)
+                .map(item => item.otherloseReason);
         
-            if (otherReasons.length === 0) return '';
+            if (otherloseReasons.length === 0) return '';
         
             const reasonCounts = {};
-            otherReasons.forEach(reason => {
+            otherloseReasons.forEach(reason => {
                 reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
             });
         
@@ -996,6 +996,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
