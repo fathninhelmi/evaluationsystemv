@@ -528,9 +528,7 @@ function initCharts() {
                 }
             }
         });
-        // Lose Reason Breakdown (show only user-filled "otherReason")
-        const breakdownText = categories.map(cat => {
-            // Get all "otherReason" values for this category
+        const breakdownText = categories.map(cat => 
             const otherReasons = evaluationData
                 .filter(item => item.category === cat && item.loseReason === 'others' && item.otherReason)
                 .map(item => item.otherReason);
@@ -777,18 +775,26 @@ function updateMapMarkers() {
 }
 
 function getFilteredData() {
-    const filter = document.getElementById('locationFilter')?.value || 'all';
-    const start = document.getElementById("startDate").value ? new Date(document.getElementById("startDate").value) : null;
-    const end = document.getElementById("endDate").value ? new Date(document.getElementById("endDate").value) : null;
+    const locationFilter = document.getElementById('locationFilter')?.value || 'all';
+    const productFilter = document.getElementById('productFilter')?.value || 'all';
+
+    const start = document.getElementById("startDate").value 
+        ? new Date(document.getElementById("startDate").value) 
+        : null;
+
+    const end = document.getElementById("endDate").value 
+        ? new Date(document.getElementById("endDate").value) 
+        : null;
 
     return evaluationData.filter(e => {
-        if (filter !== 'all' && e.status !== filter) return false;
+        if (locationFilter !== 'all' && e.location !== locationFilter) return false;
+        if (productFilter !== 'all' && e.product !== productFilter) return false;
         const d = new Date(e.date);
         if (start && d < start) return false;
         if (end) {
-            const eCopy = new Date(end);
-            eCopy.setHours(23, 59, 59, 999);
-            if (d > eCopy) return false;
+            const endCopy = new Date(end);
+            endCopy.setHours(23, 59, 59, 999);
+            if (d > endCopy) return false;
         }
         return true;
     });
@@ -823,4 +829,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
