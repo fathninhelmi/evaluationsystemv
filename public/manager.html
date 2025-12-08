@@ -422,11 +422,14 @@ function initCharts() {
         }
     });
 
-// Update total wins/loses
+    // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
     document.getElementById('totalLoses').textContent = totalLoses;
 
     // Build category breakdown table
+    const categories = Object.keys(productStats);
+    const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
+
     const breakdown = categories.map(cat => ({
         category: cat,
         wins: productStats[cat].win,
@@ -461,9 +464,7 @@ function initCharts() {
     `;
 
     document.getElementById("categoryBreakdown").innerHTML = html;
-    const categories = Object.keys(productStats);
-    const colors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
-
+    
     // Product chart
     const productCtx = document.getElementById('productChart');
     if (productCtx) {
