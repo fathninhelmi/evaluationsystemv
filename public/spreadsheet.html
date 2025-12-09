@@ -74,7 +74,10 @@ const account = new Account(client);
   }
 
   function getOpenButton(status, link) {
-    if(status === "complete" || "draft") return `<a href="${link}" class="open-btn enabled">View</a>`;
+    if(status === "complete" || status === "draft") {
+        const viewParam = link.includes('?') ? '&mode=view' : '?mode=view';
+        return `<a href="${link}${viewParam}" class="open-btn enabled">View</a>`;
+    }
     return `<a href="#" class="open-btn disabled">View</a>`;
   }
 
@@ -215,6 +218,7 @@ const account = new Account(client);
 </body>
 
 </html>
+
 
 
 
