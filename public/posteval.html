@@ -234,6 +234,23 @@ function initScoreButtons() {
                 document.getElementById('otherwinReason').value = '';
                 document.getElementById('otherWinReasonSection').style.display = 'none';
             }
+             else if (resultValue === 'pending') {
+                // Hide ALL sections
+                winReasonSection.style.display = 'none';
+                loseReasonSection.style.display = 'none';
+
+                // Clear all checkboxes
+                document.querySelectorAll('input[name="winReason"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[name="loseReason"]').forEach(cb => cb.checked = false);
+
+                // Clear text areas
+                document.getElementById('otherwinReason').value = '';
+                document.getElementById('otherloseReason').value = '';
+
+                // Hide "other" text boxes
+                document.getElementById('otherWinReasonSection').style.display = 'none';
+                document.getElementById('otherLoseReasonSection').style.display = 'none';
+            }
             
             await autoSaveResult(resultValue);
         });
@@ -428,7 +445,7 @@ async function checkUserRole() {
             return 'staff';
         }
         
-        return 'staff'; // Default
+        return 'staff';
     } catch (error) {
         console.error("Error checking user role:", error);
         return 'staff';
@@ -446,13 +463,14 @@ async function initForm() {
         }
         if (showNavigation) {
             document.getElementById("preEvalBtn").style.display = "inline-block";
+            
+            
             document.getElementById("evalBtn").style.display = "inline-block";
         }
+        
         initScoreButtons();
         initFileUpload();
         await loadForm();
-
-        // Check user role and set view mode for managers
         const userRole = await checkUserRole();
         if (viewMode || userRole === 'manager') {
             setViewMode();
@@ -484,7 +502,6 @@ async function loadForm() {
              if (evDoc.result === 'win') {
                 document.getElementById('winReasonSection').style.display = 'block';
                 
-                // Load win reasons (array)
                 if (Array.isArray(evDoc.winReason)) {
                     evDoc.winReason.forEach(reason => {
                         const checkbox = document.querySelector(`input[name="winReason"][value="${reason}"]`);
@@ -496,8 +513,7 @@ async function loadForm() {
                         }
                     });
                 }
-                
-                // Load other win reason text
+
                 if (evDoc.otherwinReason) {
                     document.getElementById('otherwinReason').value = evDoc.otherwinReason;
                 }
@@ -974,5 +990,3 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
-
-
