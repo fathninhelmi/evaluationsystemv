@@ -73,6 +73,10 @@ const account = new Account(client);
     return `<span class="status-badge ${status}">${text}</span>`;
   }
 
+  function getOpenButton(status, link) {
+    return `<a href="#" class="open-btn disabled">View</a>`;
+  }
+
   function getPreEvalPage(productType, docId) {
     if (!productType) return `preeval.html?id=${docId}`;
     
@@ -210,6 +214,7 @@ const account = new Account(client);
 </body>
 
 </html>
+
 
 
 
