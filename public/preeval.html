@@ -542,6 +542,25 @@ let uploadedFileId = null;
 let currentStatus = "draft";
 let referenceData = {};
 
+async function checkUserRole() {
+    try {
+        const userLabels = currentUser.labels || [];
+        
+        if (userLabels.includes('manager')) {
+            return 'manager';
+        } else if (userLabels.includes('admin')) {
+            return 'admin';
+        } else if (userLabels.includes('staff')) {
+            return 'staff';
+        }
+        
+        return 'staff'; // Default
+    } catch (error) {
+        console.error("Error checking user role:", error);
+        return 'staff';
+    }
+}
+
 async function initForm() {
     try {
         currentUser = await account.get();
@@ -554,7 +573,11 @@ async function initForm() {
         }
 
         await loadExistingForm();
-        if (viewMode) setViewMode();
+
+        const userRole = await checkUserRole();
+        if (viewMode || userRole === 'manager') {
+            setViewMode();
+        }
     } catch (error) {
         console.error("Error initializing form:", error);
         alert("Error loading form. Redirecting to dashboard.");
@@ -1099,9 +1122,3 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
-
-
-
-
-
-
