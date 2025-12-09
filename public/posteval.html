@@ -37,16 +37,27 @@
             
             <div id="winReasonSection" style="display: none; margin-top: 20px;">
                 <div class="form-group-eval">
-                    <label>Reason for Win:</label>
-                    <select name="winReason" id="winReason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
-                        <option value="">Select a reason</option>
-                        <option value="goodvalue">Good value of money</option>
-                        <option value="best_product">Best Product</option>
-                        <option value="advance_features">Advance features</option>
-                        <option value="others">Others</option>
-                    </select>
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">Reasons for Win (Select all that apply):</label>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="winReasons" value="goodvalue" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>Good value of money</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="winReasons" value="best_product" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>Best Product</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="winReasons" value="advance_features" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>Advance features</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="winReasons" value="others" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>Others</span>
+                        </label>
+                    </div>
                 </div>
-                <div id="otherWinReasonSection" style="display: none;">
+                <div id="otherWinReasonSection" style="display: none; margin-top: 15px;">
                     <div class="form-group-eval">
                         <label>Please specify:</label>
                         <textarea name="otherwinReason" id="otherwinReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
@@ -56,23 +67,33 @@
             
             <div id="loseReasonSection" style="display: none; margin-top: 20px;">
                 <div class="form-group-eval">
-                    <label>Reason for Lose:</label>
-                    <select name="loseReason" id="loseReason" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
-                        <option value="">Select a reason</option>
-                        <option value="expensive">Expensive</option>
-                        <option value="better_product">Better Product</option>
-                        <option value="advance_features">Competitor got advance features</option>
-                        <option value="others">Others</option>
-                    </select>
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">Reasons for Lose (Select all that apply):</label>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="loseReasons" value="expensive" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>Expensive</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="loseReasons" value="better_product" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>Better Product</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="loseReasons" value="advance_features" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>Competitor got advance features</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" name="loseReasons" value="others" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <span>Others</span>
+                        </label>
+                    </div>
                 </div>
-                <div id="otherLoseReasonSection" style="display: none;">
+                <div id="otherLoseReasonSection" style="display: none; margin-top: 15px;">
                     <div class="form-group-eval">
                         <label>Please specify:</label>
                         <textarea name="otherloseReason" id="otherloseReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
                     </div>
                 </div>
             </div>
-        </div>
 
         <!-- Performance Scoring Section -->
         <div class="form-section">
@@ -200,15 +221,15 @@ function initScoreButtons() {
             if (resultValue === 'win') {
                 winReasonSection.style.display = 'block';
                 loseReasonSection.style.display = 'none';
-                // Clear lose reason fields
-                document.getElementById('loseReason').value = '';
+                // Clear lose reason checkboxes
+                document.querySelectorAll('input[name="loseReasons"]').forEach(cb => cb.checked = false);
                 document.getElementById('otherloseReason').value = '';
                 document.getElementById('otherLoseReasonSection').style.display = 'none';
             } else if (resultValue === 'lose') {
                 loseReasonSection.style.display = 'block';
                 winReasonSection.style.display = 'none';
-                // Clear win reason fields
-                document.getElementById('winReason').value = '';
+                // Clear win reason checkboxes
+                document.querySelectorAll('input[name="winReasons"]').forEach(cb => cb.checked = false);
                 document.getElementById('otherwinReason').value = '';
                 document.getElementById('otherWinReasonSection').style.display = 'none';
             }
@@ -217,26 +238,30 @@ function initScoreButtons() {
         });
     });
     
-    // Handle win reason dropdown
-    document.getElementById('winReason').addEventListener('change', function() {
-        const otherWinReasonSection = document.getElementById('otherWinReasonSection');
-        if (this.value === 'others') {
-            otherWinReasonSection.style.display = 'block';
-        } else {
-            otherWinReasonSection.style.display = 'none';
-            document.getElementById('otherwinReason').value = '';
-        }
+    // Handle win reason "Others" checkbox
+    document.querySelectorAll('input[name="winReasons"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.value === 'others') {
+                const otherWinReasonSection = document.getElementById('otherWinReasonSection');
+                otherWinReasonSection.style.display = this.checked ? 'block' : 'none';
+                if (!this.checked) {
+                    document.getElementById('otherwinReason').value = '';
+                }
+            }
+        });
     });
     
-    // Handle lose reason dropdown
-    document.getElementById('loseReason').addEventListener('change', function() {
-        const otherLoseReasonSection = document.getElementById('otherLoseReasonSection');
-        if (this.value === 'others') {
-            otherLoseReasonSection.style.display = 'block';
-        } else {
-            otherLoseReasonSection.style.display = 'none';
-            document.getElementById('otherloseReason').value = '';
-        }
+    // Handle lose reason "Others" checkbox
+    document.querySelectorAll('input[name="loseReasons"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.value === 'others') {
+                const otherLoseReasonSection = document.getElementById('otherLoseReasonSection');
+                otherLoseReasonSection.style.display = this.checked ? 'block' : 'none';
+                if (!this.checked) {
+                    document.getElementById('otherloseReason').value = '';
+                }
+            }
+        });
     });
 }
 
@@ -431,18 +456,25 @@ async function loadForm() {
                 }
             });
 
-                // Show win reason section if result is win
-            if (evDoc.result === 'win') {
+             if (evDoc.result === 'win') {
                 document.getElementById('winReasonSection').style.display = 'block';
                 
-                // Load win reason data
-                if (evDoc.winReason) {
-                    document.getElementById('winReason').value = evDoc.winReason;
-                    
-                    if (evDoc.winReason === 'others' && evDoc.otherwinReason) {
-                        document.getElementById('otherWinReasonSection').style.display = 'block';
-                        document.getElementById('otherwinReason').value = evDoc.otherwinReason;
-                    }
+                // Load win reasons (array)
+                if (Array.isArray(evDoc.winReasons)) {
+                    evDoc.winReasons.forEach(reason => {
+                        const checkbox = document.querySelector(`input[name="winReasons"][value="${reason}"]`);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            if (reason === 'others') {
+                                document.getElementById('otherWinReasonSection').style.display = 'block';
+                            }
+                        }
+                    });
+                }
+                
+                // Load other win reason text
+                if (evDoc.otherwinReason) {
+                    document.getElementById('otherwinReason').value = evDoc.otherwinReason;
                 }
             }
             
@@ -450,17 +482,24 @@ async function loadForm() {
             if (evDoc.result === 'lose') {
                 document.getElementById('loseReasonSection').style.display = 'block';
                 
-                // Load lose reason data
-                if (evDoc.loseReason) {
-                    document.getElementById('loseReason').value = evDoc.loseReason;
-                    
-                    if (evDoc.loseReason === 'others' && evDoc.otherReason) {
-                        document.getElementById('otherReasonSection').style.display = 'block';
-                        document.getElementById('otherReason').value = evDoc.otherReason;
-                    }
+                // Load lose reasons (array)
+                if (Array.isArray(evDoc.loseReasons)) {
+                    evDoc.loseReasons.forEach(reason => {
+                        const checkbox = document.querySelector(`input[name="loseReasons"][value="${reason}"]`);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            if (reason === 'others') {
+                                document.getElementById('otherLoseReasonSection').style.display = 'block';
+                            }
+                        }
+                    });
+                }
+                
+                // Load other lose reason text
+                if (evDoc.otherloseReason) {
+                    document.getElementById('otherloseReason').value = evDoc.otherloseReason;
                 }
             }
-        }
         
         if (evDoc.score !== undefined && evDoc.score !== null) {
             document.getElementById('score').value = evDoc.score;
@@ -658,10 +697,16 @@ function deleteKeywordRow(button) {
 function validateForm(status) {
     const resultValue = document.getElementById('result').value.trim();
     const scoreValue = document.getElementById('score').value.trim();
-    const loseReasonValue = document.getElementById('loseReason').value;
-    const otherLoseReasonValue = document.getElementById('otherloseReason').value.trim();
-    const winReasonValue = document.getElementById('winReason').value;
+    
+    // Get checked win reasons
+    const winReasonsChecked = Array.from(document.querySelectorAll('input[name="winReasons"]:checked'))
+        .map(cb => cb.value);
     const otherWinReasonValue = document.getElementById('otherwinReason').value.trim();
+    
+    // Get checked lose reasons
+    const loseReasonsChecked = Array.from(document.querySelectorAll('input[name="loseReasons"]:checked'))
+        .map(cb => cb.value);
+    const otherLoseReasonValue = document.getElementById('otherloseReason').value.trim();
     
     const competitorInputs = document.querySelectorAll('[name^="competitorInfo_"]');
     const competitorInfoArray = Array.from(competitorInputs)
@@ -679,28 +724,26 @@ function validateForm(status) {
             return false;
         }
         
-        // Validate win reason if result is win
+        // Validate win reasons if result is win
         if (resultValue === 'win') {
-            if (!winReasonValue) {
-                alert("Please select a reason for winning.");
-                document.getElementById('winReason').focus();
+            if (winReasonsChecked.length === 0) {
+                alert("Please select at least one reason for winning.");
                 return false;
             }
-            if (winReasonValue === 'others' && !otherWinReasonValue) {
+            if (winReasonsChecked.includes('others') && !otherWinReasonValue) {
                 alert("Please specify the other reason for winning.");
                 document.getElementById('otherwinReason').focus();
                 return false;
             }
         }
         
-        // Validate lose reason if result is lose
+        // Validate lose reasons if result is lose
         if (resultValue === 'lose') {
-            if (!loseReasonValue) {
-                alert("Please select a reason for losing.");
-                document.getElementById('loseReason').focus();
+            if (loseReasonsChecked.length === 0) {
+                alert("Please select at least one reason for losing.");
                 return false;
             }
-            if (loseReasonValue === 'others' && !otherLoseReasonValue) {
+            if (loseReasonsChecked.includes('others') && !otherLoseReasonValue) {
                 alert("Please specify the other reason for losing.");
                 document.getElementById('otherloseReason').focus();
                 return false;
@@ -725,14 +768,33 @@ function validateForm(status) {
             return false;
         }
     }
-    return { resultValue, scoreValue, loseReasonValue, otherLoseReasonValue, winReasonValue, otherWinReasonValue, competitorInfoArray, keywordArray };
+    
+    return { 
+        resultValue, 
+        scoreValue, 
+        winReasons: winReasonsChecked,
+        otherWinReasonValue,
+        loseReasons: loseReasonsChecked, 
+        otherLoseReasonValue, 
+        competitorInfoArray, 
+        keywordArray 
+    };
 }
     
 async function saveForm(status = "draft") {
     const validationResult = validateForm(status);
     if (!validationResult) return;
 
-    const { resultValue, scoreValue, loseReasonValue, otherLoseReasonValue, winReasonValue, otherWinReasonValue, competitorInfoArray, keywordArray } = validationResult;
+    const { 
+        resultValue, 
+        scoreValue, 
+        winReasons,
+        otherWinReasonValue,
+        loseReasons, 
+        otherLoseReasonValue, 
+        competitorInfoArray, 
+        keywordArray 
+    } = validationResult;
     
     // Upload file if new file is selected
     const fileInput = document.getElementById('attachmentInput');
@@ -750,18 +812,18 @@ async function saveForm(status = "draft") {
     if (resultValue) data.result = resultValue;
     if (scoreValue) data.score = scoreValue;
     
-    // Save win reason data
-    if (resultValue === 'win') {
-        if (winReasonValue) data.winReason = winReasonValue;
-        if (winReasonValue === 'others' && otherWinReasonValue) {
+    // Save win reasons as array
+    if (resultValue === 'win' && winReasons.length > 0) {
+        data.winReasons = winReasons;
+        if (winReasons.includes('others') && otherWinReasonValue) {
             data.otherwinReason = otherWinReasonValue;
         }
     }
     
-    // Save lose reason data
-    if (resultValue === 'lose') {
-        if (loseReasonValue) data.loseReason = loseReasonValue;
-        if (loseReasonValue === 'others' && otherLoseReasonValue) {
+    // Save lose reasons as array
+    if (resultValue === 'lose' && loseReasons.length > 0) {
+        data.loseReasons = loseReasons;
+        if (loseReasons.includes('others') && otherLoseReasonValue) {
             data.otherloseReason = otherLoseReasonValue;
         }
     }
@@ -887,5 +949,6 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
