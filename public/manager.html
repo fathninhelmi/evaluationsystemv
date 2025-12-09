@@ -416,7 +416,7 @@ function initCharts() {
     evaluationData.forEach(item => {
         const cat = item.category || 'Other';
         if (!productStats[cat]) {
-            productStats[cat] = { total: 0, win: 0, lose: 0, loseReasons: {}, winReasons: {} };
+            productStats[cat] = { total: 0, win: 0, lose: 0, loseReason: {}, winReason: {} };
         }
         productStats[cat].total++;
 
@@ -433,10 +433,10 @@ function initCharts() {
                         
                         winReasonStats[reason] = (winReasonStats[reason] || 0) + 1;
                         
-                        if (!productStats[cat].winReasons[reason]) {
-                            productStats[cat].winReasons[reason] = 0;
+                        if (!productStats[cat].winReason[reason]) {
+                            productStats[cat].winReason[reason] = 0;
                         }
-                        productStats[cat].winReasons[reason]++;
+                        productStats[cat].winReason[reason]++;
                     });
                 }
             } else if (status === 'lose' || status === 'loss') {
@@ -450,10 +450,10 @@ function initCharts() {
                         
                         loseReasonStats[reason] = (loseReasonStats[reason] || 0) + 1;
                         
-                        if (!productStats[cat].loseReasons[reason]) {
-                            productStats[cat].loseReasons[reason] = 0;
+                        if (!productStats[cat].loseReason[reason]) {
+                            productStats[cat].loseReason[reason] = 0;
                         }
-                        productStats[cat].loseReasons[reason]++;
+                        productStats[cat].loseReason[reason]++;
                     });
                 }
             }
@@ -543,12 +543,12 @@ function initCharts() {
         if (window.winReasonChartInstance) window.winReasonChartInstance.destroy();
 
         // Define the exact order of reasons we want on X-axis
-        const allwinReasons = ['Good value of money', 'Best Product', 'Advanced features'];
+        const allwinReason = ['Good value of money', 'Best Product', 'Advanced features'];
         const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
         const winDatasets = categories.map((cat, idx) => {
-            const categoryData = allwinReasons.map(reason =>
-                productStats[cat].winReasons[reason] || 0
+            const categoryData = allwinReason.map(reason =>
+                productStats[cat].winReason[reason] || 0
             );
             return {
                 label: cat,
@@ -562,7 +562,7 @@ function initCharts() {
         window.winReasonChartInstance = new Chart(winReasonCtx, {
             type: 'bar',
             data: {
-                labels: allwinReasons,
+                labels: allwinReason,
                 datasets: winDatasets
             },
             options: {
@@ -595,7 +595,7 @@ function initCharts() {
         // Build "Others" breakdown table
         const othersData = [];
         categories.forEach(cat => {
-            const otherwinReasons = evaluationData
+            const otherwinReason = evaluationData
                 .filter(item => {
                     // Check if winReason is an array and includes 'others'
                     if (Array.isArray(item.winReason)) {
@@ -605,9 +605,9 @@ function initCharts() {
                 })
                 .map(item => item.otherwinReason);
         
-            if (otherwinReasons.length > 0) {
+            if (otherwinReason.length > 0) {
                 const reasonCounts = {};
-                otherwinReasons.forEach(reason => {
+                otherwinReason.forEach(reason => {
                     reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
                 });
                 
@@ -662,12 +662,12 @@ function initCharts() {
         if (window.loseReasonChartInstance) window.loseReasonChartInstance.destroy();
 
         // Define the exact order of reasons we want on X-axis
-        const allReasons = ['Expensive', 'Better Product', 'Advance Features'];
+        const allReason = ['Expensive', 'Better Product', 'Advance Features', 'Others'];
         const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
         const datasets = categories.map((cat, idx) => {
-            const categoryData = allReasons.map(reason =>
-                productStats[cat].loseReasons[reason] || 0
+            const categoryData = allReason.map(reason =>
+                productStats[cat].loseReason[reason] || 0
             );
             return {
                 label: cat,
@@ -681,7 +681,7 @@ function initCharts() {
         window.loseReasonChartInstance = new Chart(loseReasonCtx, {
             type: 'bar',
             data: {
-                labels: allReasons,
+                labels: allReason,
                 datasets: datasets
             },
             options: {
@@ -714,7 +714,7 @@ function initCharts() {
         // Build "Others" breakdown table
         const othersData = [];
         categories.forEach(cat => {
-            const otherloseReasons = evaluationData
+            const otherloseReason = evaluationData
                 .filter(item => {
                     // Check if loseReason is an array and includes 'others'
                     if (Array.isArray(item.loseReason)) {
@@ -724,9 +724,9 @@ function initCharts() {
                 })
                 .map(item => item.otherloseReason);
         
-            if (otherloseReasons.length > 0) {
+            if (otherloseReason.length > 0) {
                 const reasonCounts = {};
-                otherloseReasons.forEach(reason => {
+                otherloseReason.forEach(reason => {
                     reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
                 });
                 
@@ -1092,5 +1092,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
