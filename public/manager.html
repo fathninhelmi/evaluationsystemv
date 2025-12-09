@@ -426,37 +426,38 @@ function initCharts() {
                 productStats[cat].win++;
                 totalWins++;
 
-                if (item.winReason) {
-                    const reason = item.winReason === 'others' && item.otherWinReason 
-                        ? 'Others'
-                        : formatwinReason(item.winReason);
-
-                    winReasonStats[reason] = (winReasonStats[reason] || 0) + 1;
-
-                    if (!productStats[cat].winReasons[reason]) {
-                        productStats[cat].winReasons[reason] = 0;
-                    }
-                    productStats[cat].winReasons[reason]++;
+                // Handle win reasons as array
+                if (Array.isArray(item.winReason)) {
+                    item.winReason.forEach(reasonValue => {
+                        const reason = reasonValue === 'others' ? 'Others' : formatwinReason(reasonValue);
+                        
+                        winReasonStats[reason] = (winReasonStats[reason] || 0) + 1;
+                        
+                        if (!productStats[cat].winReasons[reason]) {
+                            productStats[cat].winReasons[reason] = 0;
+                        }
+                        productStats[cat].winReasons[reason]++;
+                    });
                 }
             } else if (status === 'lose' || status === 'loss') {
                 productStats[cat].lose++;
                 totalLoses++;
 
-                if (item.loseReason) {
-                    const reason = item.loseReason === 'others' && item.otherloseReason 
-                        ? 'Others'
-                        : formatLoseReason(item.loseReason);
-
-                    loseReasonStats[reason] = (loseReasonStats[reason] || 0) + 1;
-
-                    if (!productStats[cat].loseReasons[reason]) {
-                        productStats[cat].loseReasons[reason] = 0;
-                    }
-                    productStats[cat].loseReasons[reason]++;
+                // Handle lose reasons as array
+                if (Array.isArray(item.loseReason)) {
+                    item.loseReason.forEach(reasonValue => {
+                        const reason = reasonValue === 'others' ? 'Others' : formatLoseReason(reasonValue);
+                        
+                        loseReasonStats[reason] = (loseReasonStats[reason] || 0) + 1;
+                        
+                        if (!productStats[cat].loseReasons[reason]) {
+                            productStats[cat].loseReasons[reason] = 0;
+                        }
+                        productStats[cat].loseReasons[reason]++;
+                    });
                 }
             }
         }
-    });
 
     // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
@@ -541,7 +542,8 @@ function initCharts() {
     if (winReasonCtx && Object.keys(winReasonStats).length > 0) {
         if (window.winReasonChartInstance) window.winReasonChartInstance.destroy();
 
-        const allwinReasons = Object.keys(winReasonStats).filter(r => r !== 'Others');
+        // Define the exact order of reasons we want on X-axis
+        const allwinReasons = ['Good value of money', 'Best Product', 'Advanced features'];
         const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
         const winDatasets = categories.map((cat, idx) => {
@@ -579,10 +581,12 @@ function initCharts() {
                 scales: {
                     y: { 
                         beginAtZero: true, 
-                        ticks: { stepSize: 1 }
+                        ticks: { stepSize: 1 },
+                        stacked: true
                     },
                     x: { 
-                        ticks: { font: { size: 10 } }
+                        ticks: { font: { size: 10 } },
+                        stacked: true
                     }
                 }
             }
@@ -592,7 +596,13 @@ function initCharts() {
         const othersData = [];
         categories.forEach(cat => {
             const otherwinReasons = evaluationData
-                .filter(item => item.category === cat && item.winReason === 'others' && item.otherwinReason)
+                .filter(item => {
+                    // Check if winReason is an array and includes 'others'
+                    if (Array.isArray(item.winReason)) {
+                        return item.category === cat && item.winReason.includes('others') && item.otherwinReason;
+                    }
+                    return false;
+                })
                 .map(item => item.otherwinReason);
         
             if (otherwinReasons.length > 0) {
@@ -646,12 +656,13 @@ function initCharts() {
         document.getElementById('winReasonBreakdown').innerHTML = '<div style="color: #999;">No win reasons recorded yet</div>';
     }
 
-    // Lose Reason Chart
+   // Lose Reason Chart
     const loseReasonCtx = document.getElementById('loseReasonChart');
     if (loseReasonCtx && Object.keys(loseReasonStats).length > 0) {
         if (window.loseReasonChartInstance) window.loseReasonChartInstance.destroy();
 
-        const allReasons = Object.keys(loseReasonStats).filter(r => r !== 'Others');
+        // Define the exact order of reasons we want on X-axis
+        const allReasons = ['Expensive', 'Better Product', 'Advance Features'];
         const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
         const datasets = categories.map((cat, idx) => {
@@ -689,10 +700,12 @@ function initCharts() {
                 scales: {
                     y: { 
                         beginAtZero: true, 
-                        ticks: { stepSize: 1 }
+                        ticks: { stepSize: 1 },
+                        stacked: true
                     },
                     x: { 
-                        ticks: { font: { size: 10 } }
+                        ticks: { font: { size: 10 } },
+                        stacked: true
                     }
                 }
             }
@@ -702,7 +715,13 @@ function initCharts() {
         const othersData = [];
         categories.forEach(cat => {
             const otherloseReasons = evaluationData
-                .filter(item => item.category === cat && item.loseReason === 'others' && item.otherloseReason)
+                .filter(item => {
+                    // Check if loseReason is an array and includes 'others'
+                    if (Array.isArray(item.loseReason)) {
+                        return item.category === cat && item.loseReason.includes('others') && item.otherloseReason;
+                    }
+                    return false;
+                })
                 .map(item => item.otherloseReason);
         
             if (otherloseReasons.length > 0) {
@@ -1073,3 +1092,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
