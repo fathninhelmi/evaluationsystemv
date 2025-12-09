@@ -579,12 +579,10 @@ function initCharts() {
                 scales: {
                     y: { 
                         beginAtZero: true, 
-                        ticks: { stepSize: 1 },
-                        stacked: true 
+                        ticks: { stepSize: 1 }
                     },
                     x: { 
-                        ticks: { font: { size: 10 } },
-                        stacked: true 
+                        ticks: { font: { size: 10 } }
                     }
                 }
             }
@@ -691,12 +689,10 @@ function initCharts() {
                 scales: {
                     y: { 
                         beginAtZero: true, 
-                        ticks: { stepSize: 1 },
-                        stacked: true 
+                        ticks: { stepSize: 1 }
                     },
                     x: { 
-                        ticks: { font: { size: 10 } },
-                        stacked: true 
+                        ticks: { font: { size: 10 } }
                     }
                 }
             }
@@ -759,7 +755,7 @@ function initCharts() {
     } else {
         document.getElementById('loseReasonBreakdown').innerHTML = '<div style="color: #999;">No lose reasons recorded yet</div>';
     }
-
+    
     // Monthly Progress Chart
     const monthlyData = getMonthlyProgressData();
     const progressCtx = document.getElementById('progressChart');
@@ -1077,6 +1073,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
-
-
-
