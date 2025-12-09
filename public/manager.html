@@ -464,7 +464,8 @@ function initCharts() {
     document.getElementById('totalLoses').textContent = totalLoses;
 
     const categories = Object.keys(productStats);
-    const colors = ['#cce5ff',  '#99ccff',  '#66b2ff', '#3399ff',  '#007fff',  '#005080' ]; 
+    const colors = ['#001f4d','#003366','#004c99','#3366cc','#6699ff','#99ccff'];
+ 
 
     // Build category breakdown table
     const breakdown = categories.map(cat => ({
@@ -544,7 +545,7 @@ function initCharts() {
 
         // Define the exact order of reasons we want on X-axis
         const allwinReason = ['Good value of money', 'Best Product', 'Advanced features', 'Others'];
-        const categoryColors = ['#cce5ff',  '#99ccff',  '#66b2ff', '#3399ff',  '#007fff',  '#005080' ]; 
+        const categoryColors = ['#001f4d','#003366','#004c99','#3366cc','#6699ff','#99ccff']; 
 
         const winDatasets = categories.map((cat, idx) => {
             const categoryData = allwinReason.map(reason =>
@@ -663,7 +664,7 @@ function initCharts() {
 
         // Define the exact order of reasons we want on X-axis
         const allReason = ['Expensive', 'Better Product', 'Competitor got advance features', 'Others'];
-        const categoryColors = ['#cce5ff',  '#99ccff',  '#66b2ff', '#3399ff',  '#007fff',  '#005080' ];
+        const categoryColors = ['#001f4d','#003366','#004c99','#3366cc','#6699ff','#99ccff'];
 
         const datasets = categories.map((cat, idx) => {
             const categoryData = allReason.map(reason =>
@@ -1092,6 +1093,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
