@@ -205,6 +205,7 @@ let issueRowCount = 1;
 let feedbackRowCount = 1;
 let commentRowCount = 1;
 let uploadedFileId = null;
+let currentUser = null;
 
 function showToast(message, isError = false) {
     const existingToast = document.querySelector('.toast-notification');
@@ -234,6 +235,25 @@ function showToast(message, isError = false) {
         toast.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => toast.remove(), 300);
     }, 2000);
+}
+
+async function checkUserRole() {
+    try {
+        const userLabels = currentUser.labels || [];
+        
+        if (userLabels.includes('manager')) {
+            return 'manager';
+        } else if (userLabels.includes('admin')) {
+            return 'admin';
+        } else if (userLabels.includes('staff')) {
+            return 'staff';
+        }
+        
+        return 'staff'; // Default
+    } catch (error) {
+        console.error("Error checking user role:", error);
+        return 'staff';
+    }
 }
 
 function initFileUpload() {
@@ -600,27 +620,42 @@ async function loadForm() {
     }
 }
 
-function updateFormDisplay() {
-    const statusBadge = document.getElementById("statusBadge");
+async function initRoleBasedAccess() {
+    try {
+        currentUser = await account.get();
+        console.log("Current user:", currentUser);
+        
+        const userRole = await checkUserRole();
+        if (viewMode || userRole === 'manager') {
+            setViewMode();
+        }
+    } catch (error) {
+        console.error("Error checking user role:", error);
+    }
+}
+
+function setViewMode() {
     const formTitle = document.getElementById("formTitle");
     const submitBtn = document.getElementById("submitBtn");
     const saveProgressBtn = document.getElementById("saveProgressBtn");
     
+    formTitle.textContent = `Evaluation Form (View Mode)`;
+    document.querySelectorAll('input, textarea, select, button[type="button"]:not(.btn-secondary)').forEach(el => el.disabled = true);
+    document.querySelectorAll('.add-row-btn').forEach(btn => btn.style.display = 'none');
+    document.getElementById('attachmentInput').style.display = 'none';
+    submitBtn.style.display = 'none';
+    saveProgressBtn.style.display = 'none';
+}
+
+function updateFormDisplay() {
+    const statusBadge = document.getElementById("statusBadge");
+    const submitBtn = document.getElementById("submitBtn");
+    
     statusBadge.textContent = currentStatus;
     statusBadge.className = `status-badge ${currentStatus.replace(' ', '-')}`;
     
-    if (viewMode) {
-        formTitle.textContent = `Evaluation Form (View Mode)`;
-        document.querySelectorAll('input, textarea, select, button[type="button"]:not(.btn-secondary)').forEach(el => el.disabled = true);
-        document.querySelectorAll('.add-row-btn').forEach(btn => btn.style.display = 'none');
-        document.getElementById('attachmentInput').style.display = 'none';
+    if (currentStatus === "complete") {
         submitBtn.style.display = 'none';
-        saveProgressBtn.style.display = 'none';
-    } else {
-        formTitle.textContent = `Evaluation Form`;
-        if (currentStatus === "complete") {
-            submitBtn.style.display = 'none';
-        }
     }
 }
 
@@ -736,17 +771,17 @@ function goBack() {
   window.history.back();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     setupCheckboxGroups();
     initFileUpload();
-    loadForm();
+    await initRoleBasedAccess();
+    await loadForm();
 });
+
 </script>
 
 <footer class="footer">
     <span>© 2025 ViTrox. All rights reserved.</span>
 </footer>
-
 </body>
-
 </html>
