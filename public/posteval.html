@@ -40,19 +40,19 @@
                     <label style="font-weight: 600; margin-bottom: 10px; display: block;">Reasons for Win (Select all that apply):</label>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReasons" value="goodvalue" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <input type="checkbox" name="winReason" value="goodvalue" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <span>Good value of money</span>
                         </label>
                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReasons" value="best_product" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <input type="checkbox" name="winReason" value="best_product" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <span>Best Product</span>
                         </label>
                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReasons" value="advance_features" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <input type="checkbox" name="winReason" value="advance_features" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <span>Advance features</span>
                         </label>
                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReasons" value="others" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <input type="checkbox" name="winReason" value="others" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <span>Others</span>
                         </label>
                     </div>
@@ -70,19 +70,19 @@
                     <label style="font-weight: 600; margin-bottom: 10px; display: block;">Reasons for Lose (Select all that apply):</label>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReasons" value="expensive" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <input type="checkbox" name="loseReason" value="expensive" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <span>Expensive</span>
                         </label>
                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReasons" value="better_product" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <input type="checkbox" name="loseReason" value="better_product" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <span>Better Product</span>
                         </label>
                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReasons" value="advance_features" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <input type="checkbox" name="loseReason" value="advance_features" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <span>Competitor got advance features</span>
                         </label>
                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReasons" value="others" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                            <input type="checkbox" name="loseReason" value="others" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <span>Others</span>
                         </label>
                     </div>
@@ -222,14 +222,14 @@ function initScoreButtons() {
                 winReasonSection.style.display = 'block';
                 loseReasonSection.style.display = 'none';
                 // Clear lose reason checkboxes
-                document.querySelectorAll('input[name="loseReasons"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[name="loseReason"]').forEach(cb => cb.checked = false);
                 document.getElementById('otherloseReason').value = '';
                 document.getElementById('otherLoseReasonSection').style.display = 'none';
             } else if (resultValue === 'lose') {
                 loseReasonSection.style.display = 'block';
                 winReasonSection.style.display = 'none';
                 // Clear win reason checkboxes
-                document.querySelectorAll('input[name="winReasons"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[name="winReason"]').forEach(cb => cb.checked = false);
                 document.getElementById('otherwinReason').value = '';
                 document.getElementById('otherWinReasonSection').style.display = 'none';
             }
@@ -239,7 +239,7 @@ function initScoreButtons() {
     });
     
     // Handle win reason "Others" checkbox
-    document.querySelectorAll('input[name="winReasons"]').forEach(checkbox => {
+    document.querySelectorAll('input[name="winReason"]').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             if (this.value === 'others') {
                 const otherWinReasonSection = document.getElementById('otherWinReasonSection');
@@ -252,7 +252,7 @@ function initScoreButtons() {
     });
     
     // Handle lose reason "Others" checkbox
-    document.querySelectorAll('input[name="loseReasons"]').forEach(checkbox => {
+    document.querySelectorAll('input[name="loseReason"]').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             if (this.value === 'others') {
                 const otherLoseReasonSection = document.getElementById('otherLoseReasonSection');
@@ -461,9 +461,9 @@ async function loadForm() {
                 document.getElementById('winReasonSection').style.display = 'block';
                 
                 // Load win reasons (array)
-                if (Array.isArray(evDoc.winReasons)) {
-                    evDoc.winReasons.forEach(reason => {
-                        const checkbox = document.querySelector(`input[name="winReasons"][value="${reason}"]`);
+                if (Array.isArray(evDoc.winReason)) {
+                    evDoc.winReason.forEach(reason => {
+                        const checkbox = document.querySelector(`input[name="winReason"][value="${reason}"]`);
                         if (checkbox) {
                             checkbox.checked = true;
                             if (reason === 'others') {
@@ -484,9 +484,9 @@ async function loadForm() {
                 document.getElementById('loseReasonSection').style.display = 'block';
                 
                 // Load lose reasons (array)
-                if (Array.isArray(evDoc.loseReasons)) {
-                    evDoc.loseReasons.forEach(reason => {
-                        const checkbox = document.querySelector(`input[name="loseReasons"][value="${reason}"]`);
+                if (Array.isArray(evDoc.loseReason)) {
+                    evDoc.loseReason.forEach(reason => {
+                        const checkbox = document.querySelector(`input[name="loseReason"][value="${reason}"]`);
                         if (checkbox) {
                             checkbox.checked = true;
                             if (reason === 'others') {
@@ -700,12 +700,12 @@ function validateForm(status) {
     const scoreValue = document.getElementById('score').value.trim();
     
     // Get checked win reasons
-    const winReasonsChecked = Array.from(document.querySelectorAll('input[name="winReasons"]:checked'))
+    const winReasonsChecked = Array.from(document.querySelectorAll('input[name="winReason"]:checked'))
         .map(cb => cb.value);
     const otherWinReasonValue = document.getElementById('otherwinReason').value.trim();
     
     // Get checked lose reasons
-    const loseReasonsChecked = Array.from(document.querySelectorAll('input[name="loseReasons"]:checked'))
+    const loseReasonsChecked = Array.from(document.querySelectorAll('input[name="loseReason"]:checked'))
         .map(cb => cb.value);
     const otherLoseReasonValue = document.getElementById('otherloseReason').value.trim();
     
@@ -773,9 +773,9 @@ function validateForm(status) {
     return { 
         resultValue, 
         scoreValue, 
-        winReasons: winReasonsChecked,
+        winReason: winReasonsChecked,
         otherWinReasonValue,
-        loseReasons: loseReasonsChecked, 
+        loseReason: loseReasonsChecked, 
         otherLoseReasonValue, 
         competitorInfoArray, 
         keywordArray 
@@ -789,9 +789,9 @@ async function saveForm(status = "draft") {
     const { 
         resultValue, 
         scoreValue, 
-        winReasons,
+        winReason,
         otherWinReasonValue,
-        loseReasons, 
+        loseReason, 
         otherLoseReasonValue, 
         competitorInfoArray, 
         keywordArray 
@@ -814,17 +814,17 @@ async function saveForm(status = "draft") {
     if (scoreValue) data.score = scoreValue;
     
     // Save win reasons as array
-    if (resultValue === 'win' && winReasons.length > 0) {
-        data.winReasons = winReasons;
-        if (winReasons.includes('others') && otherWinReasonValue) {
+    if (resultValue === 'win' && winReason.length > 0) {
+        data.winReason = winReason;
+        if (winReason.includes('others') && otherWinReasonValue) {
             data.otherwinReason = otherWinReasonValue;
         }
     }
     
     // Save lose reasons as array
-    if (resultValue === 'lose' && loseReasons.length > 0) {
-        data.loseReasons = loseReasons;
-        if (loseReasons.includes('others') && otherLoseReasonValue) {
+    if (resultValue === 'lose' && loseReason.length > 0) {
+        data.loseReason = loseReason;
+        if (loseReason.includes('others') && otherLoseReasonValue) {
             data.otherloseReason = otherLoseReasonValue;
         }
     }
@@ -950,6 +950,7 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
 
