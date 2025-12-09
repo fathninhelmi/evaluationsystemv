@@ -265,8 +265,12 @@ async function loadForms() {
           }
         }
       };
+      const badge = document.createElement("span");
+      badge.className = `status-badge status-${statusInfo.status.replace(" ", "")}`;
+      badge.textContent = statusInfo.status;
       
       div.appendChild(infoDiv);
+      div.appendChild(badge); 
       div.appendChild(delBtn);
       list.appendChild(div);
     }
@@ -361,5 +365,6 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 <footer class="footer">
   <span>© 2025 ViTrox. All rights reserved.</span>
 </footer>
+
 </body>
 </html>
