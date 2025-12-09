@@ -543,7 +543,7 @@ function initCharts() {
         if (window.winReasonChartInstance) window.winReasonChartInstance.destroy();
 
         // Define the exact order of reasons we want on X-axis
-        const allwinReason = ['Good value of money', 'Best Product', 'Advanced features'];
+        const allwinReason = ['Good value of money', 'Best Product', 'Advanced features', 'Others'];
         const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
         const winDatasets = categories.map((cat, idx) => {
@@ -662,7 +662,7 @@ function initCharts() {
         if (window.loseReasonChartInstance) window.loseReasonChartInstance.destroy();
 
         // Define the exact order of reasons we want on X-axis
-        const allReason = ['Expensive', 'Better Product', 'Advance Features', 'Others'];
+        const allReason = ['Expensive', 'Better Product', 'Competitor got advance features', 'Others'];
         const categoryColors = ['#3498db','#e74c3c','#f39c12','#2ecc71','#9b59b6','#1abc9c','#e67e22'];
 
         const datasets = categories.map((cat, idx) => {
@@ -820,7 +820,7 @@ function formatLoseReason(reason) {
     const reasonMap = {
         'expensive': 'Expensive',
         'better_product': 'Better Product',
-        'advance_features': 'Advance Features',
+        'advance_features': 'Competitor got advance features',
         'others': 'Others'
     };
     return reasonMap[reason] || reason;
@@ -1092,6 +1092,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
