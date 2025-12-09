@@ -168,14 +168,14 @@ async function getOverallStatus(eventId) {
   const [preStatus, evalStatus, postStatus] = statuses;
 
   if (preStatus === "complete" && evalStatus === "complete" && postStatus === "complete") {
-    return { status: "complete", color: "#2a9d8f" };
+    return { status: "complete", color: "#2a9d8f", order: 3 };
   }
 
   if (preStatus !== "draft" || evalStatus !== "draft" || postStatus !== "draft") {
-    return { status: "in progress", color: "#f4a261" };
+    return { status: "in progress", color: "#f4a261", order: 2 };
   }
 
-  return { status: "draft", color: "#e76f51" };
+  return { status: "draft", color: "#e76f51", order: 1 };
 }
 
 async function getFormStatus(collectionId, eventId) {
@@ -207,13 +207,22 @@ async function loadForms() {
       return;
     }
 
+    // Get status for all documents
+    const formsWithStatus = await Promise.all(
+      res.documents.map(async (doc) => {
+        const statusInfo = await getOverallStatus(doc.$id);
+        return { doc, statusInfo };
+      })
+    );
+
+    // Sort by status order: draft (1), in progress (2), complete (3)
+    formsWithStatus.sort((a, b) => a.statusInfo.order - b.statusInfo.order);
+
     list.innerHTML = "";
 
-    for (const doc of res.documents) {
+    for (const { doc, statusInfo } of formsWithStatus) {
       const div = document.createElement("div");
       div.className = "event-item";
-
-      const statusInfo = await getOverallStatus(doc.$id);
 
       div.style.backgroundColor = statusInfo.color;
       div.style.color = "white";
@@ -352,7 +361,5 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 <footer class="footer">
   <span>© 2025 ViTrox. All rights reserved.</span>
 </footer>
-
 </body>
 </html>
-
