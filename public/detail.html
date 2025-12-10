@@ -170,8 +170,7 @@ async function goToStep(page, eventId, isViewMode = false) {
             page = preevalPage;
         }
         console.log("Final page to navigate to:", page); 
-        
-        // Add 'mode=view' parameter when in view mode (from manager)
+
         const viewModeParam = isViewMode ? '&mode=view' : '';
         window.location.href = `${page}?id=${eventId}${viewModeParam}`;
 
@@ -190,5 +189,6 @@ loadEvent();
 </body>
 
 </html>
+
 
 
