@@ -180,8 +180,9 @@
         </div>
         
         <div class="form-actions">
-            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
             <button type="submit" class="btn btn-success submit-btn" id="submitBtn">Submit</button>
+            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
+            <button type="button" class="btn btn-danger submit-btn" onclick="dropForm()">Drop</button>
         </div>
     </form>
 </div>
@@ -197,7 +198,7 @@ const storage = new Appwrite.Storage(client);
 
 const databaseId = "68ba8a9c001f17064e15";
 const evalCollectionId = "68bf9d5600257a20775a";
-const bucketId = "69015d8b0030f329c599"; // Same bucket as post-eval
+const bucketId = "69015d8b0030f329c599"; 
 
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id");
@@ -642,24 +643,65 @@ function setViewMode() {
     const formTitle = document.getElementById("formTitle");
     const submitBtn = document.getElementById("submitBtn");
     const saveProgressBtn = document.getElementById("saveProgressBtn");
+    const dropBtn = document.querySelector('.btn-danger');
     
     formTitle.textContent = `Evaluation Form (View Mode)`;
     document.querySelectorAll('input, textarea, select, button[type="button"]:not(.btn-secondary)').forEach(el => el.disabled = true);
     document.querySelectorAll('.add-row-btn').forEach(btn => btn.style.display = 'none');
+    document.querySelectorAll('.delete-row-btn').forEach(btn => btn.style.display = 'none');
     document.getElementById('attachmentInput').style.display = 'none';
     submitBtn.style.display = 'none';
     saveProgressBtn.style.display = 'none';
+    if (dropBtn) dropBtn.style.display = 'none';
 }
 
+async function dropForm() {
+    if (!confirm("Are you sure you want to drop this form? This will mark the form as dropped and it will become view-only.")) {
+        return;
+    }
+    try {
+        const data = {
+            status: "drop"
+        };
+        try {
+            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
+            console.log("Form marked as dropped successfully");
+        } catch (updateError) {
+            if (updateError.message.includes("Document with the requested ID could not be found")) {
+                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
+                console.log("Document created and marked as dropped");
+            } else {
+                throw updateError;
+            }
+        }
+        currentStatus = "drop";
+        updateFormDisplay();
+        setViewMode();
+        alert("Form has been dropped and is now in view-only mode."); 
+    } catch (err) {
+        console.error("Failed to drop form:", err);
+        alert(`Error dropping form: ${err.message}`);
+    }
+}
+    
 function updateFormDisplay() {
     const statusBadge = document.getElementById("statusBadge");
     const submitBtn = document.getElementById("submitBtn");
+    const saveProgressBtn = document.getElementById("saveProgressBtn");
+    const dropBtn = document.querySelector('.btn-danger');
     
     statusBadge.textContent = currentStatus;
     statusBadge.className = `status-badge ${currentStatus.replace(' ', '-')}`;
     
-    if (currentStatus === "complete") {
+    if (currentStatus === "complete" || currentStatus === "drop") {
         submitBtn.style.display = 'none';
+        saveProgressBtn.style.display = 'none';
+        if (dropBtn) dropBtn.style.display = 'none';
+    }
+    
+    // Update form title if dropped
+    if (currentStatus === "drop") {
+        document.getElementById("formTitle").textContent = "Evaluation Form (Dropped)";
     }
 }
 
@@ -789,4 +831,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
