@@ -628,7 +628,7 @@ function updateFormDisplay() {
     
     if (viewMode || currentStatus === "drop") { 
         formTitle.textContent = currentStatus === "drop" ? "Pre Evaluation Form (Dropped)" : "Post Evaluation Form (View Mode)";
-        document.querySelectorAll('input, select, button:not(.btn-secondary)').forEach(el => el.disabled = true);
+        document.querySelectorAll('input, select, button:not(.btn-secondary):not(.back-icon-btn)').forEach(el => el.disabled = true);
         if (submitBtn) submitBtn.style.display = 'none';
         if (saveProgressBtn) saveProgressBtn.style.display = 'none';
         if (dropBtn) dropBtn.style.display = 'none'; 
@@ -918,6 +918,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
