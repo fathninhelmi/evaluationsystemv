@@ -934,11 +934,11 @@ function viewEval() {
 
 function setViewMode() {
     const formTitle = document.getElementById("formTitle");
-    const submitBtn = document.getElementById("submitBtn");
-    const saveProgressBtn = document.getElementById("saveProgressBtn");
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const saveProgressBtn = document.querySelector('.draft-btn');
     const dropBtn = document.querySelector('.btn-danger');
     
-    formTitle.textContent = `Evaluation Form (View Only)`;
+    formTitle.textContent = `Post Evaluation Form (View Only)`;
     
     // Disable all inputs and buttons except back button
     document.querySelectorAll('input, textarea, select').forEach(el => {
@@ -947,12 +947,15 @@ function setViewMode() {
         el.style.color = '#666';
         el.style.cursor = 'not-allowed';
     });
-    
-    // Disable and gray out action buttons
-    document.querySelectorAll('button[type="button"]:not(.back-icon-btn), button[type="submit"]').forEach(btn => {
+    document.querySelectorAll('button[type="button"]:not(.back-icon-btn):not(.btn-secondary), button[type="submit"]').forEach(btn => {
         btn.disabled = true;
         btn.style.backgroundColor = '#9e9e9e';
         btn.style.color = '#fff';
+        btn.style.cursor = 'not-allowed';
+        btn.style.opacity = '0.6';
+    });
+    document.querySelectorAll('.result-btn').forEach(btn => {
+        btn.disabled = true;
         btn.style.cursor = 'not-allowed';
         btn.style.opacity = '0.6';
     });
@@ -964,7 +967,6 @@ function setViewMode() {
     if (saveProgressBtn) saveProgressBtn.style.display = 'none';
     if (dropBtn) dropBtn.style.display = 'none';
 }
-
 async function dropForm() {
     if (!confirm("Are you sure you want to drop this form? This will mark the form as dropped and it will become view-only.")) {
         return;
@@ -974,11 +976,11 @@ async function dropForm() {
             status: "drop"
         };
         try {
-            await databases.updateDocument(databaseId, postCollectionId, eventId, data);
+            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
             console.log("Form marked as dropped successfully");
         } catch (updateError) {
             if (updateError.message.includes("Document with the requested ID could not be found")) {
-                await databases.createDocument(databaseId, postCollectionId, eventId, data);
+                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
                 console.log("Document created and marked as dropped");
             } else {
                 throw updateError;
@@ -986,34 +988,35 @@ async function dropForm() {
         }
         currentStatus = "drop";
         updateFormDisplay();
-        
-        // Apply gray styling to dropped form
+
         const formTitle = document.getElementById("formTitle");
-        formTitle.textContent = "Evaluation Form (Dropped)";
-        
-        // Gray out all inputs
+        formTitle.textContent = "Post Evaluation Form (Dropped)";
+
         document.querySelectorAll('input, textarea, select').forEach(el => {
             el.disabled = true;
             el.style.backgroundColor = '#e0e0e0';
             el.style.color = '#666';
             el.style.cursor = 'not-allowed';
         });
-        
-        // Gray out and hide all action buttons except back button
-        document.querySelectorAll('button[type="button"]:not(.back-icon-btn), button[type="submit"]').forEach(btn => {
+
+        document.querySelectorAll('button[type="button"]:not(.back-icon-btn):not(.btn-secondary), button[type="submit"]').forEach(btn => {
             btn.disabled = true;
             btn.style.backgroundColor = '#9e9e9e';
             btn.style.color = '#fff';
             btn.style.cursor = 'not-allowed';
             btn.style.opacity = '0.6';
         });
+
+        document.querySelectorAll('.result-btn').forEach(btn => {
+            btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
+            btn.style.opacity = '0.6';
+        });
         
         document.querySelectorAll('.add-row-btn, .delete-row-btn').forEach(btn => btn.style.display = 'none');
         document.getElementById('attachmentInput').style.display = 'none';
-        
-        // Hide action buttons
-        const submitBtn = document.getElementById("submitBtn");
-        const saveProgressBtn = document.getElementById("saveProgressBtn");
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const saveProgressBtn = document.querySelector('.draft-btn');
         const dropBtn = document.querySelector('.btn-danger');
         if (submitBtn) submitBtn.style.display = 'none';
         if (saveProgressBtn) saveProgressBtn.style.display = 'none';
@@ -1068,4 +1071,5 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
