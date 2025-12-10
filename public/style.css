@@ -1374,6 +1374,13 @@ textarea::placeholder {
   border: 1.5px solid #e63946;
 }
 
+.status-badge.drop {
+  background: linear-gradient(135deg, rgba(128, 128, 128, 0.25), rgba(192, 192, 192, 0.15));
+  color: #333;
+  border: 1.5px solid #888; 
+  margin: 10px;
+}
+
 .form-meta {
   display: flex;
   flex-direction: column;
