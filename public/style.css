@@ -4544,21 +4544,24 @@ label {
 }
 
 .back-icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #333;
-    transition: all 0.2s ease;
-    border-radius: 4px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #aaa;
+  cursor: pointer;
+  width: auto;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .back-icon-btn:hover {
-    background-color: #f0f0f0;
-    color: #007bff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
 }
 
 .back-icon-btn:active {
