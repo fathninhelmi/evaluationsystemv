@@ -752,7 +752,7 @@ function goBack() {
             status: "drop"
         };
         try {
-            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
+            await databases.updateDocument(databaseId, preEvalCollectionId, eventId, data);
             console.log("Form marked as dropped successfully");
         } catch (updateError) {
             if (updateError.message.includes("Document with the requested ID could not be found")) {
@@ -1158,6 +1158,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
