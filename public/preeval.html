@@ -725,25 +725,41 @@ function populateForm(preEvalData, referenceData) {
 }
 
 function setViewMode() {
-    const form = document.getElementById("preEvalForm");
-    const inputs = form.querySelectorAll('input, textarea, select, button[type="submit"], button[type="button"]:not(.btn-secondary)');
-    inputs.forEach(input => {
-        if (input.type === 'submit' || input.classList.contains('add-row-btn') || input.classList.contains('draft-btn')) {
-            input.style.display = 'none';
-        } else if (input.type === 'file') {
-            input.style.display = 'none';
-        } else {
-            input.disabled = true;
-        }
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.getElementById("submitBtn");
+    const saveProgressBtn = document.getElementById("saveProgressBtn");
+    const dropBtn = document.querySelector('.btn-danger');
+    
+    formTitle.textContent = `Evaluation Form (View Only)`;
+
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.disabled = true;
+        el.style.backgroundColor = '#e0e0e0';
+        el.style.color = '#666';
+        el.style.cursor = 'not-allowed';
     });
-    document.getElementById("formTitle").textContent = "Pre-Evaluation Form (View Mode)";
+
+    document.querySelectorAll('button[type="button"]:not(.back-icon-btn), button[type="submit"]').forEach(btn => {
+        btn.disabled = true;
+        btn.style.backgroundColor = '#9e9e9e';
+        btn.style.color = '#fff';
+        btn.style.cursor = 'not-allowed';
+        btn.style.opacity = '0.6';
+    });
+    
+    document.querySelectorAll('.add-row-btn, .delete-row-btn').forEach(btn => btn.style.display = 'none');
+    document.getElementById('attachmentInput').style.display = 'none';
+    
+    if (submitBtn) submitBtn.style.display = 'none';
+    if (saveProgressBtn) saveProgressBtn.style.display = 'none';
+    if (dropBtn) dropBtn.style.display = 'none';
 }
 
 function goBack() {
   window.history.back();
 }
 
- async function dropForm() {
+async function dropForm() {
     if (!confirm("Are you sure you want to drop this form? This will mark the form as dropped and it will become view-only.")) {
         return;
     }
@@ -764,13 +780,39 @@ function goBack() {
         }
         currentStatus = "drop";
         updateFormDisplay();
-        setViewMode();
+
+        const formTitle = document.getElementById("formTitle");
+        formTitle.textContent = "Evaluation Form (Dropped)";
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+            el.disabled = true;
+            el.style.backgroundColor = '#e0e0e0';
+            el.style.color = '#666';
+            el.style.cursor = 'not-allowed';
+        });
+        document.querySelectorAll('button[type="button"]:not(.back-icon-btn), button[type="submit"]').forEach(btn => {
+            btn.disabled = true;
+            btn.style.backgroundColor = '#9e9e9e';
+            btn.style.color = '#fff';
+            btn.style.cursor = 'not-allowed';
+            btn.style.opacity = '0.6';
+        });
+        
+        document.querySelectorAll('.add-row-btn, .delete-row-btn').forEach(btn => btn.style.display = 'none');
+        document.getElementById('attachmentInput').style.display = 'none';
+        
+        const submitBtn = document.getElementById("submitBtn");
+        const saveProgressBtn = document.getElementById("saveProgressBtn");
+        const dropBtn = document.querySelector('.btn-danger');
+        if (submitBtn) submitBtn.style.display = 'none';
+        if (saveProgressBtn) saveProgressBtn.style.display = 'none';
+        if (dropBtn) dropBtn.style.display = 'none';
+        
         alert("Form has been dropped and is now in view-only mode."); 
     } catch (err) {
         console.error("Failed to drop form:", err);
         alert(`Error dropping form: ${err.message}`);
     }
-}   
+}  
     
 function updateFormDisplay() {
     const statusBadge = document.getElementById("statusBadge");
@@ -1158,6 +1200,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
