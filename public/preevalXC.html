@@ -23,7 +23,7 @@
         </button>
         <h1 id="formTitle">Pre Evaluation Form</h1>
         <span id="statusBadge" class="status-badge"></span>
-    </div>>
+    </div>
     
     <div id="loadingIndicator" class="loading" style="display: none;">
         Loading form data
@@ -703,7 +703,7 @@ function updateFormDisplay() {
         formTitle.textContent = currentStatus === "drop" ? "Post Evaluation Form (Dropped)" : "Post Evaluation Form (View Mode)";
         document.querySelectorAll('input, select, button:not(.btn-secondary)').forEach(el => el.disabled = true);
         if (submitBtn) submitBtn.style.display = 'none';
-        if (saveBtn) saveBtn.style.display = 'none';
+        if (saveProgressBtn) saveProgressBtn.style.display = 'none';
         if (dropBtn) dropBtn.style.display = 'none'; 
     } else {
         formTitle.textContent = `Pre-Evaluation Form`;
@@ -978,5 +978,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
 
