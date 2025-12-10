@@ -167,7 +167,7 @@ async function getOverallStatus(eventId) {
 
   const [preStatus, evalStatus, postStatus] = statuses;
 
-  if (preStatus !== "drop" || evalStatus !== "drop" || postStatus !== "drop") {
+  if (preStatus == "drop" || evalStatus == "drop" || postStatus == "drop") {
     return { status: "drop", color: "#8B949E", order: 4 };
   }
 
@@ -370,4 +370,5 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 
 </body>
 </html>
+
 
