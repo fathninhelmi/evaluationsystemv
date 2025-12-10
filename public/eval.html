@@ -664,7 +664,7 @@ async function dropForm() {
             status: "drop"
         };
         try {
-            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
+            await databases.updateDocument(databaseId, evalCollectionId, eventId, data);
             console.log("Form marked as dropped successfully");
         } catch (updateError) {
             if (updateError.message.includes("Document with the requested ID could not be found")) {
@@ -831,6 +831,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
 
