@@ -512,8 +512,9 @@
         </div>
 
         <div class="form-actions">
-            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
             <button type="submit" class="btn btn-success submit-btn" id="submitBtn">Submit</button>
+            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
+            <button type="button" class="btn btn-danger submit-btn" onclick="dropForm()">Drop</button>
         </div>
     </form>
 </div>
@@ -742,20 +743,51 @@ function goBack() {
   window.history.back();
 }
 
+ async function dropForm() {
+    if (!confirm("Are you sure you want to drop this form? This will mark the form as dropped and it will become view-only.")) {
+        return;
+    }
+    try {
+        const data = {
+            status: "drop"
+        };
+        try {
+            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
+            console.log("Form marked as dropped successfully");
+        } catch (updateError) {
+            if (updateError.message.includes("Document with the requested ID could not be found")) {
+                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
+                console.log("Document created and marked as dropped");
+            } else {
+                throw updateError;
+            }
+        }
+        currentStatus = "drop";
+        updateFormDisplay();
+        setViewMode();
+        alert("Form has been dropped and is now in view-only mode."); 
+    } catch (err) {
+        console.error("Failed to drop form:", err);
+        alert(`Error dropping form: ${err.message}`);
+    }
+}   
+    
 function updateFormDisplay() {
     const statusBadge = document.getElementById("statusBadge");
     const formTitle = document.getElementById("formTitle");
     const submitBtn = document.getElementById("submitBtn");
     const saveProgressBtn = document.getElementById("saveProgressBtn");
+    const dropBtn = document.querySelector('.btn-danger');
     
     statusBadge.textContent = currentStatus;
     statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
     
-    if (viewMode) {
-        formTitle.textContent = `Pre-Evaluation Form (Viewing)`;
-        document.querySelectorAll('input, textarea, select, button[type="button"]:not(.btn-secondary)').forEach(el => el.disabled = true);
+    if (viewMode || currentStatus === "drop") { 
+        formTitle.textContent = currentStatus === "drop" ? "Post Evaluation Form (Dropped)" : "Post Evaluation Form (View Mode)";
+        document.querySelectorAll('input, select, button:not(.btn-secondary)').forEach(el => el.disabled = true);
         if (submitBtn) submitBtn.style.display = 'none';
-        if (saveProgressBtn) saveProgressBtn.style.display = 'none';
+        if (saveBtn) saveBtn.style.display = 'none';
+        if (dropBtn) dropBtn.style.display = 'none'; 
     } else {
         formTitle.textContent = `Pre-Evaluation Form`;
         if (currentStatus === "complete" && submitBtn) {
@@ -1126,5 +1158,6 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
