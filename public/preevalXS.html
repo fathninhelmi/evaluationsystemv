@@ -941,6 +941,10 @@ function toggleSpecifyBox(checkboxName, specifyInputId) {
   updateVisibility();
 }
 
+function goBack() {
+  window.location.href = `detail.html?id=${eventId}`;
+}
+    
 document.addEventListener('DOMContentLoaded', () => {
   toggleSpecifyBox('codeType', 'codeTypeOtherDetails'); 
   toggleSpecifyBox('codeDataUsage', 'dataUsageOtherDetails');
@@ -955,6 +959,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
