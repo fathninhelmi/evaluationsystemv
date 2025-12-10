@@ -668,7 +668,7 @@ async function dropForm() {
             console.log("Form marked as dropped successfully");
         } catch (updateError) {
             if (updateError.message.includes("Document with the requested ID could not be found")) {
-                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
+                await databases.createDocument(databaseId, evalCollectionId, eventId, data);
                 console.log("Document created and marked as dropped");
             } else {
                 throw updateError;
@@ -831,5 +831,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
