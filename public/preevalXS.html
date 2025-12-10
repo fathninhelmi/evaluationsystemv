@@ -596,11 +596,11 @@ async function dropForm() {
             status: "drop"
         };
         try {
-            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
+            await databases.updateDocument(databaseId, preEvalCollectionId, eventId, data);
             console.log("Form marked as dropped successfully");
         } catch (updateError) {
             if (updateError.message.includes("Document with the requested ID could not be found")) {
-                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
+                await databases.createDocument(databaseId, preEvalCollectionId, eventId, data);
                 console.log("Document created and marked as dropped");
             } else {
                 throw updateError;
@@ -918,4 +918,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
