@@ -211,6 +211,7 @@ let currentStatus = "draft";
 let competitorRowCount = 1;
 let keywordRowCount = 1;
 let uploadedFileId = null;
+let currentUser = null;
 
 function initScoreButtons() {
     document.querySelectorAll('.result-btn').forEach(btn => {
@@ -466,16 +467,18 @@ async function initForm() {
             window.location.href = "/createform.html";
             return;
         }
+        currentUser = await account.get();
+        console.log("Current user:", currentUser);
+        
         if (showNavigation) {
             document.getElementById("preEvalBtn").style.display = "inline-block";
-            
-            
             document.getElementById("evalBtn").style.display = "inline-block";
         }
         
         initScoreButtons();
         initFileUpload();
         await loadForm();
+        
         const userRole = await checkUserRole();
         if (viewMode || userRole === 'manager') {
             setViewMode();
@@ -1054,7 +1057,7 @@ function updateFormDisplay() {
 }
 
 function goBack() {
-  window.history.back();
+  window.location.href = `detail.html?id=${eventId}`;
 }
 
 document.getElementById("postEvalForm").addEventListener("submit", e => {
@@ -1071,5 +1074,6 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
