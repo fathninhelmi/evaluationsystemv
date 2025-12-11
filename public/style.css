@@ -1681,7 +1681,6 @@ textarea::placeholder {
 }
 
 #formsTable .open-btn.enabled {
-  background: #3498db;
   color: #fff;
 }
 
@@ -1692,7 +1691,6 @@ textarea::placeholder {
 }
 
 #formsTable .open-btn.disabled {
-  background: #6c757d;
   color: #ddd;
   cursor: not-allowed;
   pointer-events: none;
@@ -4621,6 +4619,7 @@ label {
 .back-icon-btn:active {
     transform: scale(0.95);
 }
+
 
 
 
