@@ -45,9 +45,9 @@
           <th rowspan="2">Username</th>
           <th rowspan="2">Type</th>
           <th rowspan="2">Category</th>
-          <th colspan="3">Status</th>
+          <th colspan="3">Status & Actions</th>
           <th rowspan="2">Created On</th>
-          <th rowspan="2">Actions</th>
+          <th rowspan="2">Archive</th>
         </tr>
         <tr>
           <th>Pre-Evaluation</th>
@@ -58,64 +58,6 @@
       <tbody></tbody>
     </table>
 </main>
-
-<div id="editModal" class="modal" style="display: none;">
-  <div class="modal-content small">
-    <div class="modal-header">
-      <h3 id="editTitle">Edit Form</h3>
-      <button class="close-btn" onclick="closeEditModal()">&times;</button>
-    </div>
-    <div class="modal-body">
-      <form id="editForm">
-        <div class="form-group">
-          <label>Type</label>
-          <select id="editType" onchange="updateCategoryOptions()">
-            <option value="SPI">SPI</option>
-            <option value="AOI">AOI</option>
-            <option value="ARV">ARV</option>
-            <option value="AXI">AXI</option>
-            <option value="XC">Smart Camera (XC)</option>
-            <option value="XS">Smart Code Reader (XS)</option>
-          </select>
-        </div>
-        <div class="form-group" id="editCategoryGroup" style="display: none;">
-          <label>Product Category</label>
-          <select id="editCategory">
-            <option value="">Select Category</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Pre-Evaluation</label>
-          <select id="editPreEvalStatus">
-            <option value="draft">Draft</option>
-            <option value="progress">In Progress</option>
-            <option value="complete">Complete</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Evaluation</label>
-          <select id="editEvalStatus">
-            <option value="draft">Draft</option>
-            <option value="progress">In Progress</option>
-            <option value="complete">Complete</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Post-Evaluation</label>
-          <select id="editPostEvalStatus">
-            <option value="draft">Draft</option>
-            <option value="progress">In Progress</option>
-            <option value="complete">Complete</option>
-          </select>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveFormChanges()">Save</button>
-    </div>
-  </div>
-</div>
 
 <script>
 const { Client, Account, Databases, Query } = window.Appwrite;
@@ -133,7 +75,6 @@ const evalCollectionId = "68bf9d5600257a20775a";
 const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 
 let forms = [];
-let editingFormId = null;
 
 const productCategoryOptions = {
   'SPI': [
@@ -180,6 +121,27 @@ function updateCategoryOptions() {
     categoryGroup.style.display = "none";
     categorySelect.innerHTML = '<option value="">Select Category</option>';
   }
+}
+
+function editForm(formId) {
+  const form = forms.find(f => f.id === formId);
+  if (!form) return;
+  const productTypeLower = (form.type || '').toLowerCase().trim();
+  let preEvalPage;
+  
+  switch (productTypeLower) {
+    case "xs":
+    case "smart code reader (xs)":
+      preEvalPage = `preevalXS.html?id=${formId}`;
+      break;
+    case "xc":
+    case "smart camera (xc)":
+      preEvalPage = `preevalXC.html?id=${formId}`;
+      break;
+    default:
+      preEvalPage = `preeval.html?id=${formId}`;
+  }
+  window.location.href = preEvalPage;
 }
 
 async function checkSession() {
@@ -289,18 +251,30 @@ function renderTable(data) {
   }
 
   data.forEach(form => {
+    const preEvalLink = getPreEvalPage(form.type, form.id);
+    const evalLink = `eval.html?id=${form.id}`;
+    const postEvalLink = `posteval.html?id=${form.id}`;
+    
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${form.username}</td>
       <td>${form.type}</td>
       <td>${getCategoryLabel(form.type, form.category)}</td>
-      <td><span class="status-badge ${form.pre_eval}">${getStatusText(form.pre_eval)}</span></td>
-      <td><span class="status-badge ${form.eval}">${getStatusText(form.eval)}</span></td>
-      <td><span class="status-badge ${form.post_eval}">${getStatusText(form.post_eval)}</span></td>
+      <td>
+        <span class="status-badge ${form.pre_eval}">${getStatusText(form.pre_eval)}</span><br>
+        ${getEditButton(form.pre_eval, preEvalLink)}
+      </td>
+      <td>
+        <span class="status-badge ${form.eval}">${getStatusText(form.eval)}</span><br>
+        ${getEditButton(form.eval, evalLink)}
+      </td>
+      <td>
+        <span class="status-badge ${form.post_eval}">${getStatusText(form.post_eval)}</span><br>
+        ${getEditButton(form.post_eval, postEvalLink)}
+      </td>
       <td>${formatDate(form.createdOn)}</td>
       <td>
         <div class="action-buttons">
-          <button class="edit" onclick="editForm('${form.id}')" title="Edit Form"><i class="fas fa-edit"></i></button>
           <button class="archive" onclick="archiveForm('${form.id}')" title="Archive Form"><i class="fas fa-box-archive"></i></button>
         </div>
       </td>
@@ -314,84 +288,33 @@ function getStatusText(status) {
     case 'draft': return 'Draft';
     case 'progress': return 'In Progress';
     case 'complete': return 'Complete';
+    case 'drop': return 'Drop';
     default: return '-';
   }
 }
 
-function editForm(formId) {
-  const form = forms.find(f => f.id === formId);
-  if (!form) return;
-
-  editingFormId = formId;
-  document.getElementById("editType").value = form.type;
-  document.getElementById("editPreEvalStatus").value = form.pre_eval;
-  document.getElementById("editEvalStatus").value = form.eval;
-  document.getElementById("editPostEvalStatus").value = form.post_eval;
+function getPreEvalPage(productType, docId) {
+  if (!productType) return `preeval.html?id=${docId}`;
   
-  updateCategoryOptions();
+  const productTypeLower = productType.toLowerCase().trim();
   
-  if (form.category && productCategoryOptions[form.type]) {
-    document.getElementById("editCategory").value = form.category;
+  switch (productTypeLower) {
+    case "xs":
+    case "smart code reader (xs)":
+      return `preevalXS.html?id=${docId}`;
+    case "xc":
+    case "smart camera (xc)":
+      return `preevalXC.html?id=${docId}`;
+    default:
+      return `preeval.html?id=${docId}`;
   }
-  
-  document.getElementById("editTitle").textContent = "Edit Form - " + form.type;
-  document.getElementById("editModal").style.display = "flex";
 }
 
-async function saveFormChanges() {
-  if (!editingFormId) return;
-
-  const newType = document.getElementById("editType").value;
-  const newCategory = document.getElementById("editCategory").value;
-  const newPre = document.getElementById("editPreEvalStatus").value;
-  const newEval = document.getElementById("editEvalStatus").value;
-  const newPost = document.getElementById("editPostEvalStatus").value;
-
-  try {
-    const updateData = { productType: newType };
-    
-    if (productCategoryOptions[newType] && newCategory) {
-      updateData.productCategory = newCategory;
-    } else {
-      updateData.productCategory = "";
-    }
-    
-    await databases.updateDocument(databaseId, collectionId, editingFormId, updateData);
-
-    try {
-      await databases.updateDocument(databaseId, preEvalCollectionId, editingFormId, { status: newPre });
-    } catch (err) {
-      console.log('Pre-eval document not found, skipping');
-    }
-
-    try {
-      await databases.updateDocument(databaseId, evalCollectionId, editingFormId, { status: newEval });
-    } catch (err) {
-      console.log('Eval document not found, skipping');
-    }
-
-    try {
-      await databases.updateDocument(databaseId, postEvalCollectionId, editingFormId, { status: newPost });
-    } catch (err) {
-      console.log('Post-eval document not found, skipping');
-    }
-
-    const form = forms.find(f => f.id === editingFormId);
-    if (form) {
-      form.type = newType;
-      form.category = newCategory;
-      form.pre_eval = newPre;
-      form.eval = newEval;
-      form.post_eval = newPost;
-    }
-
-    applyFilters();
-    closeEditModal();
-    alert("Form updated successfully!");
-  } catch (err) {
-    console.error("Update failed:", err);
-    alert("Failed to update form: " + err.message);
+function getEditButton(status, link) {
+  if (status === "complete" || status === "draft" || status === "progress" || status === "drop") {
+    return `<a href="${link}" class="open-btn enabled" title="Edit">Edit</a>`;
   }
+  return `<a href="#" class="open-btn disabled" title="Not available">Edit</a>`;
 }
 
 async function archiveForm(formId) {
@@ -418,11 +341,6 @@ async function archiveForm(formId) {
   }
 }
 
-function closeEditModal() {
-  document.getElementById("editModal").style.display = "none";
-  editingFormId = null;
-}
-
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -445,14 +363,7 @@ document.getElementById("logoutBtn").addEventListener("click", (e) => {
   e.preventDefault();
   logout();
 });
-
-window.onclick = function(event) {
-  const modal = document.getElementById('editModal');
-  if (event.target === modal) {
-    closeEditModal();
-  }
-};
-
+    
 document.addEventListener("DOMContentLoaded", async () => {
   await checkSession();
   await loadForms();
@@ -464,4 +375,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
