@@ -241,28 +241,23 @@ function initScoreButtons() {
                 document.getElementById('otherWinReasonSection').style.display = 'none';
             }
              else if (resultValue === 'pending') {
-                // Hide ALL sections
+                const isLoadingExisting = evDoc && evDoc.result === 'pending';
+                if (!isLoadingExisting) {
+                    showPendingModal();
+                }
                 winReasonSection.style.display = 'none';
                 loseReasonSection.style.display = 'none';
-
-                // Clear all checkboxes
                 document.querySelectorAll('input[name="winReason"]').forEach(cb => cb.checked = false);
                 document.querySelectorAll('input[name="loseReason"]').forEach(cb => cb.checked = false);
-
-                // Clear text areas
                 document.getElementById('otherwinReason').value = '';
                 document.getElementById('otherloseReason').value = '';
-
-                // Hide "other" text boxes
                 document.getElementById('otherWinReasonSection').style.display = 'none';
                 document.getElementById('otherLoseReasonSection').style.display = 'none';
             }
-            
             await autoSaveResult(resultValue);
         });
     });
     
-    // Handle win reason "Others" checkbox
     document.querySelectorAll('input[name="winReason"]').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             if (this.value === 'others') {
@@ -289,11 +284,62 @@ function initScoreButtons() {
     });
 }
 
+function showPendingModal() {
+    const modal = document.getElementById('pendingModal');
+    modal.classList.add('active');
+}
+
+function hidePendingModal() {
+    const modal = document.getElementById('pendingModal');
+    modal.classList.remove('active');
+}
+
+async function acknowledgePending() {
+    hidePendingModal();
+    const pendingSetDate = new Date();
+    const reminderDate = new Date();
+    reminderDate.setDate(reminderDate.getDate() + 14);
+    const pendingSetDateISO = pendingSetDate.toISOString();
+    const reminderDateISO = reminderDate.toISOString();
+    console.log('Pending set date:', pendingSetDateISO);
+    console.log('Reminder date:', reminderDateISO);
+    
+    const data = {
+        result: 'pending',
+        status: currentStatus || "draft",
+        pendingSetDate: pendingSetDateISO,
+        reminderDate: reminderDateISO
+    };
+
+    try {
+        try {
+            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
+            console.log("Pending dates saved successfully");
+            showToast("Pending status acknowledged!");
+        } catch (updateError) {
+            if (updateError.message.includes("Document with the requested ID could not be found")) {
+                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
+                console.log("Document created with pending dates");
+                showToast("Pending status acknowledged!");
+            } else {
+                throw updateError;
+            }
+        }
+    } catch (err) {
+        console.error("Failed to save pending dates:", err);
+        showToast("Failed to save pending status", true);
+    }
+}
+
 async function autoSaveResult(resultValue) {
     const data = {
         result: resultValue,
         status: currentStatus || "draft"
     };
+    if (resultValue !== 'pending' && evDoc && evDoc.result === 'pending') {
+        data.pendingSetDate = null;
+        data.reminderDate = null;
+    }
 
     console.log("Auto-saving result:", data);
 
@@ -1081,6 +1127,7 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
 
