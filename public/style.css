@@ -4029,6 +4029,15 @@ label {
   background: #0056b3;
 }
 
+.btn-edit {
+  background: #007bff;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #0056b3;
+}
+
 .btn-download {
   background: #6c757d;
   color: white;
@@ -4590,6 +4599,7 @@ label {
 .back-icon-btn:active {
     transform: scale(0.95);
 }
+
 
 
 
