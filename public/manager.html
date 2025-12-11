@@ -79,18 +79,22 @@
           <span id="mapStatus">Loading map data...</span>
           <div class="legend">
             <div class="legend-item">
-              <div class="legend-dot" style="background: #28a745;"></div>
-              <span>Complete</span>
+                <div class="legend-dot" style="background: #28a745;"></div>
+                <span>Complete</span>
             </div>
             <div class="legend-item">
-              <div class="legend-dot" style="background: #ffc107;"></div>
-              <span>In Progress</span>
+                <div class="legend-dot" style="background: #ffc107;"></div>
+                <span>In Progress</span>
             </div>
             <div class="legend-item">
-              <div class="legend-dot" style="background: #dc3545;"></div>
-              <span>Draft</span>
+                <div class="legend-dot" style="background: #dc3545;"></div>
+                <span>Draft</span>
             </div>
-          </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #6c757d;"></div>
+                <span>Dropped</span>
+            </div>
+            </div>
         </div>
       </div>
 
@@ -217,6 +221,10 @@ async function getFormStatus(collectionId, formId) {
 }
 
 function computeOverallStatus(pre, evalStatus, post) {
+    if (pre === 'drop' || evalStatus === 'drop' || post === 'drop') {
+        return 'drop';
+    }
+    
     const completedForms = [pre, evalStatus, post].filter(s => s === 'complete').length;
     const formsWithProgress = [pre, evalStatus, post].filter(s => s === 'complete' || s === 'progress').length;
 
@@ -932,7 +940,8 @@ function updateMapMarkers() {
     data.forEach((e, index) => {
         if (e.location && Array.isArray(e.location) && e.location.length === 2) {
             const color = e.status === 'complete' ? '#28a745' : 
-                         e.status === 'progress' ? '#ffc107' : '#dc3545';
+                         e.status === 'progress' ? '#ffc107' : 
+                         e.status === 'drop' ? '#6c757d' : '#dc3545';
 
             const icon = L.divIcon({
                 className: 'custom-marker-icon',
@@ -950,11 +959,12 @@ function updateMapMarkers() {
 
             const marker = L.marker(e.location, { icon });
 
-            const isClickable = e.status !== 'complete';
+            const isClickable = e.status !== 'complete' && e.status !== 'drop';
             const statusText = e.status === 'complete' ? '✅ Complete' : 
-                            e.status === 'progress' ? '⏳ In Progress' : '📝 Draft';
+                            e.status === 'progress' ? '⏳ In Progress' : 
+                            e.status === 'drop' ? '❌ Dropped' : '📝 Draft';
             const statusBadge = isClickable 
-                ? `<a href="detail.html?id=${e.id}" style="
+                ? `<a href="detail.html?id=${e.id}&from=manager" style="
                     display: inline-block;
                     padding: 8px 16px;
                     background: ${color};
@@ -996,21 +1006,11 @@ function updateMapMarkers() {
                         <div><strong>📅 Date:</strong> ${e.date}</div>
                         ${e.searchQuery ? `<div style="font-size: 11px; color: #999; margin-top: 8px;"><em>Found via: "${e.searchQuery}"</em></div>` : ''}
                     </div>
-                    <div style=
-                        "margin-top: 12px; 
-                        padding-top: 12px; 
-                        border-top: 1px solid #eee; 
-                        text-align: center;">
-                        
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: center;">
                         ${statusBadge}
                         ${isClickable ? 
-                        
-                        `<div style=
-                        "font-size: 11px; 
-                        color: #666; 
-                        margin-top: 6px;"> 
-                        Click to view details
-                        </div>` : ''}
+                        `<div style="font-size: 11px; color: #666; margin-top: 6px;">Click to view details</div>` : 
+                        e.status === 'drop' ? `<div style="font-size: 11px; color: #666; margin-top: 6px;">This evaluation has been dropped</div>` : ''}
                     </div>
                 </div>
             `;
@@ -1024,6 +1024,7 @@ function updateMapMarkers() {
             console.warn(`  ✗ No location: ${e.customerCompany} - ${e.customerLocation}`);
         }
     });
+    
     if (displayedCount > 0) {
         const group = markerClusterGroup.getBounds();
         if (group.isValid()) {
@@ -1036,7 +1037,7 @@ function updateMapMarkers() {
 
     console.log(`✅ ${displayedCount} markers displayed on map\n`);
 }
-
+    
 function getFilteredData() {
     const locationFilter = document.getElementById('locationFilter')?.value || 'all';
     const productFilter = document.getElementById('productFilter')?.value || 'all';
@@ -1093,6 +1094,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
