@@ -726,23 +726,29 @@ function populateForm(preEvalData, referenceData) {
 
 function setViewMode() {
     const formTitle = document.getElementById("formTitle");
-    const submitBtn = document.getElementById("submitBtn");
-    const saveProgressBtn = document.getElementById("saveProgressBtn");
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const saveProgressBtn = document.querySelector('.draft-btn');
     const dropBtn = document.querySelector('.btn-danger');
-    
-    formTitle.textContent = `Evaluation Form (View Only)`;
-
+    if (currentStatus === "drop") {
+        formTitle.textContent = `Post Evaluation Form (Dropped)`;
+    } else {
+        formTitle.textContent = `Post Evaluation Form (View Only)`;
+    }
     document.querySelectorAll('input, textarea, select').forEach(el => {
         el.disabled = true;
         el.style.backgroundColor = '#e0e0e0';
         el.style.color = '#666';
         el.style.cursor = 'not-allowed';
     });
-
-    document.querySelectorAll('button[type="button"]:not(.back-icon-btn), button[type="submit"]').forEach(btn => {
+    document.querySelectorAll('button[type="button"]:not(.back-icon-btn):not(.btn-secondary), button[type="submit"]').forEach(btn => {
         btn.disabled = true;
         btn.style.backgroundColor = '#9e9e9e';
         btn.style.color = '#fff';
+        btn.style.cursor = 'not-allowed';
+        btn.style.opacity = '0.6';
+    });
+    document.querySelectorAll('.result-btn').forEach(btn => {
+        btn.disabled = true;
         btn.style.cursor = 'not-allowed';
         btn.style.opacity = '0.6';
     });
@@ -817,21 +823,26 @@ async function dropForm() {
 function updateFormDisplay() {
     const statusBadge = document.getElementById("statusBadge");
     const formTitle = document.getElementById("formTitle");
-    const submitBtn = document.getElementById("submitBtn");
-    const saveProgressBtn = document.getElementById("saveProgressBtn");
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const saveBtn = document.querySelector('.draft-btn');
     const dropBtn = document.querySelector('.btn-danger');
-    
+
     statusBadge.textContent = currentStatus;
     statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
-    
+
     if (viewMode || currentStatus === "drop") { 
-        formTitle.textContent = currentStatus === "drop" ? "Post Evaluation Form (Dropped)" : "Post Evaluation Form (View Mode)";
+        if (currentStatus === "drop") {
+            formTitle.textContent = "Post Evaluation Form (Dropped)";
+        } else {
+            formTitle.textContent = "Post Evaluation Form (View Only)";
+        }
+        
         document.querySelectorAll('input, select, button:not(.btn-secondary):not(.back-icon-btn)').forEach(el => el.disabled = true);
         if (submitBtn) submitBtn.style.display = 'none';
         if (saveBtn) saveBtn.style.display = 'none';
         if (dropBtn) dropBtn.style.display = 'none'; 
     } else {
-        formTitle.textContent = `Pre-Evaluation Form`;
+        formTitle.textContent = "Post Evaluation Form";
         if (currentStatus === "complete" && submitBtn) {
             submitBtn.style.display = 'none';
         }
@@ -1200,6 +1211,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
