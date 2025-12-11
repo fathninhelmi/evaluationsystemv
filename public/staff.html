@@ -486,11 +486,19 @@ function renderMyForms(forms) {
     ["pre_eval","eval","post_eval"].forEach(type => {
       const status = form.subforms?.[type] || "not created";
       const statusClass = status === "not created" ? "draft" : status;
-      const actionBtn = status === "draft" 
-        ? `<button class="btn-mini btn-primary" onclick="editForm('${form.$id}','${type}')"><i class="fas fa-edit"></i> Edit</button>`
-        : status === "complete"
-        ? `<button class="btn-mini btn-secondary" onclick="viewForm('${form.$id}','${type}')"><i class="fas fa-eye"></i> View</button>`
-        : `<button class="btn-mini btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">Not Created</button>`;
+      const isDropped = status === "drop";
+      
+      let actionBtn = '';
+      if (isDropped) {
+        actionBtn = `<button class="btn-mini btn-secondary" onclick="viewForm('${form.$id}','${type}')"><i class="fas fa-eye"></i> View</button>`;
+      } else if (status === "draft") {
+        actionBtn = `<button class="btn-mini btn-primary" onclick="editForm('${form.$id}','${type}')"><i class="fas fa-edit"></i> Edit</button>`;
+      } else if (status === "complete") {
+        actionBtn = `<button class="btn-mini btn-secondary" onclick="viewForm('${form.$id}','${type}')"><i class="fas fa-eye"></i> View</button>`;
+      } else {
+        actionBtn = `<button class="btn-mini btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">Not Created</button>`;
+      }
+      
       subformsHTML += `
         <div class="subform-row">
           <div class="subform-info">
@@ -520,56 +528,6 @@ function renderMyForms(forms) {
   });
 }
   
-function renderPublicForms(forms) {
-  const grid = document.getElementById("publicFormsGrid");
-  const loading = document.getElementById("publicFormsLoading");
-  const empty = document.getElementById("publicFormsEmpty");
-  
-  loading.style.display = "none";
-  grid.innerHTML = "";
-  if (forms.length === 0) {
-    empty.style.display = "block";
-    return;
-  }
-  empty.style.display = "none";
-  forms.forEach(form => {
-    const isSameCompany = form.customerCompany === userCompany;
-    const requestStatus = userRequests[form.$id]; 
-    const card = document.createElement("div");
-    card.className = "form-card public";
-    let actionButtons = '';
-    if (isSameCompany) {
-      actionButtons = `
-        <button class="btn btn-secondary" onclick="viewPostEvalWithNavigation('${form.$id}')"><i class="fas fa-eye"></i> Summary</button>
-        <button class="btn btn-outline" onclick="viewFormDirect('${form.$id}', 'pre_eval')"><i class="fas fa-clipboard-list"></i> Pre - Evaluation</button>
-        <button class="btn btn-outline" onclick="viewFormDirect('${form.$id}', 'eval')"><i class="fas fa-clipboard-list"></i> Evaluation</button>
-      `;
-    } else {
-      if (requestStatus === 'approved') {
-        actionButtons = `<button class="btn btn-secondary" onclick="viewApprovedForm('${form.$id}')"><i class="fas fa-eye"></i> View Form</button>`;
-      } else if (requestStatus === 'pending') {
-        actionButtons = `<button class="btn btn-primary" disabled style="cursor: not-allowed; opacity: 0.7; background: #ffc107; border-color: #ffc107; color: #000;"><i class="fas fa-clock"></i> Requested</button>`;
-      } else {
-        actionButtons = `<button class="btn btn-primary" onclick="requestAccess('${form.$id}')"><i class="fas fa-paper-plane"></i> Request Access</button>`;
-      }
-    }
-    card.innerHTML = `
-      <div class="form-header">
-        <div class="form-title">${form.prodname || 'Untitled'}</div>
-        <div class="form-user"><i class="fas fa-user"></i> ${form.username || 'Unknown User'}</div>
-      </div>
-      <div class="form-meta">
-        <div class="form-user"><i class="fas fa-cog"></i> ${form.productType || 'N/A'}</div>
-        <div class="form-user"><i class="fas fa-building"></i> ${form.customerCompany || 'N/A'}</div>
-        <div class="form-user"><i class="fas fa-tags"></i> ${form.postEvalData?.keyword || 'No keyword'}</div>
-        <div class="form-user"><i class="fas fa-calendar-check"></i> Completed ${formatDate(form.createDate)}</div>
-      </div>
-      <div class="form-actions">${actionButtons}</div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
 async function requestAccess(formId) {
   try {
     const form = allPublicForms.find(f => f.$id === formId);
@@ -722,6 +680,7 @@ document.addEventListener("DOMContentLoaded", loadForms);
 </body>
 
 </html>
+
 
 
 
