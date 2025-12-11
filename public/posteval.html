@@ -173,6 +173,26 @@
             </div>
         </div>
 
+            <div id="pendingModal" class="pending-modal">
+                <div class="pending-modal-content">
+                    <div class="pending-modal-header">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <h2>Pending Status Notice</h2>
+                    </div>
+                    <div class="pending-modal-body">
+                        <p><strong>Important:</strong> After 14 days (2 weeks), a reminder will be sent to your email if you don't update the pending information.</p>
+                        <p>Please make sure to complete this evaluation within the specified timeframe.</p>
+                    </div>
+                    <div class="pending-modal-footer">
+                        <button type="button" class="pending-modal-btn" onclick="acknowledgePending()">Okay, I Understand</button>
+                    </div>
+                </div>
+            </div>
+
         <div class="form-actions">
             <button type="button" id="preEvalBtn" class="btn btn-secondary" onclick="viewPreEval()" style="display: none;">
                 <i class="fas fa-clipboard-list"></i> View Pre-Evaluation Form
@@ -1127,10 +1147,3 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
-
-
-
-
-
-
-
