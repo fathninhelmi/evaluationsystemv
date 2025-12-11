@@ -940,10 +940,11 @@ function setViewMode() {
     const submitBtn = document.querySelector('button[type="submit"]');
     const saveProgressBtn = document.querySelector('.draft-btn');
     const dropBtn = document.querySelector('.btn-danger');
-    
-    formTitle.textContent = `Post Evaluation Form (View Only)`;
-    
-    // Disable all inputs and buttons except back button
+    if (currentStatus === "drop") {
+        formTitle.textContent = `Post Evaluation Form (Dropped)`;
+    } else {
+        formTitle.textContent = `Post Evaluation Form (View Only)`;
+    }
     document.querySelectorAll('input, textarea, select').forEach(el => {
         el.disabled = true;
         el.style.backgroundColor = '#e0e0e0';
@@ -970,6 +971,7 @@ function setViewMode() {
     if (saveProgressBtn) saveProgressBtn.style.display = 'none';
     if (dropBtn) dropBtn.style.display = 'none';
 }
+    
 async function dropForm() {
     if (!confirm("Are you sure you want to drop this form? This will mark the form as dropped and it will become view-only.")) {
         return;
@@ -1043,7 +1045,12 @@ function updateFormDisplay() {
     statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
 
     if (viewMode || currentStatus === "drop") { 
-        formTitle.textContent = currentStatus === "drop" ? "Post Evaluation Form (Dropped)" : "Post Evaluation Form (View Mode)";
+        if (currentStatus === "drop") {
+            formTitle.textContent = "Post Evaluation Form (Dropped)";
+        } else {
+            formTitle.textContent = "Post Evaluation Form (View Only)";
+        }
+        
         document.querySelectorAll('input, select, button:not(.btn-secondary):not(.back-icon-btn)').forEach(el => el.disabled = true);
         if (submitBtn) submitBtn.style.display = 'none';
         if (saveBtn) saveBtn.style.display = 'none';
@@ -1057,7 +1064,7 @@ function updateFormDisplay() {
 }
 
 function goBack() {
-  window.location.href = `detail.html?id=${eventId}`;
+  window.history.back();
 }
 
 document.getElementById("postEvalForm").addEventListener("submit", e => {
@@ -1074,6 +1081,7 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
 
