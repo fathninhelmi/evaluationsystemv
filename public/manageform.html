@@ -102,27 +102,6 @@ function getCategoryLabel(type, value) {
   return option ? option.label : value;
 }
 
-function updateCategoryOptions() {
-  const productType = document.getElementById("editType").value;
-  const categoryGroup = document.getElementById("editCategoryGroup");
-  const categorySelect = document.getElementById("editCategory");
-  
-  if (productCategoryOptions[productType]) {
-    categoryGroup.style.display = "block";
-    categorySelect.innerHTML = '<option value="">Select Category</option>';
-    
-    productCategoryOptions[productType].forEach(option => {
-      const optionEl = document.createElement("option");
-      optionEl.value = option.value;
-      optionEl.textContent = option.label;
-      categorySelect.appendChild(optionEl);
-    });
-  } else {
-    categoryGroup.style.display = "none";
-    categorySelect.innerHTML = '<option value="">Select Category</option>';
-  }
-}
-
 function editForm(formId) {
   const form = forms.find(f => f.id === formId);
   if (!form) return;
@@ -375,5 +354,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
