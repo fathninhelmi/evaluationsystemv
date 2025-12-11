@@ -133,6 +133,37 @@ const account = new Account(client);
         try { evalDoc = await databases.getDocument(databaseId, evalCollectionId, doc.$id); evalStatus = evalDoc.status || "draft"; } catch {}
         try { postDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.$id); postStatus = postDoc.status || "draft"; } catch {}
 
+        const hasDropStatus = preStatus === "drop" || evalStatus === "drop" || postStatus === "drop";
+        
+        if (hasDropStatus) {
+          try {
+            if (preDoc && preStatus !== "drop") {
+              await databases.updateDocument(databaseId, preEvalCollectionId, doc.$id, { status: "drop" });
+              preStatus = "drop";
+            }
+          } catch (err) {
+            console.log("Pre-eval doc doesn't exist or couldn't update:", err);
+          }
+          
+          try {
+            if (evalDoc && evalStatus !== "drop") {
+              await databases.updateDocument(databaseId, evalCollectionId, doc.$id, { status: "drop" });
+              evalStatus = "drop";
+            }
+          } catch (err) {
+            console.log("Eval doc doesn't exist or couldn't update:", err);
+          }
+          
+          try {
+            if (postDoc && postStatus !== "drop") {
+              await databases.updateDocument(databaseId, postEvalCollectionId, doc.$id, { status: "drop" });
+              postStatus = "drop";
+            }
+          } catch (err) {
+            console.log("Post-eval doc doesn't exist or couldn't update:", err);
+          }
+        }
+
         let evalDate;
         if (preDoc && preDoc.evalDate) {
           evalDate = new Date(preDoc.evalDate);
@@ -219,3 +250,4 @@ const account = new Account(client);
 </body>
 
 </html>
+
