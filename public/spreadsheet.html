@@ -70,11 +70,12 @@ const account = new Account(client);
     let text = "Draft";
     if(status === "progress") text = "In Progress";
     else if(status === "complete") text = "Complete";
+    else if(status === "drop") text = "Drop";
     return `<span class="status-badge ${status}">${text}</span>`;
   }
 
   function getOpenButton(status, link) {
-    if(status === "complete" || status === "draft") {
+    if(status === "complete" || status === "draft" ||status === "drop") {
         const viewParam = link.includes('?') ? '&mode=view' : '?mode=view';
         return `<a href="${link}${viewParam}" class="open-btn enabled">View</a>`;
     }
@@ -218,9 +219,3 @@ const account = new Account(client);
 </body>
 
 </html>
-
-
-
-
-
-
