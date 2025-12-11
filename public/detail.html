@@ -108,7 +108,11 @@ function formatDate(dateStr) {
 }
 
 function goBack() { 
-    window.history.back();
+    if (fromPage === 'manager') {
+        window.location.href = 'spreadsheet.html';
+    } else {
+        window.location.href = 'createform.html';
+    }
 }
 
 async function goToStep(page, eventId, isViewMode = false) {
@@ -189,6 +193,7 @@ loadEvent();
 </body>
 
 </html>
+
 
 
 
