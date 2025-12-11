@@ -3751,6 +3751,12 @@ label {
   border-color: #2a9d8f;
 }
 
+.status-badge-small.drop {
+  background: rgba(150, 150, 150, 0.25);
+  color: #A0A0A0;
+  border-color: #A0A0A0;
+}
+
 /* Button Styling */
 .btn-mini {
   padding: 6px 14px;
@@ -4584,5 +4590,6 @@ label {
 .back-icon-btn:active {
     transform: scale(0.95);
 }
+
 
 
