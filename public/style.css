@@ -1671,11 +1671,11 @@ textarea::placeholder {
 /* Edit buttons in manage forms table */
 #formsTable .open-btn {
   display: inline-block;
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 5px 15px;
+  border-radius: 5px;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 400;
   transition: all 0.3s ease;
   margin-top: 8px;
 }
@@ -1686,7 +1686,7 @@ textarea::placeholder {
 
 #formsTable .open-btn.enabled:hover {
   background: #2980b9;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(52, 152, 219, 0.5);
 }
 
@@ -4619,6 +4619,7 @@ label {
 .back-icon-btn:active {
     transform: scale(0.95);
 }
+
 
 
 
