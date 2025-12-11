@@ -647,9 +647,9 @@ function setViewMode() {
     const saveProgressBtn = document.querySelector('.draft-btn');
     const dropBtn = document.querySelector('.btn-danger');
     if (currentStatus === "drop") {
-        formTitle.textContent = `Post Evaluation Form (Dropped)`;
+        formTitle.textContent = `Pre Evaluation Form (Dropped)`;
     } else {
-        formTitle.textContent = `Post Evaluation Form (View Only)`;
+        formTitle.textContent = `Pre Evaluation Form (View Only)`;
     }
     document.querySelectorAll('input, textarea, select').forEach(el => {
         el.disabled = true;
@@ -749,9 +749,9 @@ function updateFormDisplay() {
 
     if (viewMode || currentStatus === "drop") { 
         if (currentStatus === "drop") {
-            formTitle.textContent = "Post Evaluation Form (Dropped)";
+            formTitle.textContent = "Pre Evaluation Form (Dropped)";
         } else {
-            formTitle.textContent = "Post Evaluation Form (View Only)";
+            formTitle.textContent = "Pre Evaluation Form (View Only)";
         }
         
         document.querySelectorAll('input, select, button:not(.btn-secondary):not(.back-icon-btn)').forEach(el => el.disabled = true);
@@ -759,7 +759,7 @@ function updateFormDisplay() {
         if (saveBtn) saveBtn.style.display = 'none';
         if (dropBtn) dropBtn.style.display = 'none'; 
     } else {
-        formTitle.textContent = "Post Evaluation Form";
+        formTitle.textContent = "Pre Evaluation Form";
         if (currentStatus === "complete" && submitBtn) {
             submitBtn.style.display = 'none';
         }
@@ -1031,6 +1031,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
 
 
