@@ -50,12 +50,50 @@
     <!-- Configuration Section -->
     <div class="reminder-config-section">
         <h3>⚙️ Configuration</h3>
+        
         <div class="reminder-form-group">
             <label for="emailService">Email Service:</label>
             <select id="emailService">
-                <option value="console">Console Log (Testing)</option>
-                <option value="mailto">Open Email Client</option>
+                <option value="appwrite">Appwrite Messaging (Automatic)</option>
+                <option value="console">Console Log (Testing Only)</option>
+                <option value="mailto">Open Email Client (Manual)</option>
             </select>
+        </div>
+
+        <div class="reminder-form-group" id="providerIdGroup">
+            <label for="providerId">
+                Appwrite Email Provider ID: 
+                <small style="color: #999;">(Required for Appwrite Messaging)</small>
+            </label>
+            <input 
+                type="text" 
+                id="providerId" 
+                placeholder="e.g., 6123456789abcdef1234"
+                style="font-family: monospace;"
+            >
+            <small style="color: #666; display: block; margin-top: 5px;">
+                📝 Get this from: Appwrite Console → Messaging → Your Provider → Copy ID
+            </small>
+        </div>
+
+        <div class="reminder-alert reminder-alert-info" style="margin-top: 10px; font-size: 0.9em;">
+            <strong>💡 How to Setup Professional "No-Reply" Emails:</strong>
+            <ol style="margin: 10px 0 0 20px; line-height: 1.8;">
+                <li><strong>Sign up for SendGrid</strong> (free, no credit card): <a href="https://sendgrid.com" target="_blank" style="color: #667eea;">sendgrid.com</a></li>
+                <li><strong>Create API Key:</strong> Settings → API Keys → Create (Full Access)</li>
+                <li><strong>In Appwrite Console:</strong> Messaging → Create Provider → SendGrid
+                    <ul style="margin-top: 5px; font-size: 0.95em;">
+                        <li>API Key: (paste your SendGrid key)</li>
+                        <li>From Email: (SendGrid verified sender)</li>
+                        <li>From Name: <code>Evaluation System - No Reply</code></li>
+                    </ul>
+                </li>
+                <li><strong>Copy Provider ID</strong> from Appwrite and paste above</li>
+                <li>Click "Check & Send Reminders" - emails send automatically! 🚀</li>
+            </ol>
+            <p style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+                <strong>📧 Result:</strong> Recipients will see emails from <strong>"Evaluation System - No Reply"</strong> instead of your personal email!
+            </p>
         </div>
     </div>
 
@@ -92,6 +130,7 @@
 
     const databases = new Appwrite.Databases(client);
     const account = new Appwrite.Account(client);
+    const messaging = new Appwrite.Messaging(client);
 
     const databaseId = "68ba8a9c001f17064e15";
     const postEvalCollectionId = "68bf9d62002b4f5f7f23";
@@ -99,6 +138,27 @@
 
     let autoCheckInterval = null;
     let emailsSentCount = 0;
+
+    // Load saved provider ID
+    const savedProviderId = localStorage.getItem('emailProviderId');
+    if (savedProviderId) {
+        document.getElementById('providerId').value = savedProviderId;
+    }
+
+    // Save provider ID when changed
+    document.getElementById('providerId').addEventListener('change', function() {
+        localStorage.setItem('emailProviderId', this.value);
+    });
+
+    // Show/hide provider ID field based on email service
+    document.getElementById('emailService').addEventListener('change', function() {
+        const providerGroup = document.getElementById('providerIdGroup');
+        if (this.value === 'appwrite') {
+            providerGroup.style.display = 'block';
+        } else {
+            providerGroup.style.display = 'none';
+        }
+    });
 
     // Logout functionality
     document.getElementById('logoutBtn').addEventListener('click', async (e) => {
@@ -135,12 +195,12 @@
         const alertContainer = document.getElementById('alertContainer');
         const alert = document.createElement('div');
         alert.className = `reminder-alert reminder-alert-${type}`;
-        alert.textContent = message;
+        alert.innerHTML = message;
         alertContainer.appendChild(alert);
         
         setTimeout(() => {
             alert.remove();
-        }, 5000);
+        }, 8000);
     }
 
     function updateStats(totalPending, dueCount) {
@@ -149,8 +209,53 @@
         document.getElementById('emailsSent').textContent = emailsSentCount;
     }
 
+    async function sendEmailViaAppwrite(recipientEmail, subject, body, userName, projectName) {
+        const providerId = document.getElementById('providerId').value.trim();
+        
+        if (!providerId) {
+            throw new Error('Provider ID is required for Appwrite Messaging. Please enter it in the configuration section.');
+        }
+
+        try {
+            // Create email message using Appwrite Messaging
+            const response = await messaging.createEmail(
+                Appwrite.ID.unique(),
+                subject,
+                body,
+                [], // topics (not used)
+                [], // users (not used)
+                [recipientEmail], // targets (recipient emails)
+                [], // cc
+                [], // bcc
+                [], // attachments
+                false, // draft
+                true, // html (set to false for plain text)
+                undefined, // scheduledAt
+                providerId // the provider ID
+            );
+
+            addLog(`✅ Email sent via Appwrite to ${userName} (${recipientEmail}) - Project: ${projectName}`, 'success');
+            return true;
+        } catch (error) {
+            console.error('Appwrite email error:', error);
+            addLog(`❌ Failed to send email via Appwrite: ${error.message}`, 'error');
+            throw error;
+        }
+    }
+
     async function checkAndSendReminders() {
         const checkBtn = document.getElementById('checkBtn');
+        const emailService = document.getElementById('emailService').value;
+        
+        // Validate Appwrite setup
+        if (emailService === 'appwrite') {
+            const providerId = document.getElementById('providerId').value.trim();
+            if (!providerId) {
+                showAlert('<strong>⚠️ Configuration Required:</strong><br>Please enter your Appwrite Email Provider ID in the configuration section above.', 'warning');
+                return;
+            }
+        }
+
         checkBtn.disabled = true;
         checkBtn.textContent = 'Checking...';
         
@@ -189,24 +294,37 @@
             if (duePendings.length === 0) {
                 statusMessage.textContent = 'No reminders due at this time.';
                 addLog('No reminders due', 'success');
-                showAlert('No reminders due at this time', 'info');
+                showAlert('✅ No reminders due at this time', 'info');
             } else {
                 statusMessage.textContent = `Sending ${duePendings.length} reminder(s)...`;
                 addLog(`${duePendings.length} reminder(s) are due`, 'info');
                 
+                let successCount = 0;
+                let failCount = 0;
+
                 for (const pending of duePendings) {
-                    await sendReminder(pending);
+                    const result = await sendReminder(pending);
+                    if (result) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
                 }
 
-                statusMessage.textContent = `Successfully sent ${duePendings.length} reminder(s)!`;
-                showAlert(`Sent ${duePendings.length} reminder(s) successfully!`, 'success');
+                statusMessage.textContent = `Completed! Sent: ${successCount}, Failed: ${failCount}`;
+                
+                if (failCount > 0) {
+                    showAlert(`⚠️ Sent ${successCount} reminder(s), but ${failCount} failed. Check the activity log for details.`, 'warning');
+                } else {
+                    showAlert(`✅ Successfully sent ${successCount} reminder(s)!`, 'success');
+                }
             }
 
         } catch (error) {
             console.error('Error checking reminders:', error);
             statusMessage.textContent = 'Error checking reminders';
             addLog(`Error: ${error.message}`, 'error');
-            showAlert('Error checking reminders: ' + error.message, 'warning');
+            showAlert('❌ Error checking reminders: ' + error.message, 'warning');
         } finally {
             checkBtn.disabled = false;
             checkBtn.textContent = 'Check & Send Reminders';
@@ -215,6 +333,7 @@
 
     async function sendReminder(pendingDoc) {
         try {
+            // Double-check the status hasn't changed
             const currentDoc = await databases.getDocument(
                 databaseId,
                 postEvalCollectionId,
@@ -223,9 +342,10 @@
             
             if (currentDoc.result !== 'pending') {
                 addLog(`Skipped: ${pendingDoc.$id} status changed to ${currentDoc.result}`, 'info');
-                return;
+                return false;
             }
 
+            // Get main document for user details
             const mainDoc = await databases.getDocument(
                 databaseId,
                 mainCollectionId,
@@ -255,12 +375,15 @@ Thank you for your attention.
 Best & Regards,
 Evaluation System Team`;
 
-            if (emailService === 'mailto') {
+            // Send email based on selected service
+            if (emailService === 'appwrite') {
+                await sendEmailViaAppwrite(email, subject, body, userName, projectName);
+            } else if (emailService === 'mailto') {
                 const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 window.open(mailtoLink, '_blank');
-                
-                addLog(`Opened email client for ${userName} (${email}) - Project: ${projectName}`, 'success');
+                addLog(`📧 Opened email client for ${userName} (${email}) - Project: ${projectName}`, 'info');
             } else {
+                // Console log
                 console.log('=== REMINDER EMAIL ===');
                 console.log('To:', email);
                 console.log('User:', userName);
@@ -271,7 +394,7 @@ Evaluation System Team`;
                 console.log('Body:', body);
                 console.log('=====================');
                 
-                addLog(`[CONSOLE] Reminder logged for ${userName} (${email}) - Project: ${projectName} (${customerName})`, 'success');
+                addLog(`📝 [CONSOLE] Reminder logged for ${userName} (${email}) - Project: ${projectName}`, 'info');
             }
 
             emailsSentCount++;
@@ -293,31 +416,33 @@ Evaluation System Team`;
                 }
             );
 
-            addLog(`Reminder sent and rescheduled to ${newReminderDate.toLocaleDateString()} for ${userName}`, 'success');
+            addLog(`📅 Reminder rescheduled to ${newReminderDate.toLocaleDateString()} for ${userName}`, 'success');
+            return true;
 
         } catch (error) {
             console.error('Error sending reminder:', error);
-            addLog(`Failed to send reminder: ${error.message}`, 'error');
+            addLog(`❌ Failed to send reminder: ${error.message}`, 'error');
+            return false;
         }
     }
 
     document.getElementById('autoCheck').addEventListener('change', function() {
         if (this.checked) {
-            addLog('Auto-check enabled (every 5 minutes)', 'info');
+            addLog('🔄 Auto-check enabled (every 5 minutes)', 'info');
             autoCheckInterval = setInterval(checkAndSendReminders, 5 * 60 * 1000);
-            showAlert('Auto-check enabled - will check every 5 minutes', 'success');
+            showAlert('✅ Auto-check enabled - will check every 5 minutes', 'success');
         } else {
-            addLog('Auto-check disabled', 'info');
+            addLog('⏸️ Auto-check disabled', 'info');
             if (autoCheckInterval) {
                 clearInterval(autoCheckInterval);
                 autoCheckInterval = null;
             }
-            showAlert('Auto-check disabled', 'info');
+            showAlert('ℹ️ Auto-check disabled', 'info');
         }
     });
 
     // Initialize
-    addLog('System initialized and ready', 'success');
+    addLog('🚀 System initialized and ready', 'success');
 </script>
 
 </body>
