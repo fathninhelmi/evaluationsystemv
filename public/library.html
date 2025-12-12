@@ -227,6 +227,7 @@ function loadNavigation(role) {
             <a href="manageform.html" class="nav-link">Manage Forms</a>
             <a href="referencecust.html" class="nav-link">References Details</a>
             <a href="library.html" class="nav-link active">Library</a>
+            <a href="reminder.html" class="nav-link">Reminder</a>
             <a href="#" class="nav-link" id="logoutBtn">Logout</a>
         `;
     } else if (role === 'manager') {
@@ -236,6 +237,13 @@ function loadNavigation(role) {
             <a href="request.html" class="nav-link">Requested Form</a>
             <a href="library.html" class="nav-link active">Library</a>
             <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+        `;
+    } else {
+        navHTML = `
+            <a href="staff.html" class="nav-link">Home</a>
+            <a href="createform.html" class="nav-link active">Create Form</a>
+            <a href="notifications.html" class="nav-link">Notifications</a>
+            <a href="index.html" class="nav-link" id="logoutBtn">Logout</a>
         `;
     }
     
@@ -1121,4 +1129,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </footer>
 </body>
 </html>
-
