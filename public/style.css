@@ -27,6 +27,11 @@ body {
   gap: 40px;
 }
 
+.required-asterisk {
+    color: red;
+    margin-left: 2px;
+}
+
 .search-bar-wrapper {
   display: flex;
   justify-content: center; 
@@ -4941,3 +4946,4 @@ label {
   border-radius: 6px;
   font-size: 0.95em;
 }
+
