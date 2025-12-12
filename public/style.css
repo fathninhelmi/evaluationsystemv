@@ -4710,3 +4710,234 @@ label {
 .pending-modal-btn:active {
     transform: scale(0.98);
 }
+
+@media (max-width: 480px) {
+  .modal-content-upload {
+    padding: 20px;
+  }
+  
+  .modal-content-upload h2 {
+    font-size: 20px;
+  }
+  
+  .stat-number {
+    font-size: 24px;
+  }
+  
+  .result-stat {
+    padding: 12px;
+  }
+}
+
+/* Reminder System Styles */
+.reminder-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  max-width: 800px;
+  width: 100%;
+  padding: 40px;
+  margin: 100px auto;
+}
+
+.reminder-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.reminder-header h1 {
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.reminder-header p {
+  color: #666;
+  font-size: 0.95em;
+}
+
+.reminder-status-box {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.reminder-status-box h3 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+}
+
+.reminder-status-box p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.reminder-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.reminder-stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.reminder-stat-card .number {
+  font-size: 2.5em;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.reminder-stat-card .label {
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+.reminder-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.reminder-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.reminder-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.reminder-log-container {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.reminder-log-container h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+}
+
+.reminder-log-entry {
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  border-left: 3px solid #667eea;
+  font-size: 0.9em;
+}
+
+.reminder-log-entry.success {
+  border-left-color: #28a745;
+}
+
+.reminder-log-entry.error {
+  border-left-color: #dc3545;
+}
+
+.reminder-log-entry.info {
+  border-left-color: #17a2b8;
+}
+
+.reminder-log-entry .timestamp {
+  color: #999;
+  font-size: 0.85em;
+  margin-bottom: 5px;
+}
+
+.reminder-log-entry .message {
+  color: #333;
+}
+
+.reminder-alert {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.reminder-alert-info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.reminder-alert-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.reminder-alert-warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.reminder-spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: reminderSpin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes reminderSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.reminder-config-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.reminder-config-section h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.reminder-form-group {
+  margin-bottom: 15px;
+}
+
+.reminder-form-group label {
+  display: block;
+  color: #333;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.reminder-form-group input, 
+.reminder-form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95em;
+}
