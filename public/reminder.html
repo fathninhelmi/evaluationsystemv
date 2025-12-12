@@ -64,15 +64,6 @@
     <button class="reminder-btn" id="checkBtn" onclick="checkAndSendReminders()">
         Check & Send Reminders
     </button>
-
-    <!-- Auto-check toggle -->
-    <div style="margin-top: 15px; text-align: center;">
-        <label style="cursor: pointer; color: #666;">
-            <input type="checkbox" id="autoCheck" style="margin-right: 8px;">
-            Auto-check every 5 minutes
-        </label>
-    </div>
-
 <script>
     const client = new Appwrite.Client()
         .setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -278,21 +269,6 @@ Evaluation System Team`;
             addLog(`Failed to send reminder: ${error.message}`, 'error');
         }
     }
-
-    document.getElementById('autoCheck').addEventListener('change', function() {
-        if (this.checked) {
-            addLog('Auto-check enabled (every 5 minutes)', 'info');
-            autoCheckInterval = setInterval(checkAndSendReminders, 5 * 60 * 1000);
-            showAlert('Auto-check enabled - will check every 5 minutes', 'success');
-        } else {
-            addLog('Auto-check disabled', 'info');
-            if (autoCheckInterval) {
-                clearInterval(autoCheckInterval);
-                autoCheckInterval = null;
-            }
-            showAlert('Auto-check disabled', 'info');
-        }
-    });
 </script>
 
 </body>
