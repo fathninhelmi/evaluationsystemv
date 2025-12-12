@@ -25,8 +25,7 @@
 
 <div class="reminder-container">
     <div class="reminder-header">
-        <h1>📧 Automated Reminder System</h1>
-        <p>Manage and send reminder emails for pending evaluations</p>
+        <h1>Automated Email Reminder System</h1>
     </div>
 
     <div id="alertContainer"></div>
@@ -41,13 +40,9 @@
             <div class="number" id="dueReminders">0</div>
             <div class="label">Due Reminders</div>
         </div>
-        <div class="reminder-stat-card">
-            <div class="number" id="emailsSent">0</div>
-            <div class="label">Emails Sent</div>
-        </div>
     </div>
 
-    <!-- Configuration Section -->
+        <!-- Configuration Section -->
     <div class="reminder-config-section">
         <h3>⚙️ Configuration</h3>
         <div class="reminder-form-group">
@@ -61,7 +56,7 @@
 
     <!-- Status Box -->
     <div class="reminder-status-box">
-        <h3>📊 System Status</h3>
+        <h3>System Status</h3>
         <p id="statusMessage">Ready to check for pending reminders...</p>
     </div>
 
@@ -78,13 +73,6 @@
         </label>
     </div>
 
-    <!-- Log Container -->
-    <div class="reminder-log-container">
-        <h3>📝 Activity Log</h3>
-        <div id="logEntries"></div>
-    </div>
-</div>
-
 <script>
     const client = new Appwrite.Client()
         .setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -100,7 +88,6 @@
     let autoCheckInterval = null;
     let emailsSentCount = 0;
 
-    // Logout functionality
     document.getElementById('logoutBtn').addEventListener('click', async (e) => {
         e.preventDefault();
         try {
@@ -146,7 +133,6 @@
     function updateStats(totalPending, dueCount) {
         document.getElementById('totalPending').textContent = totalPending;
         document.getElementById('dueReminders').textContent = dueCount;
-        document.getElementById('emailsSent').textContent = emailsSentCount;
     }
 
     async function checkAndSendReminders() {
@@ -273,14 +259,6 @@ Evaluation System Team`;
                 
                 addLog(`[CONSOLE] Reminder logged for ${userName} (${email}) - Project: ${projectName} (${customerName})`, 'success');
             }
-
-            emailsSentCount++;
-            updateStats(
-                parseInt(document.getElementById('totalPending').textContent),
-                parseInt(document.getElementById('dueReminders').textContent)
-            );
-
-            // Update reminder date to 14 days from now
             const newReminderDate = new Date();
             newReminderDate.setDate(newReminderDate.getDate() + 14);
             
@@ -315,9 +293,6 @@ Evaluation System Team`;
             showAlert('Auto-check disabled', 'info');
         }
     });
-
-    // Initialize
-    addLog('System initialized and ready', 'success');
 </script>
 
 </body>
