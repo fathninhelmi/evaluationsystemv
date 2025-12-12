@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manage Forms</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<title>Reminder Email System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
@@ -22,190 +22,228 @@
         <a href="#" class="nav-link" id="logoutBtn">Logout</a>
     </nav>
 </header>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>📧 Automated Reminder System</h1>
+
+<div class="reminder-container">
+    <div class="reminder-header">
+        <h1>📧 Automated Reminder System</h1>
+        <p>Manage and send reminder emails for pending evaluations</p>
+    </div>
+
+    <div id="alertContainer"></div>
+
+    <!-- Statistics -->
+    <div class="reminder-stats">
+        <div class="reminder-stat-card">
+            <div class="number" id="totalPending">0</div>
+            <div class="label">Total Pending</div>
         </div>
-
-        <div id="alertContainer"></div>
-
-        <!-- Statistics -->
-        <div class="stats">
-            <div class="stat-card">
-                <div class="number" id="totalPending">0</div>
-                <div class="label">Total Pending</div>
-            </div>
-            <div class="stat-card">
-                <div class="number" id="dueReminders">0</div>
-                <div class="label">Due Reminders</div>
-            </div>
+        <div class="reminder-stat-card">
+            <div class="number" id="dueReminders">0</div>
+            <div class="label">Due Reminders</div>
         </div>
-
-        <!-- Status Box -->
-        <div class="status-box">
-            <h3>📊 System Status</h3>
-            <p id="statusMessage">Ready to check for pending reminders...</p>
-        </div>
-
-        <!-- Action Button -->
-        <button class="btn" id="checkBtn" onclick="checkAndSendReminders()">
-            Check & Send Reminders
-        </button>
-
-        <!-- Auto-check toggle -->
-        <div style="margin-top: 15px; text-align: center;">
-            <label style="cursor: pointer; color: #666;">
-                <input type="checkbox" id="autoCheck" style="margin-right: 8px;">
-                Auto-check every 5 minutes
-            </label>
+        <div class="reminder-stat-card">
+            <div class="number" id="emailsSent">0</div>
+            <div class="label">Emails Sent</div>
         </div>
     </div>
 
-    <script>
-        const client = new Appwrite.Client()
-            .setEndpoint("https://fra.cloud.appwrite.io/v1")
-            .setProject("68ddd7de00255d4f5c96");
+    <!-- Configuration Section -->
+    <div class="reminder-config-section">
+        <h3>⚙️ Configuration</h3>
+        <div class="reminder-form-group">
+            <label for="emailService">Email Service:</label>
+            <select id="emailService">
+                <option value="console">Console Log (Testing)</option>
+                <option value="mailto">Open Email Client</option>
+            </select>
+        </div>
+    </div>
 
-        const databases = new Appwrite.Databases(client);
-        const account = new Appwrite.Account(client);
+    <!-- Status Box -->
+    <div class="reminder-status-box">
+        <h3>📊 System Status</h3>
+        <p id="statusMessage">Ready to check for pending reminders...</p>
+    </div>
 
-        const databaseId = "68ba8a9c001f17064e15";
-        const postEvalCollectionId = "68bf9d62002b4f5f7f23";
-        const mainCollectionId = "68ba918c0022d2b9a429";
+    <!-- Action Button -->
+    <button class="reminder-btn" id="checkBtn" onclick="checkAndSendReminders()">
+        Check & Send Reminders
+    </button>
 
-        let autoCheckInterval = null;
-        let emailsSentCount = 0;
+    <!-- Auto-check toggle -->
+    <div style="margin-top: 15px; text-align: center;">
+        <label style="cursor: pointer; color: #666;">
+            <input type="checkbox" id="autoCheck" style="margin-right: 8px;">
+            Auto-check every 5 minutes
+        </label>
+    </div>
 
-        function addLog(message, type = 'info') {
-            const logEntries = document.getElementById('logEntries');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
+    <!-- Log Container -->
+    <div class="reminder-log-container">
+        <h3>📝 Activity Log</h3>
+        <div id="logEntries"></div>
+    </div>
+</div>
+
+<script>
+    const client = new Appwrite.Client()
+        .setEndpoint("https://fra.cloud.appwrite.io/v1")
+        .setProject("68ddd7de00255d4f5c96");
+
+    const databases = new Appwrite.Databases(client);
+    const account = new Appwrite.Account(client);
+
+    const databaseId = "68ba8a9c001f17064e15";
+    const postEvalCollectionId = "68bf9d62002b4f5f7f23";
+    const mainCollectionId = "68ba918c0022d2b9a429";
+
+    let autoCheckInterval = null;
+    let emailsSentCount = 0;
+
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+            await account.deleteSession('current');
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = 'login.html';
+        }
+    });
+
+    function addLog(message, type = 'info') {
+        const logEntries = document.getElementById('logEntries');
+        const entry = document.createElement('div');
+        entry.className = `reminder-log-entry ${type}`;
+        
+        const now = new Date();
+        const timestamp = now.toLocaleString();
+        
+        entry.innerHTML = `
+            <div class="timestamp">${timestamp}</div>
+            <div class="message">${message}</div>
+        `;
+        
+        logEntries.insertBefore(entry, logEntries.firstChild);
+        while (logEntries.children.length > 50) {
+            logEntries.removeChild(logEntries.lastChild);
+        }
+    }
+
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alert = document.createElement('div');
+        alert.className = `reminder-alert reminder-alert-${type}`;
+        alert.textContent = message;
+        alertContainer.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
+    }
+
+    function updateStats(totalPending, dueCount) {
+        document.getElementById('totalPending').textContent = totalPending;
+        document.getElementById('dueReminders').textContent = dueCount;
+        document.getElementById('emailsSent').textContent = emailsSentCount;
+    }
+
+    async function checkAndSendReminders() {
+        const checkBtn = document.getElementById('checkBtn');
+        checkBtn.disabled = true;
+        checkBtn.textContent = 'Checking...';
+        
+        const statusMessage = document.getElementById('statusMessage');
+        statusMessage.textContent = 'Checking for pending evaluations...';
+        
+        addLog('Starting reminder check...', 'info');
+
+        try {
+            const { Query } = Appwrite;
+            const response = await databases.listDocuments(
+                databaseId,
+                postEvalCollectionId,
+                [
+                    Query.equal('result', 'pending'),
+                    Query.isNotNull('reminderDate'),
+                    Query.limit(100)
+                ]
+            );
+
+            addLog(`Found ${response.documents.length} pending evaluations`, 'info');
             
             const now = new Date();
-            const timestamp = now.toLocaleString();
-            
-            entry.innerHTML = `
-                <div class="timestamp">${timestamp}</div>
-                <div class="message">${message}</div>
-            `;
-            
-            logEntries.insertBefore(entry, logEntries.firstChild);
-            while (logEntries.children.length > 50) {
-                logEntries.removeChild(logEntries.lastChild);
+            const duePendings = [];
+            for (const doc of response.documents) {
+                if (doc.reminderDate) {
+                    const reminderDate = new Date(doc.reminderDate);
+                    if (reminderDate <= now) {
+                        duePendings.push(doc);
+                    }
+                }
             }
-        }
 
-        function showAlert(message, type) {
-            const alertContainer = document.getElementById('alertContainer');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            alertContainer.appendChild(alert);
+            updateStats(response.documents.length, duePendings.length);
             
-            setTimeout(() => {
-                alert.remove();
-            }, 5000);
-        }
-
-        function updateStats(totalPending, dueCount) {
-            document.getElementById('totalPending').textContent = totalPending;
-            document.getElementById('dueReminders').textContent = dueCount;
-            document.getElementById('emailsSent').textContent = emailsSentCount;
-        }
-
-        async function checkAndSendReminders() {
-            const checkBtn = document.getElementById('checkBtn');
-            checkBtn.disabled = true;
-            checkBtn.textContent = 'Checking...';
-            
-            const statusMessage = document.getElementById('statusMessage');
-            statusMessage.textContent = 'Checking for pending evaluations...';
-            
-            addLog('Starting reminder check...', 'info');
-
-            try {
-                const { Query } = Appwrite;
-                const response = await databases.listDocuments(
-                    databaseId,
-                    postEvalCollectionId,
-                    [
-                        Query.equal('result', 'pending'),
-                        Query.isNotNull('reminderDate'),
-                        Query.limit(100)
-                    ]
-                );
-
-                addLog(`Found ${response.documents.length} pending evaluations`, 'info');
+            if (duePendings.length === 0) {
+                statusMessage.textContent = 'No reminders due at this time.';
+                addLog('No reminders due', 'success');
+                showAlert('No reminders due at this time', 'info');
+            } else {
+                statusMessage.textContent = `Sending ${duePendings.length} reminder(s)...`;
+                addLog(`${duePendings.length} reminder(s) are due`, 'info');
                 
-                const now = new Date();
-                const duePendings = [];
-                for (const doc of response.documents) {
-                    if (doc.reminderDate) {
-                        const reminderDate = new Date(doc.reminderDate);
-                        if (reminderDate <= now) {
-                            duePendings.push(doc);
-                        }
-                    }
+                for (const pending of duePendings) {
+                    await sendReminder(pending);
                 }
 
-                updateStats(response.documents.length, duePendings.length);
-                if (duePendings.length === 0) {
-                    statusMessage.textContent = 'No reminders due at this time.';
-                    addLog('No reminders due', 'success');
-                    showAlert('No reminders due at this time', 'info');
-                } else {
-                    statusMessage.textContent = `Sending ${duePendings.length} reminder(s)...`;
-                    addLog(`${duePendings.length} reminder(s) are due`, 'info');
-                    for (const pending of duePendings) {
-                        await sendReminder(pending);
-                    }
-
-                    statusMessage.textContent = `Successfully sent ${duePendings.length} reminder(s)!`;
-                    showAlert(`Sent ${duePendings.length} reminder(s) successfully!`, 'success');
-                }
-
-            } catch (error) {
-                console.error('Error checking reminders:', error);
-                statusMessage.textContent = 'Error checking reminders';
-                addLog(`Error: ${error.message}`, 'error');
-                showAlert('Error checking reminders: ' + error.message, 'warning');
-            } finally {
-                checkBtn.disabled = false;
-                checkBtn.textContent = 'Check & Send Reminders';
+                statusMessage.textContent = `Successfully sent ${duePendings.length} reminder(s)!`;
+                showAlert(`Sent ${duePendings.length} reminder(s) successfully!`, 'success');
             }
+
+        } catch (error) {
+            console.error('Error checking reminders:', error);
+            statusMessage.textContent = 'Error checking reminders';
+            addLog(`Error: ${error.message}`, 'error');
+            showAlert('Error checking reminders: ' + error.message, 'warning');
+        } finally {
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Check & Send Reminders';
         }
+    }
 
-        async function sendReminder(pendingDoc) {
-            try {
-                const currentDoc = await databases.getDocument(
-                    databaseId,
-                    postEvalCollectionId,
-                    pendingDoc.$id
-                );
-                if (currentDoc.result !== 'pending') {
-                    addLog(`Skipped: ${pendingDoc.$id} status changed to ${currentDoc.result}`, 'info');
-                    return;
-                }
+    async function sendReminder(pendingDoc) {
+        try {
+            const currentDoc = await databases.getDocument(
+                databaseId,
+                postEvalCollectionId,
+                pendingDoc.$id
+            );
+            
+            if (currentDoc.result !== 'pending') {
+                addLog(`Skipped: ${pendingDoc.$id} status changed to ${currentDoc.result}`, 'info');
+                return;
+            }
 
-                const mainDoc = await databases.getDocument(
-                    databaseId,
-                    mainCollectionId,
-                    pendingDoc.$id
-                );
+            const mainDoc = await databases.getDocument(
+                databaseId,
+                mainCollectionId,
+                pendingDoc.$id
+            );
 
-                const userName = mainDoc.username || 'User';
-                const email = mainDoc.email || 'no-email@example.com';
-                const projectName = mainDoc.prodname || 'Unknown Product Name';
-                const customerName = mainDoc.customername || 'Unknown Customer';
-                const formLink = `https://evaluationsystemv.appwrite.network/posteval.html?id=${pendingDoc.$id}`;
+            const userName = mainDoc.username || 'User';
+            const email = mainDoc.email || 'no-email@example.com';
+            const projectName = mainDoc.prodname || 'Unknown Product Name';
+            const customerName = mainDoc.customername || 'Unknown Customer';
+            const formLink = `https://evaluationsystemv.appwrite.network/posteval.html?id=${pendingDoc.$id}`;
 
-                const emailService = document.getElementById('emailService').value;
+            const emailService = document.getElementById('emailService').value;
 
-                const subject = 'Reminder: Update Your Pending Status in Evaluation System';
-                const body = `Hello ${userName},
+            const subject = 'Reminder: Update Your Pending Status in Evaluation System';
+            const body = `Hello ${userName},
 
-This is an automated reminder that your post evaluation form for ${projectName} , (${customerName}) is still pending in the Evaluation System.
+This is an automated reminder that your post evaluation form for ${projectName}, (${customerName}) is still pending in the Evaluation System.
 
 Please update the form as soon as possible by clicking the link below:
 ${formLink}
@@ -217,65 +255,70 @@ Thank you for your attention.
 Best & Regards,
 Evaluation System Team`;
 
-                if (emailService === 'mailto') {
-                    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                    window.open(mailtoLink, '_blank');
-                    
-                    addLog(`Opened email client for ${userName} (${email}) - Project: ${projectName}`, 'success');
-                } else {
-                    console.log('=== REMINDER EMAIL ===');
-                    console.log('To:', email);
-                    console.log('User:', userName);
-                    console.log('Project:', projectName);
-                    console.log('Customer:', customerName);
-                    console.log('Link:', formLink);
-                    console.log('Subject:', subject);
-                    console.log('Body:', body);
-                    console.log('=====================');
-                    
-                    addLog(`[CONSOLE] Reminder logged for ${userName} (${email}) - Project: ${projectName} (${customerName})`, 'success');
-                }
-
-                emailsSentCount++;
-                updateStats(
-                    parseInt(document.getElementById('totalPending').textContent),
-                    parseInt(document.getElementById('dueReminders').textContent)
-                );
-                const newReminderDate = new Date();
-                newReminderDate.setDate(newReminderDate.getDate() + 14);
+            if (emailService === 'mailto') {
+                const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                window.open(mailtoLink, '_blank');
                 
-                await databases.updateDocument(
-                    databaseId,
-                    postEvalCollectionId,
-                    pendingDoc.$id,
-                    {
-                        reminderDate: newReminderDate.toISOString()
-                    }
-                );
-
-                addLog(`Reminder sent and rescheduled to ${newReminderDate.toLocaleDateString()} for ${userName}`, 'success');
-
-            } catch (error) {
-                console.error('Error sending reminder:', error);
-                addLog(`Failed to send reminder: ${error.message}`, 'error');
-            }
-        }
-
-        document.getElementById('autoCheck').addEventListener('change', function() {
-            if (this.checked) {
-                addLog('Auto-check enabled (every 5 minutes)', 'info');
-                autoCheckInterval = setInterval(checkAndSendReminders, 5 * 60 * 1000);
-                showAlert('Auto-check enabled - will check every 5 minutes', 'success');
+                addLog(`Opened email client for ${userName} (${email}) - Project: ${projectName}`, 'success');
             } else {
-                addLog('Auto-check disabled', 'info');
-                if (autoCheckInterval) {
-                    clearInterval(autoCheckInterval);
-                    autoCheckInterval = null;
-                }
-                showAlert('Auto-check disabled', 'info');
+                console.log('=== REMINDER EMAIL ===');
+                console.log('To:', email);
+                console.log('User:', userName);
+                console.log('Project:', projectName);
+                console.log('Customer:', customerName);
+                console.log('Link:', formLink);
+                console.log('Subject:', subject);
+                console.log('Body:', body);
+                console.log('=====================');
+                
+                addLog(`[CONSOLE] Reminder logged for ${userName} (${email}) - Project: ${projectName} (${customerName})`, 'success');
             }
-        });
-        addLog('System initialized and ready', 'success');
-    </script>
+
+            emailsSentCount++;
+            updateStats(
+                parseInt(document.getElementById('totalPending').textContent),
+                parseInt(document.getElementById('dueReminders').textContent)
+            );
+
+            // Update reminder date to 14 days from now
+            const newReminderDate = new Date();
+            newReminderDate.setDate(newReminderDate.getDate() + 14);
+            
+            await databases.updateDocument(
+                databaseId,
+                postEvalCollectionId,
+                pendingDoc.$id,
+                {
+                    reminderDate: newReminderDate.toISOString()
+                }
+            );
+
+            addLog(`Reminder sent and rescheduled to ${newReminderDate.toLocaleDateString()} for ${userName}`, 'success');
+
+        } catch (error) {
+            console.error('Error sending reminder:', error);
+            addLog(`Failed to send reminder: ${error.message}`, 'error');
+        }
+    }
+
+    document.getElementById('autoCheck').addEventListener('change', function() {
+        if (this.checked) {
+            addLog('Auto-check enabled (every 5 minutes)', 'info');
+            autoCheckInterval = setInterval(checkAndSendReminders, 5 * 60 * 1000);
+            showAlert('Auto-check enabled - will check every 5 minutes', 'success');
+        } else {
+            addLog('Auto-check disabled', 'info');
+            if (autoCheckInterval) {
+                clearInterval(autoCheckInterval);
+                autoCheckInterval = null;
+            }
+            showAlert('Auto-check disabled', 'info');
+        }
+    });
+
+    // Initialize
+    addLog('System initialized and ready', 'success');
+</script>
+
 </body>
 </html>
