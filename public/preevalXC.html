@@ -34,19 +34,19 @@
         <div class="form-section two-column">
             <div class="section-title">1. GENERAL</div>
             <div class="form-group-evalxc-compact">
-                <label>Customer Company Name :</label>
+                <label>Customer Company Name <span class="required-asterisk">*</span> :</label>
                 <input type="text" id="customerCompany" name="customerCompany">
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Customer PIC name :</label>
+                <label>Customer PIC name <span class="required-asterisk">*</span> :</label>
                 <input type="text" id="custPICname" name="custPICname">
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Customer PIC position :</label>
+                <label>Customer PIC position <span class="required-asterisk">*</span> :</label>
                 <input type="text" id="custPICposition" name="custPICposition">
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Existing customer? :</label>
+                <label>Existing customer? <span class="required-asterisk">*</span> :</label>
                 <select id="existcust" name="existcust">
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
@@ -54,7 +54,7 @@
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Evaluation Date :</label>
+                <label>Evaluation Date <span class="required-asterisk">*</span> :</label>
                 <input type="date" id="evalDate" name="evalDate">
             </div>
         </div>
@@ -63,7 +63,7 @@
         <div class="form-section two-column">
             <div class="section-title">2. RESOURCES</div>
             <div class="form-group-evalxc-compact">
-                <label>VisionXpert BD Sales Champion :</label>
+                <label>VisionXpert BD Sales Champion <span class="required-asterisk">*</span> :</label>
                 <select id="vxpertsalesChamp" name="vxpertsalesChamp">
                     <option value="">Select</option>
                     <option value="George_Koay">George Koay</option>
@@ -73,7 +73,7 @@
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>VisionXpert Technical Champion :</label>
+                <label>VisionXpert Technical Champion <span class="required-asterisk">*</span> :</label>
                 <select id="vxperttechChamp" name="vxperttechChamp">
                     <option value="">Select</option>
                     <option value="Han_Li_Shan">Han Li Shan</option>
@@ -108,7 +108,7 @@
             <div class="section-title" style="grid-column: span 2;">3. OBJECT & INSPECTION DETAILS</div>
             <div class="subsection-title" style="grid-column: span 2;">Object Dimensions & Shape</div>
             <div class="form-group-evalxc-compact"style="grid-column: span 2;">
-                <label>Object Name :</label>
+                <label>Object Name <span class="required-asterisk">*</span> :</label>
                 <input type="text" id="objname" name="objname">
             </div>
             <div class="form-group-evalxc-compact" style="grid-column: span 2;">
@@ -207,7 +207,7 @@
             </div>
 
             <div class="form-group-evalxc-compact">
-                <label>Defect/Feature Description :</label>
+                <label>Defect/Feature Description <span class="required-asterisk">*</span> :</label>
                 <input type="text" id="defectDescription" name="defectDescription">
             </div>
             <div class="form-group-evalxc-compact">
@@ -216,7 +216,7 @@
             </div>
             
             <div class="form-group-evalxc">
-                <label>Samples Provided :</label>
+                <label>Samples Provided <span class="required-asterisk">*</span> :</label>
                 <select id="samplesProvided" name="samplesProvided">
                     <option value="">Select</option>
                     <option value="good_bad_samples">Client can provide both good and bad samples</option>
@@ -262,7 +262,7 @@
             <div class="section-title" style="grid-column: span 2;">4. TECHNICAL ENVIRONMENT</div>
             <div class="form-group-evalxc">
                 <div class="requirement-wrapperxs">
-                <div class="requirement-xc">Working Distance (mm) :</div>
+                <div class="requirement-xc">Working Distance (mm) <span class="required-asterisk">*</span> :</div>
                 <div class="requirement-subinfo">Any space/height constraint?</div>
             </div>
                 <input type="text" name="workingDistance" id="workingDistance">
@@ -276,7 +276,7 @@
             </div>
 
             <div class="form-group-evalxc">
-                <label>Object Movement :</label>
+                <label>Object Movement <span class="required-asterisk">*</span> :</label>
                 <select id="objectMovement" name="objectMovement">
                     <option value="">Select</option>
                     <option value="static_jig">Static Jig or Station</option>
@@ -408,7 +408,7 @@
 
             <div class="subsection-title">Project Timeline</div>
             <div class="form-group-evalxc">
-                <label>Target Deployment Date :</label>
+                <label>Target Deployment Date <span class="required-asterisk">*</span> :</label>
                 <input type="date" id="targetDeploymentDate" name="targetDeploymentDate">
             </div>
 
@@ -431,7 +431,7 @@
         <div class="form-section">
             <div class="section-title">6. NEXT STEPS & FOLLOW-UP</div>
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Recommended Next Steps :</div>
+                <div class="requirement-xc">Recommended Next Steps <span class="required-asterisk">*</span> :</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="nextSteps" value="followup_call">Schedule a follow-up call with technical team</label>
                     <label><input type="checkbox" name="nextSteps" value="sample_submission">Request sample submission</label>
@@ -1031,6 +1031,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
 
 
