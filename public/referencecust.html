@@ -12,7 +12,7 @@
 <body>
 
 <header class="header">
-    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+    <div class="logo"><img src="logo.png" alt="logo" style="height: 40px;"></div>
     <nav class="nav-desktop">
         <a href="approveduser.html" class="nav-link">User Management</a>
         <a href="manageform.html" class="nav-link">Manage Forms</a>
@@ -26,6 +26,9 @@
 <main class="main-content-ref">
     <div class="page-header">
         <h1>Reference Details Management</h1>
+        <button class="btn-add-category" onclick="openAddCategoryModal()">
+            <i class="fas fa-plus-circle"></i> Add New Category
+        </button>
     </div>
 
     <div class="controls-ref">
@@ -43,6 +46,43 @@
     <div id="referenceGrid" class="reference-grid-ref" style="display: none;"></div>
 </main>
 
+<!-- Add Category Modal -->
+<div id="addCategoryModal" class="modal-ref">
+    <div class="modal-overlay-ref" onclick="closeAddCategoryModal()"></div>
+    <div class="modal-content-ref">
+        <div class="modal-header-ref">
+            <h2><i class="fas fa-plus-circle"></i> Add New Category</h2>
+            <button class="close-btn" onclick="closeAddCategoryModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="addCategoryForm">
+            <div class="form-group-ref">
+                <label><i class="fas fa-folder"></i> Category Name</label>
+                <input type="text" id="newCategoryName" placeholder="e.g., New Software Category" required>
+            </div>
+            
+            <div class="form-group-ref">
+                <label><i class="fas fa-list"></i> Features</label>
+                <div id="featuresList" class="feature-list"></div>
+                <button type="button" class="btn-add-feature" onclick="addFeatureInput()">
+                    <i class="fas fa-plus"></i> Add Feature
+                </button>
+            </div>
+
+            <div class="modal-actions-ref">
+                <button type="button" class="btn-ref btn-cancel-ref" onclick="closeAddCategoryModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="submit" class="btn-ref btn-save-ref">
+                    <i class="fas fa-save"></i> Create Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Options Modal -->
 <div id="editModal" class="modal-ref">
     <div class="modal-overlay-ref" onclick="closeModal()"></div>
     <div class="modal-content-ref">
@@ -89,6 +129,7 @@
         </form>
     </div>
 </div>
+
 <script>
 const { Client, Account, Databases } = window.Appwrite;
 const client = new Client();
@@ -98,6 +139,7 @@ const databases = new Databases(client);
 const account = new Account(client);
 const databaseId = "68ba8a9c001f17064e15";
 const referenceCollectionId = "68da1d5f002142be75df";
+const categoryCollectionId ="6944b2a20012334309c3";
 
 const categoryFeatures = {
     'V-Library': [
@@ -158,6 +200,7 @@ let currentOptions = [];
 let currentDetails = [];
 let currentUser = null;
 let selectedFeatures = {};
+let featureInputCount = 0;
 
 async function loadReferences() {
     try {
@@ -276,6 +319,115 @@ function changeFeature(category, featureId) {
     selectedFeatures[category] = featureId;
     displayReferences(document.getElementById('searchInput').value);
 }
+
+function openAddCategoryModal() {
+    document.getElementById('addCategoryModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('newCategoryName').value = '';
+    document.getElementById('featuresList').innerHTML = '';
+    featureInputCount = 0;
+    addFeatureInput();
+}
+
+function closeAddCategoryModal() {
+    document.getElementById('addCategoryModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+function addFeatureInput() {
+    const featuresList = document.getElementById('featuresList');
+    const inputGroup = document.createElement('div');
+    inputGroup.className = 'feature-input-group';
+    inputGroup.id = `feature-${featureInputCount}`;
+    inputGroup.innerHTML = `
+        <input type="text" placeholder="Feature name (e.g., License)" required>
+        <button type="button" class="btn-remove-feature" onclick="removeFeatureInput(${featureInputCount})">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    featuresList.appendChild(inputGroup);
+    featureInputCount++;
+}
+
+function removeFeatureInput(id) {
+    const element = document.getElementById(`feature-${id}`);
+    if (element) {
+        element.remove();
+    }
+}
+
+function deleteCategory(categoryName) {
+    if (!confirm(`Are you sure you want to delete the entire "${categoryName}" category?\n\nThis will remove all features and options associated with this category. This action cannot be undone.`)) {
+        return;
+    }
+    delete categoryFeatures[categoryName];
+    delete selectedFeatures[categoryName];
+    showNotification(`Category "${categoryName}" deleted successfully`, 'success');
+    displayReferences(document.getElementById('searchInput').value);
+}
+
+async function saveCategoryToDatabase(categoryName, features) {
+    try {
+        await databases.createDocument(
+            databaseId, 
+            categoryCollectionId, 
+            'unique()', 
+            {
+                categoryName: categoryName,
+                features: JSON.stringify(features),
+                createdBy: currentUser.email,
+                createdAt: new Date().toISOString()
+            }
+        );
+        console.log('Category saved to database:', categoryName);
+    } catch (error) {
+        console.error('Error saving category:', error);
+        showNotification('Error saving category to database', 'warning');
+    }
+}
+
+document.getElementById('addCategoryForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const categoryName = document.getElementById('newCategoryName').value.trim();
+    
+    if (!categoryName) {
+        showNotification('Please enter a category name', 'warning');
+        return;
+    }
+    
+    if (categoryFeatures[categoryName]) {
+        showNotification('Category already exists', 'warning');
+        return;
+    }
+
+    const featureInputs = document.querySelectorAll('#featuresList .feature-input-group input');
+    const features = [];
+    
+    featureInputs.forEach((input, index) => {
+        const featureName = input.value.trim();
+        if (featureName) {
+            const featureId = `${categoryName.toLowerCase().replace(/\s+/g, '_')}_${featureName.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}_${index}`;
+            features.push({
+                id: featureId,
+                name: featureName
+            });
+        }
+    });
+    
+    if (features.length === 0) {
+        showNotification('Please add at least one feature', 'warning');
+        return;
+    }
+
+    categoryFeatures[categoryName] = features;
+    selectedFeatures[categoryName] = features[0].id;
+    await saveCategoryToDatabase(categoryName, features);
+    
+    closeAddCategoryModal();
+    displayReferences(document.getElementById('searchInput').value);
+    showNotification(`Category "${categoryName}" created successfully!`, 'success');
+});
 
 function openEditModal(id, category, name) {
     currentEditId = id;
@@ -492,7 +644,3 @@ loadReferences();
 </body>
 
 </html>
-
-
-
-
