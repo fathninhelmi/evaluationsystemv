@@ -639,8 +639,10 @@ function populateForm(preEvalData, referenceData) {
             document.getElementById('attachmentPreview').innerHTML = `
                 <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
                     <span style="flex: 1; color:black; font-size:12px;">${fileName}</span>
-                    <a href="${fileUrl}" target="_blank"  class="btn-view"><i class="fas fa-eye"></i></a>
-                    ${!viewMode ? '<button type="button" class="btn-remove" onclick="removeAttachment()"><i class="fas fa-times"></i></button>' : ''}
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a href="${fileUrl}" target="_blank" class="btn-view"><i class="fas fa-eye"></i></a>
+                        ${!viewMode ? '<button type="button" class="btn-remove" onclick="removeAttachment()"><i class="fas fa-times"></i></button>' : ''}
+                    </div>
                 </div>
             `;
              } catch (error) {
@@ -1211,6 +1213,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
