@@ -89,19 +89,30 @@ async function loadEvent() {
             
             <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px;">
                 <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #f5f5f5;">
-                    Report Evaluation Link:
+                    Evaluation Report Link:
                 </label>
-                <input 
-                    type="url" 
-                    id="reportLink" 
-                    placeholder="Enter report evaluation link..." 
-                    value="${ev.reportLink || ''}"
-                    style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2c5ca5; background: #0e2952; color: #fff; font-size: 14px;"
-                    ${isViewMode ? 'readonly' : ''}
-                />
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input 
+                        type="url" 
+                        id="reportLink" 
+                        placeholder="Enter evaluation report link" 
+                        value="${ev.reportLink || ''}"
+                        style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #2c5ca5; background: #0e2952; color: #fff; font-size: 14px;"
+                        ${isViewMode ? 'readonly' : ''}
+                    />
+                    <button 
+                        id="openLinkBtn"
+                        onclick="openReportLink()"
+                        style="padding: 12px 20px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; white-space: nowrap; transition: background 0.3s;"
+                        onmouseover="this.style.background='#2980b9'"
+                        onmouseout="this.style.background='#3498db'"
+                        ${!ev.reportLink ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                    >
+                        Open Link
+                    </button>
+                </div>
                 <div id="saveStatus" style="margin-top: 8px; font-size: 12px; color: #4ea8de; min-height: 20px;"></div>
             </div>
-            
             <button class="back-btn" onclick="goBack()">Back</button>
         `;
         if (!isViewMode) {
@@ -117,12 +128,25 @@ let saveTimeout;
 async function autoSaveReportLink() {
     const reportLinkInput = document.getElementById('reportLink');
     const saveStatus = document.getElementById('saveStatus');
+    const openLinkBtn = document.getElementById('openLinkBtn');
     
     if (!reportLinkInput) return;
     
     reportLinkInput.addEventListener('input', async (e) => {
         clearTimeout(saveTimeout);
         saveStatus.textContent = 'Typing...';
+        
+        if (openLinkBtn) {
+            if (e.target.value.trim()) {
+                openLinkBtn.disabled = false;
+                openLinkBtn.style.opacity = '1';
+                openLinkBtn.style.cursor = 'pointer';
+            } else {
+                openLinkBtn.disabled = true;
+                openLinkBtn.style.opacity = '0.5';
+                openLinkBtn.style.cursor = 'not-allowed';
+            }
+        }
         
         saveTimeout = setTimeout(async () => {
             try {
@@ -144,6 +168,21 @@ async function autoSaveReportLink() {
             }
         }, 1000);
     });
+}
+
+function openReportLink() {
+    const reportLinkInput = document.getElementById('reportLink');
+    const link = reportLinkInput.value.trim();
+    
+    if (!link) {
+        alert('Please enter a report link first.');
+        return;
+    }
+    let fullLink = link;
+    if (!link.startsWith('http://') && !link.startsWith('https://')) {
+        fullLink = 'https://' + link;
+    }
+    window.open(fullLink, '_blank');
 }
 
 async function getFormStatus(collectionId, eventId) {
