@@ -374,8 +374,7 @@ async function saveCategoryToDatabase(categoryName, features) {
             'unique()', 
             {
                 categoryName: categoryName,
-                features: JSON.stringify(features),
-                createdAt: new Date().toISOString()
+                features: JSON.stringify(features)
             }
         );
         console.log('Category saved to database:', categoryName);
@@ -643,4 +642,5 @@ loadReferences();
 </body>
 
 </html>
+
 
