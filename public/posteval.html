@@ -617,7 +617,7 @@ async function loadForm() {
         }
 
         if (evDoc.attachmentId) {
-        uploadedFileId = data.attachmentId;
+        uploadedFileId = evDoc.attachmentId;
         try {
             const fileUrl = storage.getFileView(bucketId, data.attachmentId);
             const fileName = data.attachmentName || 'Uploaded file';
@@ -1145,6 +1145,7 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
 
