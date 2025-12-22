@@ -82,7 +82,7 @@ async function loadEvent() {
             </div>
             ` : ''}
             <div class="step-container">
-                <div class="step ${!hideEvalStep ? '3' : '2'}" onclick="goToStep('posteval.html', '${eventId}', ${isViewMode})">${!hideEvalStep ? '3' : '2'}</div>
+                <div class="step ${getStepClass(postEvalStatus)}" onclick="goToStep('posteval.html', '${eventId}', ${isViewMode})">${!hideEvalStep ? '3' : '2'}</div>
                 <div class="step-label">Post Evaluation</div>
             </div>
             </div>
@@ -198,6 +198,7 @@ loadEvent();
 </body>
 
 </html>
+
 
 
 
