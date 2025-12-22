@@ -71,27 +71,79 @@ async function loadEvent() {
             <h1>${ev.prodname} (${ev.createDate ? formatDate(ev.createDate) : ""})</h1>
             ${viewModeIndicator}
             <div class="wizard">
-            <div class="step-container">
-                <div class="step ${getStepClass(preEvalStatus)}" onclick="goToStep('preeval.html', '${eventId}', ${isViewMode})">1</div>
-                <div class="step-label">Pre Evaluation</div>
+                <div class="step-container">
+                    <div class="step ${getStepClass(preEvalStatus)}" onclick="goToStep('preeval.html', '${eventId}', ${isViewMode})">1</div>
+                    <div class="step-label">Pre Evaluation</div>
+                </div>
+                ${!hideEvalStep ? `
+                <div class="step-container">
+                    <div class="step ${getStepClass(evalStatus)}" onclick="goToStep('eval.html', '${eventId}', ${isViewMode})">2</div>
+                    <div class="step-label">Evaluation</div>
+                </div>
+                ` : ''}
+                <div class="step-container">
+                    <div class="step ${getStepClass(postEvalStatus)}" onclick="goToStep('posteval.html', '${eventId}', ${isViewMode})">${!hideEvalStep ? '3' : '2'}</div>
+                    <div class="step-label">Post Evaluation</div>
+                </div>
             </div>
-            ${!hideEvalStep ? `
-            <div class="step-container">
-                <div class="step ${getStepClass(evalStatus)}" onclick="goToStep('eval.html', '${eventId}', ${isViewMode})">2</div>
-                <div class="step-label">Evaluation</div>
+            
+            <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #f5f5f5;">
+                    Report Evaluation Link:
+                </label>
+                <input 
+                    type="url" 
+                    id="reportLink" 
+                    placeholder="Enter report evaluation link..." 
+                    value="${ev.reportLink || ''}"
+                    style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #2c5ca5; background: #0e2952; color: #fff; font-size: 14px;"
+                    ${isViewMode ? 'readonly' : ''}
+                />
+                <div id="saveStatus" style="margin-top: 8px; font-size: 12px; color: #4ea8de; min-height: 20px;"></div>
             </div>
-            ` : ''}
-            <div class="step-container">
-                <div class="step ${getStepClass(postEvalStatus)}" onclick="goToStep('posteval.html', '${eventId}', ${isViewMode})">${!hideEvalStep ? '3' : '2'}</div>
-                <div class="step-label">Post Evaluation</div>
-            </div>
-            </div>
+            
             <button class="back-btn" onclick="goBack()">Back</button>
         `;
+        if (!isViewMode) {
+            autoSaveReportLink();
+        }
     } catch (err) {
         console.error("Failed to load event:", err);
         eventCard.innerHTML = "<p>Event not found.</p>";
     }
+}
+
+let saveTimeout;
+async function autoSaveReportLink() {
+    const reportLinkInput = document.getElementById('reportLink');
+    const saveStatus = document.getElementById('saveStatus');
+    
+    if (!reportLinkInput) return;
+    
+    reportLinkInput.addEventListener('input', async (e) => {
+        clearTimeout(saveTimeout);
+        saveStatus.textContent = 'Typing...';
+        
+        saveTimeout = setTimeout(async () => {
+            try {
+                saveStatus.textContent = 'Saving...';
+                await databases.updateDocument(
+                    databaseId, 
+                    mainCollectionId, 
+                    eventId, 
+                    { reportLink: e.target.value }
+                );
+                saveStatus.textContent = '✓ Saved';
+                setTimeout(() => {
+                    saveStatus.textContent = '';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to save:', err);
+                saveStatus.textContent = '✗ Failed to save';
+                saveStatus.style.color = '#e63946';
+            }
+        }, 1000);
+    });
 }
 
 async function getFormStatus(collectionId, eventId) {
@@ -198,10 +250,3 @@ loadEvent();
 </body>
 
 </html>
-
-
-
-
-
-
-
