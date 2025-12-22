@@ -375,7 +375,6 @@ async function saveCategoryToDatabase(categoryName, features) {
             {
                 categoryName: categoryName,
                 features: JSON.stringify(features),
-                createdBy: currentUser.email,
                 createdAt: new Date().toISOString()
             }
         );
@@ -644,3 +643,4 @@ loadReferences();
 </body>
 
 </html>
+
