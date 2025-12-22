@@ -619,8 +619,8 @@ async function loadForm() {
         if (evDoc.attachmentId) {
         uploadedFileId = evDoc.attachmentId;
         try {
-            const fileUrl = storage.getFileView(bucketId, data.attachmentId);
-            const fileName = data.attachmentName || 'Uploaded file';
+            const fileUrl = storage.getFileView(bucketId, evDoc.attachmentId);
+            const fileName = evDoc.attachmentName || 'Uploaded file';
             document.getElementById('attachmentPreview').innerHTML = `
                 <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
                     <span style="flex: 1; color:black; font-size: 12px;">${fileName}</span>
@@ -921,11 +921,11 @@ async function saveForm(status = "draft") {
     if (competitorInfoArray.length > 0) data.competitorInfo = competitorInfoArray;
     if (keywordArray.length > 0) data.keyword = keywordArray;
     if (uploadedFileId) {
-        data.attachmentId = uploadedFileId;
+        evDoc.attachmentId = uploadedFileId;
         if (fileInput.files.length > 0) {
-            data.attachmentName = fileInput.files[0].name;
+            evDoc.attachmentName = fileInput.files[0].name;
         } else if (evDoc && evDoc.attachmentName) {
-            data.attachmentName = evDoc.attachmentName;
+            evDoc.attachmentName = evDoc.attachmentName;
         }
     }
 
@@ -1145,6 +1145,7 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
 
