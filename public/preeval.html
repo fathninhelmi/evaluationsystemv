@@ -640,7 +640,7 @@ function populateForm(preEvalData, referenceData) {
                 <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
                     <span style="flex: 1;">${fileName}</span>
                     <a href="${fileUrl}" target="_blank" style="color: #007bff; text-decoration: none; white-space: nowrap;">View</a>
-                    ${!viewMode ? '<button type="button" onclick="removeAttachment()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; white-space: nowrap;">Remove</button>' : ''}
+                    ${!viewMode ? '<button type="button" class="btn-remove" onclick="removeAttachment()" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; white-space: nowrap;">Remove</button>' : ''}
                 </div>
             `;
              } catch (error) {
@@ -1211,4 +1211,5 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
