@@ -63,23 +63,28 @@ async function loadEvent() {
                  👁️ View-Only Mode (Manager Access)
                </div>` 
             : '';
-
+        const productType = (ev.productType || "").toLowerCase().trim();
+        const hideEvalStep = productType === "xs" || productType === "xc" || 
+                            productType === "smart code reader (xs)" || 
+                            productType === "smart camera (xc)";
         eventCard.innerHTML = `
             <h1>${ev.prodname} (${ev.createDate ? formatDate(ev.createDate) : ""})</h1>
             ${viewModeIndicator}
             <div class="wizard">
-              <div class="step-container">
+            <div class="step-container">
                 <div class="step ${getStepClass(preEvalStatus)}" onclick="goToStep('preeval.html', '${eventId}', ${isViewMode})">1</div>
                 <div class="step-label">Pre Evaluation</div>
-              </div>
-              <div class="step-container">
+            </div>
+            ${!hideEvalStep ? `
+            <div class="step-container">
                 <div class="step ${getStepClass(evalStatus)}" onclick="goToStep('eval.html', '${eventId}', ${isViewMode})">2</div>
                 <div class="step-label">Evaluation</div>
-              </div>
-              <div class="step-container">
-                <div class="step ${getStepClass(postEvalStatus)}" onclick="goToStep('posteval.html', '${eventId}', ${isViewMode})">3</div>
+            </div>
+            ` : ''}
+            <div class="step-container">
+                <div class="step ${!hideEvalStep ? '3' : '2'}" onclick="goToStep('posteval.html', '${eventId}', ${isViewMode})">${!hideEvalStep ? '3' : '2'}</div>
                 <div class="step-label">Post Evaluation</div>
-              </div>
+            </div>
             </div>
             <button class="back-btn" onclick="goBack()">Back</button>
         `;
@@ -193,6 +198,7 @@ loadEvent();
 </body>
 
 </html>
+
 
 
 
