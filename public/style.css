@@ -4292,7 +4292,7 @@ label {
   background: #e63946;
   color: white;
   border: none;
-  width: 32px;
+  width: 10px;
   height: 32px;
   border-radius: 50%;
   cursor: pointer;
@@ -4946,3 +4946,4 @@ label {
   border-radius: 6px;
   font-size: 0.95em;
 }
+
