@@ -33,7 +33,7 @@
     <form id="preEvalForm" style="display: none;">
 
         <!-- Section 1 -->
-        <div class="form-section two-column">
+        <div class="form-section two-column" data-section="1">
             <div class="section-title">1. GENERAL</div>
             <div class="form-group-evalxc-compact">
                 <label>Customer Company Name :</label>
@@ -75,28 +75,20 @@
         </div>
 
         <!-- Section 2 -->
-        <div class="form-section two-column">
+        <div class="form-section two-column" data-section="2">
             <div class="section-title">2. RESOURCES</div>
             <div class="form-group-evalxc-compact">
-                <label>SCP Sales Champion :</label>
+                <label>ViTrox / SCP Sales Champion :</label>
                 <input type="text" id="scpsalesChamp" name="scpsalesChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>SCP Technical Champion :</label>
+                <label>ViTrox / SCP Technical Champion :</label>
                 <input type="text" id="scptechChamp" name="scptechChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>ViTrox Sales Champion :</label>
-                <input type="text" id="vitroxsalesChamp" name="vitroxsalesChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>ViTrox Tech Champion :</label>
-                <input type="text" id="vitroxtechChamp" name="vitroxtechChamp" required>
             </div>
         </div>
 
         <!-- Section 3 --->
-        <div class="form-section two-column">
+        <div class="form-section two-column" data-section="3">
             <div class="section-title">3. TARGET INSPECTION PERFORMANCE</div>
             <div class="form-group-evalxc-compact">
                 <label>Inspection environment :</label>
@@ -149,7 +141,7 @@
         </div>
 
         <!-- Section 4 -->
-        <div class="form-section">
+        <div class="form-section" data-section="4">
             <div class="section-title">4. PCB</div>
                 <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Board thickness :</div>
@@ -191,7 +183,7 @@
         </div>
 
         <!-- Section 5 -->
-        <div class="form-section">
+        <div class="form-section" data-section="5">
             <div class="section-title">5. MACHINE TYPE</div>
                 <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Conveyor :</div>
@@ -238,7 +230,7 @@
         </div>
 
         <!-- Section 6 -->
-        <div class="form-section">
+        <div class="form-section" data-section="6">
             <div class="section-title">6. VISION</div>
                 <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Lens :</div>
@@ -261,7 +253,7 @@
         </div>
 
         <!-- Section 7 -->
-        <div class="form-section">
+        <div class="form-section" data-section="7">
             <div class="section-title">7. PC SPECS</div>
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Hardisc capacity :</div>
@@ -272,7 +264,7 @@
         </div>
 
         <!-- Section 8 -->
-        <div class="form-section">
+        <div class="form-section" data-section="8">
         <div class="section-title">8. FEATURES & TOOLS</div>
         <div class="checkbox-gridpr">
             <div class="header-evalpr"></div>
@@ -440,7 +432,7 @@
         </div>
 
         <!-- Section 9 -->
-        <div class="form-section">
+        <div class="form-section" data-section="9">
             <div class="section-title">9. HARDWARE</div>
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Rubber pad version 2019 :</div>
@@ -451,7 +443,7 @@
         </div>
 
         <!-- Section 10 -->
-        <div class="form-section">
+        <div class="form-section" data-section="10">
             <div class="section-title">10. TOOLS</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="tools" value="leveling_meter">Leveling meter</label>
@@ -468,7 +460,7 @@
             </div>
 
         <!-- Section 11 -->
-        <div class="form-section">
+        <div class="form-section" data-section="11">
             <div class="section-title">11. Customers' Current Top Issues</div>
             <div class="table-section">
                 <table class="eval-table" id="custIssueTable">
@@ -619,6 +611,22 @@ async function loadExistingForm() {
     }
 }
 
+function toggleSectionsByProduct(productType) {
+    const sectionsToToggle = document.querySelectorAll(
+        '.form-section[data-section]'
+    );
+
+    sectionsToToggle.forEach(section => {
+        const sectionNumber = parseInt(section.dataset.section, 10);
+
+        if (productType === 'AXI' && sectionNumber >= 3 && sectionNumber <= 10) {
+            section.style.display = 'none';
+        } else {
+            section.style.display = '';
+        }
+    });
+}
+
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
     const customerCompanyElement = document.getElementById('customerCompany');
@@ -649,6 +657,10 @@ function populateForm(preEvalData, referenceData) {
             console.error('Error loading attachment:', error);
         }
     }
+        if (referenceDocData && referenceDocData.product) {
+        toggleSectionsByProduct(referenceDocData.product);
+    }
+
 
     const textFields = [
         'custTechChamp', 'competitor', 'compModel',
@@ -1174,6 +1186,7 @@ function displayFilePreview(file) {
         </div>
     `;
 }
+
 
 function removeAttachment() {
     document.getElementById('attachmentInput').value = '';
