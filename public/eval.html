@@ -255,7 +255,7 @@ async function checkUserRole() {
             return 'staff';
         }
         
-        return 'staff'; // Default
+        return 'staff'; 
     } catch (error) {
         console.error("Error checking user role:", error);
         return 'staff';
@@ -514,7 +514,7 @@ async function loadForm() {
 
         // Load attachment if exists
         if (evDoc.attachmentId) {
-            uploadedFileId = data.attachmentId;
+            uploadedFileId = evDoc.attachmentId;
             try {
                 const fileUrl = storage.getFileView(bucketId, data.attachmentId);
                 const fileName = data.attachmentName || 'Uploaded file';
@@ -890,6 +890,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
 
