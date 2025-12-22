@@ -4054,15 +4054,6 @@ label {
   gap: 6px;
 }
 
-.btn-view {
-  background: #007bff;
-  color: white;
-}
-
-.btn-view:hover {
-  background: #0056b3;
-}
-
 .btn-download {
   background: #6c757d;
   color: white;
@@ -4323,6 +4314,7 @@ label {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
 }
 
 .btn-view:hover {
@@ -4969,6 +4961,7 @@ label {
   border-radius: 6px;
   font-size: 0.95em;
 }
+
 
 
 
