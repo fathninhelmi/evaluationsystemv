@@ -4326,7 +4326,7 @@ label {
 }
 
 .btn-view:hover {
-  background: #c92a36;
+  background: #007bff;
   transform: scale(1.1);
 }
 
@@ -4969,6 +4969,7 @@ label {
   border-radius: 6px;
   font-size: 0.95em;
 }
+
 
 
 
