@@ -623,19 +623,22 @@ function toggleSectionsByProduct(productType) {
 
     allSections.forEach(section => {
         const sectionNumber = Number(section.dataset.section);
+        console.log("Processing section:", sectionNumber);
 
         if (productType === 'AXI') {
             if ([1, 2, 11].includes(sectionNumber)) {
-                section.style.display = 'block';
+                section.style.removeProperty('display');
+                console.log("Showing section:", sectionNumber);
             } else {
                 section.style.display = 'none';
+                console.log("Hiding section:", sectionNumber);
             }
         } else {
-            section.style.display = 'block';
+            section.style.removeProperty('display');
+            console.log("Showing all sections");
         }
     });
 }
-
 
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
@@ -1247,6 +1250,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
