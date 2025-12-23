@@ -1007,13 +1007,6 @@ async function saveForm(status = "draft") {
                 return;
             }
         }
-            
-            const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
-            if (missingFields.length > 0 || !collectedData.custIssues || collectedData.custIssues.length === 0) {
-                alert("Please fill in all required fields before submitting.");
-                return;
-            }
-        }
         
         const saveData = {
             ...collectedData,
@@ -1260,6 +1253,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
