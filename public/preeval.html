@@ -619,8 +619,12 @@ function toggleSectionsByProduct(productType) {
     sectionsToToggle.forEach(section => {
         const sectionNumber = parseInt(section.dataset.section, 10);
 
-        if (productType === 'AXI' && sectionNumber >= 3 && sectionNumber <= 10) {
-            section.style.display = 'none';
+        if (productType === 'AXI') {
+            if (sectionNumber === 1 || sectionNumber === 2 || sectionNumber === 11) {
+                section.style.display = '';
+            } else {
+                section.style.display = 'none';
+            }
         } else {
             section.style.display = '';
         }
@@ -1239,4 +1243,5 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
