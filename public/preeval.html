@@ -617,28 +617,19 @@ async function loadExistingForm() {
 }
     
 function toggleSectionsByProduct(productType) {
-    console.log("Toggling sections for product type:", productType);
-
     const allSections = document.querySelectorAll('.form-section[data-section]');
 
     allSections.forEach(section => {
         const sectionNumber = Number(section.dataset.section);
-        console.log("Processing section:", sectionNumber);
 
-        if (productType === 'AXI') {
-            if ([1, 2, 11].includes(sectionNumber)) {
-                section.style.removeProperty('display');
-                console.log("Showing section:", sectionNumber);
-            } else {
-                section.style.display = 'none';
-                console.log("Hiding section:", sectionNumber);
-            }
+        if (productType === 'AXI' && ![1, 2, 11].includes(sectionNumber)) {
+            section.classList.add('hidden-section');
         } else {
-            section.style.removeProperty('display');
-            console.log("Showing all sections");
+            section.classList.remove('hidden-section');
         }
     });
 }
+
 
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
@@ -1250,6 +1241,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
