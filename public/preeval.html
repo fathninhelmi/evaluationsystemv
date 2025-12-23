@@ -597,12 +597,17 @@ async function loadExistingForm() {
         } catch (err) {
             console.log("Pre-eval form not found, will create new one:", err);
         }
-        populateForm(formData, referenceDocData);
-        currentStatus = (formData && formData.status) || "draft";
         
-        updateFormDisplay();
+        currentStatus = (formData && formData.status) || "draft";
         document.getElementById("loadingIndicator").style.display = "none";
         document.getElementById("preEvalForm").style.display = "block";
+        populateForm(formData, referenceDocData);
+        if (referenceDocData && referenceDocData.product) {
+            console.log("Final toggle for product:", referenceDocData.product);
+            toggleSectionsByProduct(referenceDocData.product);
+        }
+        
+        updateFormDisplay();
     } catch (error) {
         console.log("Error loading form:", error);
         document.getElementById("loadingIndicator").style.display = "none";
@@ -610,7 +615,7 @@ async function loadExistingForm() {
         updateFormDisplay();
     }
 }
-
+    
 function toggleSectionsByProduct(productType) {
     console.log("Toggling sections for product type:", productType);
     
@@ -1253,6 +1258,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
