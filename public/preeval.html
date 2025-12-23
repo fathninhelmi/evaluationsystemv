@@ -618,27 +618,24 @@ async function loadExistingForm() {
     
 function toggleSectionsByProduct(productType) {
     console.log("Toggling sections for product type:", productType);
-    
+
     const allSections = document.querySelectorAll('.form-section[data-section]');
-    
+
     allSections.forEach(section => {
-        const sectionNumber = parseInt(section.dataset.section, 10);
-        console.log("Processing section:", sectionNumber);
+        const sectionNumber = Number(section.dataset.section);
 
         if (productType === 'AXI') {
-            if (sectionNumber === 1 || sectionNumber === 2 || sectionNumber === 11) {
-                section.style.removeProperty('display');
-                console.log("Showing section:", sectionNumber);
+            if ([1, 2, 11].includes(sectionNumber)) {
+                section.style.display = 'block';
             } else {
                 section.style.display = 'none';
-                console.log("Hiding section:", sectionNumber);
             }
         } else {
-            section.style.removeProperty('display');
-            console.log("Showing all sections");
+            section.style.display = 'block';
         }
     });
 }
+
 
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
@@ -670,14 +667,6 @@ function populateForm(preEvalData, referenceData) {
             console.error('Error loading attachment:', error);
         }
     }
-    if (referenceData && referenceData.product) {
-        console.log("Product type detected:", referenceData.product);
-        toggleSectionsByProduct(referenceData.product);
-    } else {
-        console.log("No product type found, showing all sections");
-        toggleSectionsByProduct('');
-    }
-
     const textFields = [
         'custTechChamp', 'competitor', 'compModel',
         'scpsalesChamp', 'scptechChamp', 'vitroxsalesChamp', 'vitroxtechChamp',
@@ -1258,6 +1247,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
