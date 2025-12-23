@@ -657,8 +657,9 @@ function populateForm(preEvalData, referenceData) {
             console.error('Error loading attachment:', error);
         }
     }
-        if (referenceDocData && referenceDocData.product) {
-        toggleSectionsByProduct(referenceDocData.product);
+    if (referenceData && referenceData.product) {
+        console.log("Product type detected:", referenceData.product);
+        toggleSectionsByProduct(referenceData.product);
     }
 
 
@@ -1238,3 +1239,4 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
