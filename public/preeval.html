@@ -612,21 +612,25 @@ async function loadExistingForm() {
 }
 
 function toggleSectionsByProduct(productType) {
-    const sectionsToToggle = document.querySelectorAll(
-        '.form-section[data-section]'
-    );
-
+    console.log("Toggling sections for product type:", productType);
+    
+    const sectionsToToggle = document.querySelectorAll('.form-section[data-section]');
+    
     sectionsToToggle.forEach(section => {
         const sectionNumber = parseInt(section.dataset.section, 10);
+        console.log("Processing section:", sectionNumber);
 
         if (productType === 'AXI') {
             if (sectionNumber === 1 || sectionNumber === 2 || sectionNumber === 11) {
-                section.style.display = '';
+                section.style.display = 'block';
+                console.log("Showing section:", sectionNumber);
             } else {
                 section.style.display = 'none';
+                console.log("Hiding section:", sectionNumber);
             }
         } else {
-            section.style.display = '';
+            section.style.display = 'block';
+            console.log("Showing all sections");
         }
     });
 }
@@ -664,8 +668,10 @@ function populateForm(preEvalData, referenceData) {
     if (referenceData && referenceData.product) {
         console.log("Product type detected:", referenceData.product);
         toggleSectionsByProduct(referenceData.product);
+    } else {
+        console.log("No product type found, showing all sections");
+        toggleSectionsByProduct('');
     }
-
 
     const textFields = [
         'custTechChamp', 'competitor', 'compModel',
@@ -985,11 +991,22 @@ async function saveForm(status = "draft") {
             }
         }
 
-        if (status === "complete") {
+       if (status === "complete") {
+            const isAXI = referenceDocData && referenceDocData.product === 'AXI';      
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalDate','scpsalesChamp', 'scptechChamp',
-                'vitroxsalesChamp', 'vitroxtechChamp', 'venue'
+                'customerCompany', 'custTechChamp', 'evalDate','scpsalesChamp', 'scptechChamp', 'venue'
             ];
+            
+            if (!isAXI) {
+                requiredFields.push('falseCallppm');
+            }
+            
+            const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
+            if (missingFields.length > 0 || !collectedData.custIssues || collectedData.custIssues.length === 0) {
+                alert("Please fill in all required fields before submitting.");
+                return;
+            }
+        }
             
             const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
             if (missingFields.length > 0 || !collectedData.custIssues || collectedData.custIssues.length === 0) {
@@ -1243,5 +1260,6 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
