@@ -102,31 +102,6 @@
                 </div>
             </div>
 
-        <!-- Competitor Information Section -->
-        <div class="form-section">
-            <div class="section-title">Competitor Information/Analysis</div>
-            <div class="table-section">
-                <table class="eval-table" id="competitorTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Competitor Info</th>
-                        </tr>
-                    </thead>
-                    <tbody id="competitorTableBody">
-                        <tr>
-                            <td class="row-number">1</td>
-                            <td class="input-row-content">
-                                <input type="text" name="competitorInfo_1" class="table-input" required>
-                                <button type="button" class="delete-row-btn" onclick="deleteCompetitorRow(this)" style="display: none;">&times;</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button type="button" class="add-row-btn" onclick="addCompetitorRow()">+ Add Info</button>
-            </div>
-        </div>
-
         <!-- Keyword Section -->
         <div class="form-section">
             <div class="section-title">Keyword Form</div>
@@ -223,7 +198,8 @@ let currentStatus = "draft";
 let competitorRowCount = 1;
 let keywordRowCount = 1;
 let uploadedFileId = null;
-let currentUser = null;
+let currentUser = null;    
+let productType = null;
 
 function initScoreButtons() {
     document.querySelectorAll('.result-btn').forEach(btn => {
@@ -240,14 +216,12 @@ function initScoreButtons() {
             if (resultValue === 'win') {
                 winReasonSection.style.display = 'block';
                 loseReasonSection.style.display = 'none';
-                // Clear lose reason checkboxes
                 document.querySelectorAll('input[name="loseReason"]').forEach(cb => cb.checked = false);
                 document.getElementById('otherloseReason').value = '';
                 document.getElementById('otherLoseReasonSection').style.display = 'none';
             } else if (resultValue === 'lose') {
                 loseReasonSection.style.display = 'block';
                 winReasonSection.style.display = 'none';
-                // Clear win reason checkboxes
                 document.querySelectorAll('input[name="winReason"]').forEach(cb => cb.checked = false);
                 document.getElementById('otherwinReason').value = '';
                 document.getElementById('otherWinReasonSection').style.display = 'none';
@@ -282,7 +256,6 @@ function initScoreButtons() {
         });
     });
     
-    // Handle lose reason "Others" checkbox
     document.querySelectorAll('input[name="loseReason"]').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             if (this.value === 'others') {
@@ -539,6 +512,7 @@ async function initForm() {
         }
         currentUser = await account.get();
         console.log("Current user:", currentUser);
+        await loadProductType();
         
         if (showNavigation) {
             document.getElementById("preEvalBtn").style.display = "inline-block";
@@ -548,6 +522,10 @@ async function initForm() {
         initScoreButtons();
         initFileUpload();
         await loadForm();
+        
+        if (productType === 'AXI') {
+            hideAXISections();
+        }
         
         const userRole = await checkUserRole();
         if (viewMode || userRole === 'manager') {
@@ -563,7 +541,34 @@ async function initForm() {
         window.location.href = "/createform.html";
     }
 }
+    
+async function loadProductType() {
+    try {
+        const mainDoc = await databases.getDocument(databaseId, mainCollectionId, eventId);
+        productType = mainDoc.productType;
+        console.log("Loaded product type:", productType);
+    } catch (err) {
+        console.error("Error loading product type:", err);
+    }
+}
 
+function hideAXISections() {
+    // Hide attachment section
+    const attachmentSection = document.querySelector('.form-section:has(#attachmentInput)');
+    if (attachmentSection) {
+        attachmentSection.style.display = 'none';
+        attachmentSection.classList.add('hidden-section');
+        console.log("Attachment section hidden for AXI");
+    }
+    
+    // Disable attachment input
+    const attachmentInput = document.getElementById('attachmentInput');
+    if (attachmentInput) {
+        attachmentInput.disabled = true;
+        attachmentInput.removeAttribute('required');
+    }
+}
+    
 async function loadForm() {
     try {
         evDoc = await databases.getDocument(databaseId, postEvalCollectionId, eventId);
@@ -791,12 +796,10 @@ function validateForm(status) {
     const resultValue = document.getElementById('result').value.trim();
     const scoreValue = document.getElementById('score').value.trim();
     
-    // Get checked win reasons
     const winReasonsChecked = Array.from(document.querySelectorAll('input[name="winReason"]:checked'))
         .map(cb => cb.value);
     const otherWinReasonValue = document.getElementById('otherwinReason').value.trim();
     
-    // Get checked lose reasons
     const loseReasonsChecked = Array.from(document.querySelectorAll('input[name="loseReason"]:checked'))
         .map(cb => cb.value);
     const otherLoseReasonValue = document.getElementById('otherloseReason').value.trim();
@@ -813,11 +816,10 @@ function validateForm(status) {
         
     if (status === "complete") {
         if (!resultValue) {
-            alert("Please select Win or Lose.");
+            alert("Please select Win, Lose, or Pending.");
             return false;
         }
         
-        // Validate win reasons if result is win
         if (resultValue === 'win') {
             if (winReasonsChecked.length === 0) {
                 alert("Please select at least one reason for winning.");
@@ -830,7 +832,6 @@ function validateForm(status) {
             }
         }
         
-        // Validate lose reasons if result is lose
         if (resultValue === 'lose') {
             if (loseReasonsChecked.length === 0) {
                 alert("Please select at least one reason for losing.");
@@ -889,12 +890,13 @@ async function saveForm(status = "draft") {
         keywordArray 
     } = validationResult;
     
-    // Upload file if new file is selected
-    const fileInput = document.getElementById('attachmentInput');
-    if (fileInput.files.length > 0) {
-        const fileId = await uploadFile();
-        if (fileId) {
-            uploadedFileId = fileId;
+    if (productType !== 'AXI') {
+        const fileInput = document.getElementById('attachmentInput');
+        if (fileInput && fileInput.files.length > 0) {
+            const fileId = await uploadFile();
+            if (fileId) {
+                uploadedFileId = fileId;
+            }
         }
     }
 
@@ -905,7 +907,6 @@ async function saveForm(status = "draft") {
     if (resultValue) data.result = resultValue;
     if (scoreValue) data.score = scoreValue;
     
-    // Save win reasons as array
     if (resultValue === 'win' && winReason.length > 0) {
         data.winReason = winReason;
         if (winReason.includes('others') && otherWinReasonValue) {
@@ -913,7 +914,6 @@ async function saveForm(status = "draft") {
         }
     }
     
-    // Save lose reasons as array
     if (resultValue === 'lose' && loseReason.length > 0) {
         data.loseReason = loseReason;
         if (loseReason.includes('others') && otherLoseReasonValue) {
@@ -923,12 +923,14 @@ async function saveForm(status = "draft") {
     
     if (competitorInfoArray.length > 0) data.competitorInfo = competitorInfoArray;
     if (keywordArray.length > 0) data.keyword = keywordArray;
-    if (uploadedFileId) {
-        evDoc.attachmentId = uploadedFileId;
-        if (fileInput.files.length > 0) {
-            evDoc.attachmentName = fileInput.files[0].name;
+    
+    if (productType !== 'AXI' && uploadedFileId) {
+        data.attachmentId = uploadedFileId;
+        const fileInput = document.getElementById('attachmentInput');
+        if (fileInput && fileInput.files.length > 0) {
+            data.attachmentName = fileInput.files[0].name;
         } else if (evDoc && evDoc.attachmentName) {
-            evDoc.attachmentName = evDoc.attachmentName;
+            data.attachmentName = evDoc.attachmentName;
         }
     }
 
@@ -958,20 +960,10 @@ async function saveForm(status = "draft") {
         }
     } catch (err) {
         console.error("Failed to save document:", err);
-        console.error("Error details:", err.message);
-
-        if (err.message.includes("Invalid document structure")) {
-            alert(`Database schema error: ${err.message}\n\nPlease check if your database fields are configured correctly:\n- result: string\n- score: string\n- status: enum\n- competitorInfo: string[]\n- keyword: string[]\n- attachmentId: string\n- attachmentName: string`);
-        } else if (err.message.includes("Missing required attribute")) {
-            alert(`Missing required field: ${err.message}`);
-        } else if (err.message.includes("Invalid enum value")) {
-            alert(`Invalid status value. Expected values for status enum might be: draft, complete, pending, etc.`);
-        } else {
-            alert(`Error saving form: ${err.message}\n\nPlease try again or contact support if the issue persists.`);
-        }
+        alert(`Error saving form: ${err.message}`);
     }
 }
-
+    
 async function getPreEvalPage(formId) {
     try {
         const mainDoc = await databases.getDocument(databaseId, mainCollectionId, formId);
@@ -1148,4 +1140,5 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
