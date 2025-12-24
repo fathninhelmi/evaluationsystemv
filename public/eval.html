@@ -199,7 +199,8 @@ const storage = new Appwrite.Storage(client);
 
 const databaseId = "68ba8a9c001f17064e15";
 const evalCollectionId = "68bf9d5600257a20775a";
-const bucketId = "69015d8b0030f329c599"; 
+const mainCollectionId = "68ba918c0022d2b9a429";
+const bucketId = "69015d8b0030f329c599";
 
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id");
@@ -212,6 +213,7 @@ let feedbackRowCount = 1;
 let commentRowCount = 1;
 let uploadedFileId = null;
 let currentUser = null;
+let productType = null;
 
 function showToast(message, isError = false) {
     const existingToast = document.querySelector('.toast-notification');
@@ -502,6 +504,16 @@ function setupCheckboxGroups() {
         });
     });
 }
+
+async function loadProductType() {
+    try {
+        const mainDoc = await databases.getDocument(databaseId, mainCollectionId, eventId);
+        productType = mainDoc.productType;
+        console.log("Loaded product type:", productType);
+    } catch (err) {
+        console.error("Error loading product type:", err);
+    }
+}
     
 function hideAXISections() {
     const attachmentInput = document.getElementById('attachmentInput');
@@ -530,11 +542,13 @@ async function loadForm() {
     }
 
     try {
+        await loadProductType();
+        
         evDoc = await databases.getDocument(databaseId, evalCollectionId, eventId);
         console.log("Loaded eval document:", evDoc);
-        if (evDoc.productType === "AXI") {
-                 hideAXISections();
-            }
+        if (productType === "AXI") {
+            hideAXISections();
+        }
         [
             'tech_inspection_cycle_above','tech_inspection_cycle_medium','tech_inspection_cycle_below',
             'tech_programming_time_above','tech_programming_time_medium','tech_programming_time_below',
@@ -546,7 +560,7 @@ async function loadForm() {
             if (checkbox) checkbox.checked = !!evDoc[key];
         });
 
-        if (evDoc.attachmentId && evDoc.productType !== 'AXI') {
+        if (evDoc.attachmentId && productType !== 'AXI') {
             uploadedFileId = evDoc.attachmentId;
             try {
                 const fileUrl = storage.getFileView(bucketId, evDoc.attachmentId);
@@ -801,7 +815,7 @@ async function saveForm(status = "draft") {
     console.log("Starting save process...");
 
     const fileInput = document.getElementById('attachmentInput');
-    if (evDoc?.productType !== "AXI" && fileInput.files.length > 0) {
+    if (productType !== "AXI" && fileInput.files.length > 0) {
         const fileId = await uploadFile();
         if (fileId) {
             uploadedFileId = fileId;
@@ -842,7 +856,7 @@ async function saveForm(status = "draft") {
         status: status
     };
 
-    if (evDoc?.productType !== "AXI" && uploadedFileId) {
+    if (productType !== "AXI" && uploadedFileId) {
         saveData.attachmentId = uploadedFileId;
         if (fileInput.files.length > 0) {
             saveData.attachmentName = fileInput.files[0].name;
@@ -921,9 +935,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
-
-
-
-
-
-
