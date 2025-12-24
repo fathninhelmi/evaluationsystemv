@@ -503,20 +503,23 @@ function setupCheckboxGroups() {
     });
 }
     
-function hideAttachmentForAXI() {
-    const fileInput = document.getElementById('attachmentInput');
-    if (!fileInput) return;
+function hideAXISections() {
+    const attachmentInput = document.getElementById('attachmentInput');
+    if (!attachmentInput) return;
 
-    const attachmentSection = fileInput.closest('.form-section');
+    const attachmentSection = attachmentInput.closest('.form-section');
     if (attachmentSection) {
         attachmentSection.style.display = 'none';
-        console.log("AXI detected → Attachment section hidden");
+        console.log("Attachment section hidden for AXI");
     }
 
-    fileInput.disabled = true;
-    fileInput.value = '';
+    attachmentInput.disabled = true;
+    attachmentInput.value = '';
+
     const preview = document.getElementById('attachmentPreview');
     if (preview) preview.innerHTML = '';
+
+    uploadedFileId = null;
 }
 
 async function loadForm() {
@@ -543,7 +546,7 @@ async function loadForm() {
             if (checkbox) checkbox.checked = !!evDoc[key];
         });
 
-        if (evDoc.attachmentId) {
+        if (evDoc.attachmentId && productType !== 'AXI') {
             uploadedFileId = evDoc.attachmentId;
             try {
                 const fileUrl = storage.getFileView(bucketId, evDoc.attachmentId);
@@ -797,7 +800,6 @@ function updateFormDisplay() {
 async function saveForm(status = "draft") {
     console.log("Starting save process...");
 
-    // Upload file if new file is selected
     const fileInput = document.getElementById('attachmentInput');
     if (evDoc?.productType !== "AXI" && fileInput.files.length > 0) {
         const fileId = await uploadFile();
@@ -919,6 +921,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
 
