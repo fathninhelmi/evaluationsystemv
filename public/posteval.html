@@ -553,20 +553,17 @@ async function loadProductType() {
 }
 
 function hideAXISections() {
-    // Hide attachment section
-    const attachmentSection = document.querySelector('.form-section:has(#attachmentInput)');
+    const attachmentInput = document.getElementById('attachmentInput');
+    if (!attachmentInput) return;
+
+    const attachmentSection = attachmentInput.closest('.form-section');
     if (attachmentSection) {
         attachmentSection.style.display = 'none';
-        attachmentSection.classList.add('hidden-section');
         console.log("Attachment section hidden for AXI");
     }
-    
-    // Disable attachment input
-    const attachmentInput = document.getElementById('attachmentInput');
-    if (attachmentInput) {
-        attachmentInput.disabled = true;
-        attachmentInput.removeAttribute('required');
-    }
+
+    attachmentInput.disabled = true;
+    attachmentInput.removeAttribute('required');
 }
     
 async function loadForm() {
@@ -1140,5 +1137,3 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
-
-
