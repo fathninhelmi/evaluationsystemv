@@ -533,7 +533,7 @@ async function loadForm() {
         evDoc = await databases.getDocument(databaseId, evalCollectionId, eventId);
         console.log("Loaded eval document:", evDoc);
         if (evDoc.productType === "AXI") {
-                hideAttachmentForAXI();
+                 hideAXISections();
             }
         [
             'tech_inspection_cycle_above','tech_inspection_cycle_medium','tech_inspection_cycle_below',
@@ -921,6 +921,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
 
