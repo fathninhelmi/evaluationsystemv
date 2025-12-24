@@ -601,11 +601,13 @@ async function loadExistingForm() {
         currentStatus = (formData && formData.status) || "draft";
         document.getElementById("loadingIndicator").style.display = "none";
         document.getElementById("preEvalForm").style.display = "block";
-        populateForm(formData, referenceDocData);
-        if (referenceDocData && referenceDocData.product) {
-            console.log("Final toggle for product:", referenceDocData.product);
-            toggleSectionsByProduct(referenceDocData.product);
+        
+        if (referenceDocData && referenceDocData.productType === 'AXI') {
+            console.log("Product type is AXI - hiding sections 3-10");
+            toggleSectionsByProduct('AXI');
         }
+        
+        populateForm(formData, referenceDocData);
         
         updateFormDisplay();
     } catch (error) {
@@ -621,15 +623,28 @@ function toggleSectionsByProduct(productType) {
 
     allSections.forEach(section => {
         const sectionNumber = Number(section.dataset.section);
-
         if (productType === 'AXI' && ![1, 2, 11].includes(sectionNumber)) {
+            section.style.display = 'none';
             section.classList.add('hidden-section');
+            const inputs = section.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.removeAttribute('required');
+            });
         } else {
+            section.style.display = 'block';
             section.classList.remove('hidden-section');
+            if (!viewMode && currentStatus !== "drop") {
+                const inputs = section.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.disabled = false;
+                });
+            }
         }
     });
+    
+    console.log("Sections toggled for product type:", productType);
 }
-
 
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
@@ -1241,6 +1256,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
