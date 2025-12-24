@@ -403,6 +403,36 @@ async function saveCategoryToDatabase(categoryName, features) {
     }
 }
 
+async function deleteCategoryFromDatabase(categoryName) {
+    try {
+        const response = await databases.listDocuments(
+            databaseId, 
+            categoryCollectionId
+        );
+        const categoryDoc = response.documents.find(doc => doc.categoryName === categoryName);
+        if (categoryDoc) {
+            await databases.deleteDocument(databaseId, categoryCollectionId, categoryDoc.$id);
+            console.log('Category deleted from database:', categoryName);
+        }
+        
+        const featuresToDelete = categoryFeatures[categoryName];
+        if (featuresToDelete) {
+            for (const feature of featuresToDelete) {
+                const refData = references[feature.id];
+                if (refData && refData.docId) {
+                    await databases.deleteDocument(databaseId, referenceCollectionId, refData.docId);
+                    delete references[feature.id];
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error deleting category from database:', error);
+        throw error;
+    }
+}
+
+document.getElementById('addCategoryForm').addEventListener('submit', async (e) => {
+
 document.getElementById('addCategoryForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -679,6 +709,7 @@ loadReferences();
 </body>
 
 </html>
+
 
 
 
