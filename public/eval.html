@@ -546,7 +546,7 @@ async function loadForm() {
             if (checkbox) checkbox.checked = !!evDoc[key];
         });
 
-        if (evDoc.attachmentId && productType !== 'AXI') {
+        if (evDoc.attachmentId && evDoc.productType !== 'AXI') {
             uploadedFileId = evDoc.attachmentId;
             try {
                 const fileUrl = storage.getFileView(bucketId, evDoc.attachmentId);
@@ -921,6 +921,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
 
