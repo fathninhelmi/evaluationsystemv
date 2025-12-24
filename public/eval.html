@@ -261,6 +261,20 @@ async function checkUserRole() {
         return 'staff';
     }
 }
+    
+function hideAttachmentForAXI() {
+    const fileInput = document.getElementById('attachmentInput');
+    if (!fileInput) return;
+
+    const attachmentSection = fileInput.closest('.form-section');
+    if (attachmentSection) {
+        attachmentSection.style.display = 'none';
+        console.log("Attachment section hidden (AXI)");
+    }
+
+    fileInput.disabled = true;
+    fileInput.value = '';
+}
 
 function initFileUpload() {
     const fileInput = document.getElementById('attachmentInput');
