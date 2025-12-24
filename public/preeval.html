@@ -36,15 +36,15 @@
         <div class="form-section two-column" data-section="1">
             <div class="section-title">GENERAL</div>
             <div class="form-group-evalxc-compact">
-                <label>Customer Company Name :</label>
+                <label>Customer Company Name <span class="required-asterisk">*</span>:</label>
                 <input type="text" id="customerCompany" name="customerCompany" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Customer Tech Champion :</label>
+                <label>Customer Tech Champion <span class="required-asterisk">*</span>:</label>
                 <input type="text" id="custTechChamp" name="custTechChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Existing customer? :</label>
+                <label>Existing customer? <span class="required-asterisk">*</span>:</label>
                 <select id="existcust" name="existcust">
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
@@ -52,19 +52,19 @@
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Evaluation Date :</label>
+                <label>Evaluation Date<span class="required-asterisk">*</span>:</label>
                 <input type="date" id="evalDate" name="evalDate" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Competitor(s) if any :</label>
+                <label>Competitor(s) if any<span class="required-asterisk">*</span>:</label>
                 <input type="text" id="competitor" name="competitor">
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Competitor machine model :</label>
+                <label>Competitor machine model<span class="required-asterisk">*</span>:</label>
                 <input type="text" id="compModel" name="compModel">
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Venue :</label>
+                <label>Venue<span class="required-asterisk">*</span>:</label>
                 <select id="venue" name="venue" required>
                     <option value="">Select</option>
                     <option value="customer_site">Customer site</option>
@@ -78,12 +78,12 @@
         <div class="form-section two-column" data-section="2">
             <div class="section-title">RESOURCES</div>
             <div class="form-group-evalxc-compact">
-                <label>ViTrox / SCP Sales Champion :</label>
-                <input type="text" id="scpsalesChamp" name="scpsalesChamp" required>
+                <label>ViTrox / SCP Sales Champion<span class="required-asterisk">*</span>:</label>
+                <input type="text" id="scpvitroxsalesChamp" name="scpvitroxsalesChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>ViTrox / SCP Technical Champion :</label>
-                <input type="text" id="scptechChamp" name="scptechChamp" required>
+                <label>ViTrox / SCP Technical Champion<span class="required-asterisk">*</span>:</label>
+                <input type="text" id="scpvitroxtechChamp" name="scpvitroxtechChamp" required>
             </div>
         </div>
 
@@ -687,7 +687,7 @@ function populateForm(preEvalData, referenceData) {
     }
     const textFields = [
         'custTechChamp', 'competitor', 'compModel',
-        'scpsalesChamp', 'scptechChamp', 'vitroxsalesChamp', 'vitroxtechChamp',
+        'scpvitroxsalesChamp', 'scpvitroxtechChamp',
         'cycleTime', 'falseCallppm', 'otherreq'
     ];
 
@@ -930,7 +930,7 @@ function collectFormData() {
 
     const textFields = [
         'customerCompany', 'custTechChamp', 'competitor', 'compModel',
-        'scpsalesChamp', 'scptechChamp', 'vitroxsalesChamp', 'vitroxtechChamp',
+        'scpvitroxsalesChamp', 'scpvitroxtechChamp',
         'cycleTime', 'falseCallppm', 'otherreq'
     ];
 
@@ -1006,7 +1006,7 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalDate','scpsalesChamp', 'scptechChamp', 'venue'
+                'customerCompany', 'custTechChamp', 'evalDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
             ];
             if (!isAXI) {
                 requiredFields.push('falseCallppm');
@@ -1264,6 +1264,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
