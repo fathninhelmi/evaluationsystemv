@@ -33,7 +33,7 @@
     <form id="preEvalForm" style="display: none;">
         <!-- Section 1 -->
         <div class="form-section two-column">
-            <div class="section-title">1. GENERAL</div>
+            <div class="section-title">GENERAL</div>
             <div class="form-group-evalxc-compact">
                 <label>Customer Company Name <span class="required-asterisk">*</span> :</label>
                 <input type="text" id="customerCompany" name="customerCompany">
@@ -62,7 +62,7 @@
 
         <!-- Section 2 -->
         <div class="form-section two-column">
-            <div class="section-title">2. RESOURCES</div>
+            <div class="section-title">RESOURCES</div>
             <div class="form-group-evalxc-compact">
                 <label>VisionXpert BD Sales Champion<span class="required-asterisk">*</span>:</label>
                 <select id="vxpertsalesChamp" name="vxpertsalesChamp">
@@ -106,7 +106,7 @@
         
         <!-- Section 3 -->
         <div class="form-section two-column">
-            <div class="section-title" style="grid-column: span 2;">3. OBJECT & INSPECTION DETAILS</div>
+            <div class="section-title" style="grid-column: span 2;">OBJECT & INSPECTION DETAILS</div>
             <div class="subsection-title" style="grid-column: span 2;">Object Dimensions & Shape</div>
             <div class="form-group-evalxc-compact"style="grid-column: span 2;">
                 <label>Object Name <span class="required-asterisk">*</span> :</label>
@@ -260,7 +260,7 @@
 
         <!-- Section 4 -->
         <div class="form-section two-column">
-            <div class="section-title" style="grid-column: span 2;">4. TECHNICAL ENVIRONMENT</div>
+            <div class="section-title" style="grid-column: span 2;">TECHNICAL ENVIRONMENT</div>
             <div class="form-group-evalxc">
                 <div class="requirement-wrapperxs">
                 <div class="requirement-xc">Working Distance (mm) <span class="required-asterisk">*</span> :</div>
@@ -392,7 +392,7 @@
 
         <!-- Section 5 -->
         <div class="form-section">
-            <div class="section-title">5. COMMERCIAL & TIMELINE</div>
+            <div class="section-title">COMMERCIAL & TIMELINE</div>
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Budget Status :</div>
                 <div class="checkbox-options-xc">
@@ -430,7 +430,7 @@
 
         <!-- Section 6 -->
         <div class="form-section">
-            <div class="section-title">6. NEXT STEPS & FOLLOW-UP</div>
+            <div class="section-title">NEXT STEPS & FOLLOW-UP</div>
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Recommended Next Steps <span class="required-asterisk">*</span> :</div>
                 <div class="checkbox-options-xc">
@@ -510,7 +510,7 @@ async function checkUserRole() {
             return 'staff';
         }
         
-        return 'staff'; // Default
+        return 'staff';
     } catch (error) {
         console.error("Error checking user role:", error);
         return 'staff';
