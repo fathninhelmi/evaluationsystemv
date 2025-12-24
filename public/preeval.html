@@ -34,7 +34,7 @@
 
         <!-- Section 1 -->
         <div class="form-section two-column" data-section="1">
-            <div class="section-title">1. GENERAL</div>
+            <div class="section-title">GENERAL</div>
             <div class="form-group-evalxc-compact">
                 <label>Customer Company Name :</label>
                 <input type="text" id="customerCompany" name="customerCompany" required>
@@ -76,7 +76,7 @@
 
         <!-- Section 2 -->
         <div class="form-section two-column" data-section="2">
-            <div class="section-title">2. RESOURCES</div>
+            <div class="section-title">RESOURCES</div>
             <div class="form-group-evalxc-compact">
                 <label>ViTrox / SCP Sales Champion :</label>
                 <input type="text" id="scpsalesChamp" name="scpsalesChamp" required>
@@ -89,7 +89,7 @@
 
         <!-- Section 3 --->
         <div class="form-section two-column" data-section="3">
-            <div class="section-title">3. TARGET INSPECTION PERFORMANCE</div>
+            <div class="section-title">TARGET INSPECTION PERFORMANCE</div>
             <div class="form-group-evalxc-compact">
                 <label>Inspection environment :</label>
                 <select id="inspectionEnvironment" name="inspectionEnvironment">
@@ -142,7 +142,7 @@
 
         <!-- Section 4 -->
         <div class="form-section" data-section="4">
-            <div class="section-title">4. PCB</div>
+            <div class="section-title">PCB</div>
                 <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Board thickness :</div>
                 <div class="checkbox-options-xc">
@@ -184,7 +184,7 @@
 
         <!-- Section 5 -->
         <div class="form-section" data-section="5">
-            <div class="section-title">5. MACHINE TYPE</div>
+            <div class="section-title">MACHINE TYPE</div>
                 <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Conveyor :</div>
                 <div class="checkbox-options-xc">
@@ -231,7 +231,7 @@
 
         <!-- Section 6 -->
         <div class="form-section" data-section="6">
-            <div class="section-title">6. VISION</div>
+            <div class="section-title">VISION</div>
                 <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Lens :</div>
                 <div class="checkbox-options-xc">
@@ -254,7 +254,7 @@
 
         <!-- Section 7 -->
         <div class="form-section" data-section="7">
-            <div class="section-title">7. PC SPECS</div>
+            <div class="section-title">PC SPECS</div>
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Hardisc capacity :</div>
                 <div class="checkbox-options-xc">
@@ -265,7 +265,7 @@
 
         <!-- Section 8 -->
         <div class="form-section" data-section="8">
-        <div class="section-title">8. FEATURES & TOOLS</div>
+        <div class="section-title">FEATURES & TOOLS</div>
         <div class="checkbox-gridpr">
             <div class="header-evalpr"></div>
             <div class="header-evalpr">Software</div>
@@ -433,7 +433,7 @@
 
         <!-- Section 9 -->
         <div class="form-section" data-section="9">
-            <div class="section-title">9. HARDWARE</div>
+            <div class="section-title">HARDWARE</div>
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Rubber pad version 2019 :</div>
                 <div class="checkbox-options-xc">
@@ -444,7 +444,7 @@
 
         <!-- Section 10 -->
         <div class="form-section" data-section="10">
-            <div class="section-title">10. TOOLS</div>
+            <div class="section-title">TOOLS</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="tools" value="leveling_meter">Leveling meter</label>
                     <label><input type="checkbox" name="tools" value="auto_3d_calibration_jig">Auto 3D Calibration Jig</label>
@@ -461,7 +461,7 @@
 
         <!-- Section 11 -->
         <div class="form-section" data-section="11">
-            <div class="section-title">11. Customers' Current Top Issues</div>
+            <div class="section-title">Customers' Current Top Issues</div>
             <div class="table-section">
                 <table class="eval-table" id="custIssueTable">
                     <thead>
@@ -551,7 +551,7 @@ async function checkUserRole() {
             return 'staff';
         }
         
-        return 'staff'; // Default
+        return 'staff';
     } catch (error) {
         console.error("Error checking user role:", error);
         return 'staff';
@@ -601,7 +601,7 @@ async function loadExistingForm() {
         currentStatus = (formData && formData.status) || "draft";
         document.getElementById("loadingIndicator").style.display = "none";
         document.getElementById("preEvalForm").style.display = "block";
-        
+    
         if (referenceDocData && referenceDocData.productType === 'AXI') {
             console.log("Product type is AXI - hiding sections 3-10");
             toggleSectionsByProduct('AXI');
@@ -632,7 +632,7 @@ function toggleSectionsByProduct(productType) {
                 input.removeAttribute('required');
             });
         } else {
-            section.style.display = 'block';
+            section.style.display = '';
             section.classList.remove('hidden-section');
             if (!viewMode && currentStatus !== "drop") {
                 const inputs = section.querySelectorAll('input, select, textarea');
@@ -642,10 +642,19 @@ function toggleSectionsByProduct(productType) {
             }
         }
     });
+    const attachmentSection = document.querySelector('.form-section:has(#attachmentInput)');
+    if (attachmentSection) {
+        if (productType === 'AXI') {
+            attachmentSection.style.display = 'none';
+            attachmentSection.classList.add('hidden-section');
+        } else {
+            attachmentSection.style.display = '';
+            attachmentSection.classList.remove('hidden-section');
+        }
+    }
     
     console.log("Sections toggled for product type:", productType);
 }
-
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
     const customerCompanyElement = document.getElementById('customerCompany');
@@ -994,12 +1003,11 @@ async function saveForm(status = "draft") {
             }
         }
 
-       if (status === "complete") {
-            const isAXI = referenceDocData && referenceDocData.product === 'AXI';      
+        if (status === "complete") {
+            const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
                 'customerCompany', 'custTechChamp', 'evalDate','scpsalesChamp', 'scptechChamp', 'venue'
             ];
-            
             if (!isAXI) {
                 requiredFields.push('falseCallppm');
             }
@@ -1256,6 +1264,7 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
 
 
 
