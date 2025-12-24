@@ -5026,11 +5026,21 @@ label {
   font-size: 0.95em;
 }
 
+.btn-delete-category {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+}
 
+.btn-delete-category:hover {
+    background: #dc2626;
+}
 
-
-
-
-
-
-
+.btn-delete-category i {
+    font-size: 12px;
+}
