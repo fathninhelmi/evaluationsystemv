@@ -211,6 +211,18 @@ async function loadReferences() {
         console.log('Logged in as:', currentUser.email);
 
         try {
+            const categoryResponse = await databases.listDocuments(databaseId, categoryCollectionId);
+            categoryResponse.documents.forEach(doc => {
+                const categoryName = doc.categoryName;
+                const features = doc.features.map(f => JSON.parse(f));
+                categoryFeatures[categoryName] = features;
+            });
+            console.log('Loaded categories:', Object.keys(categoryFeatures).length);
+        } catch (error) {
+            console.log('No existing categories found or error loading:', error);
+        }
+
+        try {
             const response = await databases.listDocuments(databaseId, referenceCollectionId);
             console.log('Loaded references:', response.documents.length);
             response.documents.forEach(doc => {
@@ -224,6 +236,7 @@ async function loadReferences() {
         } catch (error) {
             console.log('No existing references found:', error);
         }
+        
         Object.keys(categoryFeatures).forEach(category => {
             if (categoryFeatures[category].length > 0) {
                 selectedFeatures[category] = categoryFeatures[category][0].id;
@@ -284,33 +297,37 @@ function displayReferences(searchFilter = '') {
         }
 
         card.innerHTML = `
-            <div class="card-header-cat">
-                <h3 class="category-title">
-                    <i class="fas fa-folder-open"></i> ${category}
-                </h3>
-                <select class="feature-selector" onchange="changeFeature('${category}', this.value)">
-                    ${features.map(f => `
-                        <option value="${f.id}" ${f.id === selectedFeatureId ? 'selected' : ''}>
-                            ${f.name}
-                        </option>
-                    `).join('')}
-                </select>
-            </div>
-            <div class="card-body-cat">
-                <div class="options-display">
-                    ${optionsHtml}
-                </div>
-                <div class="action-buttons">
-                    <button class="btn-ref btn-manage" onclick="openEditModal('${selectedFeatureId}', '${category}', '${selectedFeature.name.replace(/'/g, "\\'")}')">
-                        <i class="fas fa-cog"></i> Manage Options
-                    </button>
-                    <button class="btn-ref btn-delete" onclick="deleteAllOptions('${selectedFeatureId}', '${category}', '${selectedFeature.name.replace(/'/g, "\\'")}')">
-                        <i class="fas fa-trash-alt"></i> Delete All
-                    </button>
-                </div>
-            </div>
-        `;
-
+    <div class="card-header-cat">
+        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+            <h3 class="category-title">
+                <i class="fas fa-folder-open"></i> ${category}
+            </h3>
+            <button class="btn-delete-category" onclick="deleteCategory('${category.replace(/'/g, "\\'")}')">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+        <select class="feature-selector" onchange="changeFeature('${category}', this.value)">
+            ${features.map(f => `
+                <option value="${f.id}" ${f.id === selectedFeatureId ? 'selected' : ''}>
+                    ${f.name}
+                </option>
+            `).join('')}
+        </select>
+    </div>
+    <div class="card-body-cat">
+        <div class="options-display">
+            ${optionsHtml}
+        </div>
+        <div class="action-buttons">
+            <button class="btn-ref btn-manage" onclick="openEditModal('${selectedFeatureId}', '${category}', '${selectedFeature.name.replace(/'/g, "\\'")}')">
+                <i class="fas fa-cog"></i> Manage Options
+            </button>
+            <button class="btn-ref btn-delete" onclick="deleteAllOptions('${selectedFeatureId}', '${category}', '${selectedFeature.name.replace(/'/g, "\\'")}')">
+                <i class="fas fa-trash-alt"></i> Delete All
+            </button>
+        </div>
+    </div>
+`;
         grid.appendChild(card);
     });
 }
@@ -368,13 +385,15 @@ function deleteCategory(categoryName) {
 
 async function saveCategoryToDatabase(categoryName, features) {
     try {
+        const featureStrings = features.map(f => JSON.stringify(f));
+        
         await databases.createDocument(
             databaseId, 
             categoryCollectionId, 
             'unique()', 
             {
                 categoryName: categoryName,
-                features: JSON.stringify(features)
+                features: featureStrings
             }
         );
         console.log('Category saved to database:', categoryName);
@@ -426,6 +445,24 @@ document.getElementById('addCategoryForm').addEventListener('submit', async (e) 
     displayReferences(document.getElementById('searchInput').value);
     showNotification(`Category "${categoryName}" created successfully!`, 'success');
 });
+
+async function deleteCategory(categoryName) {
+    if (!confirm(`Are you sure you want to delete the entire "${categoryName}" category?\n\nThis will remove all features and options associated with this category. This action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        await deleteCategoryFromDatabase(categoryName);
+        delete categoryFeatures[categoryName];
+        delete selectedFeatures[categoryName];
+        
+        showNotification(`Category "${categoryName}" deleted successfully`, 'success');
+        displayReferences(document.getElementById('searchInput').value);
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        showNotification('Error deleting category: ' + error.message, 'warning');
+    }
+}
 
 function openEditModal(id, category, name) {
     currentEditId = id;
@@ -642,6 +679,7 @@ loadReferences();
 </body>
 
 </html>
+
 
 
 
