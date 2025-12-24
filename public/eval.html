@@ -262,20 +262,6 @@ async function checkUserRole() {
         return 'staff';
     }
 }
-    
-function hideAttachmentForAXI() {
-    const fileInput = document.getElementById('attachmentInput');
-    if (!fileInput) return;
-
-    const attachmentSection = fileInput.closest('.form-section');
-    if (attachmentSection) {
-        attachmentSection.style.display = 'none';
-        console.log("Attachment section hidden (AXI)");
-    }
-
-    fileInput.disabled = true;
-    fileInput.value = '';
-}
 
 function initFileUpload() {
     const fileInput = document.getElementById('attachmentInput');
@@ -517,6 +503,22 @@ function setupCheckboxGroups() {
         });
     });
 }
+    
+function hideAttachmentForAXI() {
+    const fileInput = document.getElementById('attachmentInput');
+    if (!fileInput) return;
+
+    const attachmentSection = fileInput.closest('.form-section');
+    if (attachmentSection) {
+        attachmentSection.style.display = 'none';
+        console.log("AXI detected → Attachment section hidden");
+    }
+
+    fileInput.disabled = true;
+    fileInput.value = '';
+    const preview = document.getElementById('attachmentPreview');
+    if (preview) preview.innerHTML = '';
+}
 
 async function loadForm() {
     if (!eventId) {
@@ -527,10 +529,10 @@ async function loadForm() {
 
     try {
         evDoc = await databases.getDocument(databaseId, evalCollectionId, eventId);
-        if (evDoc.productType === 'AXI') {
+        console.log("Loaded eval document:", evDoc);
+        if (evDoc.productType === "AXI") {
                 hideAttachmentForAXI();
             }
-        console.log("Loaded eval document:", evDoc);
         [
             'tech_inspection_cycle_above','tech_inspection_cycle_medium','tech_inspection_cycle_below',
             'tech_programming_time_above','tech_programming_time_medium','tech_programming_time_below',
@@ -542,7 +544,6 @@ async function loadForm() {
             if (checkbox) checkbox.checked = !!evDoc[key];
         });
 
-        // Load attachment if exists
         if (evDoc.attachmentId) {
             uploadedFileId = evDoc.attachmentId;
             try {
@@ -799,7 +800,7 @@ async function saveForm(status = "draft") {
 
     // Upload file if new file is selected
     const fileInput = document.getElementById('attachmentInput');
-    if (fileInput.files.length > 0) {
+    if (evDoc?.productType !== "AXI" && fileInput.files.length > 0) {
         const fileId = await uploadFile();
         if (fileId) {
             uploadedFileId = fileId;
@@ -840,8 +841,7 @@ async function saveForm(status = "draft") {
         status: status
     };
 
-    // Add attachment data if exists
-    if (uploadedFileId) {
+    if (evDoc?.productType !== "AXI" && uploadedFileId) {
         saveData.attachmentId = uploadedFileId;
         if (fileInput.files.length > 0) {
             saveData.attachmentName = fileInput.files[0].name;
@@ -920,4 +920,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
