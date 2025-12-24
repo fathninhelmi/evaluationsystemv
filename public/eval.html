@@ -212,6 +212,7 @@ let feedbackRowCount = 1;
 let commentRowCount = 1;
 let uploadedFileId = null;
 let currentUser = null;
+let uploadedFileId = null;
 
 function showToast(message, isError = false) {
     const existingToast = document.querySelector('.toast-notification');
@@ -526,6 +527,9 @@ async function loadForm() {
 
     try {
         evDoc = await databases.getDocument(databaseId, evalCollectionId, eventId);
+        if (evDoc.productType === 'AXI') {
+                hideAttachmentForAXI();
+            }
         console.log("Loaded eval document:", evDoc);
         [
             'tech_inspection_cycle_above','tech_inspection_cycle_medium','tech_inspection_cycle_below',
@@ -916,3 +920,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
