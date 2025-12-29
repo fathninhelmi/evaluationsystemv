@@ -526,6 +526,7 @@ const databaseId = "68ba8a9c001f17064e15";
 const collectionId = "68ba918c0022d2b9a429";
 const preEvalCollectionId = "68c7ced6001bd14d08f4";
 const referenceCollectionId = "68da1d5f002142be75df";
+const categoryCollectionId = "6944b2a20012334309c3";
 const bucketId = "69015d8b0030f329c599";
 
 const params = new URLSearchParams(window.location.search);
@@ -538,6 +539,7 @@ let referenceDocData = null;
 let uploadedFileId = null;
 let currentStatus = "draft";
 let referenceData = {};
+let dynamicCategories = {};
 
 async function checkUserRole() {
     try {
@@ -558,6 +560,106 @@ async function checkUserRole() {
     }
 }
 
+// Function to load all categories from database
+async function loadAllCategories() {
+    try {
+        const response = await databases.listDocuments(databaseId, categoryCollectionId);
+        
+        response.documents.forEach(doc => {
+            const categoryName = doc.categoryName;
+            const features = doc.features.map(f => JSON.parse(f));
+            
+            // Store the category info
+            dynamicCategories[categoryName] = {
+                features: features,
+                formFields: doc.formFields ? JSON.parse(doc.formFields) : null
+            };
+        });
+        
+        console.log('Loaded dynamic categories:', Object.keys(dynamicCategories).length);
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+// Function to inject custom categories into the form
+function injectDynamicCategories() {
+    const featuresSection = document.querySelector('[data-section="8"]');
+    if (!featuresSection) {
+        console.error('Features section not found');
+        return;
+    }
+    
+    const checkboxGrid = featuresSection.querySelector('.checkbox-gridpr');
+    if (!checkboxGrid) {
+        console.error('Checkbox grid not found');
+        return;
+    }
+    
+    // Define default categories to skip (they're already in the HTML)
+    const defaultCategories = [
+        'V-Library', 'AI Programming', 'VVTS', 'AI VVTS', 'VDSPC 2.0',
+        'V-One', 'V-Accelerator', 'V-Tune', 'Minitab', 'One-View',
+        'MES', 'Barcode Related'
+    ];
+    
+    // Add custom categories
+    Object.keys(dynamicCategories).forEach(categoryName => {
+        // Skip if it's a default category
+        if (defaultCategories.includes(categoryName)) {
+            return;
+        }
+        
+        const categoryData = dynamicCategories[categoryName];
+        const features = categoryData.features;
+        const formFields = categoryData.formFields || {};
+        
+        // Generate field names if not stored
+        const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        const softwareFieldName = formFields.software || `${baseName}Software`;
+        const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
+        
+        // Create the category row HTML
+        const categoryRow = document.createElement('div');
+        categoryRow.className = 'requirementpr';
+        categoryRow.textContent = categoryName + ' ';
+        categoryRow.setAttribute('data-dynamic-category', categoryName);
+        
+        // Create software column
+        const softwareColumn = document.createElement('div');
+        softwareColumn.className = 'checkbox-containerpr';
+        softwareColumn.setAttribute('data-dynamic-category', categoryName);
+        
+        // Add software checkboxes
+        features.forEach(feature => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'checkbox-itempr';
+            
+            checkboxDiv.innerHTML = `
+                <input type="checkbox" name="${softwareFieldName}" value="${feature.id}">
+                <label>${feature.name} <i class="fas fa-info-circle info-icon" data-tool="${feature.id}"></i></label>
+            `;
+            
+            softwareColumn.appendChild(checkboxDiv);
+        });
+        
+        // Create hardware column (empty for now, can be populated if needed)
+        const hardwareColumn = document.createElement('div');
+        hardwareColumn.className = 'checkbox-containerpr';
+        hardwareColumn.setAttribute('data-dynamic-category', categoryName);
+        
+        // Append to grid
+        checkboxGrid.appendChild(categoryRow);
+        checkboxGrid.appendChild(softwareColumn);
+        checkboxGrid.appendChild(hardwareColumn);
+        
+        console.log(`Added dynamic category: ${categoryName}`);
+    });
+    
+    // Reinitialize tooltips for new info icons
+    initTooltips();
+}
+
 async function initForm() {
     try {
         currentUser = await account.get();
@@ -569,7 +671,14 @@ async function initForm() {
             return;
         }
 
+        // Load categories first
+        await loadAllCategories();
+        
+        // Load existing form data
         await loadExistingForm();
+        
+        // Inject dynamic categories into the form
+        injectDynamicCategories();
 
         const userRole = await checkUserRole();
         if (viewMode || userRole === 'manager') {
@@ -655,6 +764,7 @@ function toggleSectionsByProduct(productType) {
     
     console.log("Sections toggled for product type:", productType);
 }
+
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
     const customerCompanyElement = document.getElementById('customerCompany');
@@ -681,7 +791,7 @@ function populateForm(preEvalData, referenceData) {
                     </div>
                 </div>
             `;
-             } catch (error) {
+        } catch (error) {
             console.error('Error loading attachment:', error);
         }
     }
@@ -738,6 +848,32 @@ function populateForm(preEvalData, referenceData) {
         if (data[fieldName] && Array.isArray(data[fieldName])) {
             data[fieldName].forEach(value => {
                 const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+    });
+
+    // Populate dynamic category fields
+    Object.keys(dynamicCategories).forEach(categoryName => {
+        const categoryData = dynamicCategories[categoryName];
+        const formFields = categoryData.formFields || {};
+        
+        const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        const softwareFieldName = formFields.software || `${baseName}Software`;
+        const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
+        
+        // Populate software checkboxes
+        if (data[softwareFieldName] && Array.isArray(data[softwareFieldName])) {
+            data[softwareFieldName].forEach(value => {
+                const checkbox = document.querySelector(`input[name="${softwareFieldName}"][value="${value}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+        
+        // Populate hardware checkboxes
+        if (data[hardwareFieldName] && Array.isArray(data[hardwareFieldName])) {
+            data[hardwareFieldName].forEach(value => {
+                const checkbox = document.querySelector(`input[name="${hardwareFieldName}"][value="${value}"]`);
                 if (checkbox) checkbox.checked = true;
             });
         }
@@ -977,6 +1113,28 @@ function collectFormData() {
         const checkedBoxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
         if (checkedBoxes.length > 0) {
             data[fieldName] = Array.from(checkedBoxes).map(cb => cb.value);
+        }
+    });
+
+    // Collect dynamic category fields
+    Object.keys(dynamicCategories).forEach(categoryName => {
+        const categoryData = dynamicCategories[categoryName];
+        const formFields = categoryData.formFields || {};
+        
+        const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        const softwareFieldName = formFields.software || `${baseName}Software`;
+        const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
+        
+        // Collect software checkboxes
+        const softwareBoxes = document.querySelectorAll(`input[name="${softwareFieldName}"]:checked`);
+        if (softwareBoxes.length > 0) {
+            data[softwareFieldName] = Array.from(softwareBoxes).map(cb => cb.value);
+        }
+        
+        // Collect hardware checkboxes
+        const hardwareBoxes = document.querySelectorAll(`input[name="${hardwareFieldName}"]:checked`);
+        if (hardwareBoxes.length > 0) {
+            data[hardwareFieldName] = Array.from(hardwareBoxes).map(cb => cb.value);
         }
     });
 
@@ -1249,10 +1407,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     initTooltips();
     initFileUpload();
 
-document.getElementById("preEvalForm").addEventListener("submit", e => {
-    e.preventDefault();
-    saveForm("complete");
-});
+    document.getElementById("preEvalForm").addEventListener("submit", e => {
+        e.preventDefault();
+        saveForm("complete");
+    });
 });
 
 </script>
@@ -1264,3 +1422,4 @@ document.getElementById("preEvalForm").addEventListener("submit", e => {
 </body>
 
 </html>
+
