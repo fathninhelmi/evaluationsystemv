@@ -5034,12 +5034,12 @@ label {
     background: #ef4444;
     color: white;
     border: none;
-    padding: 3px 5px;
+    padding: 2px 4px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 10px; 
     transition: background 0.2s;
-    min-width: auto;  
+    min-width: 15px;  
     flex-shrink: 0;     
 }
 
@@ -5051,3 +5051,4 @@ label {
 .btn-delete-category i {
     font-size: 9px;  
 }
+
