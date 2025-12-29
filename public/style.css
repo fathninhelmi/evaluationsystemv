@@ -5034,7 +5034,6 @@ label {
     background: #ef4444;
     color: white;
     border: none;
-    padding: 2px 4px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 10px; 
@@ -5051,4 +5050,5 @@ label {
 .btn-delete-category i {
     font-size: 9px;  
 }
+
 
