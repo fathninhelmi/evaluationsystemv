@@ -303,7 +303,7 @@ card.innerHTML = `
                 <i class="fas fa-folder-open"></i> ${category}
             </h3>
             <button class="btn-delete-category" onclick="deleteCategory('${category.replace(/'/g, "\\'")}')">
-                <i class="fas fa-trash-alt"></i> Delete
+                <i class="fas fa-trash-alt"></i> Delete Category
             </button>
         </div>
         <select class="feature-selector" onchange="changeFeature('${category}', this.value)">
@@ -705,6 +705,7 @@ loadReferences();
 </footer>
 </body>
 </html>
+
 
 
 
