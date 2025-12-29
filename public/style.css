@@ -3003,29 +3003,6 @@ label {
   box-shadow: 0 12px 35px rgba(0,0,0,0.4);
 }
 
-.card-header-cat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 2px solid rgba(78, 168, 222, 0.3);
-    gap: 10px;
-}
-
-.category-title {
-    color: #4ea8de;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex: 1; 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; 
-}
-
 .feature-selector {
   width: 100%;
   padding: 0.75rem;
@@ -5032,30 +5009,59 @@ label {
   border-radius: 6px;
   font-size: 0.95em;
 }
+.card-header-cat {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 1.5rem;
+    border-bottom: 2px solid rgba(78, 168, 222, 0.3);
+}
+
+.category-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+
+.category-title {
+    color: #4ea8de;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
 
 .btn-delete-category {
     background: #ef4444;
     color: white;
     border: none;
     cursor: pointer;
-    font-size: 7px;
-    transition: background 0.2s;
-    width: 3px;
-    height: 10px;
-    padding: 0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    gap: 5px;
+    height: 32px;
 }
 
 .btn-delete-category:hover {
     background: #dc2626;
-    transform: scale(1.05);
+    transform: translateY(-1px);
 }
 
 .btn-delete-category i {
-    font-size: 10px;
+    font-size: 12px;
 }
-
-
