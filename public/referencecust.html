@@ -297,15 +297,22 @@ function displayReferences(searchFilter = '') {
         }
 
        card.innerHTML = `
+    card.innerHTML = `
     <div class="card-header-cat">
-        <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-            <h3 class="category-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;">
-                <i class="fas fa-folder-open"></i> ${category}
-            </h3>
-            <button class="btn-delete-category" onclick="deleteCategory('${category.replace(/'/g, "\\'")}')">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-        </div>
+        <h3 class="category-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; flex: 1; min-width: 0;">
+            <i class="fas fa-folder-open"></i> ${category}
+        </h3>
+        <button class="btn-delete-category" onclick="deleteCategory('${category.replace(/'/g, "\\'")}')">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+        <select class="feature-selector" onchange="changeFeature('${category}', this.value)">
+            ${features.map(f => `
+                <option value="${f.id}" ${f.id === selectedFeatureId ? 'selected' : ''}>
+                    ${f.name}
+                </option>
+            `).join('')}
+        </select>
+    </div>
         <select class="feature-selector" onchange="changeFeature('${category}', this.value)">
             ${features.map(f => `
                 <option value="${f.id}" ${f.id === selectedFeatureId ? 'selected' : ''}>
@@ -705,4 +712,3 @@ loadReferences();
 </footer>
 </body>
 </html>
-
