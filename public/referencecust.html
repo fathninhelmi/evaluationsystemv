@@ -298,12 +298,12 @@ function displayReferences(searchFilter = '') {
 
 card.innerHTML = `
     <div class="card-header-cat">
-        <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-            <h3 class="category-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; flex: 1; min-width: 0;">
+        <div class="category-title-row">
+            <h3 class="category-title">
                 <i class="fas fa-folder-open"></i> ${category}
             </h3>
             <button class="btn-delete-category" onclick="deleteCategory('${category.replace(/'/g, "\\'")}')">
-                <i class="fas fa-trash-alt"></i>
+                <i class="fas fa-trash-alt"></i> Delete
             </button>
         </div>
         <select class="feature-selector" onchange="changeFeature('${category}', this.value)">
@@ -705,5 +705,6 @@ loadReferences();
 </footer>
 </body>
 </html>
+
 
 
