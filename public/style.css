@@ -3010,13 +3010,17 @@ label {
 }
 
 .category-title {
-  color: #4ea8de;
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    color: #4ea8de;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; 
 }
 
 .feature-selector {
@@ -5030,19 +5034,20 @@ label {
     background: #ef4444;
     color: white;
     border: none;
-    padding: 4px;
-    border-radius: 2px 4px;
+    padding: 3px 5px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 10px; 
     transition: background 0.2s;
+    min-width: auto;  
+    flex-shrink: 0;     
 }
 
 .btn-delete-category:hover {
     background: #dc2626;
+    transform: scale(1.05);
 }
 
 .btn-delete-category i {
-    font-size: 10px;
+    font-size: 9px;  
 }
-
-
