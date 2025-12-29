@@ -5031,9 +5031,9 @@ label {
     color: white;
     border: none;
     padding: 4px;
-    border-radius: 4px;
+    border-radius: 2px 4px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 10px;
     transition: background 0.2s;
 }
 
@@ -5042,6 +5042,7 @@ label {
 }
 
 .btn-delete-category i {
-    font-size: 12px;
+    font-size: 10px;
 }
+
 
