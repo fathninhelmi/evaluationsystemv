@@ -52,7 +52,15 @@
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
+                <label>End customer name <span class="required-asterisk">*</span>:</label>
+                <input type="text" id="custTechChamp" name="custTechChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
                 <label>Evaluation Date<span class="required-asterisk">*</span>:</label>
+                <input type="date" id="evalDate" name="evalDate" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Estimate Duration<span class="required-asterisk">*</span>:</label>
                 <input type="date" id="evalDate" name="evalDate" required>
             </div>
             <div class="form-group-evalxc-compact">
@@ -70,6 +78,14 @@
                     <option value="customer_site">Customer site</option>
                     <option value="in_house">In House</option>
                     <option value="scp_office">SCP office</option>
+                </select>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Completed Machine Health check? <span class="required-asterisk">*</span>:</label>
+                <select id="existcust" name="existcust">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </select>
             </div>
         </div>
@@ -1422,4 +1438,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 </body>
 
 </html>
+
 
