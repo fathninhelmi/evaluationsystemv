@@ -178,10 +178,10 @@
                     <label><input type="checkbox" name="smallestComponentSize" value="008004_03015">008004 / 03015</label>
                 </div>
             </div>
-
-            <div class="checkbox-grid-xc">
+            
+            <div class="form-group-evalxc" style="grid-column: span 2;">
                 <label>Tallest Component (from PCB top surface) <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="falseCallppm" name="falseCallppm" required>
+                <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
             </div>
 
             <div class="checkbox-grid-xc">
@@ -263,7 +263,7 @@
         </div>
 
         <!-- Section 6 -->
-        <div class="form-section" data-section="6">
+        <div class="form-section two-column" data-section="6">
             <div class="section-title">VISION</div>
             <div class="form-group-evalxc-compact">
                 <label>Camera <span class="required-asterisk">*</span>:</label>
@@ -316,6 +316,7 @@
                 </div>
             </div>
         </div>
+</div>
 
         <!-- Section 7 -->
         <div class="form-section" data-section="7">
@@ -1584,3 +1585,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 </body>
 
 </html>
+
