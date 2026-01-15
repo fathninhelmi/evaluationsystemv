@@ -81,7 +81,7 @@
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Completed Machine Health check? <span class="required-asterisk">*</span>:</label>
+                <label>Machine Health checked? <span class="required-asterisk">*</span>:</label>
                 <select id="existcust" name="existcust">
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
@@ -107,7 +107,7 @@
         <div class="form-section two-column" data-section="3">
             <div class="section-title">TARGET INSPECTION PERFORMANCE</div>
             <div class="form-group-evalxc-compact">
-                <label>Inspection environment :</label>
+                <label>Inspection environment <span class="required-asterisk">*</span>:</label>
                 <select id="inspectionEnvironment" name="inspectionEnvironment">
                     <option value="">Select</option>
                     <option value="offline_only">Offline only</option>
@@ -115,7 +115,7 @@
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>FPY target if any :</label>
+                <label>FPY target if any <span class="required-asterisk">*</span>:</label>
                 <select id="fpyTarget" name="fpyTarget">
                     <option value="">Select</option>
                     <option value="95">≥ 95%</option>
@@ -123,7 +123,7 @@
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Product segment :</label>
+                <label>Product segment <span class="required-asterisk">*</span>:</label>
                 <select id="prodseg" name="prodseg">
                     <option value="">Select</option>
                     <option value="aerospace">Aerospace</option>
@@ -132,10 +132,11 @@
                     <option value="telecom">Telecommunication</option>
                     <option value="consumer">Consumer product</option>
                     <option value="semicon">Semicon</option>
+                    <option value="automotive">Automotive</option>    
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Require angular inspection :</label>
+                <label>Require angular inspection <span class="required-asterisk">*</span>:</label>
                 <select id="reqinspect" name="reqinspect">
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
@@ -143,15 +144,15 @@
                 </select>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Cycle time requirement :</label>
+                <label>Cycle time requirement <span class="required-asterisk">*</span>:</label>
                 <input type="text" id="cycleTime" name="cycleTime">
             </div>
             <div class="form-group-evalxc-compact">
-                <label>False call PPM :</label>
+                <label>False call PPM <span class="required-asterisk">*</span>:</label>
                 <input type="text" id="falseCallppm" name="falseCallppm" required>
             </div>
             <div class="form-group-evalxc" style="grid-column: span 2;">
-                <label>Others :</label>
+                <label>Others <span class="required-asterisk">*</span>:</label>
                 <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
             </div>
         </div>
@@ -160,16 +161,17 @@
         <div class="form-section" data-section="4">
             <div class="section-title">PCB</div>
                 <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Board thickness :</div>
+                <div class="requirement-xc">Board thickness <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">Normal (0.5 - 4mm)</label>
+                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">0.2 - 4mm</label>
                     <label><input type="checkbox" name="boardThickness" value="gt_4mm">&gt;4mm</label>
-                    <label><input type="checkbox" name="boardThickness" value="lt_100um">&lt;100um</label>
+                    <label><input type="checkbox" name="boardThickness" value="lt_100um">&lt;200um</label>
                 </div>
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Smallest Component size :</div>
+                <div class="requirement-xc">Smallest Component size <span class="required-asterisk">*:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="smallestComponentSize" value="0201">0201</label>
                     <label><input type="checkbox" name="smallestComponentSize" value="01005">01005</label>
@@ -178,22 +180,37 @@
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Inspection requirement :</div>
+                <label>Tallest Component (from PCB top surface) <span class="required-asterisk">*</span>:</label>
+                <input type="text" id="falseCallppm" name="falseCallppm" required>
+            </div>
+
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Inspection requirement <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="inspectionRequirement" value="general_smt">General SMT</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="smt_tht">SMT & THT</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="non_smt">non-SMT inspection</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="z_height">Z-Height</label>
+                    <label><input type="checkbox" name="inspectionRequirement" value="smt_tht">Semicon</label>
+                    <label><input type="checkbox" name="inspectionRequirement" value="non_smt">Conformal Coating</label>
+                    <label><input type="checkbox" name="inspectionRequirement" value="z_height">Back End PCB Assembly</label>
                 </div>
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Programming Input files :</div>
+                <div class="requirement-xc">Programming Input files <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="programmingInputFiles" value="general_cad">General CAD</label>
                     <label><input type="checkbox" name="programmingInputFiles" value="gerber">Gerber</label>
                     <label><input type="checkbox" name="programmingInputFiles" value="bom">BOM</label>
                     <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">XY placement files</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">No CAD</label>
+                </div>
+            </div>
+
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Inspection Layer <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">Top only</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">Bottom only</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Top-Bottom</label>
                 </div>
             </div>
         </div>
@@ -202,11 +219,11 @@
         <div class="form-section" data-section="5">
             <div class="section-title">MACHINE TYPE</div>
                 <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Conveyor :</div>
+                <div class="requirement-xc">Conveyor <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="conveyor" value="staging">Staging</label>
                     <label><input type="checkbox" name="conveyor" value="linear_guide_awa">Linear Guide AWA</label>
-                    <label><input type="checkbox" name="conveyor" value="vacuum_table_awa">Vacuum Table AWA</label>
+                    <label><input type="checkbox" name="conveyor" value="vacuum_table_awa">Vacuum Table</label>
                     <label><input type="checkbox" name="conveyor" value="vvts_usb_io_card">VVTS USB IO Card</label>
                     <label><input type="checkbox" name="conveyor" value="long_board">Long Board</label>
                     <label><input type="checkbox" name="conveyor" value="center_pin">Center Pin</label>
@@ -214,7 +231,7 @@
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Machine type selection by board size :</div>
+                <div class="requirement-xc">Machine type selection by board size <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="machineTypeByBoardSize" value="standard">Standard</label>
                     <label><input type="checkbox" name="machineTypeByBoardSize" value="xl">XL</label>
@@ -226,7 +243,7 @@
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Board Flow Direction :</div>
+                <div class="requirement-xc">Board Flow Direction <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="boardFlowDirection" value="l_r">L-R</label>
                     <label><input type="checkbox" name="boardFlowDirection" value="r_l">R-L</label>
@@ -236,7 +253,7 @@
             </div>
 
             <div class="form-group-evalxc">
-                <label>Board Stop Requirement :</label>
+                <label>Board Stop Requirement <span class="required-asterisk">*</span>:</label>
                 <select id="boardStopRequirement" name="boardStopRequirement">
                     <option value="">Select</option>
                     <option value="hard_stop">Hard Stop</option>
@@ -248,34 +265,116 @@
         <!-- Section 6 -->
         <div class="form-section" data-section="6">
             <div class="section-title">VISION</div>
-                <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Lens :</div>
+            <div class="form-group-evalxc-compact">
+                <label>Camera <span class="required-asterisk">*</span>:</label>
+                <select id="inspectionEnvironment" name="inspectionEnvironment">
+                    <option value="">Select</option>
+                    <option value="offline_only">12MP</option>
+                    <option value="offline_inline">25MP</option>
+                </select>
+            </div>
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Lens <span class="required-asterisk">*</span:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="lens" value="13um">13um</label>
                     <label><input type="checkbox" name="lens" value="15um">15um</label>
                     <label><input type="checkbox" name="lens" value="10um">10um</label>
                     <label><input type="checkbox" name="lens" value="8um">8um</label>
+                    <label><input type="checkbox" name="lens" value="8um">9um</label>
+                    <label><input type="checkbox" name="lens" value="8um">7um</label>
+                    <label><input type="checkbox" name="lens" value="8um">6um</label>
+                    <label><input type="checkbox" name="lens" value="8um">5um</label>
+                    <label><input type="checkbox" name="lens" value="8um">2.5um</label>
                 </div>
             </div>
 
-            <div class="form-group-evalxc">
-                <label>Coaxial Lighting :</label>
+            <div class="form-group-evalxc-compact">
+                <label>Coaxial Lighting <span class="required-asterisk">*</span:</label>
                 <select id="coaxialLighting" name="coaxialLighting">
                     <option value="">Select</option>
                     <option value="required">Required</option>
                     <option value="not_required">Not required</option>
                 </select>
             </div>
+
+            <div class="form-group-evalxc-compact">
+                <label>Motorized Z-height <span class="required-asterisk">*</span:</label>
+                <select id="coaxialLighting" name="coaxialLighting">
+                    <option value="">Select</option>
+                    <option value="required">Required</option>
+                    <option value="not_required">Not required</option>
+                </select>
+            </div>
+
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Projector <span class="required-asterisk">*</span:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="lens" value="13um">Standard</label>
+                    <label><input type="checkbox" name="lens" value="15um">6x Lens</label>
+                    <label><input type="checkbox" name="lens" value="10um">4x Lens</label>
+                    <label><input type="checkbox" name="lens" value="8um">Multiverse</label>
+                </div>
+            </div>
         </div>
 
         <!-- Section 7 -->
         <div class="form-section" data-section="7">
-            <div class="section-title">PC SPECS</div>
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Hardisc capacity :</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="hardiscCapacity" value="512gb_ssd">&gt;512GB SSD</label>
-                </div>
+            <div class="section-title">IPC SPECS</div>
+            <div class="form-group-evalxc-compact">
+                <label>Operating System <span class="required-asterisk">*</span>:</label>
+                <select id="inspectionEnvironment" name="inspectionEnvironment">
+                    <option value="">Select</option>
+                    <option value="offline_only">Window 11</option>
+                    <option value="offline_inline">Window 10</option>
+                    <option value="offline_inline">Window 8</option>
+                    <option value="offline_inline">Older than Window 10</option>
+            </select>
+            </div>
+
+            <div class="form-group-evalxc-compact">
+                <label>CPU <span class="required-asterisk">*</span>:</label>
+                <select id="inspectionEnvironment" name="inspectionEnvironment">
+                    <option value="">Select</option>
+                    <option value="offline_only">i9</option>
+                    <option value="offline_inline">i7</option>
+                    <option value="offline_inline">Xeon</option>
+            </select>
+            </div>
+
+            <div class="form-group-evalxc-compact">
+                <label>RAM <span class="required-asterisk">*</span>:</label>
+                <select id="inspectionEnvironment" name="inspectionEnvironment">
+                    <option value="">Select</option>
+                    <option value="offline_only">Lower than 16GB</option>
+                    <option value="offline_inline">16GB</option>
+                    <option value="offline_inline">32GB</option>
+                    <option value="offline_inline">64GB</option>
+            </select>
+            </div>
+
+            <div class="form-group-evalxc-compact">
+                <label>GPU <span class="required-asterisk">*</span>:</label>
+                <select id="inspectionEnvironment" name="inspectionEnvironment">
+                    <option value="">Select</option>
+                    <option value="offline_only">RTX 50 series</option>
+                    <option value="offline_inline">RTX 40 series</option>
+                    <option value="offline_inline">RTX 30 series</option>
+                    <option value="offline_inline">RTX 20 series</option>
+                    <option value="offline_inline">Older than RTX 20 series</option>
+            </select>
+            </div>
+
+            
+            <div class="form-group-evalxc-compact">
+                <label>C Drive Storage <span class="required-asterisk">*</span>:</label>
+                <select id="inspectionEnvironment" name="inspectionEnvironment">
+                    <option value="">Select</option>
+                    <option value="offline_only">1TB</option>
+                    <option value="offline_inline">512GB</option>
+                    <option value="offline_inline">Lower than 512GB</option>
+                    <option value="offline_inline">RTX 20 series</option>
+                    <option value="offline_inline">More than 1TB</option>
+            </select>
             </div>
         </div>
 
@@ -286,7 +385,20 @@
             <div class="header-evalpr"></div>
             <div class="header-evalpr">Software</div>
             <div class="header-evalpr">Hardware</div>
-            <div class="requirementpr">V-Library </div>
+            <div class="requirementpr">Smart Measurement <span class="required-asterisk">*</span></div>
+            <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vLibrarySoftware" value="system_gt_32gb_ram">
+                <label>License <i class="fas fa-info-circle info-icon" data-tool="system_gt_32gb_ram"></i></label>
+            </div>
+            </div>
+            <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vLibraryHardware" value="server">
+                <label>Motorized Z-height <i class="fas fa-info-circle info-icon" data-tool="server"></i></label>
+            </div>
+            </div>
+            <div class="requirementpr">V-Library <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="vLibrarySoftware" value="system_gt_32gb_ram">
@@ -299,7 +411,7 @@
                 <label>Server <i class="fas fa-info-circle info-icon" data-tool="server"></i></label>
             </div>
             </div>
-            <div class="requirementpr">AI Programming </div>
+            <div class="requirementpr">AI Programming <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="aiProgrammingSoftware" value="vayo_accelerator">
@@ -312,7 +424,7 @@
                 <label>Mentor graphics OPM <i class="fas fa-info-circle info-icon" data-tool="mentor_graphics_opm"></i></label>
             </div>
             </div>
-            <div class="requirementpr">VVTS </div>
+            <div class="requirementpr">VVTS <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="vvtsSoftware" value="license">
@@ -329,7 +441,7 @@
                 <label>One AOI to multiple <i class="fas fa-info-circle info-icon" data-tool="vvts_one_aoi"></i></label>
             </div>
             </div>
-            <div class="requirementpr">AI VVTS </div>
+            <div class="requirementpr">AI VVTS <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="aiVvtsSoftware" value="license">
@@ -346,7 +458,7 @@
                 <label>One AOI to multiple <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_one_aoi"></i></label>
             </div>
             </div>
-            <div class="requirementpr">VDSPC 2.0 </div>
+            <div class="requirementpr">VDSPC 2.0 <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="vdspcSoftware" value="license">
@@ -359,7 +471,7 @@
                 <label>Server <i class="fas fa-info-circle info-icon" data-tool="vdspc_server"></i></label>
             </div>
             </div>
-            <div class="requirementpr">V-One </div>
+            <div class="requirementpr">V-One <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="voneSoftware" value="license">
@@ -372,40 +484,36 @@
                 <label>Server <i class="fas fa-info-circle info-icon" data-tool="vone_server"></i></label>
             </div>
             </div>
-            <div class="requirementpr">V-Accelerator </div>
+            <div class="requirementpr">CAD Converter Tool<span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="vAcceleratorSoftware" value="license_dongle">
-                <label>License / dongle <i class="fas fa-info-circle info-icon" data-tool="v_acc_license"></i></label>
+                <label>V-Accelerator <i class="fas fa-info-circle info-icon" data-tool="v_acc_license"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiVvtsHardware" value="one_aoi_to_multiple">
+                <label>ePM-AI2 <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_one_aoi"></i></label>
+            </div>
+            </div>
+            <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="voneHardware" value="server">
+                <label>PC <i class="fas fa-info-circle info-icon" data-tool="vone_server"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiVvtsHardware" value="one_aoi_to_multiple">
+                <label>PC <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_one_aoi"></i></label>
             </div>
             </div>
             <div class="checkbox-containerpr"></div>
-            <div class="requirementpr">V-Tune </div>
+            <div class="requirementpr">V-Tune <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="vTuneSoftware" value="system_gt_32gb_ram">
                 <label>System &gt;32GB RAM <i class="fas fa-info-circle info-icon" data-tool="v_tune_system32"></i></label>
             </div>
             </div>
-            <div class="checkbox-containerpr"></div>
-            <div class="requirementpr">Minitab </div>
-            <div class="checkbox-containerpr">
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="minitabSoftware" value="license">
-                <label>License <i class="fas fa-info-circle info-icon" data-tool="minitab_license"></i></label>
-            </div>
-            </div>
-            <div class="checkbox-containerpr">
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="minitabHardware" value="server">
-                <label>Server <i class="fas fa-info-circle info-icon" data-tool="minitab_server"></i></label>
-            </div>
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="minitabHardware" value="additional_gt_500gb_drive">
-                <label>Additional &gt;500GB hard drive capacity <i class="fas fa-info-circle info-icon" data-tool="minitab_500gb"></i></label>
-            </div>
-            </div>
-            <div class="requirementpr">One-View </div>
+            <div class="requirementpr">One-View <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="oneViewSoftware" value="license">
@@ -418,7 +526,24 @@
                 <label>Additional &gt;500GB Drive, Additional 16GB RAM <i class="fas fa-info-circle info-icon" data-tool="one_view_drive_ram"></i></label>
             </div>
             </div>
-            <div class="requirementpr">MES </div>
+            <div class="requirementpr">Smart Manufacturing <span class="required-asterisk">*</span></div>
+            <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiVvtsSoftware" value="license">
+                <label>SECS/GEM <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_license"></i></label>
+            </div>
+            </div>
+            <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiVvtsHardware" value="pc">
+                <label>HERMES <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_pc"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiVvtsHardware" value="one_aoi_to_multiple">
+                <label>M2M Closed Loop <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_one_aoi"></i></label>
+            </div>
+            </div>
+            <div class="requirementpr">MES <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="mesSoftware" value="available_feature">
@@ -431,7 +556,7 @@
                 <label>Need to develop/enhance <i class="fas fa-info-circle info-icon" data-tool="mes_develop"></i></label>
             </div>
             </div>
-            <div class="requirementpr">Barcode related </div>
+            <div class="requirementpr">Barcode related <span class="required-asterisk">*</span></div>
             <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="barcodeSoftware" value="available_feature">
@@ -451,21 +576,42 @@
         <div class="form-section" data-section="9">
             <div class="section-title">HARDWARE</div>
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Rubber pad version 2019 :</div>
+                <div class="requirement-xc">ESD Rubber Pads <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="rubberPad" value="smaller_than_0201">Component smaller than 0201</label>
+                </div>
+            </div>
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Cleanroom <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="rubberPad" value="smaller_than_0201">Ionizer kit</label>
+                </div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="rubberPad" value="smaller_than_0201">HEPA filter</label>
+                </div>
+            </div>
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Loader/Unloader <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="rubberPad" value="smaller_than_0201">L-R</label>
+                </div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="rubberPad" value="smaller_than_0201">L-L</label>
                 </div>
             </div>
         </div>
 
         <!-- Section 10 -->
         <div class="form-section" data-section="10">
-            <div class="section-title">TOOLS</div>
+            <div class="section-title">TOOLS<span class="required-asterisk">*</span></div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="tools" value="leveling_meter">Leveling meter</label>
                     <label><input type="checkbox" name="tools" value="auto_3d_calibration_jig">Auto 3D Calibration Jig</label>
                     <label><input type="checkbox" name="tools" value="manual_3d_calibration_jig">Manual 3D Calibration Jig</label>
-                    <label><input type="checkbox" name="tools" value="a4_grey_card">A4 Grey Card</label>
+                    <label><input type="checkbox" name="tools" value="manual_3d_calibration_jig">Deflectometry Jig</label>
+                    <label><input type="checkbox" name="tools" value="manual_3d_calibration_jig">Side Cam Jig</label>
+                    <label><input type="checkbox" name="tools" value="manual_3d_calibration_jig">Gantry Mapping Plate</label>
+                    <label><input type="checkbox" name="tools" value="a4_grey_card">A4/A5 Grey Card</label>
                     <label><input type="checkbox" name="tools" value="fiducial_plate">Fiducial Plate</label>
                     <label><input type="checkbox" name="tools" value="barcode_reader">Barcode reader</label>
                     <label><input type="checkbox" name="tools" value="300um_3d_step_grr_jig">300um 3D step GRR jig</label>
@@ -477,7 +623,7 @@
 
         <!-- Section 11 -->
         <div class="form-section" data-section="11">
-            <div class="section-title">Customers' Current Top Issues</div>
+            <div class="section-title">Customers' Current Top Issues<span class="required-asterisk">*</span></div>
             <div class="table-section">
                 <table class="eval-table" id="custIssueTable">
                     <thead>
@@ -1438,5 +1584,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 </body>
 
 </html>
-
-
