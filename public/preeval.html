@@ -273,6 +273,14 @@
                     <option value="offline_inline">25MP</option>
                 </select>
             </div>
+            <div class="form-group-evalxc-compact">
+                <label>Coaxial Lighting <span class="required-asterisk">*</span:</label>
+                <select id="coaxialLighting" name="coaxialLighting">
+                    <option value="">Select</option>
+                    <option value="required">Required</option>
+                    <option value="not_required">Not required</option>
+                </select>
+            </div>
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Lens <span class="required-asterisk">*</span:</div>
                 <div class="checkbox-options-xc">
@@ -287,25 +295,6 @@
                     <label><input type="checkbox" name="lens" value="8um">2.5um</label>
                 </div>
             </div>
-
-            <div class="form-group-evalxc-compact">
-                <label>Coaxial Lighting <span class="required-asterisk">*</span:</label>
-                <select id="coaxialLighting" name="coaxialLighting">
-                    <option value="">Select</option>
-                    <option value="required">Required</option>
-                    <option value="not_required">Not required</option>
-                </select>
-            </div>
-
-            <div class="form-group-evalxc-compact">
-                <label>Motorized Z-height <span class="required-asterisk">*</span:</label>
-                <select id="coaxialLighting" name="coaxialLighting">
-                    <option value="">Select</option>
-                    <option value="required">Required</option>
-                    <option value="not_required">Not required</option>
-                </select>
-            </div>
-
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Projector <span class="required-asterisk">*</span:</div>
                 <div class="checkbox-options-xc">
@@ -315,8 +304,14 @@
                     <label><input type="checkbox" name="lens" value="8um">Multiverse</label>
                 </div>
             </div>
-        </div>
-</div>
+            <div class="form-group-evalxc-compact">
+                <label>Motorized Z-height <span class="required-asterisk">*</span:</label>
+                <select id="coaxialLighting" name="coaxialLighting">
+                    <option value="">Select</option>
+                    <option value="required">Required</option>
+                    <option value="not_required">Not required</option>
+                </select>
+            </div>
 
         <!-- Section 7 -->
         <div class="form-section two-column" data-section="7">
@@ -1587,3 +1582,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 </body>
 
 </html>
+
