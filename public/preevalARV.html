@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+<title>Pre Evaluation Form</title>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<header class="header">
+    <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
+</header>
+
+<div class="card-eval">
+    <div class="form-header">
+        <button type="button" class="back-icon-btn" onclick="goBack()" aria-label="Go back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <h1 id="formTitle">Pre Evaluation Form</h1>
+        <span id="statusBadge" class="status-badge"></span>
+    </div>
+    
+    <div id="loadingIndicator" class="loading" style="display: none;">
+        Loading form data
+    </div>
+    
+    <form id="preEvalForm" style="display: none;">
+
+        <!-- Section 1 -->
+        <div class="form-section two-column" data-section="1">
+            <div class="section-title">GENERAL</div>
+            <div class="form-group-evalxc-compact">
+                <label>Customer Company Name <span class="required-asterisk">*</span>:</label>
+                <input type="text" id="customerCompany" name="customerCompany" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Customer Tech Champion <span class="required-asterisk">*</span>:</label>
+                <input type="text" id="custTechChamp" name="custTechChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Existing customer? <span class="required-asterisk">*</span>:</label>
+                <select id="existcust" name="existcust">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>End customer name <span class="required-asterisk">*</span>:</label>
+                <input type="text" id="custTechChamp" name="custTechChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Evaluation Date<span class="required-asterisk">*</span>:</label>
+                <input type="date" id="evalDate" name="evalDate" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Estimate Duration<span class="required-asterisk">*</span>:</label>
+                <input type="date" id="evalDate" name="evalDate" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Competitor(s) if any<span class="required-asterisk">*</span>:</label>
+                <input type="text" id="competitor" name="competitor">
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Competitor machine model<span class="required-asterisk">*</span>:</label>
+                <input type="text" id="compModel" name="compModel">
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Venue<span class="required-asterisk">*</span>:</label>
+                <select id="venue" name="venue" required>
+                    <option value="">Select</option>
+                    <option value="customer_site">Customer site</option>
+                    <option value="in_house">In House</option>
+                    <option value="scp_office">SCP office</option>
+                </select>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Machine Health checked? <span class="required-asterisk">*</span>:</label>
+                <select id="existcust" name="existcust">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="form-section two-column" data-section="2">
+            <div class="section-title">RESOURCES</div>
+            <div class="form-group-evalxc-compact">
+                <label>ViTrox / SCP Sales Champion<span class="required-asterisk">*</span>:</label>
+                <input type="text" id="scpvitroxsalesChamp" name="scpvitroxsalesChamp" required>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>ViTrox / SCP Tech Champion<span class="required-asterisk">*</span>:</label>
+                <input type="text" id="scpvitroxtechChamp" name="scpvitroxtechChamp" required>
+            </div>
+        </div>
+
+        <!-- Section 3 --->
+        <div class="form-section two-column" data-section="3">
+            <div class="section-title">TARGET INSPECTION PERFORMANCE</div>
+            <div class="form-group-evalxc-compact">
+                <label>Inspection environment <span class="required-asterisk">*</span>:</label>
+                <select id="inspectionEnvironment" name="inspectionEnvironment">
+                    <option value="">Select</option>
+                    <option value="offline_only">Offline only</option>
+                    <option value="offline_inline">Offline & Inline</option>
+                </select>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>FPY target if any <span class="required-asterisk">*</span>:</label>
+                <select id="fpyTarget" name="fpyTarget">
+                    <option value="">Select</option>
+                    <option value="95">≥ 95%</option>
+                    <option value="no_concern">No concern</option>
+                </select>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Product segment <span class="required-asterisk">*</span>:</label>
+                <select id="prodseg" name="prodseg">
+                    <option value="">Select</option>
+                    <option value="aerospace">Aerospace</option>
+                    <option value="medical">Medical</option>
+                    <option value="military">Military</option>
+                    <option value="telecom">Telecommunication</option>
+                    <option value="consumer">Consumer product</option>
+                    <option value="semicon">Semicon</option>
+                    <option value="automotive">Automotive</option>    
+                </select>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Require angular inspection <span class="required-asterisk">*</span>:</label>
+                <select id="reqinspect" name="reqinspect">
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>Cycle time requirement <span class="required-asterisk">*</span>:</label>
+                <input type="text" id="cycleTime" name="cycleTime">
+            </div>
+            <div class="form-group-evalxc-compact">
+                <label>False call PPM <span class="required-asterisk">*</span>:</label>
+                <input type="text" id="falseCallppm" name="falseCallppm" required>
+            </div>
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <label>Others <span class="required-asterisk">*</span>:</label>
+                <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
+            </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="form-section" data-section="4">
+            <div class="section-title">PCB</div>
+                <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Board thickness <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">Normal (0.5 - 13mm)</label>
+                    <label><input type="checkbox" name="boardThickness" value="gt_4mm">&gt;13mm</label>
+                </div>
+            </div>
+
+            <div class="form-group-evalxc" style="grid-column: span 2;">
+                <label>Smallest defect size <span class="required-asterisk">*</span>:</label>
+                <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
+            </div>
+
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Inspection requirement <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="inspectionRequirement" value="general_smt">Conformal Coating</label>
+                    <label><input type="checkbox" name="inspectionRequirement" value="smt_tht">Final Inspection</label>
+                    <label><input type="checkbox" name="inspectionRequirement" value="non_smt">2-in-1</label>
+                </div>
+            </div>
+
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Programming Input files <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">General CAD</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">Gerber</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">BOM</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">XY placement files</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">No CAD</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="form-section" data-section="5">
+            <div class="section-title">MACHINE TYPE</div>
+                <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Platform <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="conveyor" value="staging">V510Ai R</label>
+                    <label><input type="checkbox" name="conveyor" value="linear_guide_awa">V9i</label>
+                    <label><input type="checkbox" name="conveyor" value="vacuum_table_awa">V9i XL</label>
+                </div>
+            </div>
+
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Board Flow Direction <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="boardFlowDirection" value="l_r">L-R</label>
+                    <label><input type="checkbox" name="boardFlowDirection" value="r_l">R-L</label>
+                    <label><input type="checkbox" name="boardFlowDirection" value="l_l">L-L</label>
+                    <label><input type="checkbox" name="boardFlowDirection" value="r_r">R-R</label>
+                </div>
+            </div>
+
+            <div class="form-group-evalxc">
+                <label>Automation Configuration <span class="required-asterisk">*</span>:</label>
+                <select id="boardStopRequirement" name="boardStopRequirement">
+                    <option value="">Select</option>
+                    <option value="hard_stop">Return Conveyor</option>
+                    <option value="sensor_stop">V95i Rotator</option>
+                    <option value="sensor_stop">V97i Flipper</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section 6 -->
+<div class="form-section" data-section="6">
+    <div class="section-title">VISION</div>
+    <div class="form-group-evalxc-compact">
+        <label>Camera <span class="required-asterisk">*</span>:</label>
+        <select id="camera" name="camera">
+            <option value="">Select</option>
+            <option value="12mp">12MP</option>
+            <option value="25mp">25MP</option>
+        </select>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Coaxial Lighting <span class="required-asterisk">*</span>:</label>
+        <select id="coaxialLighting" name="coaxialLighting">
+            <option value="">Select</option>
+            <option value="required">Required</option>
+            <option value="not_required">Not required</option>
+        </select>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Motorized Z-height <span class="required-asterisk">*</span>:</label>
+        <select id="motorizedZHeight" name="motorizedZHeight">
+            <option value="">Select</option>
+            <option value="required">Required</option>
+            <option value="not_required">Not required</option>
+        </select>
+    </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Lens <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="lens" value="13um">13um</label>
+            <label><input type="checkbox" name="lens" value="15um">15um</label>
+            <label><input type="checkbox" name="lens" value="10um">10um</label>
+            <label><input type="checkbox" name="lens" value="8um">8um</label>
+            <label><input type="checkbox" name="lens" value="9um">9um</label>
+            <label><input type="checkbox" name="lens" value="7um">7um</label>
+            <label><input type="checkbox" name="lens" value="6um">6um</label>
+            <label><input type="checkbox" name="lens" value="5um">5um</label>
+            <label><input type="checkbox" name="lens" value="2.5um">2.5um</label>
+        </div>
+    </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Projector <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="projector" value="standard">Standard</label>
+            <label><input type="checkbox" name="projector" value="6x_lens">6x Lens</label>
+            <label><input type="checkbox" name="projector" value="4x_lens">4x Lens</label>
+            <label><input type="checkbox" name="projector" value="multiverse">Multiverse</label>
+        </div>
+    </div>
+</div>
+
+<!-- Section 7 -->
+<div class="form-section two-column" data-section="7">
+    <div class="section-title">IPC SPECS</div>
+    <div class="form-group-evalxc-compact">
+        <label>Operating System <span class="required-asterisk">*</span>:</label>
+        <select id="operatingSystem" name="operatingSystem">
+            <option value="">Select</option>
+            <option value="windows_11">Window 11</option>
+            <option value="windows_10">Window 10</option>
+            <option value="windows_8">Window 8</option>
+            <option value="older_than_windows_10">Older than Window 10</option>
+        </select>
+    </div>
+
+    <div class="form-group-evalxc-compact">
+        <label>CPU <span class="required-asterisk">*</span>:</label>
+        <select id="cpu" name="cpu">
+            <option value="">Select</option>
+            <option value="i9">i9</option>
+            <option value="i7">i7</option>
+            <option value="xeon">Xeon</option>
+        </select>
+    </div>
+
+    <div class="form-group-evalxc-compact">
+        <label>RAM <span class="required-asterisk">*</span>:</label>
+        <select id="ram" name="ram">
+            <option value="">Select</option>
+            <option value="lower_than_16gb">Lower than 16GB</option>
+            <option value="16gb">16GB</option>
+            <option value="32gb">32GB</option>
+            <option value="64gb">64GB</option>
+        </select>
+    </div>
+
+    <div class="form-group-evalxc-compact">
+        <label>GPU <span class="required-asterisk">*</span>:</label>
+        <select id="gpu" name="gpu">
+            <option value="">Select</option>
+            <option value="rtx_50_series">RTX 50 series</option>
+            <option value="rtx_40_series">RTX 40 series</option>
+            <option value="rtx_30_series">RTX 30 series</option>
+            <option value="rtx_20_series">RTX 20 series</option>
+            <option value="older_than_rtx_20">Older than RTX 20 series</option>
+        </select>
+    </div>
+
+    <div class="form-group-evalxc-compact">
+        <label>C Drive Storage <span class="required-asterisk">*</span>:</label>
+        <select id="cDriveStorage" name="cDriveStorage">
+            <option value="">Select</option>
+            <option value="1tb">1TB</option>
+            <option value="512gb">512GB</option>
+            <option value="lower_than_512gb">Lower than 512GB</option>
+            <option value="more_than_1tb">More than 1TB</option>
+        </select>
+    </div>
+</div>
+
+<!-- Section 8 -->
+<div class="form-section" data-section="8">
+    <div class="section-title">FEATURES & TOOLS</div>
+    <div class="checkbox-gridpr">
+        <div class="header-evalpr"></div>
+        <div class="header-evalpr">Software</div>
+        <div class="header-evalpr">Hardware</div>
+        
+        <div class="requirementpr">Smart Measurement <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartMeasurementSoftware" value="license">
+                <label>License <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_license"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartMeasurementHardware" value="motorized_z_height">
+                <label>Motorized Z-height <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_z_height"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">V-Library <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vLibrarySoftware" value="system_gt_32gb_ram">
+                <label>System &gt;32GB RAM <i class="fas fa-info-circle info-icon" data-tool="system_gt_32gb_ram"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vLibraryHardware" value="server">
+                <label>Server <i class="fas fa-info-circle info-icon" data-tool="server"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">AI Programming <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiProgrammingSoftware" value="vayo_accelerator">
+                <label>Vayo Accelerator <i class="fas fa-info-circle info-icon" data-tool="vayo_accelerator"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiProgrammingHardware" value="mentor_graphics_opm">
+                <label>Mentor graphics OPM <i class="fas fa-info-circle info-icon" data-tool="mentor_graphics_opm"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">VVTS <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vvtsSoftware" value="license">
+                <label>License <i class="fas fa-info-circle info-icon" data-tool="vvts_license"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vvtsHardware" value="pc">
+                <label>PC <i class="fas fa-info-circle info-icon" data-tool="vvts_pc"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vvtsHardware" value="one_aoi_to_multiple">
+                <label>One AOI to multiple <i class="fas fa-info-circle info-icon" data-tool="vvts_one_aoi"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">AI VVTS <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiVvtsSoftware" value="license">
+                <label>License <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_license"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiVvtsHardware" value="pc">
+                <label>PC <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_pc"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="aiVvtsHardware" value="one_aoi_to_multiple">
+                <label>One AOI to multiple <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_one_aoi"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">VDSPC 2.0 <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vdspcSoftware" value="license">
+                <label>License <i class="fas fa-info-circle info-icon" data-tool="vdspc_license"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vdspcHardware" value="server">
+                <label>Server <i class="fas fa-info-circle info-icon" data-tool="vdspc_server"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">V-One <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="voneSoftware" value="license">
+                <label>License <i class="fas fa-info-circle info-icon" data-tool="vone_license"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="voneHardware" value="server">
+                <label>Server <i class="fas fa-info-circle info-icon" data-tool="vone_server"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">CAD Converter Tool <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="cadConverterSoftware" value="v_accelerator">
+                <label>V-Accelerator <i class="fas fa-info-circle info-icon" data-tool="v_acc_license"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="cadConverterSoftware" value="epm_ai2">
+                <label>ePM-AI2 <i class="fas fa-info-circle info-icon" data-tool="epm_ai2_license"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="cadConverterHardware" value="pc_v_acc">
+                <label>PC <i class="fas fa-info-circle info-icon" data-tool="v_acc_pc"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="cadConverterHardware" value="pc_epm">
+                <label>PC <i class="fas fa-info-circle info-icon" data-tool="epm_ai2_pc"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">V-Tune <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="vTuneSoftware" value="system_gt_32gb_ram">
+                <label>System &gt;32GB RAM <i class="fas fa-info-circle info-icon" data-tool="v_tune_system32"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+            </div>
+        </div>
+        
+        <div class="requirementpr">One-View <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="oneViewSoftware" value="license">
+                <label>License <i class="fas fa-info-circle info-icon" data-tool="one_view_license"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="oneViewHardware" value="additional_gt_500gb_drive_16gb_ram">
+                <label>Additional &gt;500GB Drive, Additional 16GB RAM <i class="fas fa-info-circle info-icon" data-tool="one_view_drive_ram"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">Smart Manufacturing <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartManufacturingSoftware" value="secs_gem">
+                <label>SECS/GEM <i class="fas fa-info-circle info-icon" data-tool="secs_gem"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartManufacturingHardware" value="hermes">
+                <label>HERMES <i class="fas fa-info-circle info-icon" data-tool="hermes"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartManufacturingHardware" value="m2m_closed_loop">
+                <label>M2M Closed Loop <i class="fas fa-info-circle info-icon" data-tool="m2m_closed_loop"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">MES <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="mesSoftware" value="available_feature">
+                <label>Available feature <i class="fas fa-info-circle info-icon" data-tool="mes_available"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="mesHardware" value="need_to_develop_enhance">
+                <label>Need to develop/enhance <i class="fas fa-info-circle info-icon" data-tool="mes_develop"></i></label>
+            </div>
+        </div>
+        
+        <div class="requirementpr">Barcode related <span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="barcodeSoftware" value="available_feature">
+                <label>Available feature <i class="fas fa-info-circle info-icon" data-tool="barcode_available"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="barcodeHardware" value="need_to_develop_enhance">
+                <label>Need to develop/enhance <i class="fas fa-info-circle info-icon" data-tool="barcode_develop"></i></label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 9 -->
+<div class="form-section" data-section="9">
+    <div class="section-title">HARDWARE</div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">ESD Rubber Pads <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="rubberPad" value="smaller_than_0201">Component smaller than 0201</label>
+        </div>
+    </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Cleanroom <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="cleanroom" value="ionizer">Ionizer kit</label>
+            <label><input type="checkbox" name="cleanroom" value="hepa">HEPA filter</label>
+        </div>
+    </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Loader/Unloader <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="loaderUnloader" value="lr">L-R</label>
+            <label><input type="checkbox" name="loaderUnloader" value="ll">L-L</label>
+        </div>
+    </div>
+</div>
+
+<!-- Section 10 -->
+<div class="form-section" data-section="10">
+    <div class="section-title">TOOLS<span class="required-asterisk">*</span></div>
+    <div class="checkbox-options-xc">
+        <label><input type="checkbox" name="tools" value="leveling_meter">Leveling meter</label>
+        <label><input type="checkbox" name="tools" value="auto_3d_calibration_jig">Auto 3D Calibration Jig</label>
+        <label><input type="checkbox" name="tools" value="manual_3d_calibration_jig">Manual 3D Calibration Jig</label>
+        <label><input type="checkbox" name="tools" value="deflectometry_jig">Deflectometry Jig</label>
+        <label><input type="checkbox" name="tools" value="side_cam_jig">Side Cam Jig</label>
+        <label><input type="checkbox" name="tools" value="gantry_mapping_plate">Gantry Mapping Plate</label>
+        <label><input type="checkbox" name="tools" value="a4_grey_card">A4/A5 Grey Card</label>
+        <label><input type="checkbox" name="tools" value="fiducial_plate">Fiducial Plate</label>
+        <label><input type="checkbox" name="tools" value="barcode_reader">Barcode reader</label>
+        <label><input type="checkbox" name="tools" value="300um_3d_step_grr_jig">300um 3D step GRR jig</label>
+        <label><input type="checkbox" name="tools" value="customized_rubber_pad">Customized Rubber pad</label>
+        <label><input type="checkbox" name="tools" value="torque_wrench">Torque wrench</label>
+        <label><input type="checkbox" name="tools" value="aoi_machine_stand_40mm_extension_block">AOI Machine Stand 40mm Extension Block</label>
+    </div>
+</div>
+
+<!-- Section 11 -->
+<div class="form-section" data-section="11">
+    <div class="section-title">Customers' Current Top Issues<span class="required-asterisk">*</span></div>
+    <div class="table-section">
+        <table class="eval-table" id="custIssueTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Issue Description</th>
+                </tr>
+            </thead>
+            <tbody id="custIssueTableBody">
+                <tr>
+                    <td class="row-number">1</td>
+                    <td class="issue-row-content">
+                        <input type="text" name="custIssues[]" class="issue-input" required>
+                        <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)" style="display: none;">&times;</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" class="add-row-btn" onclick="addIssueRow()">+ Add Issue</button>
+    </div>
+</div>
+
+<!-- Attachment Section -->
+<div class="form-section">
+    <div class="section-title">Attachment</div>
+    <div class="form-group-evalxc" style="display: block;">
+        <label style="font-weight: 500; margin-bottom: 8px; display: block;">Upload File (Optional)</label>
+    </div>
+    <div class="form-group-evalxc" style="display: block;">
+        <div style="font-size: 0.85em; color: #666; margin-bottom: 12px;">
+            Please upload the file in PNG or PDF only
+        </div>
+    </div>
+    <div class="form-group-evalxc" style="display: block;">
+        <div style="border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; background: white;">
+            <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" style="width: 100%; border: none; outline: none; cursor: pointer;">
+        </div>
+        <div id="attachmentPreview" style="margin-top: 10px;"></div>
+    </div>
+</div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success submit-btn" id="submitBtn">Submit</button>
+            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
+            <button type="button" class="btn btn-danger submit-btn" onclick="dropForm()">Drop</button>
+        </div>
+    </form>
+
+    <div id="tooltip" class="tooltip"></div>
+
+<script>
+const client = new Appwrite.Client()
+    .setEndpoint("https://fra.cloud.appwrite.io/v1")
+    .setProject("68ddd7de00255d4f5c96");
+
+const databases = new Appwrite.Databases(client);
+const account = new Appwrite.Account(client);
+const storage = new Appwrite.Storage(client);
+
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba918c0022d2b9a429";
+const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const referenceCollectionId = "68da1d5f002142be75df";
+const categoryCollectionId = "6944b2a20012334309c3";
+const bucketId = "69015d8b0030f329c599";
+
+const params = new URLSearchParams(window.location.search);
+const eventId = params.get("id"); 
+const viewMode = params.get("mode") === "view";
+
+let currentUser = null;
+let formData = null;
+let referenceDocData = null;
+let uploadedFileId = null;
+let currentStatus = "draft";
+let referenceData = {};
+let dynamicCategories = {};
+
+async function checkUserRole() {
+    try {
+        const userLabels = currentUser.labels || [];
+        
+        if (userLabels.includes('manager')) {
+            return 'manager';
+        } else if (userLabels.includes('admin')) {
+            return 'admin';
+        } else if (userLabels.includes('staff')) {
+            return 'staff';
+        }
+        
+        return 'staff';
+    } catch (error) {
+        console.error("Error checking user role:", error);
+        return 'staff';
+    }
+}
+
+// Function to load all categories from database
+async function loadAllCategories() {
+    try {
+        const response = await databases.listDocuments(databaseId, categoryCollectionId);
+        
+        response.documents.forEach(doc => {
+            const categoryName = doc.categoryName;
+            const features = doc.features.map(f => JSON.parse(f));
+            
+            // Store the category info
+            dynamicCategories[categoryName] = {
+                features: features,
+                formFields: doc.formFields ? JSON.parse(doc.formFields) : null
+            };
+        });
+        
+        console.log('Loaded dynamic categories:', Object.keys(dynamicCategories).length);
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+// Function to inject custom categories into the form
+function injectDynamicCategories() {
+    const featuresSection = document.querySelector('[data-section="8"]');
+    if (!featuresSection) {
+        console.error('Features section not found');
+        return;
+    }
+    
+    const checkboxGrid = featuresSection.querySelector('.checkbox-gridpr');
+    if (!checkboxGrid) {
+        console.error('Checkbox grid not found');
+        return;
+    }
+    
+    // Define default categories to skip (they're already in the HTML)
+    const defaultCategories = [
+        'V-Library', 'AI Programming', 'VVTS', 'AI VVTS', 'VDSPC 2.0',
+        'V-One', 'V-Accelerator', 'V-Tune', 'Minitab', 'One-View',
+        'MES', 'Barcode Related'
+    ];
+    
+    // Add custom categories
+    Object.keys(dynamicCategories).forEach(categoryName => {
+        // Skip if it's a default category
+        if (defaultCategories.includes(categoryName)) {
+            return;
+        }
+        
+        const categoryData = dynamicCategories[categoryName];
+        const features = categoryData.features;
+        const formFields = categoryData.formFields || {};
+        
+        // Generate field names if not stored
+        const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        const softwareFieldName = formFields.software || `${baseName}Software`;
+        const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
+        
+        // Create the category row HTML
+        const categoryRow = document.createElement('div');
+        categoryRow.className = 'requirementpr';
+        categoryRow.textContent = categoryName + ' ';
+        categoryRow.setAttribute('data-dynamic-category', categoryName);
+        
+        // Create software column
+        const softwareColumn = document.createElement('div');
+        softwareColumn.className = 'checkbox-containerpr';
+        softwareColumn.setAttribute('data-dynamic-category', categoryName);
+        
+        // Add software checkboxes
+        features.forEach(feature => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'checkbox-itempr';
+            
+            checkboxDiv.innerHTML = `
+                <input type="checkbox" name="${softwareFieldName}" value="${feature.id}">
+                <label>${feature.name} <i class="fas fa-info-circle info-icon" data-tool="${feature.id}"></i></label>
+            `;
+            
+            softwareColumn.appendChild(checkboxDiv);
+        });
+        
+        // Create hardware column (empty for now, can be populated if needed)
+        const hardwareColumn = document.createElement('div');
+        hardwareColumn.className = 'checkbox-containerpr';
+        hardwareColumn.setAttribute('data-dynamic-category', categoryName);
+        
+        // Append to grid
+        checkboxGrid.appendChild(categoryRow);
+        checkboxGrid.appendChild(softwareColumn);
+        checkboxGrid.appendChild(hardwareColumn);
+        
+        console.log(`Added dynamic category: ${categoryName}`);
+    });
+    
+    // Reinitialize tooltips for new info icons
+    initTooltips();
+}
+
+async function initForm() {
+    try {
+        currentUser = await account.get();
+        console.log("Current user:", currentUser);
+        
+        if (!eventId) {
+            alert("No event ID found. Please start from the Details page.");
+            window.location.href = "/createform.html";
+            return;
+        }
+
+        // Load categories first
+        await loadAllCategories();
+        
+        // Load existing form data
+        await loadExistingForm();
+        
+        // Inject dynamic categories into the form
+        injectDynamicCategories();
+
+        const userRole = await checkUserRole();
+        if (viewMode || userRole === 'manager') {
+            setViewMode();
+        }
+    } catch (error) {
+        console.error("Error initializing form:", error);
+        alert("Error loading form. Redirecting to dashboard.");
+        window.location.href = "/createform.html";
+    }
+}
+
+async function loadExistingForm() {
+    try {
+        document.getElementById("loadingIndicator").style.display = "block";
+        try {
+            referenceDocData = await databases.getDocument(databaseId, collectionId, eventId);
+            console.log("Loaded reference data from main collection:", referenceDocData);
+        } catch (err) {
+            console.log("Reference document not found in main collection:", err);
+        }
+        try {
+            formData = await databases.getDocument(databaseId, preEvalCollectionId, eventId);
+            console.log("Loaded pre-eval form data:", formData);
+        } catch (err) {
+            console.log("Pre-eval form not found, will create new one:", err);
+        }
+        
+        currentStatus = (formData && formData.status) || "draft";
+        document.getElementById("loadingIndicator").style.display = "none";
+        document.getElementById("preEvalForm").style.display = "block";
+    
+        if (referenceDocData && referenceDocData.productType === 'AXI') {
+            console.log("Product type is AXI - hiding sections 3-10");
+            toggleSectionsByProduct('AXI');
+        }
+        
+        populateForm(formData, referenceDocData);
+        
+        updateFormDisplay();
+    } catch (error) {
+        console.log("Error loading form:", error);
+        document.getElementById("loadingIndicator").style.display = "none";
+        document.getElementById("preEvalForm").style.display = "block";
+        updateFormDisplay();
+    }
+}
+    
+function toggleSectionsByProduct(productType) {
+    const allSections = document.querySelectorAll('.form-section[data-section]');
+
+    allSections.forEach(section => {
+        const sectionNumber = Number(section.dataset.section);
+        if (productType === 'AXI' && ![1, 2, 11].includes(sectionNumber)) {
+            section.style.display = 'none';
+            section.classList.add('hidden-section');
+            const inputs = section.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.removeAttribute('required');
+            });
+        } else {
+            section.style.display = '';
+            section.classList.remove('hidden-section');
+            if (!viewMode && currentStatus !== "drop") {
+                const inputs = section.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.disabled = false;
+                });
+            }
+        }
+    });
+    const attachmentSection = document.querySelector('.form-section:has(#attachmentInput)');
+    if (attachmentSection) {
+        if (productType === 'AXI') {
+            attachmentSection.style.display = 'none';
+            attachmentSection.classList.add('hidden-section');
+        } else {
+            attachmentSection.style.display = '';
+            attachmentSection.classList.remove('hidden-section');
+        }
+    }
+    
+    console.log("Sections toggled for product type:", productType);
+}
+
+function populateForm(preEvalData, referenceData) {
+    const data = preEvalData || {};
+    const customerCompanyElement = document.getElementById('customerCompany');
+    if (customerCompanyElement) {
+        if (referenceData && referenceData.customerCompany) {
+            customerCompanyElement.value = referenceData.customerCompany;
+            console.log("Populated company from reference data:", referenceData.customerCompany);
+        } else if (data.customerCompany) {
+            customerCompanyElement.value = data.customerCompany;
+        }
+    }
+    
+    if (data.attachmentId) {
+        uploadedFileId = data.attachmentId;
+        try {
+            const fileUrl = storage.getFileView(bucketId, data.attachmentId);
+            const fileName = data.attachmentName || 'Uploaded file';
+            document.getElementById('attachmentPreview').innerHTML = `
+                <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
+                    <span style="flex: 1; color:black; font-size:12px;">${fileName}</span>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a href="${fileUrl}" target="_blank" class="btn-view"><i class="fas fa-eye"></i></a>
+                        ${!viewMode ? '<button type="button" class="btn-remove" onclick="removeAttachment()"><i class="fas fa-times"></i></button>' : ''}
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error loading attachment:', error);
+        }
+    }
+    const textFields = [
+        'custTechChamp', 'competitor', 'compModel',
+        'scpvitroxsalesChamp', 'scpvitroxtechChamp',
+        'cycleTime', 'falseCallppm', 'otherreq'
+    ];
+
+    textFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element && data[fieldId]) element.value = data[fieldId];
+    });
+
+    const selectFields = ['existcust', 'venue', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 'coaxialLighting'];
+    selectFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element && data[fieldId]) element.value = data[fieldId];
+    });
+
+    const dateFields = ['evalDate'];
+    dateFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element && data[fieldId]) {
+            element.value = new Date(data[fieldId]).toISOString().split("T")[0];
+        }
+    });
+
+    const checkboxGroups = [
+        'boardThickness', 'smallestComponentSize', 'inspectionRequirement', 'programmingInputFiles',
+        'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'hardiscCapacity',
+        'rubberPad', 'tools'
+    ];
+
+    checkboxGroups.forEach(groupName => {
+        if (data[groupName] && Array.isArray(data[groupName])) {
+            data[groupName].forEach(value => {
+                const checkbox = document.querySelector(`input[name="${groupName}"][value="${value}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+    });
+
+    const featureFields = [
+        'vLibrarySoftware', 'vLibraryHardware', 'aiProgrammingSoftware', 'aiProgrammingHardware',
+        'vvtsSoftware', 'vvtsHardware', 'aiVvtsSoftware', 'aiVvtsHardware',
+        'vdspcSoftware', 'vdspcHardware', 'voneSoftware', 'voneHardware',
+        'vAcceleratorSoftware', 'vTuneSoftware', 'minitabSoftware', 'minitabHardware',
+        'oneViewSoftware', 'oneViewHardware', 'mesSoftware', 'mesHardware',
+        'barcodeSoftware', 'barcodeHardware'
+    ];
+
+    featureFields.forEach(fieldName => {
+        if (data[fieldName] && Array.isArray(data[fieldName])) {
+            data[fieldName].forEach(value => {
+                const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+    });
+
+    // Populate dynamic category fields
+    Object.keys(dynamicCategories).forEach(categoryName => {
+        const categoryData = dynamicCategories[categoryName];
+        const formFields = categoryData.formFields || {};
+        
+        const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        const softwareFieldName = formFields.software || `${baseName}Software`;
+        const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
+        
+        // Populate software checkboxes
+        if (data[softwareFieldName] && Array.isArray(data[softwareFieldName])) {
+            data[softwareFieldName].forEach(value => {
+                const checkbox = document.querySelector(`input[name="${softwareFieldName}"][value="${value}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+        
+        // Populate hardware checkboxes
+        if (data[hardwareFieldName] && Array.isArray(data[hardwareFieldName])) {
+            data[hardwareFieldName].forEach(value => {
+                const checkbox = document.querySelector(`input[name="${hardwareFieldName}"][value="${value}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+    });
+
+    if (data.custIssues && data.custIssues.length > 0) {
+        const tbody = document.getElementById("custIssueTableBody");
+        tbody.innerHTML = "";
+        
+        data.custIssues.forEach((issue, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="row-number">${index + 1}</td>
+                <td class="issue-row-content">
+                    <input type="text" name="custIssues[]" class="issue-input" value="${issue}" required>
+                    <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)" ${data.custIssues.length > 1 ? '' : 'style="display: none;"'}>&times;</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+}
+
+function setViewMode() {
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const saveProgressBtn = document.querySelector('.draft-btn');
+    const dropBtn = document.querySelector('.btn-danger');
+    if (currentStatus === "drop") {
+        formTitle.textContent = `Pre Evaluation Form (Dropped)`;
+    } else {
+        formTitle.textContent = `Pre Evaluation Form (View Only)`;
+    }
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.disabled = true;
+        el.style.backgroundColor = '#e0e0e0';
+        el.style.color = '#666';
+        el.style.cursor = 'not-allowed';
+    });
+    document.querySelectorAll('button[type="button"]:not(.back-icon-btn):not(.btn-secondary), button[type="submit"]').forEach(btn => {
+        btn.disabled = true;
+        btn.style.backgroundColor = '#9e9e9e';
+        btn.style.color = '#fff';
+        btn.style.cursor = 'not-allowed';
+        btn.style.opacity = '0.6';
+    });
+    document.querySelectorAll('.result-btn').forEach(btn => {
+        btn.disabled = true;
+        btn.style.cursor = 'not-allowed';
+        btn.style.opacity = '0.6';
+    });
+    
+    document.querySelectorAll('.add-row-btn, .delete-row-btn').forEach(btn => btn.style.display = 'none');
+    document.getElementById('attachmentInput').style.display = 'none';
+    
+    if (submitBtn) submitBtn.style.display = 'none';
+    if (saveProgressBtn) saveProgressBtn.style.display = 'none';
+    if (dropBtn) dropBtn.style.display = 'none';
+}
+
+function goBack() {
+  window.history.back();
+}
+
+async function dropForm() {
+    if (!confirm("Are you sure you want to drop this form? This will mark the form as dropped and it will become view-only.")) {
+        return;
+    }
+    try {
+        const data = {
+            status: "drop"
+        };
+        try {
+            await databases.updateDocument(databaseId, preEvalCollectionId, eventId, data);
+            console.log("Form marked as dropped successfully");
+        } catch (updateError) {
+            if (updateError.message.includes("Document with the requested ID could not be found")) {
+                await databases.createDocument(databaseId, preEvalCollectionId, eventId, data);
+                console.log("Document created and marked as dropped");
+            } else {
+                throw updateError;
+            }
+        }
+        currentStatus = "drop";
+        updateFormDisplay();
+
+        const formTitle = document.getElementById("formTitle");
+        formTitle.textContent = "Evaluation Form (Dropped)";
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+            el.disabled = true;
+            el.style.backgroundColor = '#e0e0e0';
+            el.style.color = '#666';
+            el.style.cursor = 'not-allowed';
+        });
+        document.querySelectorAll('button[type="button"]:not(.back-icon-btn), button[type="submit"]').forEach(btn => {
+            btn.disabled = true;
+            btn.style.backgroundColor = '#9e9e9e';
+            btn.style.color = '#fff';
+            btn.style.cursor = 'not-allowed';
+            btn.style.opacity = '0.6';
+        });
+        
+        document.querySelectorAll('.add-row-btn, .delete-row-btn').forEach(btn => btn.style.display = 'none');
+        document.getElementById('attachmentInput').style.display = 'none';
+        
+        const submitBtn = document.getElementById("submitBtn");
+        const saveProgressBtn = document.getElementById("saveProgressBtn");
+        const dropBtn = document.querySelector('.btn-danger');
+        if (submitBtn) submitBtn.style.display = 'none';
+        if (saveProgressBtn) saveProgressBtn.style.display = 'none';
+        if (dropBtn) dropBtn.style.display = 'none';
+        
+        alert("Form has been dropped and is now in view-only mode."); 
+    } catch (err) {
+        console.error("Failed to drop form:", err);
+        alert(`Error dropping form: ${err.message}`);
+    }
+}  
+    
+function updateFormDisplay() {
+    const statusBadge = document.getElementById("statusBadge");
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const saveBtn = document.querySelector('.draft-btn');
+    const dropBtn = document.querySelector('.btn-danger');
+
+    statusBadge.textContent = currentStatus;
+    statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
+
+    if (viewMode || currentStatus === "drop") { 
+        if (currentStatus === "drop") {
+            formTitle.textContent = "Pre Evaluation Form (Dropped)";
+        } else {
+            formTitle.textContent = "Pre Evaluation Form (View Only)";
+        }
+        
+        document.querySelectorAll('input, select, button:not(.btn-secondary):not(.back-icon-btn)').forEach(el => el.disabled = true);
+        if (submitBtn) submitBtn.style.display = 'none';
+        if (saveBtn) saveBtn.style.display = 'none';
+        if (dropBtn) dropBtn.style.display = 'none'; 
+    } else {
+        formTitle.textContent = "Pre Evaluation Form";
+        if (currentStatus === "complete" && submitBtn) {
+            submitBtn.style.display = 'none';
+        }
+    }
+}
+
+function addIssueRow() {
+    const tbody = document.getElementById("custIssueTableBody");
+    const rowCount = tbody.rows.length;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td class="row-number">${rowCount + 1}</td>
+        <td class="issue-row-content">
+            <input type="text" name="custIssues[]" class="issue-input" required>
+            <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)">&times;</button>
+        </td>
+    `;
+    tbody.appendChild(row);
+    updateDeleteButtons();
+}
+
+function deleteIssueRow(btn) {
+    const tbody = document.getElementById("custIssueTableBody");
+    if (tbody.rows.length > 1) {
+        btn.closest('tr').remove();
+        updateRowNumbers();
+        updateDeleteButtons();
+    }
+}
+
+function updateRowNumbers() {
+    const tbody = document.getElementById("custIssueTableBody");
+    Array.from(tbody.rows).forEach((row, index) => {
+        row.querySelector('.row-number').textContent = index + 1;
+    });
+}
+
+function updateDeleteButtons() {
+    const tbody = document.getElementById("custIssueTableBody");
+    const deleteButtons = tbody.querySelectorAll('.delete-row-btn');
+    deleteButtons.forEach(btn => {
+        btn.style.display = tbody.rows.length > 1 ? 'inline-block' : 'none';
+    });
+}
+
+function collectFormData() {
+    const data = {};
+
+    const textFields = [
+        'customerCompany', 'custTechChamp', 'competitor', 'compModel',
+        'scpvitroxsalesChamp', 'scpvitroxtechChamp',
+        'cycleTime', 'falseCallppm', 'otherreq'
+    ];
+
+    textFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) data[fieldId] = element.value.trim();
+    });
+
+    const selectFields = ['existcust', 'venue', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 'coaxialLighting'];
+    selectFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) data[fieldId] = element.value;
+    });
+
+    ['evalDate'].forEach(dateField => {
+        const element = document.getElementById(dateField);
+        if (element && element.value) {
+            data[dateField] = new Date(element.value + "T00:00:00Z").toISOString();
+        }
+    });
+
+    const checkboxGroups = [
+        'boardThickness', 'smallestComponentSize', 'inspectionRequirement', 'programmingInputFiles',
+        'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'hardiscCapacity',
+        'rubberPad', 'tools'
+    ];
+    checkboxGroups.forEach(groupName => {
+        const checkedBoxes = document.querySelectorAll(`input[name="${groupName}"]:checked`);
+        if (checkedBoxes.length > 0) {
+            data[groupName] = Array.from(checkedBoxes).map(cb => cb.value);
+        }
+    });
+
+    const featureFields = [
+        'vLibrarySoftware', 'vLibraryHardware', 'aiProgrammingSoftware', 'aiProgrammingHardware',
+        'vvtsSoftware', 'vvtsHardware', 'aiVvtsSoftware', 'aiVvtsHardware',
+        'vdspcSoftware', 'vdspcHardware', 'voneSoftware', 'voneHardware',
+        'vAcceleratorSoftware', 'vTuneSoftware', 'minitabSoftware', 'minitabHardware',
+        'oneViewSoftware', 'oneViewHardware', 'mesSoftware', 'mesHardware',
+        'barcodeSoftware', 'barcodeHardware'
+    ];
+
+    featureFields.forEach(fieldName => {
+        const checkedBoxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
+        if (checkedBoxes.length > 0) {
+            data[fieldName] = Array.from(checkedBoxes).map(cb => cb.value);
+        }
+    });
+
+    // Collect dynamic category fields
+    Object.keys(dynamicCategories).forEach(categoryName => {
+        const categoryData = dynamicCategories[categoryName];
+        const formFields = categoryData.formFields || {};
+        
+        const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+        const softwareFieldName = formFields.software || `${baseName}Software`;
+        const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
+        
+        // Collect software checkboxes
+        const softwareBoxes = document.querySelectorAll(`input[name="${softwareFieldName}"]:checked`);
+        if (softwareBoxes.length > 0) {
+            data[softwareFieldName] = Array.from(softwareBoxes).map(cb => cb.value);
+        }
+        
+        // Collect hardware checkboxes
+        const hardwareBoxes = document.querySelectorAll(`input[name="${hardwareFieldName}"]:checked`);
+        if (hardwareBoxes.length > 0) {
+            data[hardwareFieldName] = Array.from(hardwareBoxes).map(cb => cb.value);
+        }
+    });
+
+    const issueInputs = document.querySelectorAll('[name="custIssues[]"]');
+    const custIssues = Array.from(issueInputs)
+        .map(input => input.value.trim())
+        .filter(value => value !== '');
+    if (custIssues.length > 0) {
+        data.custIssues = custIssues;
+    }
+
+    return data;
+}
+
+async function saveForm(status = "draft") {
+    try {
+        const collectedData = collectFormData();
+        const fileInput = document.getElementById('attachmentInput');
+        
+        if (fileInput && fileInput.files.length > 0) {
+            const fileId = await uploadFile();
+            if (fileId) {
+                uploadedFileId = fileId;
+            }
+        }
+
+        if (status === "complete") {
+            const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
+            const requiredFields = [
+                'customerCompany', 'custTechChamp', 'evalDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
+            ];
+            if (!isAXI) {
+                requiredFields.push('falseCallppm');
+            }
+            
+            const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
+            if (missingFields.length > 0 || !collectedData.custIssues || collectedData.custIssues.length === 0) {
+                alert("Please fill in all required fields before submitting.");
+                return;
+            }
+        }
+        
+        const saveData = {
+            ...collectedData,
+            status: status
+        };
+        
+        if (uploadedFileId) {
+            saveData.attachmentId = uploadedFileId;
+            if (fileInput && fileInput.files.length > 0) {
+                saveData.attachmentName = fileInput.files[0].name;
+            } else if (formData && formData.attachmentName) {
+                saveData.attachmentName = formData.attachmentName;
+            }
+        }
+        
+        for (const key in saveData) {
+            if (Array.isArray(saveData[key])) {
+                saveData[key] = saveData[key].filter(v => v !== "" && v !== null && v !== undefined);
+                if (saveData[key].length === 0) delete saveData[key];
+            }
+        }
+        
+        const enumFields = ["existcust", "venue", "inspectionEnvironment", "fpyTarget", "prodseg", "reqinspect", "boardStopRequirement", "coaxialLighting"];
+        enumFields.forEach(field => {
+            if (saveData[field] === "") delete saveData[field];
+        });
+
+        console.log("Data to save:", saveData);
+
+        try {
+            await databases.updateDocument(databaseId, preEvalCollectionId, eventId, saveData);
+            console.log("Form updated successfully");
+        } catch (updateError) {
+            if (updateError.message.includes("Document with the requested ID could not be found")) {
+                await databases.createDocument(databaseId, preEvalCollectionId, eventId, saveData);
+                console.log("Form created successfully with event ID:", eventId);
+            } else {
+                console.error("Error updating document:", updateError);
+                throw updateError;
+            }
+        }
+
+        currentStatus = status;
+        updateFormDisplay();
+        alert(status === "complete" ? "Form submitted successfully!" : "Form saved as draft!");
+        window.location.href = `detail.html?id=${eventId}`;
+
+    } catch (error) {
+        console.error("Error saving form:", error);
+        alert(`Error saving form: ${error.message}. Please try again.`);
+    }
+}
+
+async function loadReferenceData() {
+  try {
+    const response = await databases.listDocuments(databaseId, referenceCollectionId);
+    response.documents.forEach(doc => {
+      referenceData[doc.referenceId] = {
+        options: doc.options || [],   
+        detail: doc.detail || []     
+      };
+    });
+  } catch (error) {
+    console.log("No reference data found:", error);
+  }
+}
+
+function initTooltips() {
+  const tooltip = document.getElementById('tooltip');
+  const infoIcons = document.querySelectorAll('.info-icon');
+
+  infoIcons.forEach(icon => {
+    icon.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const toolId = this.getAttribute('data-tool');
+      showTooltip(e, toolId);
+    });
+  });
+
+  document.addEventListener('click', () => {
+    tooltip.classList.remove('active');
+  });
+}
+
+function showTooltip(event, toolId) {
+  const tooltip = document.getElementById('tooltip');
+  const ref = referenceData[toolId];
+
+  if (ref) {
+    let listHtml = "";
+
+    const maxLen = Math.max(ref.options.length, ref.detail.length);
+    for (let i = 0; i < maxLen; i++) {
+      const opt = ref.options[i] || "-";
+      const det = ref.detail[i] || "-";
+      listHtml += `<li><strong>${opt}</strong> : ${det}</li>`;
+    }
+
+    tooltip.innerHTML = `
+      <div style="font-weight:600; margin-bottom:6px;">Available Options</div>
+      <ul style="padding-left:18px; margin:0;">${listHtml}</ul>
+    `;
+  } else {
+    tooltip.textContent = "No option available";
+  }
+
+  const rect = event.target.getBoundingClientRect();
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+  tooltip.style.top = (rect.bottom + scrollTop + 10) + 'px';
+  tooltip.style.left = (rect.left + scrollLeft) + 'px';
+  tooltip.classList.add('active');
+}
+
+function showToast(message, isError = false) {
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${isError ? '#f44336' : '#4CAF50'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
+function initFileUpload() {
+    const fileInput = document.getElementById('attachmentInput');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+    }
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const validTypes = ['image/png', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+        alert('Please upload only PNG or PDF files.');
+        event.target.value = '';
+        return;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+        alert('File size must be less than 10MB.');
+        event.target.value = '';
+        return;
+    }
+
+    displayFilePreview(file);
+}
+
+function displayFilePreview(file) {
+    const preview = document.getElementById('attachmentPreview');
+
+    const fileName = file.name;
+    const fileUrl = URL.createObjectURL(file);
+
+    preview.innerHTML = `
+        <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
+            <span style="flex: 1; color:black; font-size:12px;">${fileName}</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <a href="${fileUrl}" target="_blank" class="btn-view">
+                    <i class="fas fa-eye"></i>
+                </a>
+                ${!viewMode ? `
+                    <button type="button" class="btn-remove" onclick="removeAttachment()">
+                        <i class="fas fa-times"></i>
+                    </button>` : ''}
+            </div>
+        </div>
+    `;
+}
+
+
+function removeAttachment() {
+    document.getElementById('attachmentInput').value = '';
+    document.getElementById('attachmentPreview').innerHTML = '';
+    uploadedFileId = null;
+}
+
+async function uploadFile() {
+    const fileInput = document.getElementById('attachmentInput');
+    const file = fileInput.files[0];
+    
+    if (!file) return null;
+
+    try {
+        showToast('Uploading file...');
+        const response = await storage.createFile(
+            bucketId,
+            'unique()',
+            file
+        );
+        uploadedFileId = response.$id;
+        showToast('File uploaded successfully!');
+        return response.$id;
+    } catch (error) {
+        console.error('File upload error:', error);
+        showToast('Failed to upload file', true);
+        return null;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await initForm();
+    await loadReferenceData();  
+    initTooltips();
+    initFileUpload();
+
+    document.getElementById("preEvalForm").addEventListener("submit", e => {
+        e.preventDefault();
+        saveForm("complete");
+    });
+});
+
+</script>
+
+<footer class="footer">
+    <span>© 2025 ViTrox. All rights reserved.</span>
+</footer>
+
+</body>
+</html>
