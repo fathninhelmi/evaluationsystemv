@@ -1,4 +1,4 @@
- <!DOCTYPE html> 
+<!DOCTYPE html> 
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -264,6 +264,22 @@ async function goToStep(page, eventId, isViewMode = false) {
                     preevalPage = "preevalXC.html";
                     console.log("Redirecting to XC pre-eval");
                     break;
+                case "aoi":
+                    preevalPage = "preeval.html";
+                    console.log("Redirecting to AOI pre-eval");
+                    break;
+                case "spi":
+                    preevalPage = "preevalspi.html";
+                    console.log("Redirecting to SPI pre-eval");
+                    break;
+                case "arv":
+                    preevalPage = "preeval.html";
+                    console.log("Redirecting to ARV pre-eval");
+                    break;
+                case "axi":
+                    preevalPage = "preevalaxi.html";
+                    console.log("Redirecting to AXI pre-eval");
+                    break;
                 default:
                     preevalPage = "preeval.html";
                     console.log("Redirecting to default pre-eval");
@@ -290,7 +306,3 @@ loadEvent();
 </body>
 
 </html>
-
-
-
-
