@@ -32,261 +32,261 @@
     
     <form id="preEvalForm" style="display: none;">
 
-        <!-- Section 1 -->
-        <div class="form-section two-column" data-section="1">
-            <div class="section-title">GENERAL</div>
-            <div class="form-group-evalxc-compact">
-                <label>Customer Company Name <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="customerCompany" name="customerCompany" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Customer Tech Champion <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="custTechChamp" name="custTechChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Existing customer? <span class="required-asterisk">*</span>:</label>
-                <select id="existcust" name="existcust">
-                    <option value="">Select</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                </select>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>End customer name <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="custTechChamp" name="custTechChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Evaluation Date<span class="required-asterisk">*</span>:</label>
-                <input type="date" id="evalDate" name="evalDate" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Estimate Duration<span class="required-asterisk">*</span>:</label>
-                <input type="date" id="evalDate" name="evalDate" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Competitor(s) if any<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="competitor" name="competitor">
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Competitor machine model<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="compModel" name="compModel">
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Venue<span class="required-asterisk">*</span>:</label>
-                <select id="venue" name="venue" required>
-                    <option value="">Select</option>
-                    <option value="customer_site">Customer site</option>
-                    <option value="in_house">In House</option>
-                    <option value="scp_office">SCP office</option>
-                </select>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Machine Health checked? <span class="required-asterisk">*</span>:</label>
-                <select id="existcust" name="existcust">
-                    <option value="">Select</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                </select>
-            </div>
+       <!-- Section 1 -->
+<div class="form-section two-column" data-section="1">
+    <div class="section-title">GENERAL</div>
+    <div class="form-group-evalxc-compact">
+        <label>Customer Company Name <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="customerCompany" name="customerCompany" required>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Customer Tech Champion <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="custTechChamp" name="custTechChamp" required>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Existing customer? <span class="required-asterisk">*</span>:</label>
+        <select id="existCust" name="existCust">
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>End Customer Name <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="endCustomer" name="endCustomer" required>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Evaluation Date <span class="required-asterisk">*</span>:</label>
+        <input type="date" id="evalDate" name="evalDate" required>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Estimated Duration <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="estDuration" name="estDuration" required>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Competitor(s) if any <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="competitor" name="competitor">
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Competitor Machine Model <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="compModel" name="compModel">
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Venue <span class="required-asterisk">*</span>:</label>
+        <select id="venue" name="venue" required>
+            <option value="">Select</option>
+            <option value="customer_site">Customer Site</option>
+            <option value="in_house">In House</option>
+            <option value="scp_office">SCP Office</option>
+        </select>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Machine Health Checked? <span class="required-asterisk">*</span>:</label>
+        <select id="machineHealth" name="machineHealth">
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+    </div>
+</div>
+
+<!-- Section 2 -->
+<div class="form-section two-column" data-section="2">
+    <div class="section-title">RESOURCES</div>
+    <div class="form-group-evalxc-compact">
+        <label>SCP Sales Champion <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="scpSalesChamp" name="scpSalesChamp" required>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>SCP Technical Champion <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="scpTechChamp" name="scpTechChamp" required>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>ViTrox Sales Champion <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="vitroxSalesChamp" name="vitroxSalesChamp" required>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>ViTrox Technical Champion <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="vitroxTechChamp" name="vitroxTechChamp" required>
+    </div>
+</div>
+
+<!-- Section 3 -->
+<div class="form-section two-column" data-section="3">
+    <div class="section-title">TARGET INSPECTION PERFORMANCE</div>
+    <div class="form-group-evalxc-compact">
+        <label>Inspection Environment <span class="required-asterisk">*</span>:</label>
+        <select id="inspectionEnvironment" name="inspectionEnvironment">
+            <option value="">Select</option>
+            <option value="offline_only">Offline Only</option>
+            <option value="offline_inline">Offline & Inline</option>
+        </select>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>FPY Target (if any) <span class="required-asterisk">*</span>:</label>
+        <select id="fpyTarget" name="fpyTarget">
+            <option value="">Select</option>
+            <option value="95">≥ 95%</option>
+            <option value="no_concern">No Concern</option>
+        </select>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Product Segment <span class="required-asterisk">*</span>:</label>
+        <select id="prodSeg" name="prodSeg">
+            <option value="">Select</option>
+            <option value="aerospace">Aerospace</option>
+            <option value="medical">Medical</option>
+            <option value="military">Military</option>
+            <option value="telecom">Telecommunication</option>
+            <option value="consumer">Consumer Product</option>
+            <option value="semicon">Semicon</option>
+            <option value="automotive">Automotive</option>
+        </select>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Require Angular Inspection <span class="required-asterisk">*</span>:</label>
+        <select id="reqInspect" name="reqInspect">
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>Cycle Time Requirement <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="cycleTime" name="cycleTime">
+    </div>
+    <div class="form-group-evalxc-compact">
+        <label>False Call PPM <span class="required-asterisk">*</span>:</label>
+        <input type="text" id="falseCallPPM" name="falseCallPPM" required>
+    </div>
+    <div class="form-group-evalxc" style="grid-column: span 2;">
+        <label>Others <span class="required-asterisk">*</span>:</label>
+        <textarea id="otherReq" name="otherReq" style="max-width: 100%; width: 100%;"></textarea>
+    </div>
+</div>
+
+<!-- Section 4 -->
+<div class="form-section" data-section="4">
+    <div class="section-title">PCB</div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Board Thickness <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="boardThickness" value="normal_0_5_13mm">Normal (0.5 - 13mm)</label>
+            <label><input type="checkbox" name="boardThickness" value="gt_13mm">&gt;13mm</label>
         </div>
-
-        <!-- Section 2 -->
-        <div class="form-section two-column" data-section="2">
-            <div class="section-title">RESOURCES</div>
-            <div class="form-group-evalxc-compact">
-                <label>SCP Sales Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxsalesChamp" name="scpvitroxsalesChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>SCP Technical Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxtechChamp" name="scpvitroxtechChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>ViTrox Sales Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxsalesChamp" name="scpvitroxsalesChamp" required>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>ViTrox Technical Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxtechChamp" name="scpvitroxtechChamp" required>
-            </div>
+    </div>
+    <div class="form-group-evalxc" style="grid-column: span 2;">
+        <label>Smallest Defect Size <span class="required-asterisk">*</span>:</label>
+        <textarea id="smallestDefect" name="smallestDefect" style="max-width: 100%; width: 100%;"></textarea>
+    </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Inspection Requirement <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="inspectionRequirement" value="conformal_coating">Conformal Coating</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="final_inspection">Final Inspection</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="2_in_1">2-in-1</label>
         </div>
-
-        <!-- Section 3 --->
-        <div class="form-section two-column" data-section="3">
-            <div class="section-title">TARGET INSPECTION PERFORMANCE</div>
-            <div class="form-group-evalxc-compact">
-                <label>Inspection environment <span class="required-asterisk">*</span>:</label>
-                <select id="inspectionEnvironment" name="inspectionEnvironment">
-                    <option value="">Select</option>
-                    <option value="offline_only">Offline only</option>
-                    <option value="offline_inline">Offline & Inline</option>
-                </select>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>FPY target if any <span class="required-asterisk">*</span>:</label>
-                <select id="fpyTarget" name="fpyTarget">
-                    <option value="">Select</option>
-                    <option value="95">≥ 95%</option>
-                    <option value="no_concern">No concern</option>
-                </select>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Product segment <span class="required-asterisk">*</span>:</label>
-                <select id="prodseg" name="prodseg">
-                    <option value="">Select</option>
-                    <option value="aerospace">Aerospace</option>
-                    <option value="medical">Medical</option>
-                    <option value="military">Military</option>
-                    <option value="telecom">Telecommunication</option>
-                    <option value="consumer">Consumer product</option>
-                    <option value="semicon">Semicon</option>
-                    <option value="automotive">Automotive</option>    
-                </select>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Require angular inspection <span class="required-asterisk">*</span>:</label>
-                <select id="reqinspect" name="reqinspect">
-                    <option value="">Select</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                </select>
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>Cycle time requirement <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="cycleTime" name="cycleTime">
-            </div>
-            <div class="form-group-evalxc-compact">
-                <label>False call PPM <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="falseCallppm" name="falseCallppm" required>
-            </div>
-            <div class="form-group-evalxc" style="grid-column: span 2;">
-                <label>Others <span class="required-asterisk">*</span>:</label>
-                <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
-            </div>
+    </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Programming Input Files <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="programmingInputFiles" value="general_cad">General CAD</label>
+            <label><input type="checkbox" name="programmingInputFiles" value="gerber">Gerber</label>
+            <label><input type="checkbox" name="programmingInputFiles" value="bom">BOM</label>
+            <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">XY Placement Files</label>
+            <label><input type="checkbox" name="programmingInputFiles" value="no_cad">No CAD</label>
         </div>
+    </div>
+</div>
 
-        <!-- Section 4 -->
-        <div class="form-section" data-section="4">
-            <div class="section-title">PCB</div>
-                <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Board thickness <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">Normal (0.5 - 13mm)</label>
-                    <label><input type="checkbox" name="boardThickness" value="gt_4mm">&gt;13mm</label>
-                </div>
-            </div>
+<!-- Section 5 -->
+<div class="form-section" data-section="5">
+    <div class="section-title">MACHINE TYPE</div>
 
-            <div class="form-group-evalxc" style="grid-column: span 2;">
-                <label>Smallest defect size <span class="required-asterisk">*</span>:</label>
-                <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Inspection requirement <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="inspectionRequirement" value="general_smt">Conformal Coating</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="smt_tht">Final Inspection</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="non_smt">2-in-1</label>
-                </div>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Programming Input files <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">General CAD</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">Gerber</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">BOM</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">XY placement files</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">No CAD</label>
-                </div>
-            </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Platform <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="platform" value="v510air">V510Ai R</label>
+            <label><input type="checkbox" name="platform" value="v9i">V9i</label>
+            <label><input type="checkbox" name="platform" value="v9i_xl">V9i XL</label>
         </div>
+    </div>
 
-        <!-- Section 5 -->
-        <div class="form-section" data-section="5">
-            <div class="section-title">MACHINE TYPE</div>
-                <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Platform <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="conveyor" value="staging">V510Ai R</label>
-                    <label><input type="checkbox" name="conveyor" value="linear_guide_awa">V9i</label>
-                    <label><input type="checkbox" name="conveyor" value="vacuum_table_awa">V9i XL</label>
-                </div>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Board Flow Direction <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="boardFlowDirection" value="l_r">L-R</label>
-                    <label><input type="checkbox" name="boardFlowDirection" value="r_l">R-L</label>
-                    <label><input type="checkbox" name="boardFlowDirection" value="l_l">L-L</label>
-                    <label><input type="checkbox" name="boardFlowDirection" value="r_r">R-R</label>
-                </div>
-            </div>
-
-            <div class="form-group-evalxc">
-                <label>Automation Configuration <span class="required-asterisk">*</span>:</label>
-                <select id="boardStopRequirement" name="boardStopRequirement">
-                    <option value="">Select</option>
-                    <option value="hard_stop">Return Conveyor</option>
-                    <option value="sensor_stop">V95i Rotator</option>
-                    <option value="sensor_stop">V97i Flipper</option>
-                </select>
-            </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Board Flow Direction <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="boardFlowDirection" value="l_r">L-R</label>
+            <label><input type="checkbox" name="boardFlowDirection" value="r_l">R-L</label>
+            <label><input type="checkbox" name="boardFlowDirection" value="l_l">L-L</label>
+            <label><input type="checkbox" name="boardFlowDirection" value="r_r">R-R</label>
         </div>
+    </div>
 
-        <!-- Section 6 -->
-    <div class="form-section" data-section="6">
+    <div class="form-group-evalxc">
+        <label for="automationConfig">Automation Configuration <span class="required-asterisk">*</span>:</label>
+        <select id="automationConfig" name="automationConfig">
+            <option value="">Select</option>
+            <option value="return_conveyor">Return Conveyor</option>
+            <option value="v95i_rotator">V95i Rotator</option>
+            <option value="v97i_flipper">V97i Flipper</option>
+        </select>
+    </div>
+</div>
+
+<!-- Section 6 -->
+<div class="form-section" data-section="6">
     <div class="section-title">VISION</div>
     <div class="checkbox-gridpr">
         <div class="header-evalpr"></div>
         <div class="header-evalpr">V9i & V9i XL</div>
         <div class="header-evalpr">V510Ai R</div>
-        
-        <div class="requirementpr">Lighting<span class="required-asterisk">*</span></div>
+
+        <div class="requirementpr">Lighting <span class="required-asterisk">*</span></div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
-                <input type="checkbox" name="smartMeasurementSoftware" value="license">
-                <label>RGBW <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_license"></i></label>
+                <input type="checkbox" name="lighting" value="rgbw">
+                <label>RGBW <i class="fas fa-info-circle info-icon" data-tool="lighting_rgbw"></i></label>
             </div>
             <div class="checkbox-itempr">
-                <input type="checkbox" name="smartMeasurementSoftware" value="license">
-                <label>UVRGB <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_license"></i></label>
+                <input type="checkbox" name="lighting" value="uvrgb">
+                <label>UVRGB <i class="fas fa-info-circle info-icon" data-tool="lighting_uvrgb"></i></label>
             </div>
             <div class="checkbox-itempr">
-                <input type="checkbox" name="smartMeasurementSoftware" value="license">
-                <label>UVW <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_license"></i></label>
+                <input type="checkbox" name="lighting" value="uvw">
+                <label>UVW <i class="fas fa-info-circle info-icon" data-tool="lighting_uvw"></i></label>
             </div>
         </div>
+
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
-                <input type="checkbox" name="smartMeasurementHardware" value="motorized_z_height">
-                <label>2D 8MP <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_z_height"></i></label>
+                <input type="checkbox" name="cameraType" value="2d_8mp">
+                <label>2D 8MP <i class="fas fa-info-circle info-icon" data-tool="camera_2d_8mp"></i></label>
             </div>
             <div class="checkbox-itempr">
-                <input type="checkbox" name="smartMeasurementHardware" value="motorized_z_height">
-                <label>3D 8MP <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_z_height"></i></label>
+                <input type="checkbox" name="cameraType" value="3d_8mp">
+                <label>3D 8MP <i class="fas fa-info-circle info-icon" data-tool="camera_3d_8mp"></i></label>
             </div>
         </div>
     </div>
-    </div>
-        
+</div>
+
 <!-- Section 7 -->
 <div class="form-section two-column" data-section="7">
     <div class="section-title">IPC SPECS</div>
+
     <div class="form-group-evalxc-compact">
-        <label>Operating System <span class="required-asterisk">*</span>:</label>
+        <label for="operatingSystem">Operating System <span class="required-asterisk">*</span>:</label>
         <select id="operatingSystem" name="operatingSystem">
             <option value="">Select</option>
-            <option value="windows_11">Window 11</option>
-            <option value="windows_10">Window 10</option>
-            <option value="windows_8">Window 8</option>
-            <option value="older_than_windows_10">Older than Window 10</option>
+            <option value="windows_11">Windows 11</option>
+            <option value="windows_10">Windows 10</option>
+            <option value="windows_8">Windows 8</option>
+            <option value="older_than_windows_10">Older than Windows 10</option>
         </select>
     </div>
 
     <div class="form-group-evalxc-compact">
-        <label>CPU <span class="required-asterisk">*</span>:</label>
+        <label for="cpu">CPU <span class="required-asterisk">*</span>:</label>
         <select id="cpu" name="cpu">
             <option value="">Select</option>
             <option value="i9">i9</option>
@@ -296,7 +296,7 @@
     </div>
 
     <div class="form-group-evalxc-compact">
-        <label>RAM <span class="required-asterisk">*</span>:</label>
+        <label for="ram">RAM <span class="required-asterisk">*</span>:</label>
         <select id="ram" name="ram">
             <option value="">Select</option>
             <option value="lower_than_16gb">Lower than 16GB</option>
@@ -307,7 +307,7 @@
     </div>
 
     <div class="form-group-evalxc-compact">
-        <label>GPU <span class="required-asterisk">*</span>:</label>
+        <label for="gpu">GPU <span class="required-asterisk">*</span>:</label>
         <select id="gpu" name="gpu">
             <option value="">Select</option>
             <option value="rtx_50_series">RTX 50 series</option>
@@ -319,11 +319,11 @@
     </div>
 
     <div class="form-group-evalxc-compact">
-        <label>C Drive Storage <span class="required-asterisk">*</span>:</label>
+        <label for="cDriveStorage">C Drive Storage <span class="required-asterisk">*</span>:</label>
         <select id="cDriveStorage" name="cDriveStorage">
             <option value="">Select</option>
-            <option value="1tb">1TB</option>
             <option value="512gb">512GB</option>
+            <option value="1tb">1TB</option>
             <option value="lower_than_512gb">Lower than 512GB</option>
             <option value="more_than_1tb">More than 1TB</option>
         </select>
@@ -525,22 +525,22 @@
 
 <!-- Section 10 -->
 <div class="form-section" data-section="10">
-    <div class="section-title">TOOLS<span class="required-asterisk">*</span></div>
+    <div class="section-title">TOOLS <span class="required-asterisk">*</span></div>
     <div class="checkbox-options-xc">
         <label><input type="checkbox" name="tools" value="leveling_meter">Leveling meter</label>
         <label><input type="checkbox" name="tools" value="auto_3d_calibration_jig">Auto 3D Calibration Jig</label>
         <label><input type="checkbox" name="tools" value="manual_3d_calibration_jig">Manual 3D Calibration Jig</label>
-        <label><input type="checkbox" name="tools" value="a4_grey_card">A4 Grey Card/ Grey Card Assembly</label>
+        <label><input type="checkbox" name="tools" value="a4_grey_card">A4 Grey Card / Grey Card Assembly</label>
         <label><input type="checkbox" name="tools" value="fiducial_plate">Fiducial Plate</label>
         <label><input type="checkbox" name="tools" value="barcode_reader">Barcode reader</label>
         <label><input type="checkbox" name="tools" value="300um_3d_step_grr_jig">300um 3D step GRR jig</label>
         <label><input type="checkbox" name="tools" value="customized_rubber_pad">Customized Rubber pad</label>
         <label><input type="checkbox" name="tools" value="torque_wrench">Torque wrench</label>
-        <label><input type="checkbox" name="tools" value="aoi_machine_stand_40mm_extension_block">AOI Machine Stand 40mm Extension Block</label>
-        <label><input type="checkbox" name="tools" value="aoi_machine_stand_40mm_extension_block">Portability Jig</label>
-        <label><input type="checkbox" name="tools" value="aoi_machine_stand_40mm_extension_block">Height Jig Assembly</label>
-        <label><input type="checkbox" name="tools" value="aoi_machine_stand_40mm_extension_block">2D Profiler Jig</label>
-        <label><input type="checkbox" name="tools" value="aoi_machine_stand_40mm_extension_block">UV Adjustment Assembly</label>
+        <label><input type="checkbox" name="tools" value="aoi_machine_stand">AOI Machine Stand 40mm Extension Block</label>
+        <label><input type="checkbox" name="tools" value="portability_jig">Portability Jig</label>
+        <label><input type="checkbox" name="tools" value="height_jig_assembly">Height Jig Assembly</label>
+        <label><input type="checkbox" name="tools" value="2d_profiler_jig">2D Profiler Jig</label>
+        <label><input type="checkbox" name="tools" value="uv_adjustment_assembly">UV Adjustment Assembly</label>
     </div>
 </div>
 
