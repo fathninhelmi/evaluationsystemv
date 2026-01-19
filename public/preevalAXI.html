@@ -32,7 +32,7 @@
     
     <form id="preEvalForm" style="display: none;">
 
-        <!-- Section 1 -->
+       <!-- Section 1 -->
         <div class="form-section two-column" data-section="1">
             <div class="section-title">GENERAL</div>
             <div class="form-group-evalxc-compact">
@@ -45,7 +45,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Existing customer? <span class="required-asterisk">*</span>:</label>
-                <select id="existcust" name="existcust">
+                <select id="existcust" name="existcust" required>
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -53,23 +53,23 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>End customer name <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="custTechChamp" name="custTechChamp" required>
+                <input type="text" id="endCustomerName" name="endCustomerName" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Evaluation Date<span class="required-asterisk">*</span>:</label>
-                <input type="date" id="evalDate" name="evalDate" required>
+                <label>Evaluation Start Date<span class="required-asterisk">*</span>:</label>
+                <input type="date" id="evalStartDate" name="evalStartDate" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Estimate Duration<span class="required-asterisk">*</span>:</label>
-                <input type="date" id="evalDate" name="evalDate" required>
+                <label>Estimated Evaluation End Date<span class="required-asterisk">*</span>:</label>
+                <input type="date" id="endEstimateDate" name="endEstimateDate" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor(s) if any<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="competitor" name="competitor">
+                <input type="text" id="competitor" name="competitor" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor machine model<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="compModel" name="compModel">
+                <input type="text" id="compModel" name="compModel" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Venue<span class="required-asterisk">*</span>:</label>
@@ -82,7 +82,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Machine Health checked? <span class="required-asterisk">*</span>:</label>
-                <select id="existcust" name="existcust">
+                <select id="machineHealthChecked" name="machineHealthChecked" required>
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -95,19 +95,19 @@
             <div class="section-title">RESOURCES</div>
             <div class="form-group-evalxc-compact">
                 <label>SCP Sales Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxsalesChamp" name="scpvitroxsalesChamp" required>
+                <input type="text" id="scpSalesChamp" name="scpSalesChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>SCP Technical Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxtechChamp" name="scpvitroxtechChamp" required>
+                <input type="text" id="scpTechChamp" name="scpTechChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>ViTrox Sales Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxsalesChamp" name="scpvitroxsalesChamp" required>
+                <input type="text" id="vitroxSalesChamp" name="vitroxSalesChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>ViTrox Technical Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxtechChamp" name="scpvitroxtechChamp" required>
+                <input type="text" id="vitroxTechChamp" name="vitroxTechChamp" required>
             </div>
         </div>
 
@@ -165,154 +165,164 @@
             </div>
         </div>
 
-        <!-- Section 4 -->
-        <div class="form-section" data-section="4">
-            <div class="section-title">PCB</div>
-                <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Board thickness <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">Normal (0.5 - 7mm)</label>
-                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">7mm - 12.7mm</label>
-                    <label><input type="checkbox" name="boardThickness" value="gt_4mm">&lt;0.5 um (Thin board)</label>
-                    <label><input type="checkbox" name="boardThickness" value="lt_100um">&gt;>12.7 um (Thick board)</label>
-                </div>
-            </div>
+<!-- Section 4 -->
+<div class="form-section" data-section="4">
+    <div class="section-title">PCB</div>
 
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Panel Weight <span class="required-asterisk">*:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="smallestComponentSize" value="0201">&lt;4.5 KG</label>
-                    <label><input type="checkbox" name="smallestComponentSize" value="01005">4.5 KG - 15 KG</label>
-                    <label><input type="checkbox" name="smallestComponentSize" value="008004_03015">&gt;15 KG</label>
-                </div>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Board Inspection Area <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="inspectionRequirement" value="general_smt">Full Board</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="smt_tht">Hidden Joint</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="non_smt">Selective Component</label>
-                   </div>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Smallest Component size <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">0201</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">01005</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">008004 / 03015</label>
-                </div>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Inspection Requirement<span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">General SMT</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">SMT & THT</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Non-SMT Inspection</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Heavy Shaded Component</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Backdrill</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">SiP</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Void</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Crack</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Head in Pillow</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Memory Component</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Hairline Short</label>
-                </div>
-            </div>
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Programming Input files<span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">GenCAD</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">ODB++</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">CadCadence</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">FabMaster</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Gerber file (Required Vayo)</label>
-                </div>
-            </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Board thickness <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="boardThickness" value="0_5_to_7mm">Normal (0.5 - 7mm)</label>
+            <label><input type="checkbox" name="boardThickness" value="7_to_12_7mm">7mm - 12.7mm</label>
+            <label><input type="checkbox" name="boardThickness" value="lt_0_5mm">&lt;0.5mm (Thin board)</label>
+            <label><input type="checkbox" name="boardThickness" value="gt_12_7mm">&gt;12.7mm (Thick board)</label>
         </div>
+    </div>
 
-        <!-- Section 5 -->
-        <div class="form-section" data-section="5">
-            <div class="section-title">MACHINE TYPE</div>
-                <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Conveyor <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="conveyor" value="staging">Staging</label>
-                    <label><input type="checkbox" name="conveyor" value="linear_guide_awa">Linear Guide AWA</label>
-                    <label><input type="checkbox" name="conveyor" value="vacuum_table_awa">Vacuum Table AWA</label>
-                    <label><input type="checkbox" name="conveyor" value="vvts_usb_io_card">VVTS USB IO Card</label>
-                    <label><input type="checkbox" name="conveyor" value="long_board">Long Board</label>
-                    <label><input type="checkbox" name="conveyor" value="center_pin">Center Pin</label>
-                </div>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Machine type selection by board size <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="standard">S2 XLT</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="xl">S2EX</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="xxl">S2 XXL</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="single_lane">S2 XLL</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="dual_lane">S3</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="no_concern">QX1</label>
-                </div>
-            </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Panel Weight <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="panelWeight" value="lt_4_5kg">&lt;4.5 KG</label>
+            <label><input type="checkbox" name="panelWeight" value="4_5_to_15kg">4.5 KG - 15 KG</label>
+            <label><input type="checkbox" name="panelWeight" value="gt_15kg">&gt;15 KG</label>
         </div>
+    </div>
 
-        <!-- Section 6 -->
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Board Inspection Area <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="boardInspectionArea" value="full_board">Full Board</label>
+            <label><input type="checkbox" name="boardInspectionArea" value="hidden_joint">Hidden Joint</label>
+            <label><input type="checkbox" name="boardInspectionArea" value="selective_component">Selective Component</label>
+        </div>
+    </div>
+
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Smallest Component Size <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="smallestComponentSize" value="0201">0201</label>
+            <label><input type="checkbox" name="smallestComponentSize" value="01005">01005</label>
+            <label><input type="checkbox" name="smallestComponentSize" value="008004_03015">008004 / 03015</label>
+        </div>
+    </div>
+
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Inspection Requirement <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="inspectionRequirement" value="general_smt">General SMT</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="smt_tht">SMT & THT</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="non_smt">Non-SMT Inspection</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="heavy_shaded">Heavy Shaded Component</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="backdrill">Backdrill</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="sip">SiP</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="void">Void</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="crack">Crack</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="head_in_pillow">Head in Pillow</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="memory_component">Memory Component</label>
+            <label><input type="checkbox" name="inspectionRequirement" value="hairline_short">Hairline Short</label>
+        </div>
+    </div>
+
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Programming Input Files <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="programmingInputFiles" value="gencad">GenCAD</label>
+            <label><input type="checkbox" name="programmingInputFiles" value="odbpp">ODB++</label>
+            <label><input type="checkbox" name="programmingInputFiles" value="cadence">Cadence</label>
+            <label><input type="checkbox" name="programmingInputFiles" value="fabmaster">FabMaster</label>
+            <label><input type="checkbox" name="programmingInputFiles" value="gerber_vayo">Gerber file (Required Vayo)</label>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5 -->
+<div class="form-section" data-section="5">
+    <div class="section-title">MACHINE TYPE</div>
+
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Conveyor <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="conveyor" value="staging">Staging</label>
+            <label><input type="checkbox" name="conveyor" value="linear_guide_awa">Linear Guide AWA</label>
+            <label><input type="checkbox" name="conveyor" value="vacuum_table_awa">Vacuum Table AWA</label>
+            <label><input type="checkbox" name="conveyor" value="vvts_usb_io_card">VVTS USB IO Card</label>
+            <label><input type="checkbox" name="conveyor" value="long_board">Long Board</label>
+            <label><input type="checkbox" name="conveyor" value="center_pin">Center Pin</label>
+        </div>
+    </div>
+
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Machine Type Selection by Board Size <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="machineTypeByBoardSize" value="s2_xlt">S2 XLT</label>
+            <label><input type="checkbox" name="machineTypeByBoardSize" value="s2ex">S2EX</label>
+            <label><input type="checkbox" name="machineTypeByBoardSize" value="s2_xxl">S2 XXL</label>
+            <label><input type="checkbox" name="machineTypeByBoardSize" value="s2_xll">S2 XLL</label>
+            <label><input type="checkbox" name="machineTypeByBoardSize" value="s3">S3</label>
+            <label><input type="checkbox" name="machineTypeByBoardSize" value="qx1">QX1</label>
+        </div>
+    </div>
+</div>
+
+<!-- Section 6 -->
 <div class="form-section" data-section="6">
     <div class="section-title">IMAGE RESOLUTION</div>
-    <div class="form-group-evalxc-compact">
-        <label>Resolution/px <span class="required-asterisk">*</span>:</label>
-        <select id="camera" name="camera">
+
+    <div class="form-grid-xc">
+        <label>Resolution (px) <span class="required-asterisk">*</span></label>
+        <select id="resolutionPx" name="resolutionPx" required>
             <option value="">Select</option>
-            <option value="12mp">12MP</option>
-            <option value="25mp">25MP</option>
+            <option value="5um">5 µm</option>
+            <option value="7_5um">7.5 µm</option>
+            <option value="10um">10 µm</option>
+            <option value="15um">15 µm</option>
         </select>
     </div>
-    <div class="form-group-evalxc-compact">
-        <label>Resolution/px (2x2 bining)<span class="required-asterisk">*</span>:</label>
-        <select id="coaxialLighting" name="coaxialLighting">
+
+    <div class="form-grid-xc">
+        <label>Resolution Binning <span class="required-asterisk">*</span></label>
+        <select id="resolutionBinning" name="resolutionBinning" required>
             <option value="">Select</option>
-            <option value="required">Required</option>
-            <option value="not_required">Not required</option>
+            <option value="1x1">1 x 1</option>
+            <option value="2x2">2 x 2</option>
         </select>
     </div>
-    <div class="form-group-evalxc-compact">
-        <label>Board Flow Direction <span class="required-asterisk">*</span>:</label>
-        <select id="motorizedZHeight" name="motorizedZHeight">
+
+    <div class="form-grid-xc">
+        <label>Board Flow Direction <span class="required-asterisk">*</span></label>
+        <select id="boardFlowDirection" name="boardFlowDirection" required>
             <option value="">Select</option>
-            <option value="required">L-R</option>
-            <option value="not_required">R-L</option>
-            <option value="not_required">R-R (Pass Back)</option>
-            <option value="not_required">L-L(Pass Back)</option>
+            <option value="lr">Left → Right</option>
+            <option value="rl">Right → Left</option>
         </select>
     </div>
+
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Panel in Place Sensor <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Panel In Place Sensor <span class="required-asterisk">*</span>:</div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="lens" value="13um">Metal braided (Mechanical)</label>
-            <label><input type="checkbox" name="lens" value="15um">Fibrre Optic Cable (Mechanical)</label>
-            <label><input type="checkbox" name="lens" value="10um">Optical PIP (Fibre Optic Type)</label>
-            <label><input type="checkbox" name="lens" value="8um">Optical PIP (Cast Iron Beam Mounted Type)</label>
-    </div>
+            <label><input type="checkbox" name="panelInPlaceSensor" value="metal_braided">Metal Braided</label>
+            <label><input type="checkbox" name="panelInPlaceSensor" value="fiber_optic_mechanical">Fiber Optic (Mechanical)</label>
+            <label><input type="checkbox" name="panelInPlaceSensor" value="optical_pip_fiber">Optical PIP (Fiber)</label>
+            <label><input type="checkbox" name="panelInPlaceSensor" value="optical_pip_cast_iron">Optical PIP (Cast Iron)</label>
+        </div>
     </div>
 </div>
 
+
 <!-- Section 7 -->
-<div class="form-section two-column" data-section="7">
+<div class="form-section" data-section="7">
     <div class="section-title">PC SPECS</div>
-    <div class="form-group-evalxc-compact">
-        <label>Server hardisc capacity <span class="required-asterisk">*</span>:</label>
-        <select id="operatingSystem" name="operatingSystem">
+    <div class="form-grid-xc">
+        <label>Server Harddisk Capacity <span class="required-asterisk">*</span></label>
+        <select id="serverHarddiskCapacity" name="serverHarddiskCapacity" required>
             <option value="">Select</option>
-            <option value="windows_11">1TB</option>
-            <option value="windows_10">1TB</option>
+            <option value="2tb">2 TB</option>
+            <option value="4tb">4 TB</option>
+            <option value="8tb">8 TB</option>
         </select>
     </div>
 </div>
+
 
 <!-- Section 8 -->
 <div class="form-section" data-section="8">
@@ -527,24 +537,27 @@
 <!-- Section 9 -->
 <div class="form-section" data-section="9">
     <div class="section-title">HARDWARE</div>
+
     <div class="checkbox-grid-xc">
         <div class="requirement-xc">ESD Rubber Pads <span class="required-asterisk">*</span>:</div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="rubberPad" value="smaller_than_0201">Component smaller than 0201</label>
+            <label><input type="checkbox" name="esdRubberPads" value="component_lt_0201">Component &lt; 0201</label>
         </div>
     </div>
+
     <div class="checkbox-grid-xc">
         <div class="requirement-xc">Cleanroom <span class="required-asterisk">*</span>:</div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="cleanroom" value="ionizer">Ionizer kit</label>
-            <label><input type="checkbox" name="cleanroom" value="hepa">HEPA filter</label>
+            <label><input type="checkbox" name="cleanroomEquipment" value="ionizer">Ionizer</label>
+            <label><input type="checkbox" name="cleanroomEquipment" value="hepa_filter">HEPA Filter</label>
         </div>
     </div>
+
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Loader/Unloader <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Loader / Unloader <span class="required-asterisk">*</span>:</div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="loaderUnloader" value="lr">L-R</label>
-            <label><input type="checkbox" name="loaderUnloader" value="ll">L-L</label>
+            <label><input type="checkbox" name="loaderUnloaderDirection" value="lr">LR</label>
+            <label><input type="checkbox" name="loaderUnloaderDirection" value="ll">LL</label>
         </div>
     </div>
 </div>
@@ -1273,7 +1286,8 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
+                'customerCompany', 'custTechChamp', 'existcust', 'endCustomerName', 'evalStartDate', 'endEstimateDate',
+                'competitor', 'compModel', 'venue', 'machineHealthChecked', 'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp'
             ];
             if (!isAXI) {
                 requiredFields.push('falseCallppm');
