@@ -886,12 +886,6 @@ async function loadExistingForm() {
         currentStatus = (formData && formData.status) || "draft";
         document.getElementById("loadingIndicator").style.display = "none";
         document.getElementById("preEvalForm").style.display = "block";
-    
-        if (referenceDocData && referenceDocData.productType === 'AXI') {
-            console.log("Product type is AXI - hiding sections 3-10");
-            toggleSectionsByProduct('AXI');
-        }
-        
         populateForm(formData, referenceDocData);
         
         updateFormDisplay();
@@ -901,44 +895,6 @@ async function loadExistingForm() {
         document.getElementById("preEvalForm").style.display = "block";
         updateFormDisplay();
     }
-}
-    
-function toggleSectionsByProduct(productType) {
-    const allSections = document.querySelectorAll('.form-section[data-section]');
-
-    allSections.forEach(section => {
-        const sectionNumber = Number(section.dataset.section);
-        if (productType === 'AXI' && ![1, 2, 11].includes(sectionNumber)) {
-            section.style.display = 'none';
-            section.classList.add('hidden-section');
-            const inputs = section.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.disabled = true;
-                input.removeAttribute('required');
-            });
-        } else {
-            section.style.display = '';
-            section.classList.remove('hidden-section');
-            if (!viewMode && currentStatus !== "drop") {
-                const inputs = section.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    input.disabled = false;
-                });
-            }
-        }
-    });
-    const attachmentSection = document.querySelector('.form-section:has(#attachmentInput)');
-    if (attachmentSection) {
-        if (productType === 'AXI') {
-            attachmentSection.style.display = 'none';
-            attachmentSection.classList.add('hidden-section');
-        } else {
-            attachmentSection.style.display = '';
-            attachmentSection.classList.remove('hidden-section');
-        }
-    }
-    
-    console.log("Sections toggled for product type:", productType);
 }
 
 function populateForm(preEvalData, referenceData) {
@@ -1337,14 +1293,10 @@ async function saveForm(status = "draft") {
             }
         }
 
-        if (status === "complete") {
-            const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
+        if (status === "complete") {    
             const requiredFields = [
                 'customerCompany', 'custTechChamp', 'evalDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
             ];
-            if (!isAXI) {
-                requiredFields.push('falseCallppm');
-            }
             
             const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
             if (missingFields.length > 0 || !collectedData.custIssues || collectedData.custIssues.length === 0) {
@@ -1597,4 +1549,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
