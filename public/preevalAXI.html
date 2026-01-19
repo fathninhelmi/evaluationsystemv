@@ -171,54 +171,64 @@
                 <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Board thickness <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">Normal (0.5 - 4mm)</label>
-                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">0.2 - 4mm</label>
-                    <label><input type="checkbox" name="boardThickness" value="gt_4mm">&gt;4mm</label>
-                    <label><input type="checkbox" name="boardThickness" value="lt_100um">&lt;200um</label>
+                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">Normal (0.5 - 7mm)</label>
+                    <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">7mm - 12.7mm</label>
+                    <label><input type="checkbox" name="boardThickness" value="gt_4mm">&lt;0.5 um (Thin board)</label>
+                    <label><input type="checkbox" name="boardThickness" value="lt_100um">&gt;>12.7 um (Thick board)</label>
                 </div>
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Smallest Component size <span class="required-asterisk">*:</div>
+                <div class="requirement-xc">Panel Weight <span class="required-asterisk">*:</div>
                 <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="smallestComponentSize" value="0201">0201</label>
-                    <label><input type="checkbox" name="smallestComponentSize" value="01005">01005</label>
-                    <label><input type="checkbox" name="smallestComponentSize" value="008004_03015">008004 / 03015</label>
-                </div>
-            </div>
-            
-            <div class="form-group-evalxc" style="grid-column: span 2;">
-                <label>Tallest Component (from PCB top surface) <span class="required-asterisk">*</span>:</label>
-                <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Inspection requirement <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="inspectionRequirement" value="general_smt">General SMT</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="smt_tht">Semicon</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="non_smt">Conformal Coating</label>
-                    <label><input type="checkbox" name="inspectionRequirement" value="z_height">Back End PCB Assembly</label>
+                    <label><input type="checkbox" name="smallestComponentSize" value="0201">&lt;4.5 KG</label>
+                    <label><input type="checkbox" name="smallestComponentSize" value="01005">4.5 KG - 15 KG</label>
+                    <label><input type="checkbox" name="smallestComponentSize" value="008004_03015">&gt;15 KG</label>
                 </div>
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Programming Input files <span class="required-asterisk">*</span>:</div>
+                <div class="requirement-xc">Board Inspection Area <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">General CAD</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">Gerber</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">BOM</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">XY placement files</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="xy_placement">No CAD</label>
+                    <label><input type="checkbox" name="inspectionRequirement" value="general_smt">Full Board</label>
+                    <label><input type="checkbox" name="inspectionRequirement" value="smt_tht">Hidden Joint</label>
+                    <label><input type="checkbox" name="inspectionRequirement" value="non_smt">Selective Component</label>
+                   </div>
+            </div>
+
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Smallest Component size <span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">0201</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">01005</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">008004 / 03015</label>
                 </div>
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Inspection Layer <span class="required-asterisk">*</span>:</div>
+                <div class="requirement-xc">Inspection Requirement<span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">Top only</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">Bottom only</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Top-Bottom</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">General SMT</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">SMT & THT</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Non-SMT Inspection</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Heavy Shaded Component</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Backdrill</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">SiP</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Void</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Crack</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Head in Pillow</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Memory Component</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Hairline Short</label>
+                </div>
+            </div>
+            <div class="checkbox-grid-xc">
+                <div class="requirement-xc">Programming Input files<span class="required-asterisk">*</span>:</div>
+                <div class="checkbox-options-xc">
+                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">GenCAD</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">ODB++</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">CadCadence</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">FabMaster</label>
+                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Gerber file (Required Vayo)</label>
                 </div>
             </div>
         </div>
@@ -231,7 +241,7 @@
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="conveyor" value="staging">Staging</label>
                     <label><input type="checkbox" name="conveyor" value="linear_guide_awa">Linear Guide AWA</label>
-                    <label><input type="checkbox" name="conveyor" value="vacuum_table_awa">Vacuum Table</label>
+                    <label><input type="checkbox" name="conveyor" value="vacuum_table_awa">Vacuum Table AWA</label>
                     <label><input type="checkbox" name="conveyor" value="vvts_usb_io_card">VVTS USB IO Card</label>
                     <label><input type="checkbox" name="conveyor" value="long_board">Long Board</label>
                     <label><input type="checkbox" name="conveyor" value="center_pin">Center Pin</label>
@@ -241,40 +251,21 @@
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Machine type selection by board size <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="standard">Standard</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="xl">XL</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="xxl">XXL</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="single_lane">Single Lane</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="dual_lane">Dual Lane</label>
-                    <label><input type="checkbox" name="machineTypeByBoardSize" value="no_concern">No Concern</label>
+                    <label><input type="checkbox" name="machineTypeByBoardSize" value="standard">S2 XLT</label>
+                    <label><input type="checkbox" name="machineTypeByBoardSize" value="xl">S2EX</label>
+                    <label><input type="checkbox" name="machineTypeByBoardSize" value="xxl">S2 XXL</label>
+                    <label><input type="checkbox" name="machineTypeByBoardSize" value="single_lane">S2 XLL</label>
+                    <label><input type="checkbox" name="machineTypeByBoardSize" value="dual_lane">S3</label>
+                    <label><input type="checkbox" name="machineTypeByBoardSize" value="no_concern">QX1</label>
                 </div>
-            </div>
-
-            <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Board Flow Direction <span class="required-asterisk">*</span>:</div>
-                <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="boardFlowDirection" value="l_r">L-R</label>
-                    <label><input type="checkbox" name="boardFlowDirection" value="r_l">R-L</label>
-                    <label><input type="checkbox" name="boardFlowDirection" value="l_l">L-L</label>
-                    <label><input type="checkbox" name="boardFlowDirection" value="r_r">R-R</label>
-                </div>
-            </div>
-
-            <div class="form-group-evalxc">
-                <label>Board Stop Requirement <span class="required-asterisk">*</span>:</label>
-                <select id="boardStopRequirement" name="boardStopRequirement">
-                    <option value="">Select</option>
-                    <option value="hard_stop">Hard Stop</option>
-                    <option value="sensor_stop">Sensor Stop</option>
-                </select>
             </div>
         </div>
 
         <!-- Section 6 -->
 <div class="form-section" data-section="6">
-    <div class="section-title">VISION</div>
+    <div class="section-title">IMAGE RESOLUTION</div>
     <div class="form-group-evalxc-compact">
-        <label>Camera <span class="required-asterisk">*</span>:</label>
+        <label>Resolution/px <span class="required-asterisk">*</span>:</label>
         <select id="camera" name="camera">
             <option value="">Select</option>
             <option value="12mp">12MP</option>
@@ -282,7 +273,7 @@
         </select>
     </div>
     <div class="form-group-evalxc-compact">
-        <label>Coaxial Lighting <span class="required-asterisk">*</span>:</label>
+        <label>Resolution/px (2x2 bining)<span class="required-asterisk">*</span>:</label>
         <select id="coaxialLighting" name="coaxialLighting">
             <option value="">Select</option>
             <option value="required">Required</option>
@@ -290,93 +281,35 @@
         </select>
     </div>
     <div class="form-group-evalxc-compact">
-        <label>Motorized Z-height <span class="required-asterisk">*</span>:</label>
+        <label>Board Flow Direction <span class="required-asterisk">*</span>:</label>
         <select id="motorizedZHeight" name="motorizedZHeight">
             <option value="">Select</option>
-            <option value="required">Required</option>
-            <option value="not_required">Not required</option>
+            <option value="required">L-R</option>
+            <option value="not_required">R-L</option>
+            <option value="not_required">R-R (Pass Back)</option>
+            <option value="not_required">L-L(Pass Back)</option>
         </select>
     </div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Lens <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Panel in Place Sensor <span class="required-asterisk">*</span>:</div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="lens" value="13um">13um</label>
-            <label><input type="checkbox" name="lens" value="15um">15um</label>
-            <label><input type="checkbox" name="lens" value="10um">10um</label>
-            <label><input type="checkbox" name="lens" value="8um">8um</label>
-            <label><input type="checkbox" name="lens" value="9um">9um</label>
-            <label><input type="checkbox" name="lens" value="7um">7um</label>
-            <label><input type="checkbox" name="lens" value="6um">6um</label>
-            <label><input type="checkbox" name="lens" value="5um">5um</label>
-            <label><input type="checkbox" name="lens" value="2.5um">2.5um</label>
-        </div>
+            <label><input type="checkbox" name="lens" value="13um">Metal braided (Mechanical)</label>
+            <label><input type="checkbox" name="lens" value="15um">Fibrre Optic Cable (Mechanical)</label>
+            <label><input type="checkbox" name="lens" value="10um">Optical PIP (Fibre Optic Type)</label>
+            <label><input type="checkbox" name="lens" value="8um">Optical PIP (Cast Iron Beam Mounted Type)</label>
     </div>
-    <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Projector <span class="required-asterisk">*</span>:</div>
-        <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="projector" value="standard">Standard</label>
-            <label><input type="checkbox" name="projector" value="6x_lens">6x Lens</label>
-            <label><input type="checkbox" name="projector" value="4x_lens">4x Lens</label>
-            <label><input type="checkbox" name="projector" value="multiverse">Multiverse</label>
-        </div>
     </div>
 </div>
 
 <!-- Section 7 -->
 <div class="form-section two-column" data-section="7">
-    <div class="section-title">IPC SPECS</div>
+    <div class="section-title">PC SPECS</div>
     <div class="form-group-evalxc-compact">
-        <label>Operating System <span class="required-asterisk">*</span>:</label>
+        <label>Server hardisc capacity <span class="required-asterisk">*</span>:</label>
         <select id="operatingSystem" name="operatingSystem">
             <option value="">Select</option>
-            <option value="windows_11">Window 11</option>
-            <option value="windows_10">Window 10</option>
-            <option value="windows_8">Window 8</option>
-            <option value="older_than_windows_10">Older than Window 10</option>
-        </select>
-    </div>
-
-    <div class="form-group-evalxc-compact">
-        <label>CPU <span class="required-asterisk">*</span>:</label>
-        <select id="cpu" name="cpu">
-            <option value="">Select</option>
-            <option value="i9">i9</option>
-            <option value="i7">i7</option>
-            <option value="xeon">Xeon</option>
-        </select>
-    </div>
-
-    <div class="form-group-evalxc-compact">
-        <label>RAM <span class="required-asterisk">*</span>:</label>
-        <select id="ram" name="ram">
-            <option value="">Select</option>
-            <option value="lower_than_16gb">Lower than 16GB</option>
-            <option value="16gb">16GB</option>
-            <option value="32gb">32GB</option>
-            <option value="64gb">64GB</option>
-        </select>
-    </div>
-
-    <div class="form-group-evalxc-compact">
-        <label>GPU <span class="required-asterisk">*</span>:</label>
-        <select id="gpu" name="gpu">
-            <option value="">Select</option>
-            <option value="rtx_50_series">RTX 50 series</option>
-            <option value="rtx_40_series">RTX 40 series</option>
-            <option value="rtx_30_series">RTX 30 series</option>
-            <option value="rtx_20_series">RTX 20 series</option>
-            <option value="older_than_rtx_20">Older than RTX 20 series</option>
-        </select>
-    </div>
-
-    <div class="form-group-evalxc-compact">
-        <label>C Drive Storage <span class="required-asterisk">*</span>:</label>
-        <select id="cDriveStorage" name="cDriveStorage">
-            <option value="">Select</option>
-            <option value="1tb">1TB</option>
-            <option value="512gb">512GB</option>
-            <option value="lower_than_512gb">Lower than 512GB</option>
-            <option value="more_than_1tb">More than 1TB</option>
+            <option value="windows_11">1TB</option>
+            <option value="windows_10">1TB</option>
         </select>
     </div>
 </div>
