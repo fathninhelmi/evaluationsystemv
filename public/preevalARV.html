@@ -228,57 +228,40 @@
         </div>
 
         <!-- Section 6 -->
-<div class="form-section" data-section="6">
+    <div class="form-section" data-section="6">
     <div class="section-title">VISION</div>
-    <div class="form-group-evalxc-compact">
-        <label>Camera <span class="required-asterisk">*</span>:</label>
-        <select id="camera" name="camera">
-            <option value="">Select</option>
-            <option value="12mp">12MP</option>
-            <option value="25mp">25MP</option>
-        </select>
-    </div>
-    <div class="form-group-evalxc-compact">
-        <label>Coaxial Lighting <span class="required-asterisk">*</span>:</label>
-        <select id="coaxialLighting" name="coaxialLighting">
-            <option value="">Select</option>
-            <option value="required">Required</option>
-            <option value="not_required">Not required</option>
-        </select>
-    </div>
-    <div class="form-group-evalxc-compact">
-        <label>Motorized Z-height <span class="required-asterisk">*</span>:</label>
-        <select id="motorizedZHeight" name="motorizedZHeight">
-            <option value="">Select</option>
-            <option value="required">Required</option>
-            <option value="not_required">Not required</option>
-        </select>
-    </div>
-    <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Lens <span class="required-asterisk">*</span>:</div>
-        <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="lens" value="13um">13um</label>
-            <label><input type="checkbox" name="lens" value="15um">15um</label>
-            <label><input type="checkbox" name="lens" value="10um">10um</label>
-            <label><input type="checkbox" name="lens" value="8um">8um</label>
-            <label><input type="checkbox" name="lens" value="9um">9um</label>
-            <label><input type="checkbox" name="lens" value="7um">7um</label>
-            <label><input type="checkbox" name="lens" value="6um">6um</label>
-            <label><input type="checkbox" name="lens" value="5um">5um</label>
-            <label><input type="checkbox" name="lens" value="2.5um">2.5um</label>
+    <div class="checkbox-gridpr">
+        <div class="header-evalpr"></div>
+        <div class="header-evalpr">V9i & V9i XL</div>
+        <div class="header-evalpr">V510Ai R</div>
+        
+        <div class="requirementpr">Lighting<span class="required-asterisk">*</span></div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartMeasurementSoftware" value="license">
+                <label>RGBW <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_license"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartMeasurementSoftware" value="license">
+                <label>UVRGB <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_license"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartMeasurementSoftware" value="license">
+                <label>UVW <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_license"></i></label>
+            </div>
+        </div>
+        <div class="checkbox-containerpr">
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartMeasurementHardware" value="motorized_z_height">
+                <label>2D 8MP <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_z_height"></i></label>
+            </div>
+            <div class="checkbox-itempr">
+                <input type="checkbox" name="smartMeasurementHardware" value="motorized_z_height">
+                <label>3D 8MP <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_z_height"></i></label>
+            </div>
         </div>
     </div>
-    <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Projector <span class="required-asterisk">*</span>:</div>
-        <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="projector" value="standard">Standard</label>
-            <label><input type="checkbox" name="projector" value="6x_lens">6x Lens</label>
-            <label><input type="checkbox" name="projector" value="4x_lens">4x Lens</label>
-            <label><input type="checkbox" name="projector" value="multiverse">Multiverse</label>
-        </div>
-    </div>
-</div>
-
+        
 <!-- Section 7 -->
 <div class="form-section two-column" data-section="7">
     <div class="section-title">IPC SPECS</div>
@@ -346,20 +329,6 @@
         <div class="header-evalpr">Software</div>
         <div class="header-evalpr">Hardware</div>
         
-        <div class="requirementpr">Smart Measurement <span class="required-asterisk">*</span></div>
-        <div class="checkbox-containerpr">
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="smartMeasurementSoftware" value="license">
-                <label>License <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_license"></i></label>
-            </div>
-        </div>
-        <div class="checkbox-containerpr">
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="smartMeasurementHardware" value="motorized_z_height">
-                <label>Motorized Z-height <i class="fas fa-info-circle info-icon" data-tool="smart_measurement_z_height"></i></label>
-            </div>
-        </div>
-        
         <div class="requirementpr">V-Library <span class="required-asterisk">*</span></div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
@@ -403,24 +372,6 @@
             <div class="checkbox-itempr">
                 <input type="checkbox" name="vvtsHardware" value="one_aoi_to_multiple">
                 <label>One AOI to multiple <i class="fas fa-info-circle info-icon" data-tool="vvts_one_aoi"></i></label>
-            </div>
-        </div>
-        
-        <div class="requirementpr">AI VVTS <span class="required-asterisk">*</span></div>
-        <div class="checkbox-containerpr">
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="aiVvtsSoftware" value="license">
-                <label>License <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_license"></i></label>
-            </div>
-        </div>
-        <div class="checkbox-containerpr">
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="aiVvtsHardware" value="pc">
-                <label>PC <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_pc"></i></label>
-            </div>
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="aiVvtsHardware" value="one_aoi_to_multiple">
-                <label>One AOI to multiple <i class="fas fa-info-circle info-icon" data-tool="ai_vvts_one_aoi"></i></label>
             </div>
         </div>
         
@@ -486,35 +437,17 @@
             </div>
         </div>
         
-        <div class="requirementpr">One-View <span class="required-asterisk">*</span></div>
-        <div class="checkbox-containerpr">
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="oneViewSoftware" value="license">
-                <label>License <i class="fas fa-info-circle info-icon" data-tool="one_view_license"></i></label>
-            </div>
-        </div>
-        <div class="checkbox-containerpr">
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="oneViewHardware" value="additional_gt_500gb_drive_16gb_ram">
-                <label>Additional &gt;500GB Drive, Additional 16GB RAM <i class="fas fa-info-circle info-icon" data-tool="one_view_drive_ram"></i></label>
-            </div>
-        </div>
-        
-        <div class="requirementpr">Smart Manufacturing <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">NOLP <span class="required-asterisk">*</span></div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="smartManufacturingSoftware" value="secs_gem">
-                <label>SECS/GEM <i class="fas fa-info-circle info-icon" data-tool="secs_gem"></i></label>
+                <label>License <i class="fas fa-info-circle info-icon" data-tool="secs_gem"></i></label>
             </div>
         </div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="smartManufacturingHardware" value="hermes">
-                <label>HERMES <i class="fas fa-info-circle info-icon" data-tool="hermes"></i></label>
-            </div>
-            <div class="checkbox-itempr">
-                <input type="checkbox" name="smartManufacturingHardware" value="m2m_closed_loop">
-                <label>M2M Closed Loop <i class="fas fa-info-circle info-icon" data-tool="m2m_closed_loop"></i></label>
+                <label>PC <i class="fas fa-info-circle info-icon" data-tool="hermes"></i></label>
             </div>
         </div>
         
@@ -558,17 +491,25 @@
         </div>
     </div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Cleanroom <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Confocal Thickness Sensor <span class="required-asterisk">*</span>:</div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="cleanroom" value="ionizer">Ionizer kit</label>
-            <label><input type="checkbox" name="cleanroom" value="hepa">HEPA filter</label>
+            <label><input type="checkbox" name="cleanroom" value="ionizer">10mm WD, >25um thickness</label>
+            <label><input type="checkbox" name="cleanroom" value="hepa">20mm WD, >50um thickness</label>
+            <label><input type="checkbox" name="cleanroom" value="hepa">20mm WD, >30mm WD, >80um thickness</label>
         </div>
     </div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Loader/Unloader <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Laser profile <span class="required-asterisk">*</span>:</div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="loaderUnloader" value="lr">L-R</label>
-            <label><input type="checkbox" name="loaderUnloader" value="ll">L-L</label>
+            <label><input type="checkbox" name="loaderUnloader" value="lr">WD 75-100mm, Blue</label>
+            <label><input type="checkbox" name="loaderUnloader" value="ll">WD 100-260mm, Red</label>
+        </div>
+    </div>
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">Accessories <span class="required-asterisk">*</span>:</div>
+        <div class="checkbox-options-xc">
+            <label><input type="checkbox" name="cleanroom" value="ionizer">Safety Sensor Kit</label>
+            <label><input type="checkbox" name="cleanroom" value="hepa">Universal Carrier Assembly</label>
         </div>
     </div>
 </div>
@@ -580,10 +521,7 @@
         <label><input type="checkbox" name="tools" value="leveling_meter">Leveling meter</label>
         <label><input type="checkbox" name="tools" value="auto_3d_calibration_jig">Auto 3D Calibration Jig</label>
         <label><input type="checkbox" name="tools" value="manual_3d_calibration_jig">Manual 3D Calibration Jig</label>
-        <label><input type="checkbox" name="tools" value="deflectometry_jig">Deflectometry Jig</label>
-        <label><input type="checkbox" name="tools" value="side_cam_jig">Side Cam Jig</label>
-        <label><input type="checkbox" name="tools" value="gantry_mapping_plate">Gantry Mapping Plate</label>
-        <label><input type="checkbox" name="tools" value="a4_grey_card">A4/A5 Grey Card</label>
+        <label><input type="checkbox" name="tools" value="a4_grey_card">A4 Grey Card</label>
         <label><input type="checkbox" name="tools" value="fiducial_plate">Fiducial Plate</label>
         <label><input type="checkbox" name="tools" value="barcode_reader">Barcode reader</label>
         <label><input type="checkbox" name="tools" value="300um_3d_step_grr_jig">300um 3D step GRR jig</label>
