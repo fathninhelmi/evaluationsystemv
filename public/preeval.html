@@ -771,17 +771,14 @@ function injectDynamicCategories() {
         console.error('Checkbox grid not found');
         return;
     }
-    
-    // Define default categories to skip (they're already in the HTML)
+
     const defaultCategories = [
         'V-Library', 'AI Programming', 'VVTS', 'AI VVTS', 'VDSPC 2.0',
         'V-One', 'V-Accelerator', 'V-Tune', 'Minitab', 'One-View',
         'MES', 'Barcode Related'
     ];
-    
-    // Add custom categories
+
     Object.keys(dynamicCategories).forEach(categoryName => {
-        // Skip if it's a default category
         if (defaultCategories.includes(categoryName)) {
             return;
         }
@@ -790,23 +787,19 @@ function injectDynamicCategories() {
         const features = categoryData.features;
         const formFields = categoryData.formFields || {};
         
-        // Generate field names if not stored
         const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
         const softwareFieldName = formFields.software || `${baseName}Software`;
         const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
         
-        // Create the category row HTML
         const categoryRow = document.createElement('div');
         categoryRow.className = 'requirementpr';
         categoryRow.textContent = categoryName + ' ';
         categoryRow.setAttribute('data-dynamic-category', categoryName);
         
-        // Create software column
         const softwareColumn = document.createElement('div');
         softwareColumn.className = 'checkbox-containerpr';
         softwareColumn.setAttribute('data-dynamic-category', categoryName);
         
-        // Add software checkboxes
         features.forEach(feature => {
             const checkboxDiv = document.createElement('div');
             checkboxDiv.className = 'checkbox-itempr';
@@ -819,12 +812,10 @@ function injectDynamicCategories() {
             softwareColumn.appendChild(checkboxDiv);
         });
         
-        // Create hardware column (empty for now, can be populated if needed)
         const hardwareColumn = document.createElement('div');
         hardwareColumn.className = 'checkbox-containerpr';
         hardwareColumn.setAttribute('data-dynamic-category', categoryName);
         
-        // Append to grid
         checkboxGrid.appendChild(categoryRow);
         checkboxGrid.appendChild(softwareColumn);
         checkboxGrid.appendChild(hardwareColumn);
@@ -832,7 +823,6 @@ function injectDynamicCategories() {
         console.log(`Added dynamic category: ${categoryName}`);
     });
     
-    // Reinitialize tooltips for new info icons
     initTooltips();
 }
 
@@ -847,13 +837,10 @@ async function initForm() {
             return;
         }
 
-        // Load categories first
         await loadAllCategories();
         
-        // Load existing form data
         await loadExistingForm();
         
-        // Inject dynamic categories into the form
         injectDynamicCategories();
 
         const userRole = await checkUserRole();
@@ -1549,6 +1536,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
 
