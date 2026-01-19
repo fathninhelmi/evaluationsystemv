@@ -45,7 +45,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Existing customer? <span class="required-asterisk">*</span>:</label>
-                <select id="existcust" name="existcust">
+                <select id="existcust" name="existcust" required>
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -65,11 +65,11 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor(s) if any<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="competitor" name="competitor">
+                <input type="text" id="competitor" name="competitor" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor machine model<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="compModel" name="compModel">
+                <input type="text" id="compModel" name="compModel" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Venue<span class="required-asterisk">*</span>:</label>
@@ -82,7 +82,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Machine Health checked? <span class="required-asterisk">*</span>:</label>
-                <select id="machineHealthChecked" name="machineHealthChecked">
+                <select id="machineHealthChecked" name="machineHealthChecked" required>
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -116,7 +116,7 @@
             <div class="section-title">TARGET INSPECTION PERFORMANCE</div>
             <div class="form-group-evalxc-compact">
                 <label>Inspection environment <span class="required-asterisk">*</span>:</label>
-                <select id="inspectionEnvironment" name="inspectionEnvironment">
+                <select id="inspectionEnvironment" name="inspectionEnvironment" required>
                     <option value="">Select</option>
                     <option value="offline_only">Offline only</option>
                     <option value="offline_inline">Offline & Inline</option>
@@ -124,7 +124,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>FPY target if any <span class="required-asterisk">*</span>:</label>
-                <select id="fpyTarget" name="fpyTarget">
+                <select id="fpyTarget" name="fpyTarget" required>
                     <option value="">Select</option>
                     <option value="95">≥ 95%</option>
                     <option value="no_concern">No concern</option>
@@ -132,7 +132,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Product segment <span class="required-asterisk">*</span>:</label>
-                <select id="prodseg" name="prodseg">
+                <select id="prodseg" name="prodseg" required>
                     <option value="">Select</option>
                     <option value="aerospace">Aerospace</option>
                     <option value="medical">Medical</option>
@@ -145,7 +145,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Require angular inspection <span class="required-asterisk">*</span>:</label>
-                <select id="reqinspect" name="reqinspect">
+                <select id="reqinspect" name="reqinspect" required>
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -153,7 +153,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Cycle time requirement <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="cycleTime" name="cycleTime">
+                <input type="text" id="cycleTime" name="cycleTime" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>False call PPM <span class="required-asterisk">*</span>:</label>
@@ -161,7 +161,7 @@
             </div>
             <div class="form-group-evalxc" style="grid-column: span 2;">
                 <label>Others <span class="required-asterisk">*</span>:</label>
-                <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
+                <textarea id="otherreq" name="otherreq" required style="max-width: 100%; width: 100%;"></textarea>
             </div>
         </div>
 
@@ -189,7 +189,7 @@
             
             <div class="form-group-evalxc" style="grid-column: span 2;">
                 <label>Tallest Component (from PCB top surface) <span class="required-asterisk">*</span>:</label>
-                <textarea id="tallestComponent" name="tallestComponent" style="max-width: 100%; width: 100%;"></textarea>
+                <textarea id="tallestComponent" name="tallestComponent" required style="max-width: 100%; width: 100%;"></textarea>
             </div>
 
             <div class="checkbox-grid-xc">
@@ -262,7 +262,7 @@
 
             <div class="form-group-evalxc">
                 <label>Board Stop Requirement <span class="required-asterisk">*</span>:</label>
-                <select id="boardStopRequirement" name="boardStopRequirement">
+                <select id="boardStopRequirement" name="boardStopRequirement" required>
                     <option value="">Select</option>
                     <option value="hard_stop">Hard Stop</option>
                     <option value="sensor_stop">Sensor Stop</option>
@@ -275,7 +275,7 @@
     <div class="section-title">VISION</div>
     <div class="form-group-evalxc-compact">
         <label>Camera <span class="required-asterisk">*</span>:</label>
-        <select id="camera" name="camera">
+        <select id="camera" name="camera" required>
             <option value="">Select</option>
             <option value="12mp">12MP</option>
             <option value="25mp">25MP</option>
@@ -283,7 +283,7 @@
     </div>
     <div class="form-group-evalxc-compact">
         <label>Coaxial Lighting <span class="required-asterisk">*</span>:</label>
-        <select id="coaxialLighting" name="coaxialLighting">
+        <select id="coaxialLighting" name="coaxialLighting" required>
             <option value="">Select</option>
             <option value="required">Required</option>
             <option value="not_required">Not required</option>
@@ -291,7 +291,7 @@
     </div>
     <div class="form-group-evalxc-compact">
         <label>Motorized Z-height <span class="required-asterisk">*</span>:</label>
-        <select id="motorizedZHeight" name="motorizedZHeight">
+        <select id="motorizedZHeight" name="motorizedZHeight" required>
             <option value="">Select</option>
             <option value="required">Required</option>
             <option value="not_required">Not required</option>
@@ -327,7 +327,7 @@
     <div class="section-title">IPC SPECS</div>
     <div class="form-group-evalxc-compact">
         <label>Operating System <span class="required-asterisk">*</span>:</label>
-        <select id="operatingSystem" name="operatingSystem">
+        <select id="operatingSystem" name="operatingSystem" required>
             <option value="">Select</option>
             <option value="windows_11">Window 11</option>
             <option value="windows_10">Window 10</option>
@@ -338,7 +338,7 @@
 
     <div class="form-group-evalxc-compact">
         <label>CPU <span class="required-asterisk">*</span>:</label>
-        <select id="cpu" name="cpu">
+        <select id="cpu" name="cpu" required>
             <option value="">Select</option>
             <option value="i9">i9</option>
             <option value="i7">i7</option>
@@ -348,7 +348,7 @@
 
     <div class="form-group-evalxc-compact">
         <label>RAM <span class="required-asterisk">*</span>:</label>
-        <select id="ram" name="ram">
+        <select id="ram" name="ram" required>
             <option value="">Select</option>
             <option value="lower_than_16gb">Lower than 16GB</option>
             <option value="16gb">16GB</option>
@@ -359,7 +359,7 @@
 
     <div class="form-group-evalxc-compact">
         <label>GPU <span class="required-asterisk">*</span>:</label>
-        <select id="gpu" name="gpu">
+        <select id="gpu" name="gpu" required>
             <option value="">Select</option>
             <option value="rtx_50_series">RTX 50 series</option>
             <option value="rtx_40_series">RTX 40 series</option>
@@ -371,7 +371,7 @@
 
     <div class="form-group-evalxc-compact">
         <label>C Drive Storage <span class="required-asterisk">*</span>:</label>
-        <select id="cDriveStorage" name="cDriveStorage">
+        <select id="cDriveStorage" name="cDriveStorage" required>
             <option value="">Select</option>
             <option value="1tb">1TB</option>
             <option value="512gb">512GB</option>
@@ -1282,8 +1282,12 @@ async function saveForm(status = "draft") {
 
         if (status === "complete") {    
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
-            ];
+                'customerCompany', 'custTechChamp', 'existcust', 'endCustomerName', 'evalStartDate', 'endEstimateDate',
+                'competitor', 'compModel', 'venue', 'machineHealthChecked', 'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
+                'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'cycleTime', 'falseCallppm', 'otherreq', 'boardThickness', 'smallestComponentSize',
+                'tallestComponent', 'inspectionRequirement', 'programmingInputFiles', 'inspectionLayer', 'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection',
+                'boardStopRequirement', 'camera', 'coaxialLighting', 'motorizedZHeight', 'lens', 'projector', 'operatingSystem', 'cpu', 'ram', 'gpu', 'cDriveStorage',
+                'rubberPad', 'cleanroom', 'loaderUnloader'];
             
             const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
             if (missingFields.length > 0 || !collectedData.custIssues || collectedData.custIssues.length === 0) {
@@ -1536,6 +1540,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
 
