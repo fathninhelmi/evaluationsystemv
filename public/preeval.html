@@ -53,15 +53,15 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>End customer name <span class="required-asterisk">*</span>:</label>
-                <input type="text" id="custTechChamp" name="custTechChamp" required>
+                <input type="text" id="endCustomerName" name="endCustomerName" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Evaluation Date<span class="required-asterisk">*</span>:</label>
-                <input type="date" id="evalDate" name="evalDate" required>
+                <label>Evaluation Start Date<span class="required-asterisk">*</span>:</label>
+                <input type="date" id="evalStartDate" name="evalStartDate" required>
             </div>
             <div class="form-group-evalxc-compact">
-                <label>Estimate Duration<span class="required-asterisk">*</span>:</label>
-                <input type="date" id="evalDate" name="evalDate" required>
+                <label>Estimated Evaluation End Date<span class="required-asterisk">*</span>:</label>
+                <input type="date" id="endEstimateDate" name="endEstimateDate" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Competitor(s) if any<span class="required-asterisk">*</span>:</label>
@@ -82,7 +82,7 @@
             </div>
             <div class="form-group-evalxc-compact">
                 <label>Machine Health checked? <span class="required-asterisk">*</span>:</label>
-                <select id="existcust" name="existcust">
+                <select id="machineHealthChecked" name="machineHealthChecked">
                     <option value="">Select</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -95,19 +95,19 @@
             <div class="section-title">RESOURCES</div>
             <div class="form-group-evalxc-compact">
                 <label>SCP Sales Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxsalesChamp" name="scpvitroxsalesChamp" required>
+                <input type="text" id="scpSalesChamp" name="scpSalesChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>SCP Technical Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxtechChamp" name="scpvitroxtechChamp" required>
+                <input type="text" id="scpTechChamp" name="scpTechChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>ViTrox Sales Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxsalesChamp" name="scpvitroxsalesChamp" required>
+                <input type="text" id="vitroxSalesChamp" name="vitroxSalesChamp" required>
             </div>
             <div class="form-group-evalxc-compact">
                 <label>ViTrox Technical Champion<span class="required-asterisk">*</span>:</label>
-                <input type="text" id="scpvitroxtechChamp" name="scpvitroxtechChamp" required>
+                <input type="text" id="vitroxTechChamp" name="vitroxTechChamp" required>
             </div>
         </div>
 
@@ -189,7 +189,7 @@
             
             <div class="form-group-evalxc" style="grid-column: span 2;">
                 <label>Tallest Component (from PCB top surface) <span class="required-asterisk">*</span>:</label>
-                <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
+                <textarea id="tallestComponent" name="tallestComponent" style="max-width: 100%; width: 100%;"></textarea>
             </div>
 
             <div class="checkbox-grid-xc">
@@ -1549,5 +1549,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
