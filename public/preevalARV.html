@@ -689,8 +689,7 @@ async function loadAllCategories() {
         response.documents.forEach(doc => {
             const categoryName = doc.categoryName;
             const features = doc.features.map(f => JSON.parse(f));
-            
-            // Store the category info
+
             dynamicCategories[categoryName] = {
                 features: features,
                 formFields: doc.formFields ? JSON.parse(doc.formFields) : null
@@ -734,13 +733,10 @@ function injectDynamicCategories() {
         const categoryData = dynamicCategories[categoryName];
         const features = categoryData.features;
         const formFields = categoryData.formFields || {};
-        
-        // Generate field names if not stored
         const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
         const softwareFieldName = formFields.software || `${baseName}Software`;
         const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
-        
-        // Create the category row HTML
+
         const categoryRow = document.createElement('div');
         categoryRow.className = 'requirementpr';
         categoryRow.textContent = categoryName + ' ';
@@ -885,7 +881,7 @@ function populateForm(preEvalData, referenceData) {
     });
 
     const selectFields = [
-        'existcust', 'venue', 'machineHealth', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect',
+        'existCust', 'venue', 'machineHealth', 'inspectionEnvironment', 'fpyTarget', 'prodSeg', 'reqInspect',
         'operatingSystem', 'cpu', 'ram', 'gpu', 'cDriveStorage', 'boardStopRequirement', 'coaxialLighting'];
     selectFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
@@ -919,7 +915,6 @@ function populateForm(preEvalData, referenceData) {
         'vLibrarySoftware', 'vLibraryHardware', 'aiProgrammingSoftware', 'aiProgrammingHardware',
         'vvtsSoftware', 'vvtsHardware','vdspcSoftware', 'vdspcHardware', 'voneSoftware', 'voneHardware',
         'cadConverterSoftware', 'cadConverterHardware', 'vTuneSoftware', 'vTuneHardware',
-        'vAcceleratorSoftware', 'vTuneSoftware', 'minitabSoftware', 'minitabHardware',
         'OLPSoftware', 'OLPHardware', 'mesSoftware', 'mesHardware',
         'barcodeSoftware', 'barcodeHardware'
     ];
@@ -1156,7 +1151,7 @@ function collectFormData() {
     });
 
     const selectFields = [        
-        'existcust', 'venue', 'machineHealth', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect',
+        'existCust', 'venue', 'machineHealth', 'inspectionEnvironment', 'fpyTarget', 'prodSeg', 'reqInspect',
         'operatingSystem', 'cpu', 'ram', 'gpu', 'cDriveStorage', 'boardStopRequirement', 'coaxialLighting'];
     
     selectFields.forEach(fieldId => {
@@ -1187,7 +1182,6 @@ function collectFormData() {
         'vLibrarySoftware', 'vLibraryHardware', 'aiProgrammingSoftware', 'aiProgrammingHardware',
         'vvtsSoftware', 'vvtsHardware','vdspcSoftware', 'vdspcHardware', 'voneSoftware', 'voneHardware',
         'cadConverterSoftware', 'cadConverterHardware', 'vTuneSoftware', 'vTuneHardware',
-        'vAcceleratorSoftware', 'vTuneSoftware', 'minitabSoftware', 'minitabHardware',
         'OLPSoftware', 'OLPHardware', 'mesSoftware', 'mesHardware',
         'barcodeSoftware', 'barcodeHardware'
     ];
@@ -1247,7 +1241,7 @@ async function saveForm(status = "draft") {
         if (status === "complete") {  
             const requiredFields = [
                 'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 'evalStartDate', 'endEstimateDate',
-                'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existcust', 'machineHealth', 'venue'
+                'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existCust', 'machineHealth', 'venue'
             ];
             
             const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
