@@ -540,6 +540,60 @@ function renderMyForms(forms) {
     grid.appendChild(card);
   });
 }
+
+  function renderPublicForms(forms) {
+  const grid = document.getElementById("publicFormsGrid");
+  const loading = document.getElementById("publicFormsLoading");
+  const empty = document.getElementById("publicFormsEmpty");
+  
+  loading.style.display = "none";
+  grid.innerHTML = "";
+  
+  if (forms.length === 0) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  
+  forms.forEach(form => {
+    const card = document.createElement("div");
+    card.className = "form-card";
+    
+    const requestStatus = userRequests[form.$id];
+    const isSameCompany = form.customerCompany === userCompany;
+    
+    let actionButton = '';
+    if (isSameCompany) {
+      actionButton = `<button class="btn-mini btn-primary" onclick="viewPostEvalWithNavigation('${form.$id}')"><i class="fas fa-eye"></i> View Form</button>`;
+    } else {
+      if (requestStatus === 'approved') {
+        actionButton = `<button class="btn-mini btn-primary" onclick="viewPostEvalWithNavigation('${form.$id}')"><i class="fas fa-eye"></i> View Form</button>`;
+      } else if (requestStatus === 'pending') {
+        actionButton = `<button class="btn-mini btn-secondary" disabled style="opacity: 0.7; cursor: not-allowed;"><i class="fas fa-clock"></i> Requested</button>`;
+      } else {
+        actionButton = `<button class="btn-mini btn-primary" onclick="requestAccess('${form.$id}')"><i class="fas fa-paper-plane"></i> Request Access</button>`;
+      }
+    }
+    
+    card.innerHTML = `
+      <div class="form-header">
+        <div class="form-title">
+          ${form.prodname || 'Untitled'}
+          ${!isSameCompany ? '<span style="color: #ff6b6b; font-size: 0.85em; margin-left: 8px;">(Other Company)</span>' : ''}
+        </div>
+      </div>
+      <div class="form-meta">
+        <div class="form-user"><i class="fas fa-building"></i> ${form.customerCompany || 'N/A'}</div>
+        <div class="form-user"><i class="fas fa-cog"></i> ${form.productType || 'N/A'}</div>
+        ${form.postEvalData?.keyword ? `<div class="form-user"><i class="fas fa-tags"></i> ${form.postEvalData.keyword}</div>` : ''}
+      </div>
+      <div class="subforms-container" style="margin-top: 15px;">
+        ${actionButton}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
   
 async function requestAccess(formId) {
   try {
@@ -704,6 +758,7 @@ document.addEventListener("DOMContentLoaded", loadForms);
 </body>
 
 </html>
+
 
 
 
