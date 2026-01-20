@@ -23,7 +23,6 @@
         <a href="/manager.html" class="nav-link active">Home</a>
         <a href="/spreadsheet.html" class="nav-link">Spreadsheet</a>
         <a href="/request.html" class="nav-link">Requested Form</a>
-        <a href="library.html" class="nav-link">Library</a>
         <a href="#" id="logoutBtn" class="nav-link">Logout</a>
     </nav>
 </header>
@@ -1018,7 +1017,8 @@ function updateMapMarkers() {
                         <div><strong>👤 Staff:</strong> ${e.staff}</div>
                         <div><strong>🏢 Company:</strong> ${e.customerCompany}</div>
                         <div><strong>📍 Location:</strong> ${e.customerLocation}</div>
-                        <div><strong>📅 Date:</strong> ${e.date}</div>
+                        <div><strong>📅 Evaluation Start Date:</strong> ${e.evalStartDate}</div>
+                        <div><strong>📅 Estimated Evaluation End Date:</strong> ${e.endEstimateDate}</div>
                         ${e.searchQuery ? `<div style="font-size: 11px; color: #999; margin-top: 8px;"><em>Found via: "${e.searchQuery}"</em></div>` : ''}
                     </div>
                     <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: center;">
@@ -1109,4 +1109,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
