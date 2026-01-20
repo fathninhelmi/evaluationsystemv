@@ -790,11 +790,6 @@ function collectFormData() {
             data[fieldId] = element.value.trim();
         }
     });
-    ['objectSize_l', 'objectSize_w', 'objectSize_h'].forEach(floatField => {
-        if (data[floatField] && data[floatField] !== '') {
-            data[floatField] = parseFloat(data[floatField]);
-        }
-    });
     ['evalStartDate', 'endEstimateDate', 'targetDeploymentDate'].forEach(dateField => {
         if (data[dateField]) {
             data[dateField] = new Date(data[dateField] + "T00:00:00Z").toISOString();
@@ -1046,6 +1041,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
 
 
