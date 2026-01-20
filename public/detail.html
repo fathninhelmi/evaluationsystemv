@@ -26,7 +26,14 @@ const databases = new Databases(client);
 
 const databaseId = "68ba8a9c001f17064e15";
 const mainCollectionId = "68ba918c0022d2b9a429";
-const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const preEvalCollectionIds = {
+  'AOI': '68c7ced6001bd14d08f4',
+  'SPI': '696dd2b1000c4e985d76',
+  'AXI': '696ed4b900377582df31',
+  'ARV': '696dd29b0034536c09b9', 
+  'XC': '696dd2f20006c0eef2a1',  
+  'XS': '696dd301001cd0f6da66'  
+};
 const evalCollectionId = "68bf9d5600257a20775a";
 const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 
@@ -50,6 +57,9 @@ async function loadEvent() {
     try {
         const ev = await databases.getDocument(databaseId, mainCollectionId, eventId);
         console.log('Loaded event:', ev);
+
+        const productType = (ev.productType || "AOI").toUpperCase().trim();
+        const preEvalCollectionId = preEvalCollectionIds[productType] || preEvalCollectionIds['AOI'];
         
         const preEvalStatus = await getFormStatus(preEvalCollectionId, eventId);
         const evalStatus = await getFormStatus(evalCollectionId, eventId);
@@ -217,10 +227,17 @@ async function goToStep(page, eventId, isViewMode = false) {
         const mainDoc = await databases.getDocument(databaseId, mainCollectionId, eventId);
         console.log("Product Type from database:", mainDoc.productType); 
         
+        // Get correct collection ID based on product type
+        const productTypeUpper = (mainDoc.productType || "AOI").toUpperCase().trim();
         let collectionId;
-        if (page.includes("preeval")) collectionId = preEvalCollectionId;
-        else if (page.includes("eval.html")) collectionId = evalCollectionId;
-        else if (page.includes("posteval")) collectionId = postEvalCollectionId;
+        
+        if (page.includes("preeval")) {
+            collectionId = preEvalCollectionIds[productTypeUpper] || preEvalCollectionIds['AOI'];
+        } else if (page.includes("eval.html")) {
+            collectionId = evalCollectionId;
+        } else if (page.includes("posteval")) {
+            collectionId = postEvalCollectionId;
+        }
 
         let formDoc;
         try {
@@ -306,4 +323,5 @@ loadEvent();
 </body>
 
 </html>
+
 
