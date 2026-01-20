@@ -899,7 +899,7 @@ function populateForm(preEvalData, referenceData) {
     const checkboxGroups = [
         'boardThickness', 'inspectionRequirement', 'programmingInputFiles', 'platform',
         'boardFlowDirection', 'automationConfig', 'lighting', 'tools', 'rubberPad', 'sensor', 'laser',
-        'accessories'
+        'accessories', 'cameraType'
     ];
 
     checkboxGroups.forEach(groupName => {
@@ -1169,7 +1169,7 @@ function collectFormData() {
     const checkboxGroups = [
         'boardThickness', 'inspectionRequirement', 'programmingInputFiles', 'platform',
         'boardFlowDirection', 'automationConfig', 'lighting', 'tools', 'rubberPad', 'sensor', 'laser',
-        'accessories'
+        'accessories', 'cameraType'
     ];
     checkboxGroups.forEach(groupName => {
         const checkedBoxes = document.querySelectorAll(`input[name="${groupName}"]:checked`);
