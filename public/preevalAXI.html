@@ -927,7 +927,7 @@ function populateForm(preEvalData, referenceData) {
         if (element && data[fieldId]) element.value = data[fieldId];
     });
 
-    const selectFields = ['existcust', 'venue', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 'coaxialLighting'];
+    const selectFields = ['existcust', 'venue', 'machineHealthChecked'];
     selectFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element && data[fieldId]) element.value = data[fieldId];
@@ -1186,7 +1186,7 @@ function collectFormData() {
         if (element) data[fieldId] = element.value.trim();
     });
 
-    const selectFields = ['existcust', 'venue', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 'coaxialLighting'];
+    const selectFields = ['existcust', 'venue', 'machineHealthChecked'];
     selectFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element) data[fieldId] = element.value;
