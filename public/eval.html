@@ -83,12 +83,10 @@
                     <tbody id="issuesTableBody">
                         <tr>
                             <td class="row-number">1</td>
-                    
                             <td class="issue-row-content">
                                 <input type="text" name="issue_1">
                                 <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)" style="display:none;">&times;</button>
                             </td>
-                    
                             <td>
                                 <select name="issue_priority_1">
                                     <option value="">Select Priority</option>
@@ -97,7 +95,6 @@
                                     <option value="Low">Low</option>
                                 </select>
                             </td>
-                    
                             <td><input type="text" name="issue_proposed_solution_1"></td>
                             <td><input type="text" name="issue_actual_solution_1"></td>
                             <td><input type="text" name="issue_pic_1"></td>
@@ -106,7 +103,10 @@
                             <td><input type="date" name="issue_actual_close_date_1"></td>
                         </tr>
                     </tbody>
-
+                </table>
+                <button type="button" class="add-row-btn" onclick="addIssueRow()">+ Add Issue</button>
+            </div>
+        </div>
 
         <!-- Customer Feedback/Request Section -->
         <div class="form-section">
@@ -126,15 +126,13 @@
                             <th>Actual Close Date</th>
                         </tr>
                     </thead>
-                   <tbody id="feedbackTableBody">
+                    <tbody id="feedbackTableBody">
                         <tr>
                             <td class="row-number">1</td>
-                    
                             <td class="feedback-row-content">
                                 <input type="text" name="feedback_1">
                                 <button type="button" class="delete-row-btn" onclick="deleteFeedbackRow(this)" style="display:none;">&times;</button>
                             </td>
-                    
                             <td>
                                 <select name="feedback_priority_1">
                                     <option value="">Select Priority</option>
@@ -143,7 +141,6 @@
                                     <option value="Low">Low</option>
                                 </select>
                             </td>
-                    
                             <td><input type="text" name="feedback_proposed_solution_1"></td>
                             <td><input type="text" name="feedback_actual_solution_1"></td>
                             <td><input type="text" name="feedback_pic_1"></td>
@@ -152,7 +149,10 @@
                             <td><input type="date" name="feedback_actual_close_date_1"></td>
                         </tr>
                     </tbody>
-
+                </table>
+                <button type="button" class="add-row-btn" onclick="addFeedbackRow()">+ Add Feedback</button>
+            </div>
+        </div>
 
         <!-- Customer's Good Comment Section -->
         <div class="form-section">
@@ -169,7 +169,7 @@
                         <tr>
                             <td class="row-number">1</td>
                             <td class="comment-row-content">
-                                <input type="text" name="comment-input">
+                                <input type="text" name="comment_1">
                                 <button type="button" class="delete-row-btn" onclick="deleteCommentRow(this)" style="display:none;">&times;</button>
                             </td>
                         </tr>
@@ -951,6 +951,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
 
