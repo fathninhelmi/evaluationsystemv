@@ -188,7 +188,15 @@ const account = new Account(client);
 const databaseId = "68ba8a9c001f17064e15";
 const collectionId = "68ba918c0022d2b9a429";
 
-const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const preEvalCollectionIds = {
+  'AOI': '68c7ced6001bd14d08f4',
+  'SPI': '696dd2b1000c4e985d76',
+  'AXI': '696ed4b900377582df31',
+  'ARV': '696dd29b0034536c09b9', 
+  'XC': '696dd2f20006c0eef2a1',  
+  'XS': '696dd301001cd0f6da66'  
+};
+
 const evalCollectionId    = "68bf9d5600257a20775a";
 const postEvalCollectionId= "68bf9d62002b4f5f7f23";
 
@@ -293,7 +301,10 @@ async function loadEvaluations() {
         evaluationData = [];
         console.log(`📊 Loading ${response.documents.length} evaluations...`);
 
-        for (const doc of response.documents) {
+       for (const doc of response.documents) {
+            const productType = (doc.productType || "AOI").toUpperCase().trim();
+            const preEvalCollectionId = preEvalCollectionIds[productType] || preEvalCollectionIds['AOI'];
+        
             let preDoc, evalDoc, postDoc;
             let preStatus = 'draft', evalStatus = 'draft', postStatus = 'draft';
             let winLoseStatus = null;
@@ -301,10 +312,10 @@ async function loadEvaluations() {
             let otherloseReason = null;
             let winReason = null;
             let otherwinReason = null;
-
+        
             try { preDoc = await databases.getDocument(databaseId, preEvalCollectionId, doc.$id); preStatus = preDoc.status || 'draft'; } catch {}
             try { evalDoc = await databases.getDocument(databaseId, evalCollectionId, doc.$id); evalStatus = evalDoc.status || 'draft'; } catch {}
-            try { 
+            try {
                 postDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.$id); 
                 postStatus = postDoc.status || 'draft';
                 winLoseStatus = postDoc.result || postDoc.winlose || postDoc.winLose || null;
@@ -1098,3 +1109,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
