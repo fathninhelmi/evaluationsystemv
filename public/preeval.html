@@ -917,7 +917,7 @@ function populateForm(preEvalData, referenceData) {
     const textFields = [
         'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 
         'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
-        'cycleTime', 'falseCallppm', 'otherreq'
+        'cycleTime', 'falseCallppm', 'otherreq', 'tallestComponent'
     ];
 
     textFields.forEach(fieldId => {
@@ -925,7 +925,11 @@ function populateForm(preEvalData, referenceData) {
         if (element && data[fieldId]) element.value = data[fieldId];
     });
 
-    const selectFields = ['existcust', 'venue', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 'coaxialLighting'];
+    const selectFields = [
+        'existcust', 'venue', 'machineHealthChecked', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 
+        'reqinspect', 'boardStopRequirement', 'camera', 'motorizedZHeight', 'coaxialLighting',
+        'operatingSystem' , 'cpu', 'ram', 'gpu', 'cDriveStorage'
+    ];
     selectFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element && data[fieldId]) element.value = data[fieldId];
@@ -940,9 +944,9 @@ function populateForm(preEvalData, referenceData) {
     });
 
     const checkboxGroups = [
-        'boardThickness', 'smallestComponentSize', 'inspectionRequirement', 'programmingInputFiles',
-        'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'hardiscCapacity',
-        'rubberPad', 'tools'
+        'boardThickness', 'smallestComponentSize', 'inspectionRequirement', 'programmingInputFiles', 'inspectionLayer',
+        'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'projector', 'rubberPad', 
+        'cleanroom', 'loaderUnloader', 'tools'
     ];
 
     checkboxGroups.forEach(groupName => {
@@ -955,11 +959,11 @@ function populateForm(preEvalData, referenceData) {
     });
 
     const featureFields = [
-        'vLibrarySoftware', 'vLibraryHardware', 'aiProgrammingSoftware', 'aiProgrammingHardware',
+        'smartMeasurementSoftware', 'smartMeasurementHardware', 'vLibrarySoftware', 'vLibraryHardware', 'aiProgrammingSoftware', 'aiProgrammingHardware',
         'vvtsSoftware', 'vvtsHardware', 'aiVvtsSoftware', 'aiVvtsHardware',
         'vdspcSoftware', 'vdspcHardware', 'voneSoftware', 'voneHardware',
-        'vAcceleratorSoftware', 'vTuneSoftware', 'minitabSoftware', 'minitabHardware',
-        'oneViewSoftware', 'oneViewHardware', 'mesSoftware', 'mesHardware',
+        'cadConverterSoftware', 'cadConverterHardware', 'vTuneSoftware', 
+        'oneViewSoftware', 'oneViewHardware', 'smartManufacturingSoftware', 'smartManufacturingHardware', 'mesSoftware', 'mesHardware',
         'barcodeSoftware', 'barcodeHardware'
     ];
 
@@ -1185,8 +1189,8 @@ function collectFormData() {
 
     const textFields = [
         'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 
-        'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 
-        'cycleTime', 'falseCallppm', 'otherreq'
+        'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
+        'cycleTime', 'falseCallppm', 'otherreq', 'tallestComponent'
     ];
 
     textFields.forEach(fieldId => {
@@ -1194,7 +1198,11 @@ function collectFormData() {
         if (element) data[fieldId] = element.value.trim();
     });
 
-    const selectFields = ['existcust', 'venue', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 'coaxialLighting'];
+    const selectFields = [
+        'existcust', 'venue', 'machineHealthChecked', 'inspectionEnvironment', 'fpyTarget', 'prodseg', 
+        'reqinspect', 'boardStopRequirement', 'camera', 'motorizedZHeight', 'coaxialLighting',
+        'operatingSystem' , 'cpu', 'ram', 'gpu', 'cDriveStorage'
+    ];
     selectFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element) data[fieldId] = element.value;
@@ -1208,9 +1216,9 @@ function collectFormData() {
     });
 
     const checkboxGroups = [
-        'boardThickness', 'smallestComponentSize', 'inspectionRequirement', 'programmingInputFiles',
-        'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'hardiscCapacity',
-        'rubberPad', 'tools'
+        'boardThickness', 'smallestComponentSize', 'inspectionRequirement', 'programmingInputFiles', 'inspectionLayer',
+        'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'projector', 'rubberPad', 
+        'cleanroom', 'loaderUnloader', 'tools'
     ];
     checkboxGroups.forEach(groupName => {
         const checkedBoxes = document.querySelectorAll(`input[name="${groupName}"]:checked`);
@@ -1220,11 +1228,11 @@ function collectFormData() {
     });
 
     const featureFields = [
-        'vLibrarySoftware', 'vLibraryHardware', 'aiProgrammingSoftware', 'aiProgrammingHardware',
+        'smartMeasurementSoftware', 'smartMeasurementHardware', 'vLibrarySoftware', 'vLibraryHardware', 'aiProgrammingSoftware', 'aiProgrammingHardware',
         'vvtsSoftware', 'vvtsHardware', 'aiVvtsSoftware', 'aiVvtsHardware',
         'vdspcSoftware', 'vdspcHardware', 'voneSoftware', 'voneHardware',
-        'vAcceleratorSoftware', 'vTuneSoftware', 'minitabSoftware', 'minitabHardware',
-        'oneViewSoftware', 'oneViewHardware', 'mesSoftware', 'mesHardware',
+        'cadConverterSoftware', 'cadConverterHardware', 'vTuneSoftware', 
+        'oneViewSoftware', 'oneViewHardware', 'smartManufacturingSoftware', 'smartManufacturingHardware', 'mesSoftware', 'mesHardware',
         'barcodeSoftware', 'barcodeHardware'
     ];
 
@@ -1540,13 +1548,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
