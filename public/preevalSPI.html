@@ -909,7 +909,7 @@ function populateForm(preEvalData, referenceData) {
     });
 
     // Date fields - Updated list
-    ['evalDate', 'estimateDuration'].forEach(fieldId => {
+    ['evalStartDate', 'endEstimateDate'].forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element && data[fieldId]) {
             element.value = new Date(data[fieldId]).toISOString().split("T")[0];
@@ -1189,7 +1189,7 @@ function collectFormData() {
     });
 
     // Date fields - Updated list
-    ['evalDate', 'estimateDuration'].forEach(dateField => {
+    ['evalStartDate', 'endEstimateDate'].forEach(dateField => {
         const element = document.getElementById(dateField);
         if (element && element.value) {
             data[dateField] = new Date(element.value + "T00:00:00Z").toISOString();
@@ -1277,7 +1277,7 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
+                'customerCompany', 'custTechChamp', 'evalStartDate', 'endEstimateDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
             ];
             if (!isAXI) {
                 requiredFields.push('falseCallppm');
