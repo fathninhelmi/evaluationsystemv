@@ -71,7 +71,14 @@ const databases = new Databases(client);
 
 const databaseId = "68ba8a9c001f17064e15";
 const collectionId = "68ba918c0022d2b9a429";
-const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const preEvalCollectionIds = {
+  'AOI': '68c7ced6001bd14d08f4',
+  'SPI': '696dd2b1000c4e985d76',
+  'AXI': '696ed4b900377582df31',
+  'ARV': '696dd29b0034536c09b9', 
+  'XC': '696dd2f20006c0eef2a1',  
+  'XS': '696dd301001cd0f6da66'  
+};
 const evalCollectionId = "68bf9d5600257a20775a";
 const postEvalCollectionId = "68bf9d62002b4f5f7f23";
 
@@ -118,6 +125,18 @@ function editForm(formId) {
     case "smart camera (xc)":
       preEvalPage = `preevalXC.html?id=${formId}`;
       break;
+    case "aoi":
+      preEvalPage = `preeval.html?id=${formId}`;
+      break;
+    case "spi":
+      preEvalPage = `preevalSPI.html?id=${formId}`;
+      break;
+    case "arv":
+      preEvalPage = `preevalARV.html?id=${formId}`;
+      break;
+    case "axi":
+      preEvalPage = `preevalAXI.html?id=${formId}`;
+      break;
     default:
       preEvalPage = `preeval.html?id=${formId}`;
   }
@@ -150,6 +169,10 @@ async function loadForms() {
     console.log('Loaded forms:', res.documents.length);
 
     forms = await Promise.all(res.documents.map(async (doc) => {
+      // Get correct preEval collection based on product type
+      const productType = (doc.productType || "AOI").toUpperCase().trim();
+      const preEvalCollectionId = preEvalCollectionIds[productType] || preEvalCollectionIds['AOI'];
+      
       return {
         id: doc.$id,
         username: doc.username || doc.$createdBy || "Unknown",
@@ -285,6 +308,14 @@ function getPreEvalPage(productType, docId) {
     case "xc":
     case "smart camera (xc)":
       return `preevalXC.html?id=${docId}`;
+    case "aoi":
+      return `preeval.html?id=${docId}`;
+    case "spi":
+      return `preevalSPI.html?id=${docId}`;
+    case "arv":
+      return `preevalARV.html?id=${docId}`;
+    case "axi":
+      return `preevalAXI.html?id=${docId}`;
     default:
       return `preeval.html?id=${docId}`;
   }
@@ -301,6 +332,10 @@ async function archiveForm(formId) {
   if (!confirm("Are you sure you want to archive this form? It will no longer appear in the active list.")) return;
 
   try {
+    const form = forms.find(f => f.id === formId);
+    const productType = form ? (form.type || "AOI").toUpperCase().trim() : "AOI";
+    const preEvalCollectionId = preEvalCollectionIds[productType] || preEvalCollectionIds['AOI'];
+    
     await databases.updateDocument(databaseId, collectionId, formId, {
       isArchived: true
     });
@@ -355,6 +390,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
 
