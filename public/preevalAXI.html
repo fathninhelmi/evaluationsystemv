@@ -934,7 +934,7 @@ function populateForm(preEvalData, referenceData) {
         if (element && data[fieldId]) element.value = data[fieldId];
     });
 
-    const dateFields = ['evalDate'];
+    const dateFields = ['evalStartDate', 'endEstimateDate'];
     dateFields.forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element && data[fieldId]) {
@@ -1203,7 +1203,7 @@ function collectFormData() {
         if (element) data[fieldId] = element.value;
     });
 
-    ['evalDate'].forEach(dateField => {
+    ['evalStartDate', 'endEstimateDate'].forEach(dateField => {
         const element = document.getElementById(dateField);
         if (element && element.value) {
             data[dateField] = new Date(element.value + "T00:00:00Z").toISOString();
