@@ -214,6 +214,12 @@ let uploadedFileId = null;
 let currentUser = null;    
 let productType = null;
 
+// FIX: Add handler for Save as Draft button
+function handleSaveDraft() {
+    console.log("Save as Draft clicked");
+    saveForm("draft");
+}
+
 function initScoreButtons() {
     document.querySelectorAll('.result-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
@@ -804,7 +810,6 @@ function deleteKeywordRow(button) {
 
 function validateForm(status) {
     const resultValue = document.getElementById('result').value.trim();
-    const scoreValue = document.getElementById('score').value.trim();
     
     const winReasonsChecked = Array.from(document.querySelectorAll('input[name="winReason"]:checked'))
         .map(cb => cb.value);
@@ -854,17 +859,6 @@ function validateForm(status) {
             }
         }
         
-        if (!scoreValue) {
-            alert("Score is required for submission.");
-            document.getElementById('score').focus();
-            return false;
-        }
-        if (competitorInfoArray.length === 0) {
-            alert("At least one competitor information entry is required for submission.");
-            const firstCompetitorInput = document.querySelector('[name^="competitorInfo_"]');
-            if (firstCompetitorInput) firstCompetitorInput.focus();
-            return false;
-        }
         if (keywordArray.length === 0) {
             alert("At least one keyword is required for submission.");
             const firstKeywordInput = document.querySelector('[name^="keyword_"]');
@@ -875,7 +869,6 @@ function validateForm(status) {
     
     return { 
         resultValue, 
-        scoreValue, 
         winReason: winReasonsChecked,
         otherWinReasonValue,
         loseReason: loseReasonsChecked, 
@@ -886,12 +879,13 @@ function validateForm(status) {
 }
     
 async function saveForm(status = "draft") {
+    console.log("saveForm called with status:", status);
+    
     const validationResult = validateForm(status);
     if (!validationResult) return;
 
     const { 
         resultValue, 
-        scoreValue, 
         winReason,
         otherWinReasonValue,
         loseReason, 
@@ -915,7 +909,6 @@ async function saveForm(status = "draft") {
     };
 
     if (resultValue) data.result = resultValue;
-    if (scoreValue) data.score = scoreValue;
     
     if (resultValue === 'win' && winReason.length > 0) {
         data.winReason = winReason;
@@ -1150,4 +1143,5 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
