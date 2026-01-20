@@ -59,11 +59,18 @@ client.setEndpoint("https://fra.cloud.appwrite.io/v1").setProject("68ddd7de00255
 const databases = new Databases(client);
 const account = new Account(client);
 
-  const databaseId = "68ba8a9c001f17064e15";
-  const collectionId = "68ba918c0022d2b9a429";
-  const preEvalCollectionId = "68c7ced6001bd14d08f4";
-  const evalCollectionId    = "68bf9d5600257a20775a";
-  const postEvalCollectionId= "68bf9d62002b4f5f7f23";
+const databaseId = "68ba8a9c001f17064e15";
+const collectionId = "68ba918c0022d2b9a429";
+const preEvalCollectionIds = {
+  'AOI': '68c7ced6001bd14d08f4',
+  'SPI': '696dd2b1000c4e985d76',
+  'AXI': '696ed4b900377582df31',
+  'ARV': '696dd29b0034536c09b9', 
+  'XC': '696dd2f20006c0eef2a1',  
+  'XS': '696dd301001cd0f6da66'  
+};
+const evalCollectionId    = "68bf9d5600257a20775a";
+const postEvalCollectionId= "68bf9d62002b4f5f7f23";
 
 
   function getStatusBadge(status) {
@@ -82,23 +89,30 @@ const account = new Account(client);
     return `<a href="#" class="open-btn disabled">View</a>`;
   }
 
-  function getPreEvalPage(productType, docId) {
-    if (!productType) return `preeval.html?id=${docId}`;
-    
-    const productTypeLower = productType.toLowerCase().trim();
-    
-    switch (productTypeLower) {
-      case "xs":
-      case "smart code reader (xs)":
-        return `preevalXS.html?id=${docId}`;
-      case "xc":
-      case "smart camera (xc)":
-        return `preevalXC.html?id=${docId}`;
-      default:
-        return `preeval.html?id=${docId}`;
-    }
+function getPreEvalPage(productType, docId) {
+  if (!productType) return `preeval.html?id=${docId}`;
+  
+  const productTypeLower = productType.toLowerCase().trim();
+  
+  switch (productTypeLower) {
+    case "xs":
+    case "smart code reader (xs)":
+      return `preevalXS.html?id=${docId}`;
+    case "xc":
+    case "smart camera (xc)":
+      return `preevalXC.html?id=${docId}`;
+    case "aoi":
+      return `preeval.html?id=${docId}`;
+    case "spi":
+      return `preevalSPI.html?id=${docId}`;
+    case "arv":
+      return `preevalARV.html?id=${docId}`;
+    case "axi":
+      return `preevalAXI.html?id=${docId}`;
+    default:
+      return `preeval.html?id=${docId}`;
   }
-
+}
   async function getFormStatus(collectionId, formId) {
     try {
       const doc = await databases.getDocument(databaseId, collectionId, formId);
@@ -125,7 +139,10 @@ const account = new Account(client);
 
       for(let i = 0; i < response.documents.length; i++){
         const doc = response.documents[i];
-
+      
+        const productType = (doc.productType || "AOI").toUpperCase().trim();
+        const preEvalCollectionId = preEvalCollectionIds[productType] || preEvalCollectionIds['AOI'];
+      
         let preDoc, evalDoc, postDoc;
         let preStatus = "draft", evalStatus = "draft", postStatus = "draft";
         
@@ -250,4 +267,5 @@ const account = new Account(client);
 </body>
 
 </html>
+
 
