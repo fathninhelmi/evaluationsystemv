@@ -346,6 +346,8 @@ async function loadEvaluations() {
                 searchQuery: null,
                 date: evalDate.toISOString().split('T')[0],
                 timestamp: evalDate.toISOString(),
+                evalStartDate: preDoc?.evalStartDate ? new Date(preDoc.evalStartDate).toLocaleDateString() : 'N/A',
+                endEstimateDate: preDoc?.endEstimateDate ? new Date(preDoc.endEstimateDate).toLocaleDateString() : 'N/A',
                 pre_eval: preStatus,
                 eval: evalStatus,
                 post_eval: postStatus,
@@ -1109,5 +1111,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
