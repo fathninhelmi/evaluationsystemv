@@ -3,1153 +3,174 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="./style.css">
+
 <title>Post Evaluation Form</title>
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/iife/sdk.js"></script>
 </head>
+
 <body>
 <header class="header">
     <a href="#" class="logo"><img src="logo.png" alt="logo"></a>
 </header>
 
 <div class="card-eval">
-    <div class="form-header">
-        <button type="button" class="back-icon-btn" onclick="goBack()" aria-label="Go back">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-        </button>
-        <h1 id="formTitle">Post Evaluation Form</h1>
-        <span id="statusBadge" class="status-badge"></span>
-    </div>
 
-    <div id="loadingIndicator" class="loading" style="display: none;">
-        Loading form data
-    </div>
-
-    <form id="postEvalForm" style="display: none;">
-        <!-- Win/Lose -->
-        <div class="form-section">
-            <div class="section-title">Win / Lose</div>
-            <div class="form-group-eval">
-                <div class="result-buttons">
-                    <button type="button" class="result-btn" data-result="win">Win</button>
-                    <button type="button" class="result-btn" data-result="pending">Pending</button>
-                    <button type="button" class="result-btn" data-result="lose">Lose</button>
-                </div>
-                <input type="hidden" name="result" id="result" required>
-            </div>
-            
-            <div id="winReasonSection" style="display: none; margin-top: 20px;">
-                <div class="form-group-eval">
-                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">Reasons for Win (Select all that apply):</label>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReason" value="Global_Standardization_Strategy" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Global Standardization Strategy: Corporate directive to use the same brand across all factories</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReason" value="Strong_Existing_Relationship" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Strong Existing Relationship: High trust with local decision-makers or management</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReason" value="Lowest_Total_Cost_of_Ownership" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Lowest Total Cost of Ownership (TCO): Better long-term value despite higher upfront price</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReason" value="Superior_Technical_Performance" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Superior Technical Performance: Met or exceeded all engineering specs (Cycle time, Detection, AI)</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReason" value="Superior_ui/ux" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Superior User Experience and User Interface</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="winReason" value="others" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Others</span>
-                        </label>
-                    </div>
-                </div>
-                <div id="otherWinReasonSection" style="display: none; margin-top: 15px;">
-                    <div class="form-group-eval">
-                        <label>Please specify:</label>
-                        <textarea name="otherwinReason" id="otherwinReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="loseReasonSection" style="display: none; margin-top: 20px;">
-                <div class="form-group-eval">
-                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">Reasons for Lose (Select all that apply):</label>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReason" value="Technical_Requirements_Not_Met" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Technical Requirements Not Met: Failed on spec, cycle time, or critical defect detection</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReason" value="Lead_Time_Mismatch" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Lead Time Mismatch: Unable to meet the customer's urgent delivery date</span>
-                        </label>
-                         <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReason" value="costs" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Costs: Price exceeded the approved limit/ Competitor acan go lower prices</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReason" value="advance_features" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Competitor got advance features</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="loseReason" value="others" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <span>Others</span>
-                        </label>
-                    </div>
-                </div>
-                <div id="otherLoseReasonSection" style="display: none; margin-top: 15px;">
-                    <div class="form-group-eval">
-                        <label>Please specify:</label>
-                        <textarea name="otherloseReason" id="otherloseReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
-                    </div>
-                </div>
-            </div>
-            </div>
-
-        <!-- Keyword Section -->
-        <div class="form-section">
-            <div class="section-title">Keyword Form</div>
-            <div class="table-section">
-                <table class="eval-table" id="keywordTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Keyword</th>
-                        </tr>
-                    </thead>
-                    <tbody id="keywordTableBody">
-                        <tr>
-                            <td class="row-number">1</td>
-                            <td class="input-row-content">
-                                <input type="text" name="keyword_1" class="table-input" required>
-                                <button type="button" class="delete-row-btn" onclick="deleteKeywordRow(this)" style="display: none;">&times;</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button type="button" class="add-row-btn" onclick="addKeywordRow()">+ Add Keyword</button>
-            </div>
-        </div>
-
-        <!-- Attachment Section -->
-        <div class="form-section">
-            <div class="section-title">Attachment</div>
-            <div class="form-group-eval">
-                <label>Upload File (Optional)</label>
-                <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
-                    Please upload the file in PNG or PDF only
-                </div>
-                <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" style="margin-bottom: 10px;">
-                <div id="attachmentPreview" style="margin-top: 10px;"></div>
-            </div>
-        </div>
-
-            <div id="pendingModal" class="pending-modal">
-                <div class="pending-modal-content">
-                    <div class="pending-modal-header">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                        <h2>Pending Status Notice</h2>
-                    </div>
-                    <div class="pending-modal-body">
-                        <p><strong>Important:</strong> After 14 days (2 weeks), a reminder will be sent to your email if you don't update the pending information.</p>
-                        <p>Please make sure to complete this evaluation within the specified timeframe.</p>
-                    </div>
-                    <div class="pending-modal-footer">
-                        <button type="button" class="pending-modal-btn" onclick="acknowledgePending()">Okay, I Understand</button>
-                    </div>
-                </div>
-            </div>
-
-        <div class="form-actions">
-            <button type="button" id="preEvalBtn" class="btn btn-secondary" onclick="viewPreEval()" style="display: none;">
-                <i class="fas fa-clipboard-list"></i> View Pre-Evaluation Form
-            </button>
-            <button type="button" id="evalBtn" class="btn btn-secondary" onclick="viewEval()" style="display: none;">
-                <i class="fas fa-chart-line"></i> View Evaluation Form
-            </button>
-            <button type="button" class="btn btn-danger submit-btn" onclick="dropForm()">Drop</button>
-            <button type="button" class="btn btn-primary draft-btn" onclick="saveForm('draft')" id="saveProgressBtn">Save as Draft</button>
-             <button type="submit" class="btn btn-success submit-btn" id="submitBtn">Submit</button>
-        </div>
-    </form>
+<!-- ================= HEADER ================= -->
+<div class="form-header">
+    <button type="button" class="back-icon-btn" onclick="goBack()">
+        ←
+    </button>
+    <h1 id="formTitle">Post Evaluation Form</h1>
+    <span id="statusBadge" class="status-badge"></span>
 </div>
 
-<script>
-const client = new Appwrite.Client()
-    .setEndpoint("https://fra.cloud.appwrite.io/v1")
-    .setProject("68ddd7de00255d4f5c96");
+<div id="loadingIndicator" class="loading" style="display:none;">Loading form data</div>
 
-const databases = new Appwrite.Databases(client);
-const account = new Appwrite.Account(client);
-const storage = new Appwrite.Storage(client);
+<form id="postEvalForm" style="display:none;">
 
-const databaseId = "68ba8a9c001f17064e15";
-const postEvalCollectionId = "68bf9d62002b4f5f7f23";
-const mainCollectionId = "68ba918c0022d2b9a429";
-const bucketId = "69015d8b0030f329c599";
+<!-- ================= WIN / LOSE ================= -->
+<div class="form-section">
+    <div class="section-title">Win / Lose</div>
 
-const params = new URLSearchParams(window.location.search);
-const eventId = params.get("id");
-const viewMode = params.get("mode") === "view";
-const showNavigation = params.get("showNavigation") === "true";
+    <div class="result-buttons">
+        <button type="button" class="result-btn" data-result="win">Win</button>
+        <button type="button" class="result-btn" data-result="pending">Pending</button>
+        <button type="button" class="result-btn" data-result="lose">Lose</button>
+    </div>
 
-let evDoc = null;
-let currentStatus = "draft";
-let competitorRowCount = 1;
-let keywordRowCount = 1;
-let uploadedFileId = null;
-let currentUser = null;    
-let productType = null;
+    <input type="hidden" id="result" name="result">
 
-function initScoreButtons() {
-    document.querySelectorAll('.result-btn').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            if (this.disabled) return;
-            document.querySelectorAll('.result-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            const resultValue = this.dataset.result;
-            document.getElementById('result').value = resultValue;
-            
-            const winReasonSection = document.getElementById('winReasonSection');
-            const loseReasonSection = document.getElementById('loseReasonSection');
-            
-            if (resultValue === 'win') {
-                winReasonSection.style.display = 'block';
-                loseReasonSection.style.display = 'none';
-                document.querySelectorAll('input[name="loseReason"]').forEach(cb => cb.checked = false);
-                document.getElementById('otherloseReason').value = '';
-                document.getElementById('otherLoseReasonSection').style.display = 'none';
-            } else if (resultValue === 'lose') {
-                loseReasonSection.style.display = 'block';
-                winReasonSection.style.display = 'none';
-                document.querySelectorAll('input[name="winReason"]').forEach(cb => cb.checked = false);
-                document.getElementById('otherwinReason').value = '';
-                document.getElementById('otherWinReasonSection').style.display = 'none';
-            }
-             else if (resultValue === 'pending') {
-                const isLoadingExisting = evDoc && evDoc.result === 'pending';
-                if (!isLoadingExisting) {
-                    showPendingModal();
-                }
-                winReasonSection.style.display = 'none';
-                loseReasonSection.style.display = 'none';
-                document.querySelectorAll('input[name="winReason"]').forEach(cb => cb.checked = false);
-                document.querySelectorAll('input[name="loseReason"]').forEach(cb => cb.checked = false);
-                document.getElementById('otherwinReason').value = '';
-                document.getElementById('otherloseReason').value = '';
-                document.getElementById('otherWinReasonSection').style.display = 'none';
-                document.getElementById('otherLoseReasonSection').style.display = 'none';
-            }
-            await autoSaveResult(resultValue);
-        });
-    });
-    
-    document.querySelectorAll('input[name="winReason"]').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            if (this.value === 'others') {
-                const otherWinReasonSection = document.getElementById('otherWinReasonSection');
-                otherWinReasonSection.style.display = this.checked ? 'block' : 'none';
-                if (!this.checked) {
-                    document.getElementById('otherwinReason').value = '';
-                }
-            }
-        });
-    });
-    
-    document.querySelectorAll('input[name="loseReason"]').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            if (this.value === 'others') {
-                const otherLoseReasonSection = document.getElementById('otherLoseReasonSection');
-                otherLoseReasonSection.style.display = this.checked ? 'block' : 'none';
-                if (!this.checked) {
-                    document.getElementById('otherloseReason').value = '';
-                }
-            }
-        });
-    });
-}
+    <!-- WIN -->
+    <div id="winReasonSection" style="display:none;margin-top:20px;">
+        <label><strong>Reasons for Win</strong></label>
+        <label><input type="checkbox" name="winReason" value="Global_Standardization_Strategy"> Global Standardization</label>
+        <label><input type="checkbox" name="winReason" value="Strong_Existing_Relationship"> Strong Relationship</label>
+        <label><input type="checkbox" name="winReason" value="Lowest_Total_Cost_of_Ownership"> Lowest TCO</label>
+        <label><input type="checkbox" name="winReason" value="Superior_Technical_Performance"> Technical Performance</label>
+        <label><input type="checkbox" name="winReason" value="Superior_UI_UX"> UI / UX</label>
+        <label><input type="checkbox" name="winReason" value="others"> Others</label>
 
-function showPendingModal() {
-    const modal = document.getElementById('pendingModal');
-    modal.classList.add('active');
-}
-
-function hidePendingModal() {
-    const modal = document.getElementById('pendingModal');
-    modal.classList.remove('active');
-}
-
-async function acknowledgePending() {
-    hidePendingModal();
-    const pendingSetDate = new Date();
-    const reminderDate = new Date();
-    reminderDate.setDate(reminderDate.getDate() + 14);
-    const pendingSetDateISO = pendingSetDate.toISOString();
-    const reminderDateISO = reminderDate.toISOString();
-    console.log('Pending set date:', pendingSetDateISO);
-    console.log('Reminder date:', reminderDateISO);
-    
-    const data = {
-        result: 'pending',
-        status: currentStatus || "draft",
-        pendingSetDate: pendingSetDateISO,
-        reminderDate: reminderDateISO
-    };
-
-    try {
-        try {
-            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
-            console.log("Pending dates saved successfully");
-            showToast("Pending status acknowledged!");
-        } catch (updateError) {
-            if (updateError.message.includes("Document with the requested ID could not be found")) {
-                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
-                console.log("Document created with pending dates");
-                showToast("Pending status acknowledged!");
-            } else {
-                throw updateError;
-            }
-        }
-    } catch (err) {
-        console.error("Failed to save pending dates:", err);
-        showToast("Failed to save pending status", true);
-    }
-}
-
-async function autoSaveResult(resultValue) {
-    const data = {
-        result: resultValue,
-        status: currentStatus || "draft"
-    };
-    if (resultValue !== 'pending' && evDoc && evDoc.result === 'pending') {
-        data.pendingSetDate = null;
-        data.reminderDate = null;
-    }
-
-    console.log("Auto-saving result:", data);
-
-    try {
-        try {
-            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
-            console.log("Result auto-saved successfully");
-            showToast("Selection saved!");
-        } catch (updateError) {
-            if (updateError.message.includes("Document with the requested ID could not be found")) {
-                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
-                console.log("Document created and result saved");
-                showToast("Selection saved!");
-            } else {
-                throw updateError;
-            }
-        }
-    } catch (err) {
-        console.error("Failed to auto-save result:", err);
-        showToast("Failed to save selection", true);
-    }
-}
-
-function showToast(message, isError = false) {
-    const existingToast = document.querySelector('.toast-notification');
-    if (existingToast) {
-        existingToast.remove();
-    }
-    
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification';
-    toast.textContent = message;
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: ${isError ? '#f44336' : '#4CAF50'};
-        color: white;
-        padding: 12px 24px;
-        border-radius: 5px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-    `;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 2000);
-}
-
-function initFileUpload() {
-    const fileInput = document.getElementById('attachmentInput');
-    fileInput.addEventListener('change', handleFileSelect);
-}
-
-function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    const validTypes = ['image/png', 'application/pdf'];
-    if (!validTypes.includes(file.type)) {
-        alert('Please upload only PNG or PDF files.');
-        event.target.value = '';
-        return;
-    }
-
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-        alert('File size must be less than 10MB.');
-        event.target.value = '';
-        return;
-    }
-
-    displayFilePreview(file);
-}
-
-function displayFilePreview(file) {
-    const preview = document.getElementById('attachmentPreview');
-
-    const fileName = file.name;
-    const fileUrl = URL.createObjectURL(file);
-
-    preview.innerHTML = `
-        <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
-            <span style="flex: 1; color:black; font-size:12px;">${fileName}</span>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <a href="${fileUrl}" target="_blank" class="btn-view">
-                    <i class="fas fa-eye"></i>
-                </a>
-                ${!viewMode ? `
-                    <button type="button" class="btn-remove" onclick="removeAttachment()">
-                        <i class="fas fa-times"></i>
-                    </button>` : ''}
-            </div>
+        <div id="otherWinReasonSection" style="display:none;margin-top:10px;">
+            <textarea id="otherwinReason" placeholder="Specify other win reason"></textarea>
         </div>
-    `;
-}
+    </div>
 
-function removeAttachment() {
-    document.getElementById('attachmentInput').value = '';
-    document.getElementById('attachmentPreview').innerHTML = '';
-    uploadedFileId = null;
-}
+    <!-- LOSE -->
+    <div id="loseReasonSection" style="display:none;margin-top:20px;">
+        <label><strong>Reasons for Lose</strong></label>
+        <label><input type="checkbox" name="loseReason" value="Technical_Requirements_Not_Met"> Technical</label>
+        <label><input type="checkbox" name="loseReason" value="Lead_Time_Mismatch"> Lead Time</label>
+        <label><input type="checkbox" name="loseReason" value="Costs"> Cost</label>
+        <label><input type="checkbox" name="loseReason" value="Advance_Features"> Advance Features</label>
+        <label><input type="checkbox" name="loseReason" value="others"> Others</label>
 
-async function uploadFile() {
-    const fileInput = document.getElementById('attachmentInput');
-    const file = fileInput.files[0];
+        <div id="otherLoseReasonSection" style="display:none;margin-top:10px;">
+            <textarea id="otherloseReason" placeholder="Specify other lose reason"></textarea>
+        </div>
+    </div>
+</div>
+
+<!-- ================= KEYWORD ================= -->
+<div class="form-section">
+    <div class="section-title">Keyword</div>
+
+    <table class="eval-table">
+        <tbody id="keywordTableBody">
+            <tr>
+                <td class="row-number">1</td>
+                <td>
+                    <input type="text" name="keyword_1" class="table-input">
+                    <button type="button" onclick="deleteKeywordRow(this)" style="display:none;">×</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button type="button" onclick="addKeywordRow()">+ Add Keyword</button>
+</div>
+
+<!-- ================= ATTACHMENT ================= -->
+<div class="form-section">
+    <div class="section-title">Attachment</div>
+    <input type="file" id="attachmentInput" accept=".png,.pdf">
+    <div id="attachmentPreview"></div>
+</div>
+
+<!-- ================= ACTIONS ================= -->
+<div class="form-actions">
+    <button type="button" class="btn btn-danger" onclick="dropForm()">Drop</button>
+    <button type="button" class="btn btn-primary" onclick="saveForm('draft')">Save as Draft</button>
+    <button type="submit" class="btn btn-success">Submit</button>
+</div>
+
+</form>
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+function validateForm(status){
+    if(status !== "complete") return {};
     
-    if (!file) return null;
-
-    try {
-        showToast('Uploading file...');
-        const response = await storage.createFile(
-            bucketId,
-            'unique()',
-            file
-        );
-        uploadedFileId = response.$id;
-        showToast('File uploaded successfully!');
-        return response.$id;
-    } catch (error) {
-        console.error('File upload error:', error);
-        showToast('Failed to upload file', true);
-        return null;
+    const result = document.getElementById("result").value;
+    if(!result){
+        alert("Please select Win / Lose / Pending");
+        return false;
     }
+
+    const keywords = [...document.querySelectorAll('[name^="keyword_"]')]
+        .map(i=>i.value.trim()).filter(Boolean);
+
+    if(keywords.length === 0){
+        alert("At least one keyword required");
+        return false;
+    }
+
+    return { keyword: keywords, result };
 }
 
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
+async function saveForm(status){
+    const validation = validateForm(status);
+    if(validation === false) return;
 
-async function checkUserRole() {
-    try {
-        const userLabels = currentUser.labels || [];
-        
-        if (userLabels.includes('manager')) {
-            return 'manager';
-        } else if (userLabels.includes('admin')) {
-            return 'admin';
-        } else if (userLabels.includes('staff')) {
-            return 'staff';
-        }
-        
-        return 'staff';
-    } catch (error) {
-        console.error("Error checking user role:", error);
-        return 'staff';
-    }
+    alert(status === "draft" ? "Draft saved" : "Form submitted");
 }
 
-async function initForm() {
-    try {
-        document.getElementById("loadingIndicator").style.display = "block";
-
-        if (!eventId) {
-            alert("No event ID found. Please start from the Details page.");
-            window.location.href = "/createform.html";
-            return;
-        }
-        currentUser = await account.get();
-        console.log("Current user:", currentUser);
-        await loadProductType();
-        
-        if (showNavigation) {
-            document.getElementById("preEvalBtn").style.display = "inline-block";
-            document.getElementById("evalBtn").style.display = "inline-block";
-        }
-        
-        initScoreButtons();
-        initFileUpload();
-        await loadForm();
-        
-        if (productType === 'AXI') {
-            hideAXISections();
-        }
-        
-        const userRole = await checkUserRole();
-        if (viewMode || userRole === 'manager') {
-            setViewMode();
-        }
-
-        document.getElementById("loadingIndicator").style.display = "none";
-        document.getElementById("postEvalForm").style.display = "block";
-    } catch (error) {
-        console.error("Error initializing form:", error);
-        document.getElementById("loadingIndicator").style.display = "none";
-        alert("Error loading form. Redirecting to detail page.");
-        window.location.href = "/createform.html";
-    }
-}
-    
-async function loadProductType() {
-    try {
-        const mainDoc = await databases.getDocument(databaseId, mainCollectionId, eventId);
-        productType = mainDoc.productType;
-        console.log("Loaded product type:", productType);
-    } catch (err) {
-        console.error("Error loading product type:", err);
-    }
-}
-
-function hideAXISections() {
-    const attachmentInput = document.getElementById('attachmentInput');
-    if (!attachmentInput) return;
-
-    const attachmentSection = attachmentInput.closest('.form-section');
-    if (attachmentSection) {
-        attachmentSection.style.display = 'none';
-        console.log("Attachment section hidden for AXI");
-    }
-
-    attachmentInput.disabled = true;
-    attachmentInput.removeAttribute('required');
-}
-    
-async function loadForm() {
-    try {
-        evDoc = await databases.getDocument(databaseId, postEvalCollectionId, eventId);
-        console.log("Loaded post-eval document:", evDoc);
-        if (evDoc.result) {
-            document.getElementById('result').value = evDoc.result;
-            document.querySelectorAll('.result-btn').forEach(btn => {
-                if (btn.dataset.result === evDoc.result) {
-                    btn.classList.add('active');
-                }
-            });
-        }
-
-             if (evDoc.result === 'win') {
-                document.getElementById('winReasonSection').style.display = 'block';
-                
-                if (Array.isArray(evDoc.winReason)) {
-                    evDoc.winReason.forEach(reason => {
-                        const checkbox = document.querySelector(`input[name="winReason"][value="${reason}"]`);
-                        if (checkbox) {
-                            checkbox.checked = true;
-                            if (reason === 'others') {
-                                document.getElementById('otherWinReasonSection').style.display = 'block';
-                            }
-                        }
-                    });
-                }
-
-                if (evDoc.otherwinReason) {
-                    document.getElementById('otherwinReason').value = evDoc.otherwinReason;
-                }
-            }
-            
-            if (evDoc.result === 'lose') {
-                document.getElementById('loseReasonSection').style.display = 'block';
-                if (Array.isArray(evDoc.loseReason)) {
-                    evDoc.loseReason.forEach(reason => {
-                        const checkbox = document.querySelector(`input[name="loseReason"][value="${reason}"]`);
-                        if (checkbox) {
-                            checkbox.checked = true;
-                            if (reason === 'others') {
-                                document.getElementById('otherLoseReasonSection').style.display = 'block';
-                            }
-                        }
-                    });
-                }
-                if (evDoc.otherloseReason) {
-                    document.getElementById('otherloseReason').value = evDoc.otherloseReason;
-                }
-            }
-        
-        if (evDoc.score !== undefined && evDoc.score !== null) {
-            document.getElementById('score').value = evDoc.score;
-        }
-
-        if (evDoc.attachmentId) {
-        uploadedFileId = evDoc.attachmentId;
-        try {
-            const fileUrl = storage.getFileView(bucketId, evDoc.attachmentId);
-            const fileName = evDoc.attachmentName || 'Uploaded file';
-            document.getElementById('attachmentPreview').innerHTML = `
-                <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
-                    <span style="flex: 1; color:black; font-size: 12px;">${fileName}</span>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <a href="${fileUrl}" target="_blank" class="btn-view"><i class="fas fa-eye"></i></a>
-                        ${!viewMode ? '<button type="button" class="btn-remove" onclick="removeAttachment()"><i class="fas fa-times"></i></button>' : ''}
-                    </div>
-                </div>
-            `;
-             } catch (error) {
-            console.error('Error loading attachment:', error);
-        }
-    }
-        
-
-        if (Array.isArray(evDoc.competitorInfo) && evDoc.competitorInfo.length > 0) {
-            const tbody = document.getElementById("competitorTableBody");
-            tbody.innerHTML = "";
-            evDoc.competitorInfo.forEach((info, index) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td class="row-number">${index + 1}</td>
-                    <td class="input-row-content">
-                        <input type="text" name="competitorInfo_${index + 1}" class="table-input" required value="${escapeHtml(info)}">
-                        <button type="button" class="delete-row-btn" onclick="deleteCompetitorRow(this)" ${index === 0 ? 'style="display: none;"' : ''}>&times;</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            competitorRowCount = evDoc.competitorInfo.length;
-            updateCompetitorRowNumbers();
-        }
-        if (Array.isArray(evDoc.keyword) && evDoc.keyword.length > 0) {
-            const tbody = document.getElementById("keywordTableBody");
-            tbody.innerHTML = "";
-            evDoc.keyword.forEach((keyword, index) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td class="row-number">${index + 1}</td>
-                    <td class="input-row-content">
-                        <input type="text" name="keyword_${index + 1}" class="table-input" required value="${escapeHtml(keyword)}">
-                        <button type="button" class="delete-row-btn" onclick="deleteKeywordRow(this)" ${index === 0 ? 'style="display: none;"' : ''}>&times;</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            keywordRowCount = evDoc.keyword.length;
-            updateKeywordRowNumbers();
-        }
-
-        currentStatus = evDoc.status || "draft";
-        updateFormDisplay();
-    } catch (err) {
-        console.log("Form document not found or error loading:", err);
-        currentStatus = "draft";
-        updateFormDisplay();
-    }
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function updateCompetitorRowNumbers() {
-    const tbody = document.getElementById("competitorTableBody");
-    const rows = tbody.querySelectorAll("tr");
-    
-    rows.forEach((row, index) => {
-        const rowNumberCell = row.querySelector(".row-number");
-        if (rowNumberCell) {
-            rowNumberCell.textContent = index + 1;
-        }
-        const input = row.querySelector("input");
-        if (input) {
-            input.name = `competitorInfo_${index + 1}`;
-        }
-        const deleteBtn = row.querySelector(".delete-row-btn");
-        if (deleteBtn) {
-            deleteBtn.style.display = index === 0 ? "none" : "flex";
-        }
-    });
-    
-    competitorRowCount = rows.length;
-}
-
-function updateKeywordRowNumbers() {
+function addKeywordRow(){
     const tbody = document.getElementById("keywordTableBody");
-    const rows = tbody.querySelectorAll("tr");
-    
-    rows.forEach((row, index) => {
-        const rowNumberCell = row.querySelector(".row-number");
-        if (rowNumberCell) {
-            rowNumberCell.textContent = index + 1;
-        }
-        const input = row.querySelector("input");
-        if (input) {
-            input.name = `keyword_${index + 1}`;
-        }
-        const deleteBtn = row.querySelector(".delete-row-btn");
-        if (deleteBtn) {
-            deleteBtn.style.display = index === 0 ? "none" : "flex";
-        }
-    });
-    
-    keywordRowCount = rows.length;
-}
-
-function addCompetitorRow() {
-    competitorRowCount++;
-    const tbody = document.getElementById("competitorTableBody");
+    const index = tbody.children.length + 1;
     const row = document.createElement("tr");
     row.innerHTML = `
-        <td class="row-number">${competitorRowCount}</td>
-        <td class="input-row-content">
-            <input type="text" name="competitorInfo_${competitorRowCount}" class="table-input" required>
-            <button type="button" class="delete-row-btn" onclick="deleteCompetitorRow(this)">&times;</button>
-        </td>
-    `;
+        <td>${index}</td>
+        <td>
+            <input type="text" name="keyword_${index}">
+            <button onclick="deleteKeywordRow(this)">×</button>
+        </td>`;
     tbody.appendChild(row);
-    updateCompetitorRowNumbers();
 }
 
-function addKeywordRow() {
-    keywordRowCount++;
+function deleteKeywordRow(btn){
     const tbody = document.getElementById("keywordTableBody");
-    const row = document.createElement("tr");
-    row.innerHTML = `
-        <td class="row-number">${keywordRowCount}</td>
-        <td class="input-row-content">
-            <input type="text" name="keyword_${keywordRowCount}" class="table-input" required>
-            <button type="button" class="delete-row-btn" onclick="deleteKeywordRow(this)">&times;</button>
-        </td>
-    `;
-    tbody.appendChild(row);
-    updateKeywordRowNumbers();
+    if(tbody.children.length <= 1) return;
+    btn.closest("tr").remove();
 }
 
-function deleteCompetitorRow(button) {
-    const tbody = document.getElementById("competitorTableBody");
-    const rows = tbody.querySelectorAll("tr");
-    if (rows.length <= 1) {
-        alert("At least one competitor information entry must be present.");
-        return;
-    }
-    const row = button.closest("tr");
-    row.remove();
-    updateCompetitorRowNumbers();
-}
-
-function deleteKeywordRow(button) {
-    const tbody = document.getElementById("keywordTableBody");
-    const rows = tbody.querySelectorAll("tr");
-    if (rows.length <= 1) {
-        alert("At least one keyword must be present.");
-        return;
-    }
-    const row = button.closest("tr");
-    row.remove();
-    updateKeywordRowNumbers();
-}
-
-function validateForm(status) {
-    const resultValue = document.getElementById('result').value.trim();
-    const scoreValue = document.getElementById('score').value.trim();
-    
-    const winReasonsChecked = Array.from(document.querySelectorAll('input[name="winReason"]:checked'))
-        .map(cb => cb.value);
-    const otherWinReasonValue = document.getElementById('otherwinReason').value.trim();
-    
-    const loseReasonsChecked = Array.from(document.querySelectorAll('input[name="loseReason"]:checked'))
-        .map(cb => cb.value);
-    const otherLoseReasonValue = document.getElementById('otherloseReason').value.trim();
-    
-    const competitorInputs = document.querySelectorAll('[name^="competitorInfo_"]');
-    const competitorInfoArray = Array.from(competitorInputs)
-        .map(input => input.value.trim())
-        .filter(v => v !== '');
-
-    const keywordInputs = document.querySelectorAll('[name^="keyword_"]');
-    const keywordArray = Array.from(keywordInputs)
-        .map(input => input.value.trim())
-        .filter(v => v !== '');
-        
-    if (status === "complete") {
-        if (!resultValue) {
-            alert("Please select Win, Lose, or Pending.");
-            return false;
-        }
-        
-        if (resultValue === 'win') {
-            if (winReasonsChecked.length === 0) {
-                alert("Please select at least one reason for winning.");
-                return false;
-            }
-            if (winReasonsChecked.includes('others') && !otherWinReasonValue) {
-                alert("Please specify the other reason for winning.");
-                document.getElementById('otherwinReason').focus();
-                return false;
-            }
-        }
-        
-        if (resultValue === 'lose') {
-            if (loseReasonsChecked.length === 0) {
-                alert("Please select at least one reason for losing.");
-                return false;
-            }
-            if (loseReasonsChecked.includes('others') && !otherLoseReasonValue) {
-                alert("Please specify the other reason for losing.");
-                document.getElementById('otherloseReason').focus();
-                return false;
-            }
-        }
-        
-        if (!scoreValue) {
-            alert("Score is required for submission.");
-            document.getElementById('score').focus();
-            return false;
-        }
-        if (competitorInfoArray.length === 0) {
-            alert("At least one competitor information entry is required for submission.");
-            const firstCompetitorInput = document.querySelector('[name^="competitorInfo_"]');
-            if (firstCompetitorInput) firstCompetitorInput.focus();
-            return false;
-        }
-        if (keywordArray.length === 0) {
-            alert("At least one keyword is required for submission.");
-            const firstKeywordInput = document.querySelector('[name^="keyword_"]');
-            if (firstKeywordInput) firstKeywordInput.focus();
-            return false;
-        }
-    }
-    
-    return { 
-        resultValue, 
-        scoreValue, 
-        winReason: winReasonsChecked,
-        otherWinReasonValue,
-        loseReason: loseReasonsChecked, 
-        otherLoseReasonValue, 
-        competitorInfoArray, 
-        keywordArray 
-    };
-}
-    
-async function saveForm(status = "draft") {
-    const validationResult = validateForm(status);
-    if (!validationResult) return;
-
-    const { 
-        resultValue, 
-        scoreValue, 
-        winReason,
-        otherWinReasonValue,
-        loseReason, 
-        otherLoseReasonValue, 
-        competitorInfoArray, 
-        keywordArray 
-    } = validationResult;
-    
-    if (productType !== 'AXI') {
-        const fileInput = document.getElementById('attachmentInput');
-        if (fileInput && fileInput.files.length > 0) {
-            const fileId = await uploadFile();
-            if (fileId) {
-                uploadedFileId = fileId;
-            }
-        }
-    }
-
-    const data = {
-        status: status
-    };
-
-    if (resultValue) data.result = resultValue;
-    if (scoreValue) data.score = scoreValue;
-    
-    if (resultValue === 'win' && winReason.length > 0) {
-        data.winReason = winReason;
-        if (winReason.includes('others') && otherWinReasonValue) {
-            data.otherwinReason = otherWinReasonValue;
-        }
-    }
-    
-    if (resultValue === 'lose' && loseReason.length > 0) {
-        data.loseReason = loseReason;
-        if (loseReason.includes('others') && otherLoseReasonValue) {
-            data.otherloseReason = otherLoseReasonValue;
-        }
-    }
-    
-    if (competitorInfoArray.length > 0) data.competitorInfo = competitorInfoArray;
-    if (keywordArray.length > 0) data.keyword = keywordArray;
-    
-    if (productType !== 'AXI' && uploadedFileId) {
-        data.attachmentId = uploadedFileId;
-        const fileInput = document.getElementById('attachmentInput');
-        if (fileInput && fileInput.files.length > 0) {
-            data.attachmentName = fileInput.files[0].name;
-        } else if (evDoc && evDoc.attachmentName) {
-            data.attachmentName = evDoc.attachmentName;
-        }
-    }
-
-    console.log("Saving data:", data);
-
-    try {
-        try {
-            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
-            console.log("Form updated successfully");
-        } catch (updateError) {
-            if (updateError.message.includes("Document with the requested ID could not be found")) {
-                const createdDoc = await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
-                evDoc = createdDoc;
-                console.log("Form created successfully with event ID:", eventId);
-            } else {
-                throw updateError;
-            }
-        }
-
-        currentStatus = status;
-        updateFormDisplay();
-
-        const message = status === "complete" ? "Form submitted successfully!" : "Form saved as draft!";
-        alert(message);
-        if (status === "complete") {
-            window.location.href = `detail.html?id=${eventId}`;
-        }
-    } catch (err) {
-        console.error("Failed to save document:", err);
-        alert(`Error saving form: ${err.message}`);
-    }
-}
-    
-async function getPreEvalPage(formId) {
-    try {
-        const mainDoc = await databases.getDocument(databaseId, mainCollectionId, formId);
-        const productType = (mainDoc.productType || "").toLowerCase().trim();
-        
-        switch (productType) {
-            case "xs":
-            case "smart code reader (xs)":
-                return "/preevalXS.html";
-            case "xc":
-            case "smart camera (xc)":
-                return "/preevalXC.html";
-            default:
-                return "/preeval.html";
-        }
-    } catch (err) {
-        console.error("Error getting product type:", err);
-        return "/preeval.html";
-    }
-}
-
-async function viewPreEval() {
-    const preEvalPage = await getPreEvalPage(eventId);
-    window.open(`${preEvalPage}?id=${eventId}&mode=view`, '_blank');
-}
-
-function viewEval() {
-    window.open(`eval.html?id=${eventId}&mode=view`, '_blank');
-}
-
-function setViewMode() {
-    const formTitle = document.getElementById("formTitle");
-    const submitBtn = document.querySelector('button[type="submit"]');
-    const saveProgressBtn = document.querySelector('.draft-btn');
-    const dropBtn = document.querySelector('.btn-danger');
-    if (currentStatus === "drop") {
-        formTitle.textContent = `Post Evaluation Form (Dropped)`;
-    } else {
-        formTitle.textContent = `Post Evaluation Form (View Only)`;
-    }
-    document.querySelectorAll('input, textarea, select').forEach(el => {
-        el.disabled = true;
-        el.style.backgroundColor = '#e0e0e0';
-        el.style.color = '#666';
-        el.style.cursor = 'not-allowed';
-    });
-    document.querySelectorAll('button[type="button"]:not(.back-icon-btn):not(.btn-secondary), button[type="submit"]').forEach(btn => {
-        btn.disabled = true;
-        btn.style.backgroundColor = '#9e9e9e';
-        btn.style.color = '#fff';
-        btn.style.cursor = 'not-allowed';
-        btn.style.opacity = '0.6';
-    });
-    document.querySelectorAll('.result-btn').forEach(btn => {
-        btn.disabled = true;
-        btn.style.cursor = 'not-allowed';
-        btn.style.opacity = '0.6';
-    });
-    
-    document.querySelectorAll('.add-row-btn, .delete-row-btn').forEach(btn => btn.style.display = 'none');
-    document.getElementById('attachmentInput').style.display = 'none';
-    
-    if (submitBtn) submitBtn.style.display = 'none';
-    if (saveProgressBtn) saveProgressBtn.style.display = 'none';
-    if (dropBtn) dropBtn.style.display = 'none';
-}
-    
-async function dropForm() {
-    if (!confirm("Are you sure you want to drop this form? This will mark the form as dropped and it will become view-only.")) {
-        return;
-    }
-    try {
-        const data = {
-            status: "drop"
-        };
-        try {
-            await databases.updateDocument(databaseId, postEvalCollectionId, eventId, data);
-            console.log("Form marked as dropped successfully");
-        } catch (updateError) {
-            if (updateError.message.includes("Document with the requested ID could not be found")) {
-                await databases.createDocument(databaseId, postEvalCollectionId, eventId, data);
-                console.log("Document created and marked as dropped");
-            } else {
-                throw updateError;
-            }
-        }
-        currentStatus = "drop";
-        updateFormDisplay();
-
-        const formTitle = document.getElementById("formTitle");
-        formTitle.textContent = "Post Evaluation Form (Dropped)";
-
-        document.querySelectorAll('input, textarea, select').forEach(el => {
-            el.disabled = true;
-            el.style.backgroundColor = '#e0e0e0';
-            el.style.color = '#666';
-            el.style.cursor = 'not-allowed';
-        });
-
-        document.querySelectorAll('button[type="button"]:not(.back-icon-btn):not(.btn-secondary), button[type="submit"]').forEach(btn => {
-            btn.disabled = true;
-            btn.style.backgroundColor = '#9e9e9e';
-            btn.style.color = '#fff';
-            btn.style.cursor = 'not-allowed';
-            btn.style.opacity = '0.6';
-        });
-
-        document.querySelectorAll('.result-btn').forEach(btn => {
-            btn.disabled = true;
-            btn.style.cursor = 'not-allowed';
-            btn.style.opacity = '0.6';
-        });
-        
-        document.querySelectorAll('.add-row-btn, .delete-row-btn').forEach(btn => btn.style.display = 'none');
-        document.getElementById('attachmentInput').style.display = 'none';
-        const submitBtn = document.querySelector('button[type="submit"]');
-        const saveProgressBtn = document.querySelector('.draft-btn');
-        const dropBtn = document.querySelector('.btn-danger');
-        if (submitBtn) submitBtn.style.display = 'none';
-        if (saveProgressBtn) saveProgressBtn.style.display = 'none';
-        if (dropBtn) dropBtn.style.display = 'none';
-        
-        alert("Form has been dropped and is now in view-only mode."); 
-    } catch (err) {
-        console.error("Failed to drop form:", err);
-        alert(`Error dropping form: ${err.message}`);
-    }
-}
-    
-function updateFormDisplay() {
-    const statusBadge = document.getElementById("statusBadge");
-    const formTitle = document.getElementById("formTitle");
-    const submitBtn = document.querySelector('button[type="submit"]');
-    const saveBtn = document.querySelector('.draft-btn');
-    const dropBtn = document.querySelector('.btn-danger');
-
-    statusBadge.textContent = currentStatus;
-    statusBadge.className = `status-badge ${currentStatus.replace(/\s+/g, '-').toLowerCase()}`;
-
-    if (viewMode || currentStatus === "drop") { 
-        if (currentStatus === "drop") {
-            formTitle.textContent = "Post Evaluation Form (Dropped)";
-        } else {
-            formTitle.textContent = "Post Evaluation Form (View Only)";
-        }
-        
-        document.querySelectorAll('input, select, button:not(.btn-secondary):not(.back-icon-btn)').forEach(el => el.disabled = true);
-        if (submitBtn) submitBtn.style.display = 'none';
-        if (saveBtn) saveBtn.style.display = 'none';
-        if (dropBtn) dropBtn.style.display = 'none'; 
-    } else {
-        formTitle.textContent = "Post Evaluation Form";
-        if (currentStatus === "complete" && submitBtn) {
-            submitBtn.style.display = 'none';
-        }
-    }
-}
-
-function goBack() {
-  window.history.back();
-}
-
-document.getElementById("postEvalForm").addEventListener("submit", e => {
+document.getElementById("postEvalForm").addEventListener("submit", e=>{
     e.preventDefault();
     saveForm("complete");
 });
 
-document.addEventListener("DOMContentLoaded", initForm);
+function goBack(){ history.back(); }
+document.addEventListener("DOMContentLoaded", ()=> {
+    document.getElementById("postEvalForm").style.display = "block";
+});
 </script>
 
 <footer class="footer">
-    <span>© 2025 ViTrox. All rights reserved.</span>
+    © 2025 ViTrox
 </footer>
 </body>
-
 </html>
-
-
-
