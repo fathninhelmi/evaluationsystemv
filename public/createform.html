@@ -166,17 +166,32 @@ document.getElementById("customerLocation").addEventListener("input", (e) => {
 });
 
 async function getOverallStatus(eventId, productType) {
-const preEvalCollectionId = preEvalCollectionIds[productType];
+  const preEvalCollectionId = preEvalCollectionIds[productType];
+
+  const isXCorXS = productType === 'XC' || productType === 'XS';
+  
   const statuses = await Promise.all([
     getFormStatus(preEvalCollectionId, eventId),
-    getFormStatus(evalCollectionId, eventId),
+    isXCorXS ? Promise.resolve(null) : getFormStatus(evalCollectionId, eventId),
     getFormStatus(postEvalCollectionId, eventId)
   ]);
 
   const [preStatus, evalStatus, postStatus] = statuses;
 
-  if (preStatus == "drop" || evalStatus == "drop" || postStatus == "drop") {
+  if (preStatus === "drop" || evalStatus === "drop" || postStatus === "drop") {
     return { status: "drop", color: "#8B949E", order: 4 };
+  }
+
+  if (isXCorXS) {
+    if (preStatus === "complete" && postStatus === "complete") {
+      return { status: "complete", color: "#2a9d8f", order: 3 };
+    }
+    
+    if (preStatus !== "draft" || postStatus !== "draft") {
+      return { status: "in progress", color: "#f4a261", order: 2 };
+    }
+    
+    return { status: "draft", color: "#e76f51", order: 1 };
   }
 
   if (preStatus === "complete" && evalStatus === "complete" && postStatus === "complete") {
@@ -384,5 +399,6 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 
 </body>
 </html>
+
 
 
