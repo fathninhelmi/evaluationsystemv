@@ -165,7 +165,7 @@ document.getElementById("customerLocation").addEventListener("input", (e) => {
   }, 1000);
 });
 
-async function getOverallStatus(eventId) {
+async function getOverallStatus(eventId, productType) {
 const preEvalCollectionId = preEvalCollectionIds[productType];
   const statuses = await Promise.all([
     getFormStatus(preEvalCollectionId, eventId),
@@ -384,4 +384,5 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 
 </body>
 </html>
+
 
