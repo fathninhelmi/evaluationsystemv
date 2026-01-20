@@ -83,10 +83,12 @@
                     <tbody id="issuesTableBody">
                         <tr>
                             <td class="row-number">1</td>
+                    
                             <td class="issue-row-content">
-                                <input type="text" name="issue_1" class="issue-input">
+                                <input type="text" name="issue_1">
                                 <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)" style="display:none;">&times;</button>
                             </td>
+                    
                             <td>
                                 <select name="issue_priority_1">
                                     <option value="">Select Priority</option>
@@ -95,15 +97,16 @@
                                     <option value="Low">Low</option>
                                 </select>
                             </td>
-                            <td><input type="text" name="issue_solution_1"></td>
+                    
+                            <td><input type="text" name="issue_proposed_solution_1"></td>
+                            <td><input type="text" name="issue_actual_solution_1"></td>
                             <td><input type="text" name="issue_pic_1"></td>
-                            <td><input type="date" name="issue_close_date_1"></td>
+                            <td><input type="date" name="issue_open_date_1"></td>
+                            <td><input type="date" name="issue_target_close_date_1"></td>
+                            <td><input type="date" name="issue_actual_close_date_1"></td>
                         </tr>
                     </tbody>
-                </table>
-                <button type="button" class="add-row-btn" onclick="addIssueRow()">+ Add Issue</button>
-            </div>
-        </div>
+
 
         <!-- Customer Feedback/Request Section -->
         <div class="form-section">
@@ -123,13 +126,15 @@
                             <th>Actual Close Date</th>
                         </tr>
                     </thead>
-                    <tbody id="feedbackTableBody">
+                   <tbody id="feedbackTableBody">
                         <tr>
                             <td class="row-number">1</td>
+                    
                             <td class="feedback-row-content">
-                                <input type="text" name="feedback-input">
+                                <input type="text" name="feedback_1">
                                 <button type="button" class="delete-row-btn" onclick="deleteFeedbackRow(this)" style="display:none;">&times;</button>
                             </td>
+                    
                             <td>
                                 <select name="feedback_priority_1">
                                     <option value="">Select Priority</option>
@@ -138,15 +143,16 @@
                                     <option value="Low">Low</option>
                                 </select>
                             </td>
-                            <td><input type="text" name="feedback_solution_1"></td>
+                    
+                            <td><input type="text" name="feedback_proposed_solution_1"></td>
+                            <td><input type="text" name="feedback_actual_solution_1"></td>
                             <td><input type="text" name="feedback_pic_1"></td>
-                            <td><input type="date" name="feedback_close_date_1"></td>
+                            <td><input type="date" name="feedback_open_date_1"></td>
+                            <td><input type="date" name="feedback_target_close_date_1"></td>
+                            <td><input type="date" name="feedback_actual_close_date_1"></td>
                         </tr>
                     </tbody>
-                </table>
-                <button type="button" class="add-row-btn" onclick="addFeedbackRow()">+ Add Feedback</button>
-            </div>
-        </div>
+
 
         <!-- Customer's Good Comment Section -->
         <div class="form-section">
@@ -392,13 +398,16 @@ function updateRowNumbers(tbodyId, prefix) {
 function addIssueRow() {
     issueRowCount++;
     const tbody = document.getElementById('issuesTableBody');
+
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
         <td class="row-number">${issueRowCount}</td>
+
         <td class="issue-row-content">
             <input type="text" name="issue_${issueRowCount}">
             <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)">&times;</button>
         </td>
+
         <td>
             <select name="issue_priority_${issueRowCount}">
                 <option value="">Select Priority</option>
@@ -407,13 +416,18 @@ function addIssueRow() {
                 <option value="Low">Low</option>
             </select>
         </td>
-        <td><input type="text" name="issue_solution_${issueRowCount}"></td>
+
+        <td><input type="text" name="issue_proposed_solution_${issueRowCount}"></td>
+        <td><input type="text" name="issue_actual_solution_${issueRowCount}"></td>
         <td><input type="text" name="issue_pic_${issueRowCount}"></td>
-        <td><input type="date" name="issue_close_date_${issueRowCount}"></td>
+        <td><input type="date" name="issue_open_date_${issueRowCount}"></td>
+        <td><input type="date" name="issue_target_close_date_${issueRowCount}"></td>
+        <td><input type="date" name="issue_actual_close_date_${issueRowCount}"></td>
     `;
+
     tbody.appendChild(newRow);
-    updateRowNumbers("issuesTableBody", "issue");
 }
+
 function deleteIssueRow(btn) {
     const tbody = document.getElementById("issuesTableBody");
     if (tbody.rows.length <= 1) {
@@ -427,13 +441,16 @@ function deleteIssueRow(btn) {
 function addFeedbackRow() {
     feedbackRowCount++;
     const tbody = document.getElementById('feedbackTableBody');
+
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
         <td class="row-number">${feedbackRowCount}</td>
+
         <td class="feedback-row-content">
             <input type="text" name="feedback_${feedbackRowCount}">
             <button type="button" class="delete-row-btn" onclick="deleteFeedbackRow(this)">&times;</button>
         </td>
+
         <td>
             <select name="feedback_priority_${feedbackRowCount}">
                 <option value="">Select Priority</option>
@@ -442,13 +459,18 @@ function addFeedbackRow() {
                 <option value="Low">Low</option>
             </select>
         </td>
-        <td><input type="text" name="feedback_solution_${feedbackRowCount}"></td>
+
+        <td><input type="text" name="feedback_proposed_solution_${feedbackRowCount}"></td>
+        <td><input type="text" name="feedback_actual_solution_${feedbackRowCount}"></td>
         <td><input type="text" name="feedback_pic_${feedbackRowCount}"></td>
-        <td><input type="date" name="feedback_close_date_${feedbackRowCount}"></td>
+        <td><input type="date" name="feedback_open_date_${feedbackRowCount}"></td>
+        <td><input type="date" name="feedback_target_close_date_${feedbackRowCount}"></td>
+        <td><input type="date" name="feedback_actual_close_date_${feedbackRowCount}"></td>
     `;
+
     tbody.appendChild(newRow);
-    updateRowNumbers("feedbackTableBody", "feedback");
 }
+
 function deleteFeedbackRow(btn) {
     const tbody = document.getElementById("feedbackTableBody");
     if (tbody.rows.length <= 1) {
@@ -941,4 +963,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
