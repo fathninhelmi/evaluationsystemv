@@ -280,7 +280,7 @@
             <option value="windows_11">Windows 11</option>
             <option value="windows_10">Windows 10</option>
             <option value="windows_8">Windows 8</option>
-            <option value="older_than_windows_10">Older than Windows 10</option>
+            <option value="older_than_windows_8">Older than Windows 8</option>
         </select>
     </div>
 
@@ -448,13 +448,13 @@
         <div class="requirementpr">NOLP <span class="required-asterisk">*</span></div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
-                <input type="checkbox" name="smartManufacturingSoftware" value="secs_gem">
+                <input type="checkbox" name="NOLPSoftware" value="secs_gem">
                 <label>License <i class="fas fa-info-circle info-icon" data-tool="secs_gem"></i></label>
             </div>
         </div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
-                <input type="checkbox" name="smartManufacturingHardware" value="hermes">
+                <input type="checkbox" name="NOLPHardware" value="hermes">
                 <label>PC <i class="fas fa-info-circle info-icon" data-tool="hermes"></i></label>
             </div>
         </div>
@@ -492,32 +492,70 @@
 <!-- Section 9 -->
 <div class="form-section" data-section="9">
     <div class="section-title">HARDWARE</div>
+
+    <!-- ESD Rubber Pads -->
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">ESD Rubber Pads <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">
+            ESD Rubber Pads <span class="required-asterisk">*</span>:
+        </div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="rubberPad" value="smaller_than_0201">Component smaller than 0201</label>
+            <label>
+                <input type="checkbox" name="rubberPad" value="component_smaller_than_0201">
+                Component smaller than 0201
+            </label>
+        </div>
+    </div>
+
+    <!-- Confocal Thickness Sensor -->
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">
+            Confocal Thickness Sensor <span class="required-asterisk">*</span>:
+        </div>
+        <div class="checkbox-options-xc">
+            <label>
+                <input type="checkbox" name="sensor" value="10mm_wd_gt_25um">
+                10mm WD, &gt;25um thickness
+            </label>
+            <label>
+                <input type="checkbox" name="sensor" value="20mm_wd_gt_50um">
+                20mm WD, &gt;50um thickness
+            </label>
+            <label>
+                <input type="checkbox" name="sensor" value="30mm_wd_gt_80um">
+                30mm WD, &gt;80um thickness
+            </label>
+        </div>
+    </div>
+
+    <!-- Laser Profile -->
+    <div class="checkbox-grid-xc">
+        <div class="requirement-xc">
+            Laser Profile <span class="required-asterisk">*</span>:
+        </div>
+        <div class="checkbox-options-xc">
+            <label>
+                <input type="checkbox" name="laser" value="wd_75_100mm_blue">
+                WD 75–100mm, Blue
+            </label>
+            <label>
+                <input type="checkbox" name="laser" value="wd_100_260mm_red">
+                WD 100–260mm, Red
+            </label>
         </div>
     </div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Confocal Thickness Sensor <span class="required-asterisk">*</span>:</div>
-        <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="cleanroom" value="ionizer">10mm WD, >25um thickness</label>
-            <label><input type="checkbox" name="cleanroom" value="hepa">20mm WD, >50um thickness</label>
-            <label><input type="checkbox" name="cleanroom" value="hepa">20mm WD, >30mm WD, >80um thickness</label>
+        <div class="requirement-xc">
+            Accessories <span class="required-asterisk">*</span>:
         </div>
-    </div>
-    <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Laser profile <span class="required-asterisk">*</span>:</div>
         <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="loaderUnloader" value="lr">WD 75-100mm, Blue</label>
-            <label><input type="checkbox" name="loaderUnloader" value="ll">WD 100-260mm, Red</label>
-        </div>
-    </div>
-    <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Accessories <span class="required-asterisk">*</span>:</div>
-        <div class="checkbox-options-xc">
-            <label><input type="checkbox" name="cleanroom" value="ionizer">Safety Sensor Kit</label>
-            <label><input type="checkbox" name="cleanroom" value="hepa">Universal Carrier Assembly</label>
+            <label>
+                <input type="checkbox" name="accessories" value="safety_sensor_kit">
+                Safety Sensor Kit
+            </label>
+            <label>
+                <input type="checkbox" name="accessories" value="universal_carrier_assembly">
+                Universal Carrier Assembly
+            </label>
         </div>
     </div>
 </div>
@@ -607,7 +645,7 @@ const storage = new Appwrite.Storage(client);
 
 const databaseId = "68ba8a9c001f17064e15";
 const collectionId = "68ba918c0022d2b9a429";
-const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const preEvalCollectionId = "696dd29b0034536c09b9";
 const referenceCollectionId = "68da1d5f002142be75df";
 const categoryCollectionId = "6944b2a20012334309c3";
 const bucketId = "69015d8b0030f329c599";
