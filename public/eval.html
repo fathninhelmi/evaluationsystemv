@@ -430,10 +430,6 @@ function addIssueRow() {
 
 function deleteIssueRow(btn) {
     const tbody = document.getElementById("issuesTableBody");
-    if (tbody.rows.length <= 1) {
-        alert("At least one issue must be present.");
-        return;
-    }
     btn.closest("tr").remove();
     updateRowNumbers("issuesTableBody", "issue");
 }
@@ -473,10 +469,6 @@ function addFeedbackRow() {
 
 function deleteFeedbackRow(btn) {
     const tbody = document.getElementById("feedbackTableBody");
-    if (tbody.rows.length <= 1) {
-        alert("At least one feedback must be present.");
-        return;
-    }
     btn.closest("tr").remove();
     updateRowNumbers("feedbackTableBody", "feedback");
 }
@@ -497,10 +489,6 @@ function addCommentRow() {
 }
 function deleteCommentRow(btn) {
     const tbody = document.getElementById("commentTableBody");
-    if (tbody.rows.length <= 1) {
-        alert("At least one comment must be present.");
-        return;
-    }
     btn.closest("tr").remove();
     updateRowNumbers("commentTableBody", "comment");
 }
@@ -963,5 +951,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
