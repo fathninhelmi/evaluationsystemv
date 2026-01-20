@@ -73,10 +73,13 @@ async function loadEvent() {
                  👁️ View-Only Mode (Manager Access)
                </div>` 
             : '';
-        const productType = (ev.productType || "").toLowerCase().trim();
-        const hideEvalStep = productType === "xs" || productType === "xc" || 
-                            productType === "smart code reader (xs)" || 
-                            productType === "smart camera (xc)";
+        
+        // Fixed: Use productType.toLowerCase() instead of declaring a new variable
+        const hideEvalStep = productType.toLowerCase() === "xs" || 
+                            productType.toLowerCase() === "xc" || 
+                            productType.toLowerCase() === "smart code reader (xs)" || 
+                            productType.toLowerCase() === "smart camera (xc)";
+        
         eventCard.innerHTML = `
             <h1>${ev.prodname} (${ev.createDate ? formatDate(ev.createDate) : ""})</h1>
             ${viewModeIndicator}
@@ -323,5 +326,6 @@ loadEvent();
 </body>
 
 </html>
+
 
 
