@@ -1289,20 +1289,54 @@ async function saveForm(status = "draft") {
         }
 
         if (status === "complete") {    
-            const requiredFields = [
-                'customerCompany', 'custTechChamp', 'existcust', 'endCustomerName', 'evalStartDate', 'endEstimateDate',
-                'competitor', 'compModel', 'venue', 'machineHealthChecked', 'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
-                'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'cycleTime', 'falseCallppm', 'otherreq', 'boardThickness', 'smallestComponentSize',
-                'tallestComponent', 'inspectionRequirement', 'programmingInputFiles', 'inspectionLayer', 'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection',
-                'boardStopRequirement', 'camera', 'coaxialLighting', 'motorizedZHeight', 'lens', 'projector', 'operatingSystem', 'cpu', 'ram', 'gpu', 'cDriveStorage',
-                'rubberPad', 'cleanroom', 'loaderUnloader'];
-            
-            const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
-            if (missingFields.length > 0 || !collectedData.custIssues || collectedData.custIssues.length === 0) {
-                alert("Please fill in all required fields before submitting.");
-                return;
-            }
+    const requiredFields = [
+        'customerCompany', 'custTechChamp', 'existcust', 'endCustomerName', 'evalStartDate', 'endEstimateDate',
+        'competitor', 'compModel', 'venue', 'machineHealthChecked', 'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
+        'inspectionEnvironment', 'fpyTarget', 'prodseg', 'reqinspect', 'cycleTime', 'falseCallppm', 'otherreq', 'tallestComponent',
+        'boardStopRequirement', 'camera', 'coaxialLighting', 'motorizedZHeight', 'operatingSystem', 'cpu', 'ram', 'gpu', 'cDriveStorage'
+    ];
+    
+    // Validate text/select fields
+    const missingTextFields = requiredFields.filter(field => {
+        const value = collectedData[field];
+        return !value || (typeof value === 'string' && value.trim() === '');
+    });
+    
+    // Validate array fields (checkboxes)
+    const requiredArrayFields = [
+        'boardThickness', 'smallestComponentSize', 'inspectionRequirement', 
+        'programmingInputFiles', 'inspectionLayer', 'conveyor', 
+        'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'projector',
+        'rubberPad', 'cleanroom', 'loaderUnloader', 'tools'
+    ];
+    
+    const missingArrayFields = requiredArrayFields.filter(field => {
+        const value = collectedData[field];
+        return !value || !Array.isArray(value) || value.length === 0;
+    });
+    
+    // Check customer issues
+    const hasCustIssues = collectedData.custIssues && 
+                         Array.isArray(collectedData.custIssues) && 
+                         collectedData.custIssues.length > 0;
+    
+    if (missingTextFields.length > 0 || missingArrayFields.length > 0 || !hasCustIssues) {
+        let errorMsg = "Please fill in all required fields:\n";
+        
+        if (missingTextFields.length > 0) {
+            errorMsg += "\nMissing text fields: " + missingTextFields.join(', ');
         }
+        if (missingArrayFields.length > 0) {
+            errorMsg += "\nMissing selections: " + missingArrayFields.join(', ');
+        }
+        if (!hasCustIssues) {
+            errorMsg += "\nPlease add at least one customer issue";
+        }
+        
+        alert(errorMsg);
+        return;
+    }
+}
         
         const saveData = {
             ...collectedData,
@@ -1548,3 +1582,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
