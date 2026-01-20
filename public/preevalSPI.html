@@ -1253,9 +1253,9 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
-        'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel',
-        'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
-        'cycleTime', 'falseCallppm', 'otherreq', 'smallestPadSize', 'existcust', 'machineHealthChecked', 'venue', 'inspectionEnvironment', 
+        'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 'evalStartDate', 'endEstimateDate'
+        'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existcust', 'machineHealthChecked', 'venue',
+        'cycleTime', 'falseCallppm', 'otherreq', 'smallestPadSize', 'inspectionEnvironment', 
         'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 
         'camera', 'operatingSystem', 'cpu', 'ram', 'gpu', 'cDriveStorage' 
             ];
