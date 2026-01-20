@@ -521,7 +521,7 @@ function populateForm(preEvalData, referenceData) {
     }
     
     const textFields = [
-        'custPICname', 'custPICposition', 'custTechChamp', 'existcust', 'evalDate', 
+        'custPICname', 'custPICposition', 'custTechChamp', 'existcust', 'evalStartDate', 'endEstimateDate', 
         'competitor', 'compModel', 'venue', 'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 
         'vxpertsalesChamp', 'vxperttechChamp', 'vitroxtechChamp',
         'codeTypeOtherDetails', 'codeMinSize_l', 'codeMinSize_w', 'codeMinSize', 
@@ -698,7 +698,7 @@ function updateFormDisplay() {
 function collectFormData() {
     const data = {};
     const textFields = [
-        'customerCompany', 'custPICname', 'custPICposition', 'custTechChamp', 'existcust', 'evalDate', 
+        'customerCompany', 'custPICname', 'custPICposition', 'custTechChamp', 'existcust', 'evalStartDate', 'endEstimateDate', 
         'competitor', 'compModel', 'venue', 'sisalesChamp', 'sitechChamp', 'vtechsalesChamp', 
         'vxpertsalesChamp', 'vxperttechChamp', 'vitroxtechChamp',
         'codeTypeOtherDetails', 'codeMinSize_l', 'codeMinSize_w', 'codeMinSize', 
@@ -721,7 +721,7 @@ function collectFormData() {
             data[floatField] = parseFloat(data[floatField]);
         }
     });
-    ['evalDate', 'targetDeploymentDate'].forEach(dateField => {
+    ['evalStartDate', 'endEstimateDate', 'targetDeploymentDate'].forEach(dateField => {
         if (data[dateField]) {
             data[dateField] = new Date(data[dateField] + "T00:00:00Z").toISOString();
         }
@@ -876,7 +876,7 @@ async function saveForm(status = "draft") {
         }
         if (status === "complete") {
             const requiredFields = [
-                'customerCompany', 'custPICname', 'custPICposition', 'existcust', 'evalDate', 
+                'customerCompany', 'custPICname', 'custPICposition', 'existcust', 'evalStartDate', 'endEstimateDate', 
                 'vxpertsalesChamp', 'vxperttechChamp', 'codeType', 'codeMinSize_l', 'codeMinSize_w',
                 'xs_samplesProvided', 'readingSpeed', 'workingDistance', 'heightConsistency',
                 'xs_objectMovement', 'targetDeploymentDate', 'nextSteps'
@@ -989,5 +989,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
