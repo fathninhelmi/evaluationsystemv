@@ -216,9 +216,9 @@
             <div class="checkbox-grid-xc">
                 <div class="requirement-xc">Inspection Layer <span class="required-asterisk">*</span>:</div>
                 <div class="checkbox-options-xc">
-                    <label><input type="checkbox" name="programmingInputFiles" value="general_cad">Top only</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="gerber">Bottom only</label>
-                    <label><input type="checkbox" name="programmingInputFiles" value="bom">Top-Bottom</label>
+                    <label><input type="checkbox" name="inspectionLayer" value="general_cad">Top only</label>
+                    <label><input type="checkbox" name="inspectionLayer" value="gerber">Bottom only</label>
+                    <label><input type="checkbox" name="inspectionLayer" value="bom">Top-Bottom</label>
                 </div>
             </div>
         </div>
@@ -1305,7 +1305,7 @@ async function saveForm(status = "draft") {
     // Validate array fields (checkboxes)
     const requiredArrayFields = [
         'boardThickness', 'smallestComponentSize', 'inspectionRequirement', 
-        'programmingInputFiles', 'inspectionLayer', 'conveyor', 
+        'programmingInputFiles', 'conveyor', 'inspectionLayer',
         'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'projector',
         'rubberPad', 'cleanroom', 'loaderUnloader', 'tools'
     ];
@@ -1582,4 +1582,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
