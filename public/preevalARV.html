@@ -918,7 +918,6 @@ function populateForm(preEvalData, referenceData) {
     }
     const textFields = [
         'custTechChamp', 'competitor', 'compModel',
-        'scpvitroxsalesChamp', 'scpvitroxtechChamp',
         'cycleTime', 'falseCallppm', 'otherreq'
     ];
 
@@ -1186,8 +1185,8 @@ function collectFormData() {
     const data = {};
 
     const textFields = [
-        'customerCompany', 'custTechChamp', 'competitor', 'compModel',
-        'scpvitroxsalesChamp', 'scpvitroxtechChamp',
+       'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 
+        'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 
         'cycleTime', 'falseCallppm', 'otherreq'
     ];
 
@@ -1285,8 +1284,8 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalStartDate', 'endEstimateDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
-            ];
+                'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 'evalStartDate', 'endEstimateDate'
+                'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existcust', 'machineHealthChecked', 'venue',
             if (!isAXI) {
                 requiredFields.push('falseCallppm');
             }
