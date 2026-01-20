@@ -1286,8 +1286,8 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'existcust', 'endCustomerName', 'evalStartDate', 'endEstimateDate',
-                'competitor', 'compModel', 'venue', 'machineHealthChecked', 'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp'
+        'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 'evalStartDate', 'endEstimateDate'
+        'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existcust', 'machineHealthChecked', 'venue'
             ];
             if (!isAXI) {
                 requiredFields.push('falseCallppm');
