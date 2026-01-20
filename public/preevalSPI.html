@@ -647,7 +647,6 @@ async function checkUserRole() {
     }
 }
 
-// Function to load all categories from database
 async function loadAllCategories() {
     try {
         const response = await databases.listDocuments(databaseId, categoryCollectionId);
@@ -656,7 +655,7 @@ async function loadAllCategories() {
             const categoryName = doc.categoryName;
             const features = doc.features.map(f => JSON.parse(f));
             
-            // Store the category info
+  
             dynamicCategories[categoryName] = {
                 features: features,
                 formFields: doc.formFields ? JSON.parse(doc.formFields) : null
@@ -669,7 +668,6 @@ async function loadAllCategories() {
     }
 }
 
-// Function to inject custom categories into the form
 function injectDynamicCategories() {
     const featuresSection = document.querySelector('[data-section="8"]');
     if (!featuresSection) {
@@ -683,16 +681,16 @@ function injectDynamicCategories() {
         return;
     }
     
-    // Define default categories to skip (they're already in the HTML)
+
     const defaultCategories = [
         'V-Library', 'AI Programming', 'VVTS', 'AI VVTS', 'VDSPC 2.0',
         'V-One', 'V-Accelerator', 'V-Tune', 'Minitab', 'One-View',
         'MES', 'Barcode Related'
     ];
     
-    // Add custom categories
+
     Object.keys(dynamicCategories).forEach(categoryName => {
-        // Skip if it's a default category
+
         if (defaultCategories.includes(categoryName)) {
             return;
         }
@@ -701,23 +699,23 @@ function injectDynamicCategories() {
         const features = categoryData.features;
         const formFields = categoryData.formFields || {};
         
-        // Generate field names if not stored
+
         const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
         const softwareFieldName = formFields.software || `${baseName}Software`;
         const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
         
-        // Create the category row HTML
+
         const categoryRow = document.createElement('div');
         categoryRow.className = 'requirementpr';
         categoryRow.textContent = categoryName + ' ';
         categoryRow.setAttribute('data-dynamic-category', categoryName);
         
-        // Create software column
+
         const softwareColumn = document.createElement('div');
         softwareColumn.className = 'checkbox-containerpr';
         softwareColumn.setAttribute('data-dynamic-category', categoryName);
         
-        // Add software checkboxes
+
         features.forEach(feature => {
             const checkboxDiv = document.createElement('div');
             checkboxDiv.className = 'checkbox-itempr';
@@ -729,13 +727,11 @@ function injectDynamicCategories() {
             
             softwareColumn.appendChild(checkboxDiv);
         });
-        
-        // Create hardware column (empty for now, can be populated if needed)
+
         const hardwareColumn = document.createElement('div');
         hardwareColumn.className = 'checkbox-containerpr';
         hardwareColumn.setAttribute('data-dynamic-category', categoryName);
         
-        // Append to grid
         checkboxGrid.appendChild(categoryRow);
         checkboxGrid.appendChild(softwareColumn);
         checkboxGrid.appendChild(hardwareColumn);
@@ -743,7 +739,6 @@ function injectDynamicCategories() {
         console.log(`Added dynamic category: ${categoryName}`);
     });
     
-    // Reinitialize tooltips for new info icons
     initTooltips();
 }
 
@@ -758,13 +753,10 @@ async function initForm() {
             return;
         }
 
-        // Load categories first
         await loadAllCategories();
-        
-        // Load existing form data
+
         await loadExistingForm();
-        
-        // Inject dynamic categories into the form
+
         injectDynamicCategories();
 
         const userRole = await checkUserRole();
@@ -854,8 +846,7 @@ function toggleSectionsByProduct(productType) {
 
 function populateForm(preEvalData, referenceData) {
     const data = preEvalData || {};
-    
-    // Populate customer company
+
     const customerCompanyElement = document.getElementById('customerCompany');
     if (customerCompanyElement) {
         if (referenceData && referenceData.customerCompany) {
@@ -885,7 +876,6 @@ function populateForm(preEvalData, referenceData) {
         }
     }
     
-    // Text fields - Updated list
     const textFields = [
         'custTechChamp', 'endCustomerName', 'competitor', 'compModel',
         'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
@@ -897,7 +887,6 @@ function populateForm(preEvalData, referenceData) {
         if (element && data[fieldId]) element.value = data[fieldId];
     });
 
-    // Select fields - Updated list
     const selectFields = [
         'existcust', 'machineHealthChecked', 'venue', 'inspectionEnvironment', 
         'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement',
@@ -908,7 +897,6 @@ function populateForm(preEvalData, referenceData) {
         if (element && data[fieldId]) element.value = data[fieldId];
     });
 
-    // Date fields - Updated list
     ['evalStartDate', 'endEstimateDate'].forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element && data[fieldId]) {
@@ -916,7 +904,6 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    // Checkbox groups - UPDATED
     const checkboxGroups = [
         'boardThickness', 'inspectionRequirement', 'programmingInputFiles',
         'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'projector',
@@ -932,7 +919,6 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    // Feature fields - UPDATED
     const featureFields = [
         'olpSoftware', 'olpHardware',
         'offlineVvtsSoftware', 'offlineVvtsHardware',
@@ -955,7 +941,6 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    // Dynamic category fields
     Object.keys(dynamicCategories).forEach(categoryName => {
         const categoryData = dynamicCategories[categoryName];
         const formFields = categoryData.formFields || {};
@@ -979,7 +964,6 @@ function populateForm(preEvalData, referenceData) {
         }
     });
 
-    // Customer issues
     if (data.custIssues && data.custIssues.length > 0) {
         const tbody = document.getElementById("custIssueTableBody");
         tbody.innerHTML = "";
@@ -1164,8 +1148,6 @@ function updateDeleteButtons() {
 
 function collectFormData() {
     const data = {};
-
-    // Text fields - Updated list
     const textFields = [
         'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel',
         'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
@@ -1177,7 +1159,6 @@ function collectFormData() {
         if (element) data[fieldId] = element.value.trim();
     });
 
-    // Select fields - Updated list
     const selectFields = [
         'existcust', 'machineHealthChecked', 'venue', 'inspectionEnvironment', 
         'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 
@@ -1188,7 +1169,6 @@ function collectFormData() {
         if (element) data[fieldId] = element.value;
     });
 
-    // Date fields - Updated list
     ['evalStartDate', 'endEstimateDate'].forEach(dateField => {
         const element = document.getElementById(dateField);
         if (element && element.value) {
@@ -1196,7 +1176,6 @@ function collectFormData() {
         }
     });
 
-    // Checkbox groups
     const checkboxGroups = [
         'boardThickness', 'inspectionRequirement', 'programmingInputFiles',
         'conveyor', 'machineTypeByBoardSize', 'boardFlowDirection', 'lens', 'projector',
@@ -1209,7 +1188,6 @@ function collectFormData() {
         }
     });
 
-    // Feature fields - UPDATED
     const featureFields = [
         'olpSoftware', 'olpHardware',
         'offlineVvtsSoftware', 'offlineVvtsHardware',
@@ -1230,7 +1208,6 @@ function collectFormData() {
         }
     });
 
-    // Dynamic category fields
     Object.keys(dynamicCategories).forEach(categoryName => {
         const categoryData = dynamicCategories[categoryName];
         const formFields = categoryData.formFields || {};
@@ -1250,7 +1227,6 @@ function collectFormData() {
         }
     });
 
-    // Customer issues
     const issueInputs = document.querySelectorAll('[name="custIssues[]"]');
     const custIssues = Array.from(issueInputs)
         .map(input => input.value.trim())
@@ -1277,7 +1253,11 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
-                'customerCompany', 'custTechChamp', 'evalStartDate', 'endEstimateDate','scpvitroxsalesChamp', 'scpvitroxtechChamp', 'venue'
+        'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel',
+        'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
+        'cycleTime', 'falseCallppm', 'otherreq', 'smallestPadSize', 'existcust', 'machineHealthChecked', 'venue', 'inspectionEnvironment', 
+        'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 
+        'camera', 'operatingSystem', 'cpu', 'ram', 'gpu', 'cDriveStorage' 
             ];
             if (!isAXI) {
                 requiredFields.push('falseCallppm');
