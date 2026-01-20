@@ -167,6 +167,7 @@ document.getElementById("customerLocation").addEventListener("input", (e) => {
 });
 
 async function getOverallStatus(eventId) {
+const preEvalCollectionId = preEvalCollectionIds[productType];
   const statuses = await Promise.all([
     getFormStatus(preEvalCollectionId, eventId),
     getFormStatus(evalCollectionId, eventId),
@@ -221,7 +222,7 @@ async function loadForms() {
 
     const formsWithStatus = await Promise.all(
       res.documents.map(async (doc) => {
-        const statusInfo = await getOverallStatus(doc.$id);
+        const statusInfo = await getOverallStatus(doc.$id, doc.productType);
         return { doc, statusInfo };
       })
     );
@@ -265,7 +266,10 @@ async function loadForms() {
         if (confirm(`Delete '${doc.prodname}'?`)) {
           try {
             await databases.deleteDocument(databaseId, collectionId, doc.$id);
-            try { await databases.deleteDocument(databaseId, preEvalCollectionId, doc.$id); } catch {}
+            const correctPreEvalId = preEvalCollectionIds[doc.productType];
+              if (correctPreEvalId) {
+                try { await databases.deleteDocument(databaseId, correctPreEvalId, doc.$id); } catch {}
+              }
             try { await databases.deleteDocument(databaseId, evalCollectionId, doc.$id); } catch {}
             try { await databases.deleteDocument(databaseId, postEvalCollectionId, doc.$id); } catch {}
             loadForms();
@@ -381,7 +385,3 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 
 </body>
 </html>
-
-
-
-
