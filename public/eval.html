@@ -598,20 +598,26 @@ async function loadForm() {
         const tbodyIssues = document.getElementById('issuesTableBody');
         tbodyIssues.innerHTML = '';
         issueRowCount = 0;
-
+        
         const descrip_issue = evDoc.descrip_issue || [];
         const priority_issue = evDoc.priority_issue || [];
         const sol_issue = evDoc.sol_issue || [];
+        const actualSol_issue = evDoc.actualSol_issue || [];
         const pic_issue = evDoc.pic_issue || [];
+        const openDate_issue = evDoc.openDate_issue || [];
+        const targetCloseDate_issue = evDoc.targetCloseDate_issue || [];
         const closeDate_issue = evDoc.closeDate_issue || [];
-
+        
         descrip_issue.forEach((description, index) => {
             if (!description || !description.trim()) return;
             issueRowCount++;
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="row-number">${issueRowCount}</td>
-                <td><input type="text" name="issue_${issueRowCount}" value="${description}"></td>
+                <td class="issue-row-content">
+                    <input type="text" name="issue_${issueRowCount}" value="${description}">
+                    <button type="button" class="delete-row-btn" onclick="deleteIssueRow(this)">&times;</button>
+                </td>
                 <td>
                     <select name="issue_priority_${issueRowCount}">
                         <option value="">Select Priority</option>
@@ -620,13 +626,12 @@ async function loadForm() {
                         <option value="Low" ${priority_issue[index] === 'Low' ? 'selected' : ''}>Low</option>
                     </select>
                 </td>
-                <td><input type="text" name="issue_solution_${issueRowCount}" value="${sol_issue[index] || ''}"></td>
+                <td><input type="text" name="issue_proposed_solution_${issueRowCount}" value="${sol_issue[index] || ''}"></td>
+                <td><input type="text" name="issue_actual_solution_${issueRowCount}" value="${actualSol_issue[index] || ''}"></td>  
                 <td><input type="text" name="issue_pic_${issueRowCount}" value="${pic_issue[index] || ''}"></td>
-                <td>
-                    <input type="date" name="issue_close_date_${issueRowCount}" 
-                        value="${closeDate_issue[index] ? closeDate_issue[index].split('T')[0] : ''}">
-                </td>
-
+                <td><input type="date" name="issue_open_date_${issueRowCount}" value="${openDate_issue[index] ? openDate_issue[index].split('T')[0] : ''}"></td>  
+                <td><input type="date" name="issue_target_close_date_${issueRowCount}" value="${targetCloseDate_issue[index] ? targetCloseDate_issue[index].split('T')[0] : ''}"></td>  
+                <td><input type="date" name="issue_actual_close_date_${issueRowCount}" value="${closeDate_issue[index] ? closeDate_issue[index].split('T')[0] : ''}"></td>
             `;
             tbodyIssues.appendChild(row);
         });
@@ -634,20 +639,26 @@ async function loadForm() {
         const tbodyFeedback = document.getElementById('feedbackTableBody');
         tbodyFeedback.innerHTML = '';
         feedbackRowCount = 0;
-
+        
         const descrip_fed = evDoc.descrip_fed || [];
         const priority_fed = evDoc.priority_fed || [];
         const sol_fed = evDoc.sol_fed || [];
+        const actualSol_fed = evDoc.actualSol_fed || []; 
         const pic_fed = evDoc.pic_fed || [];
+        const openDate_fed = evDoc.openDate_fed || []; 
+        const targetCloseDate_fed = evDoc.targetCloseDate_fed || []; 
         const closeDate_fed = evDoc.closeDate_fed || [];
-
+        
         descrip_fed.forEach((description, index) => {
             if (!description || !description.trim()) return;
             feedbackRowCount++;
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="row-number">${feedbackRowCount}</td>
-                <td><input type="text" name="feedback_${feedbackRowCount}" value="${description}"></td>
+                <td class="feedback-row-content">
+                    <input type="text" name="feedback_${feedbackRowCount}" value="${description}">
+                    <button type="button" class="delete-row-btn" onclick="deleteFeedbackRow(this)">&times;</button>
+                </td>
                 <td>
                     <select name="feedback_priority_${feedbackRowCount}">
                         <option value="">Select Priority</option>
@@ -656,12 +667,12 @@ async function loadForm() {
                         <option value="Low" ${priority_fed[index] === 'Low' ? 'selected' : ''}>Low</option>
                     </select>
                 </td>
-                <td><input type="text" name="feedback_solution_${feedbackRowCount}" value="${sol_fed[index] || ''}"></td>
+                <td><input type="text" name="feedback_proposed_solution_${feedbackRowCount}" value="${sol_fed[index] || ''}"></td>
+                <td><input type="text" name="feedback_actual_solution_${feedbackRowCount}" value="${actualSol_fed[index] || ''}"></td>  
                 <td><input type="text" name="feedback_pic_${feedbackRowCount}" value="${pic_fed[index] || ''}"></td>
-                <td>
-                    <input type="date" name="feedback_close_date_${feedbackRowCount}" 
-                        value="${closeDate_fed[index] ? closeDate_fed[index].split('T')[0] : ''}">
-                </td>
+                <td><input type="date" name="feedback_open_date_${feedbackRowCount}" value="${openDate_fed[index] ? openDate_fed[index].split('T')[0] : ''}"></td>  
+                <td><input type="date" name="feedback_target_close_date_${feedbackRowCount}" value="${targetCloseDate_fed[index] ? targetCloseDate_fed[index].split('T')[0] : ''}"></td>  
+                <td><input type="date" name="feedback_actual_close_date_${feedbackRowCount}" value="${closeDate_fed[index] ? closeDate_fed[index].split('T')[0] : ''}"></td>
             `;
             tbodyFeedback.appendChild(row);
         });
@@ -857,15 +868,21 @@ async function saveForm(status = "draft") {
 
         descrip_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_${i+1}"]`)?.value || ''),
         priority_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`select[name="issue_priority_${i+1}"]`)?.value || ''),
-        sol_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_solution_${i+1}"]`)?.value || ''),
+        sol_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_proposed_solution_${i+1}"]`)?.value || ''),
+        actualSol_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_actual_solution_${i+1}"]`)?.value || ''),
         pic_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_pic_${i+1}"]`)?.value || ''),
-        closeDate_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_close_date_${i+1}"]`)?.value || ''),
+        openDate_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_open_date_${i+1}"]`)?.value || ''), 
+        targetCloseDate_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_target_close_date_${i+1}"]`)?.value || ''),  
+        closeDate_issue: Array.from({ length: issueRowCount }, (_, i) => document.querySelector(`input[name="issue_actual_close_date_${i+1}"]`)?.value || ''),
 
         descrip_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_${i+1}"]`)?.value || ''),
         priority_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`select[name="feedback_priority_${i+1}"]`)?.value || ''),
-        sol_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_solution_${i+1}"]`)?.value || ''),
+        sol_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_proposed_solution_${i+1}"]`)?.value || ''),
+        actualSol_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_actual_solution_${i+1}"]`)?.value || ''),  
         pic_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_pic_${i+1}"]`)?.value || ''),
-        closeDate_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_close_date_${i+1}"]`)?.value || ''),
+        openDate_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_open_date_${i+1}"]`)?.value || ''),  
+        targetCloseDate_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_target_close_date_${i+1}"]`)?.value || ''),  
+        closeDate_fed: Array.from({ length: feedbackRowCount }, (_, i) => document.querySelector(`input[name="feedback_actual_close_date_${i+1}"]`)?.value || ''),
 
         comment: Array.from({ length: commentRowCount }, (_, i) => document.querySelector(`input[name="comment_${i+1}"]`)?.value || ''),
 
@@ -951,6 +968,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 </footer>
 </body>
 </html>
+
 
 
 
