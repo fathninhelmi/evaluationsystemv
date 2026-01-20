@@ -1247,7 +1247,7 @@ async function saveForm(status = "draft") {
         if (status === "complete") {  
             const requiredFields = [
                 'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 'evalStartDate', 'endEstimateDate',
-                'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existcust', 'machineHealthChecked', 'venue'
+                'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existcust', 'machineHealth', 'venue'
             ];
             
             const missingFields = requiredFields.filter(field => !collectedData[field] || collectedData[field].trim() === '');
