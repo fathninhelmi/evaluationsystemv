@@ -76,19 +76,45 @@ async function loadNotifications() {
     ]);
 
     console.log('Loaded notifications:', requests.documents.length);
-    const notifications = requests.documents.map(req => {
-      let formattedDate = req.evalDate || 'N/A';
-      if (req.evalDate && req.evalDate !== 'N/A') {
-        try {
-          const date = new Date(req.evalDate);
-          const day = String(date.getDate()).padStart(2, '0');
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const year = String(date.getFullYear()).slice(-2);
-          formattedDate = `${day}/${month}/${year}`;
-        } catch (err) {
-          console.warn('Error formatting date:', err);
-        }
-      }
+const notifications = requests.documents.map(req => {
+  let formattedDate = 'N/A';
+  if (req.evalStartDate && req.endEstimateDate) {
+    try {
+      const startDate = new Date(req.evalStartDate);
+      const endDate = new Date(req.endEstimateDate);
+      
+      const formatDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = String(date.getFullYear()).slice(-2);
+        return `${day}/${month}/${year}`;
+      };
+      
+      formattedDate = `Start: ${formatDate(startDate)} - End: ${formatDate(endDate)}`;
+    } catch (err) {
+      console.warn('Error formatting date:', err);
+    }
+  } else if (req.evalStartDate) {
+    try {
+      const date = new Date(req.evalStartDate);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = String(date.getFullYear()).slice(-2);
+      formattedDate = `Start: ${day}/${month}/${year}`;
+    } catch (err) {
+      console.warn('Error formatting date:', err);
+    }
+  } else if (req.endEstimateDate) {
+    try {
+      const date = new Date(req.endEstimateDate);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = String(date.getFullYear()).slice(-2);
+      formattedDate = `End: ${day}/${month}/${year}`;
+    } catch (err) {
+      console.warn('Error formatting date:', err);
+    }
+  }
       
       return {
         id: req.$id,
@@ -173,5 +199,6 @@ checkSession();
 </body>
 
 </html>
+
 
 
