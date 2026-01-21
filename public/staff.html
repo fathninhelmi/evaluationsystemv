@@ -416,12 +416,14 @@ function updateDropdown(forms) {
     if (!isSameCompany) {
       const requestBtn = document.createElement("button");
       requestBtn.className = "dropdown-request-btn";
+      requestBtn.id = `dropdown-btn-${form.$id}`;
+      
       if (requestStatus === 'approved') {
         requestBtn.innerHTML = '<i class="fas fa-eye"></i> View';
         requestBtn.style.background = '#28a745';
         requestBtn.onclick = () => viewApprovedForm(form.$id);
       } else if (requestStatus === 'pending') {
-        requestBtn.innerHTML = '<i class="fas fa-clock"></i> Requested';
+        requestBtn.innerHTML = '<i class="fas fa-clock"></i> Pending';
         requestBtn.style.background = '#ffc107';
         requestBtn.style.color = '#000';
         requestBtn.disabled = true;
@@ -453,11 +455,27 @@ function selectDropdownItem(formId) {
 }
 
 async function requestAccessFromDropdown(formId) {
-  await requestAccess(formId);
-  document.getElementById("publicFormsSearch").value = '';
-  document.getElementById("searchDropdown").style.display = "none";
-  filteredPublicForms = publicForms.filter(f => f.customerCompany === userCompany);
-  renderPublicForms(filteredPublicForms);
+  const btn = document.getElementById(`dropdown-btn-${formId}`);
+  if (btn) {
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    btn.disabled = true;
+  }
+  
+  const success = await requestAccess(formId);
+  
+  if (success) {
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-clock"></i> Pending';
+      btn.style.background = '#ffc107';
+      btn.style.color = '#000';
+      btn.style.cursor = 'not-allowed';
+    }
+  } else {
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Request';
+      btn.disabled = false;
+    }
+  }
 }
 
 function switchTab(tab){
@@ -540,7 +558,7 @@ function renderMyForms(forms) {
   });
 }
 
-  function renderPublicForms(forms) {
+function renderPublicForms(forms) {
   const grid = document.getElementById("publicFormsGrid");
   const loading = document.getElementById("publicFormsLoading");
   const empty = document.getElementById("publicFormsEmpty");
@@ -568,9 +586,9 @@ function renderMyForms(forms) {
       if (requestStatus === 'approved') {
         actionButton = `<button class="btn-mini btn-primary" onclick="viewPostEvalWithNavigation('${form.$id}')"><i class="fas fa-eye"></i> View Form</button>`;
       } else if (requestStatus === 'pending') {
-        actionButton = `<button class="btn-mini btn-secondary" disabled style="opacity: 0.7; cursor: not-allowed;"><i class="fas fa-clock"></i> Requested</button>`;
+        actionButton = `<button class="btn-mini btn-secondary" id="card-btn-${form.$id}" disabled style="opacity: 0.7; cursor: not-allowed;"><i class="fas fa-clock"></i> Pending</button>`;
       } else {
-        actionButton = `<button class="btn-mini btn-primary" onclick="requestAccess('${form.$id}')"><i class="fas fa-paper-plane"></i> Request Access</button>`;
+        actionButton = `<button class="btn-mini btn-primary" id="card-btn-${form.$id}" onclick="requestAccessFromCard('${form.$id}')"><i class="fas fa-paper-plane"></i> Request Access</button>`;
       }
     }
     
@@ -593,13 +611,37 @@ function renderMyForms(forms) {
     grid.appendChild(card);
   });
 }
+
+async function requestAccessFromCard(formId) {
+  const btn = document.getElementById(`card-btn-${formId}`);
+  if (btn) {
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    btn.disabled = true;
+  }
+  
+  const success = await requestAccess(formId);
+  
+  if (success) {
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-clock"></i> Pending';
+      btn.style.opacity = '0.7';
+      btn.style.cursor = 'not-allowed';
+      btn.onclick = null;
+    }
+  } else {
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Request Access';
+      btn.disabled = false;
+    }
+  }
+}
   
 async function requestAccess(formId) {
   try {
     const form = allPublicForms.find(f => f.$id === formId);
     if (!form) {
       alert('Form not found.');
-      return;
+      return false;
     }
     
     const existingRequests = await databases.listDocuments(databaseId, requestListId, [
@@ -609,7 +651,7 @@ async function requestAccess(formId) {
     
     if (existingRequests.documents.length > 0) {
       alert('You have already requested access to this form.');
-      return;
+      return false;
     }
     
     let evalStartDate = null;
@@ -640,7 +682,6 @@ async function requestAccess(formId) {
       statusReq: 'pending'
     };
     
-    // Only add date fields if they exist
     if (evalStartDate) {
       requestData.evalStartDate = evalStartDate;
     }
@@ -651,12 +692,15 @@ async function requestAccess(formId) {
 
     await databases.createDocument(databaseId, requestListId, ID.unique(), requestData);
     
+    userRequests[formId] = 'pending';
+    
     alert(`Access request sent for ${form.prodname}. Please wait for manager approval.`);
-    await loadForms();
+    return true;
   } catch (err) {
     console.error('Error requesting access:', err);
     console.error('Full error:', err.message);
     alert(`Failed to send request: ${err.message}`);
+    return false;
   }
 }
 
@@ -772,17 +816,4 @@ document.addEventListener("DOMContentLoaded", loadForms);
 </footer>
 
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
