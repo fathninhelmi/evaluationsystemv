@@ -36,7 +36,14 @@ const account = new Account(client);
 const databaseId = "68ba8a9c001f17064e15";
 const requestListId = "68db7c5d000007c7fd7e";
 const collectionId = "68ba918c0022d2b9a429";
-const preEvalCollectionId = "68c7ced6001bd14d08f4";
+const preEvalCollectionIds = {
+  'AOI': '68c7ced6001bd14d08f4',
+  'SPI': '696dd2b1000c4e985d76',
+  'AXI': '696ed4b900377582df31',
+  'ARV': '696dd29b0034536c09b9', 
+  'XC': '696dd2f20006c0eef2a1',  
+  'XS': '696dd301001cd0f6da66'  
+};
 const evalCollectionId    = "68bf9d5600257a20775a";
 const postEvalCollectionId= "68bf9d62002b4f5f7f23";
 const usersCollectionId = "68ba8c240002116fa647";
@@ -67,38 +74,50 @@ async function loadRequests() {
         const allRequests = [];
         for (const doc of res.documents) {
             let formLocation = '';
-            try {
-                const formDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.formId);
-                formLocation = formDoc.customerLocation || '';
-            } catch (err) {
-                console.warn(`Could not fetch form ${doc.formId}:`, err);
-            }
-            
             let formattedStartDate = 'N/A';
             let formattedEndDate = 'N/A';
+            let productType = 'AOI'; // Default
             
-            if (doc.evalStartDate) {
-                try {
-                    const date = new Date(doc.evalStartDate);
+            // First, get the main form to get the product type
+            try {
+                const mainFormDoc = await databases.getDocument(databaseId, collectionId, doc.formId);
+                productType = mainFormDoc.productType || 'AOI';
+            } catch (err) {
+                console.warn(`Could not fetch main form ${doc.formId}:`, err);
+            }
+            
+            // Get the correct pre-eval collection ID based on product type
+            const preEvalCollectionId = preEvalCollectionIds[productType] || preEvalCollectionIds['AOI'];
+            
+            // Now fetch the pre-eval form to get the dates
+            try {
+                const preEvalDoc = await databases.getDocument(databaseId, preEvalCollectionId, doc.formId);
+                
+                if (preEvalDoc.evalStartDate) {
+                    const date = new Date(preEvalDoc.evalStartDate);
                     const day = String(date.getDate()).padStart(2, '0');
                     const month = String(date.getMonth() + 1).padStart(2, '0');
                     const year = String(date.getFullYear()).slice(-2);
                     formattedStartDate = `${day}/${month}/${year}`;
-                } catch (err) {
-                    console.warn('Error formatting start date:', err);
                 }
-            }
-            
-            if (doc.endEstimateDate) {
-                try {
-                    const date = new Date(doc.endEstimateDate);
+                
+                if (preEvalDoc.endEstimateDate) {
+                    const date = new Date(preEvalDoc.endEstimateDate);
                     const day = String(date.getDate()).padStart(2, '0');
                     const month = String(date.getMonth() + 1).padStart(2, '0');
                     const year = String(date.getFullYear()).slice(-2);
                     formattedEndDate = `${day}/${month}/${year}`;
-                } catch (err) {
-                    console.warn('Error formatting end date:', err);
                 }
+            } catch (err) {
+                console.warn(`Could not fetch pre-eval form ${doc.formId}:`, err);
+            }
+            
+            // Get location from post-eval or main form
+            try {
+                const formDoc = await databases.getDocument(databaseId, postEvalCollectionId, doc.formId);
+                formLocation = formDoc.customerLocation || '';
+            } catch (err) {
+                console.warn(`Could not fetch location for form ${doc.formId}:`, err);
             }
             
             allRequests.push({
