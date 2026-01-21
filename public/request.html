@@ -74,16 +74,30 @@ async function loadRequests() {
                 console.warn(`Could not fetch form ${doc.formId}:`, err);
             }
             
-            let formattedDate = doc.evalDate || 'N/A';
-            if (doc.evalDate && doc.evalDate !== 'N/A') {
+            let formattedStartDate = 'N/A';
+            let formattedEndDate = 'N/A';
+            
+            if (doc.evalStartDate) {
                 try {
-                    const date = new Date(doc.evalDate);
+                    const date = new Date(doc.evalStartDate);
                     const day = String(date.getDate()).padStart(2, '0');
                     const month = String(date.getMonth() + 1).padStart(2, '0');
                     const year = String(date.getFullYear()).slice(-2);
-                    formattedDate = `${day}/${month}/${year}`;
+                    formattedStartDate = `${day}/${month}/${year}`;
                 } catch (err) {
-                    console.warn('Error formatting date:', err);
+                    console.warn('Error formatting start date:', err);
+                }
+            }
+            
+            if (doc.endEstimateDate) {
+                try {
+                    const date = new Date(doc.endEstimateDate);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = String(date.getFullYear()).slice(-2);
+                    formattedEndDate = `${day}/${month}/${year}`;
+                } catch (err) {
+                    console.warn('Error formatting end date:', err);
                 }
             }
             
@@ -93,7 +107,8 @@ async function loadRequests() {
                 username: doc.username || 'Unknown User',
                 prodname: doc.prodname || 'Untitled',
                 customerCompany: doc.customerCompany || 'N/A',
-                evalDate: formattedDate,
+                evalStartDate: formattedStartDate,
+                endEstimateDate: formattedEndDate,
                 statusReq: doc.statusReq || 'pending',
                 location: formLocation
             });
@@ -153,7 +168,7 @@ function renderRequests(requests) {
                 <a href="#" onclick="viewRequestedForm('${request.formId}'); return false;" 
                    style="color: #007bff; text-decoration: underline; cursor: pointer; font-weight: 500;">
                     ${request.prodname}
-                </a>, ${request.customerCompany} (${request.evalDate})
+                </a>, ${request.customerCompany} (Start: ${request.evalStartDate} - End: ${request.endEstimateDate})
                 ${locationBadge}
             </div>
             <div class="actions">
@@ -170,8 +185,12 @@ async function viewRequestedForm(formId) {
 
 async function approveRequest(id) {
     try {
+        const currentDoc = await databases.getDocument(databaseId, requestListId, id);
+
         await databases.updateDocument(databaseId, requestListId, id, {
-            statusReq: 'approved'
+            statusReq: 'approved',
+            evalStartDate: currentDoc.evalStartDate,
+            endEstimateDate: currentDoc.endEstimateDate
         });
         
         alert('Request approved successfully!');
@@ -185,8 +204,12 @@ async function approveRequest(id) {
 
 async function declineRequest(id) {
     try {
+        const currentDoc = await databases.getDocument(databaseId, requestListId, id);
+        
         await databases.updateDocument(databaseId, requestListId, id, {
-            statusReq: 'rejected'
+            statusReq: 'rejected',
+            evalStartDate: currentDoc.evalStartDate,
+            endEstimateDate: currentDoc.endEstimateDate
         });
         
         alert('Request rejected.');
@@ -209,7 +232,3 @@ async function declineRequest(id) {
 </footer>
 </body>
 </html>
-
-
-
-
