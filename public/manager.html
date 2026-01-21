@@ -446,10 +446,20 @@ function initCharts() {
                 productStats[cat].win++;
                 totalWins++;
 
-                // When processing winReason data:
+                } else if (status === 'lose') {
+                productStats[cat].lose++;
+                totalLoses++;
+            }
+        }
+    });
+
+    // Process win reasons
+    evaluationData.forEach(item => {
+        const cat = item.category || 'Other';
+        
+        if (item.winlose && item.winlose.toLowerCase() === 'win') {
             if (Array.isArray(item.winReason)) {
                 item.winReason.forEach(reason => {
-                    // Map database values to display labels
                     let displayReason;
                     switch(reason) {
                         case 'Global_Standardization_Strategy':
@@ -480,11 +490,11 @@ function initCharts() {
                     productStats[cat].winReason[displayReason]++;
                 });
             }
-            
-            // When processing loseReason data:
+        }
+        
+        if (item.winlose && item.winlose.toLowerCase() === 'lose') {
             if (Array.isArray(item.loseReason)) {
                 item.loseReason.forEach(reason => {
-                    // Map database values to display labels
                     let displayReason;
                     switch(reason) {
                         case 'Technical_Requirements_Not_Met':
@@ -512,6 +522,8 @@ function initCharts() {
                     productStats[cat].loseReason[displayReason]++;
                 });
             }
+        }
+    });
 
     // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
@@ -594,7 +606,8 @@ function initCharts() {
 
 // Win Reason Chart
     const winReasonCtx = document.getElementById('winReasonChart');
-    if (winReasonCtx && Object.keys(winReasonStats).length > 0) {
+   const hasWinReasons = categories.some(cat => Object.keys(productStats[cat].winReason).length > 0);
+    if (winReasonCtx && hasWinReasons) {
         if (window.winReasonChartInstance) window.winReasonChartInstance.destroy();
 
         // Define the exact order of reasons we want on X-axis
@@ -720,8 +733,10 @@ function initCharts() {
 
    // Lose Reason Chart
     const loseReasonCtx = document.getElementById('loseReasonChart');
-    if (loseReasonCtx && Object.keys(loseReasonStats).length > 0) {
+    const hasLoseReasons = categories.some(cat => Object.keys(productStats[cat].loseReason).length > 0);
+    if (loseReasonCtx && hasLoseReasons) {
         if (window.loseReasonChartInstance) window.loseReasonChartInstance.destroy();
+    
 
         // Define the exact order of reasons we want on X-axis
         const allReason = [
@@ -1158,6 +1173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
