@@ -446,38 +446,72 @@ function initCharts() {
                 productStats[cat].win++;
                 totalWins++;
 
-                // Handle win reasons as array
-                if (Array.isArray(item.winReason)) {
-                    item.winReason.forEach(reasonValue => {
-                        const reason = reasonValue === 'others' ? 'Others' : formatwinReason(reasonValue);
-                        
-                        winReasonStats[reason] = (winReasonStats[reason] || 0) + 1;
-                        
-                        if (!productStats[cat].winReason[reason]) {
-                            productStats[cat].winReason[reason] = 0;
-                        }
-                        productStats[cat].winReason[reason]++;
-                    });
-                }
-            } else if (status === 'lose' || status === 'loss') {
-                productStats[cat].lose++;
-                totalLoses++;
-
-                // Handle lose reasons as array
-                if (Array.isArray(item.loseReason)) {
-                    item.loseReason.forEach(reasonValue => {
-                        const reason = reasonValue === 'others' ? 'Others' : formatLoseReason(reasonValue);
-                        
-                        loseReasonStats[reason] = (loseReasonStats[reason] || 0) + 1;
-                        
-                        if (!productStats[cat].loseReason[reason]) {
-                            productStats[cat].loseReason[reason] = 0;
-                        }
-                        productStats[cat].loseReason[reason]++;
-                    });
-                }
+                // When processing winReason data:
+            if (Array.isArray(item.winReason)) {
+                item.winReason.forEach(reason => {
+                    // Map database values to display labels
+                    let displayReason;
+                    switch(reason) {
+                        case 'Global_Standardization_Strategy':
+                            displayReason = 'Global Standardization Strategy';
+                            break;
+                        case 'Strong_Existing_Relationship':
+                            displayReason = 'Strong Existing Relationship';
+                            break;
+                        case 'Lowest_Total_Cost_of_Ownership':
+                            displayReason = 'Lowest Total Cost of Ownership';
+                            break;
+                        case 'Superior_Technical_Performance':
+                            displayReason = 'Superior Technical Performance';
+                            break;
+                        case 'Superior_ui/ux':
+                            displayReason = 'Superior UI/UX';
+                            break;
+                        case 'others':
+                            displayReason = 'Others';
+                            break;
+                        default:
+                            displayReason = reason;
+                    }
+                    
+                    if (!productStats[cat].winReason[displayReason]) {
+                        productStats[cat].winReason[displayReason] = 0;
+                    }
+                    productStats[cat].winReason[displayReason]++;
+                });
             }
-        } }); 
+            
+            // When processing loseReason data:
+            if (Array.isArray(item.loseReason)) {
+                item.loseReason.forEach(reason => {
+                    // Map database values to display labels
+                    let displayReason;
+                    switch(reason) {
+                        case 'Technical_Requirements_Not_Met':
+                            displayReason = 'Technical Requirements Not Met';
+                            break;
+                        case 'Lead_Time_Mismatch':
+                            displayReason = 'Lead Time Mismatch';
+                            break;
+                        case 'costs':
+                            displayReason = 'Costs';
+                            break;
+                        case 'advance_features':
+                            displayReason = 'Advance Features';
+                            break;
+                        case 'others':
+                            displayReason = 'Others';
+                            break;
+                        default:
+                            displayReason = reason;
+                    }
+                    
+                    if (!productStats[cat].loseReason[displayReason]) {
+                        productStats[cat].loseReason[displayReason] = 0;
+                    }
+                    productStats[cat].loseReason[displayReason]++;
+                });
+            }
 
     // Update total wins/loses
     document.getElementById('totalWins').textContent = totalWins;
@@ -564,7 +598,14 @@ function initCharts() {
         if (window.winReasonChartInstance) window.winReasonChartInstance.destroy();
 
         // Define the exact order of reasons we want on X-axis
-        const allwinReason = ['Good value of money', 'Best Product', 'Advanced features', 'Others'];
+       const allwinReason = [
+            'Global Standardization Strategy',
+            'Strong Existing Relationship', 
+            'Lowest Total Cost of Ownership',
+            'Superior Technical Performance',
+            'Superior UI/UX',
+            'Others'
+        ];
         const categoryColors = ['#001f4d','#003366','#004c99','#3366cc','#6699ff','#99ccff']; 
 
         const winDatasets = categories.map((cat, idx) => {
@@ -683,7 +724,13 @@ function initCharts() {
         if (window.loseReasonChartInstance) window.loseReasonChartInstance.destroy();
 
         // Define the exact order of reasons we want on X-axis
-        const allReason = ['Expensive', 'Better Product', 'Competitor got advance features', 'Others'];
+        const allReason = [
+            'Technical Requirements Not Met',
+            'Lead Time Mismatch',
+            'Costs',
+            'Advance Features',
+            'Others'
+        ];
         const categoryColors = ['#001f4d','#003366','#004c99','#3366cc','#6699ff','#99ccff'];
 
         const datasets = categories.map((cat, idx) => {
@@ -1111,6 +1158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 </body>
 </html>
+
 
 
 
