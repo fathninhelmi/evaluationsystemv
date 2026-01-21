@@ -612,27 +612,44 @@ async function requestAccess(formId) {
       return;
     }
     
-    let evalDate = 'N/A';
+    let evalStartDate = null;
+    let endEstimateDate = null;
+    
     try {
       const productType = (form.productType || "AOI").toUpperCase().trim();
       const correctPreEvalId = preEvalCollectionIds[productType] || preEvalCollectionIds['AOI'];
       
       const preEvalForm = await databases.getDocument(databaseId, correctPreEvalId, formId);
-      if (preEvalForm.evalDate) {
-        evalDate = preEvalForm.evalDate;
+      
+      if (preEvalForm.evalStartDate) {
+        evalStartDate = preEvalForm.evalStartDate;
+      }
+      
+      if (preEvalForm.endEstimateDate) {
+        endEstimateDate = preEvalForm.endEstimateDate;
       }
     } catch (err) {
-      console.warn('Could not fetch eval date:', err);
+      console.warn('Could not fetch eval dates:', err);
     }
 
-    await databases.createDocument(databaseId, requestListId, ID.unique(), {
+    const requestData = {
       formId: formId,
       username: currentUser.name || currentUser.email,
       prodname: form.prodname || 'Untitled',
       customerCompany: form.customerCompany || 'N/A',
-      evalDate: evalDate,
       statusReq: 'pending'
-    });
+    };
+    
+    // Only add date fields if they exist
+    if (evalStartDate) {
+      requestData.evalStartDate = evalStartDate;
+    }
+    
+    if (endEstimateDate) {
+      requestData.endEstimateDate = endEstimateDate;
+    }
+
+    await databases.createDocument(databaseId, requestListId, ID.unique(), requestData);
     
     alert(`Access request sent for ${form.prodname}. Please wait for manager approval.`);
     await loadForms();
@@ -757,6 +774,7 @@ document.addEventListener("DOMContentLoaded", loadForms);
 </body>
 
 </html>
+
 
 
 
