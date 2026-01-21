@@ -674,7 +674,7 @@
     </div>
     <div class="form-group-evalxc" style="display: block;">
         <div style="border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; background: white;">
-            <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" style="width: 100%; border: none; outline: none; cursor: pointer;">
+            <input type="file" id="attachmentInput" accept=".png,.pdf,image/png,application/pdf" multiple style="width: 100%; border: none; outline: none; cursor: pointer;">
         </div>
         <div id="attachmentPreview" style="margin-top: 10px;"></div>
     </div>
@@ -712,7 +712,7 @@ const viewMode = params.get("mode") === "view";
 let currentUser = null;
 let formData = null;
 let referenceDocData = null;
-let uploadedFileId = null;
+let uploadedFileId = [];
 let currentStatus = "draft";
 let referenceData = {};
 let dynamicCategories = {};
@@ -896,24 +896,33 @@ function populateForm(preEvalData, referenceData) {
         }
     }
     
-    if (data.attachmentId) {
-        uploadedFileId = data.attachmentId;
+if (data.attachmentId && Array.isArray(data.attachmentId) && data.attachmentId.length > 0) {
+    uploadedFileId = data.attachmentId;
+    let previewHtml = '';
+    
+    data.attachmentId.forEach((fileId, index) => {
         try {
-            const fileUrl = storage.getFileView(bucketId, data.attachmentId);
-            const fileName = data.attachmentName || 'Uploaded file';
-            document.getElementById('attachmentPreview').innerHTML = `
-                <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
+            const fileUrl = storage.getFileView(bucketId, fileId);
+            const fileName = (data.attachmentName && data.attachmentName[index]) 
+                ? data.attachmentName[index] 
+                : `Uploaded file ${index + 1}`;
+            
+            previewHtml += `
+                <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px; margin-bottom: 8px;" data-file-index="${index}">
                     <span style="flex: 1; color:black; font-size:12px;">${fileName}</span>
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <a href="${fileUrl}" target="_blank" class="btn-view"><i class="fas fa-eye"></i></a>
-                        ${!viewMode ? '<button type="button" class="btn-remove" onclick="removeAttachment()"><i class="fas fa-times"></i></button>' : ''}
+                        ${!viewMode ? `<button type="button" class="btn-remove" onclick="removeExistingAttachment(${index})"><i class="fas fa-times"></i></button>` : ''}
                     </div>
                 </div>
             `;
         } catch (error) {
             console.error('Error loading attachment:', error);
         }
-    }
+    });
+    
+    document.getElementById('attachmentPreview').innerHTML = previewHtml;
+}
     const textFields = [
         'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 
         'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp',
@@ -1281,10 +1290,34 @@ async function saveForm(status = "draft") {
         const collectedData = collectFormData();
         const fileInput = document.getElementById('attachmentInput');
         
+        // Handle new file uploads
         if (fileInput && fileInput.files.length > 0) {
-            const fileId = await uploadFile();
-            if (fileId) {
-                uploadedFileId = fileId;
+            const newFileIds = [];
+            const newFileNames = [];
+            
+            // Upload all selected files
+            for (let i = 0; i < fileInput.files.length; i++) {
+                showToast(`Uploading file ${i + 1} of ${fileInput.files.length}...`);
+                const fileId = await uploadFile(fileInput.files[i]);
+                if (fileId) {
+                    newFileIds.push(fileId);
+                    newFileNames.push(fileInput.files[i].name);
+                }
+            }
+            
+            // Merge with existing attachments
+            if (uploadedFileId && Array.isArray(uploadedFileId) && uploadedFileId.length > 0) {
+                uploadedFileId = [...uploadedFileId, ...newFileIds];
+            } else {
+                uploadedFileId = newFileIds;
+            }
+            
+            // Update file names
+            if (formData && formData.attachmentName && Array.isArray(formData.attachmentName)) {
+                const existingNames = formData.attachmentName;
+                collectedData.attachmentName = [...existingNames, ...newFileNames];
+            } else {
+                collectedData.attachmentName = newFileNames;
             }
         }
 
@@ -1343,14 +1376,14 @@ async function saveForm(status = "draft") {
             status: status
         };
         
-        if (uploadedFileId) {
-            saveData.attachmentId = uploadedFileId;
-            if (fileInput && fileInput.files.length > 0) {
-                saveData.attachmentName = fileInput.files[0].name;
-            } else if (formData && formData.attachmentName) {
-                saveData.attachmentName = formData.attachmentName;
-            }
-        }
+        if (uploadedFileId && Array.isArray(uploadedFileId) && uploadedFileId.length > 0) {
+                    saveData.attachmentId = uploadedFileId;
+                    if (collectedData.attachmentName && collectedData.attachmentName.length > 0) {
+                        saveData.attachmentName = collectedData.attachmentName;
+                    } else if (formData && formData.attachmentName) {
+                        saveData.attachmentName = formData.attachmentName;
+                    }
+                }
         
         for (const key in saveData) {
             if (Array.isArray(saveData[key])) {
@@ -1490,74 +1523,127 @@ function initFileUpload() {
 }
 
 function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
     const validTypes = ['image/png', 'application/pdf'];
-    if (!validTypes.includes(file.type)) {
-        alert('Please upload only PNG or PDF files.');
-        event.target.value = '';
-        return;
-    }
-
     const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-        alert('File size must be less than 10MB.');
+    
+    let allValid = true;
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        if (!validTypes.includes(file.type)) {
+            alert(`File "${file.name}" must be PNG or PDF.`);
+            allValid = false;
+            break;
+        }
+        
+        if (file.size > maxSize) {
+            alert(`File "${file.name}" must be less than 10MB.`);
+            allValid = false;
+            break;
+        }
+    }
+    
+    if (!allValid) {
         event.target.value = '';
         return;
     }
 
-    displayFilePreview(file);
+    displayFilePreview(files);
 }
 
-function displayFilePreview(file) {
+function displayFilePreview(files) {
     const preview = document.getElementById('attachmentPreview');
+    let previewHtml = preview.innerHTML; 
 
-    const fileName = file.name;
-    const fileUrl = URL.createObjectURL(file);
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileName = file.name;
+        const fileUrl = URL.createObjectURL(file);
 
-    preview.innerHTML = `
-        <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px;">
-            <span style="flex: 1; color:black; font-size:12px;">${fileName}</span>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <a href="${fileUrl}" target="_blank" class="btn-view">
-                    <i class="fas fa-eye"></i>
-                </a>
-                ${!viewMode ? `
-                    <button type="button" class="btn-remove" onclick="removeAttachment()">
-                        <i class="fas fa-times"></i>
-                    </button>` : ''}
+        previewHtml += `
+            <div style="display: flex; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 5px; gap: 10px; margin-bottom: 8px;" data-new-file="true">
+                <span style="flex: 1; color:black; font-size:12px;">${fileName} <span style="color: #666; font-size: 11px;">(pending upload)</span></span>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <a href="${fileUrl}" target="_blank" class="btn-view">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    ${!viewMode ? `
+                        <button type="button" class="btn-remove" onclick="removeNewFilePreview(this)">
+                            <i class="fas fa-times"></i>
+                        </button>` : ''}
+                </div>
             </div>
-        </div>
-    `;
-}
-
-
-function removeAttachment() {
-    document.getElementById('attachmentInput').value = '';
-    document.getElementById('attachmentPreview').innerHTML = '';
-    uploadedFileId = null;
-}
-
-async function uploadFile() {
-    const fileInput = document.getElementById('attachmentInput');
-    const file = fileInput.files[0];
+        `;
+    }
     
+    preview.innerHTML = previewHtml;
+}
+
+
+function removeExistingAttachment(index) {
+    if (!confirm('Are you sure you want to remove this file?')) {
+        return;
+    }
+    
+    if (Array.isArray(uploadedFileId)) {
+        uploadedFileId.splice(index, 1);
+        
+        // Also remove from attachmentName if it exists
+        if (formData && formData.attachmentName && Array.isArray(formData.attachmentName)) {
+            formData.attachmentName.splice(index, 1);
+        }
+        
+        // Remove the preview element
+        const previewDiv = document.getElementById('attachmentPreview');
+        const fileItem = previewDiv.querySelector(`[data-file-index="${index}"]`);
+        if (fileItem) {
+            fileItem.remove();
+        }
+        
+        // Update remaining indices
+        const remainingItems = previewDiv.querySelectorAll('[data-file-index]');
+        remainingItems.forEach((item, newIndex) => {
+            item.setAttribute('data-file-index', newIndex);
+            const removeBtn = item.querySelector('.btn-remove');
+            if (removeBtn) {
+                removeBtn.setAttribute('onclick', `removeExistingAttachment(${newIndex})`);
+            }
+        });
+        
+        // If all files removed, clear everything
+        if (uploadedFileId.length === 0) {
+            uploadedFileId = [];
+            previewDiv.innerHTML = '';
+        }
+    }
+}
+
+function removeNewFilePreview(button) {
+    // Remove the preview for files that haven't been uploaded yet
+    button.closest('div[data-new-file="true"]').remove();
+    
+    // Clear the file input to remove the selected files
+    const fileInput = document.getElementById('attachmentInput');
+    fileInput.value = '';
+}
+
+async function uploadFile(file) {
     if (!file) return null;
 
     try {
-        showToast('Uploading file...');
         const response = await storage.createFile(
             bucketId,
             'unique()',
             file
         );
-        uploadedFileId = response.$id;
-        showToast('File uploaded successfully!');
         return response.$id;
     } catch (error) {
         console.error('File upload error:', error);
-        showToast('Failed to upload file', true);
+        showToast('Failed to upload file: ' + file.name, true);
         return null;
     }
 }
