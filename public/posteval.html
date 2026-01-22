@@ -32,12 +32,12 @@
     <form id="postEvalForm" style="display: none;">
         <!-- Win/Lose -->
         <div class="form-section">
-            <div class="section-title">Win / Lose</div>
+            <div class="section-title">Win / Loss</div>
             <div class="form-group-eval">
                 <div class="result-buttons">
                     <button type="button" class="result-btn" data-result="win">Win</button>
                     <button type="button" class="result-btn" data-result="pending">Pending</button>
-                    <button type="button" class="result-btn" data-result="lose">Lose</button>
+                    <button type="button" class="result-btn" data-result="lose">Loss</button>
                 </div>
                 <input type="hidden" name="result" id="result" required>
             </div>
@@ -82,7 +82,7 @@
             
             <div id="loseReasonSection" style="display: none; margin-top: 20px;">
                 <div class="form-group-eval">
-                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">Reasons for Lose (Select all that apply):</label>
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">Reasons for Loss (Select all that apply):</label>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <label style="display: flex; align-items: center; cursor: pointer;">
                             <input type="checkbox" name="loseReason" value="Technical_Requirements_Not_Met" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
@@ -1143,5 +1143,6 @@ document.addEventListener("DOMContentLoaded", initForm);
 </body>
 
 </html>
+
 
 
