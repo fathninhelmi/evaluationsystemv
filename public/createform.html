@@ -43,9 +43,12 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <input type="text" id="eventName" placeholder="Enter product name" required>
-      </div>
+    <div class="form-group">
+      <select id="eventName" required>
+        <option value="" disabled selected>Select product name</option>
+      </select>
+    </div>
+        
       <div class="form-group">
         <input type="text" id="customerCompany" placeholder="Enter customer company name" required>
       </div>
@@ -107,6 +110,46 @@ let geocodeTimeout = null;
   ]
 };
 
+const productNameOptions = {
+  'AXI': [
+    'V810Ai S3',
+    'V810Ai S2 XLL',
+    'V810Ai S2 XLT M',
+    'V810Ai S2 XLT',
+    'V810Ai S2 XLW',
+    'V810Ai QX1',
+    'V810i S2 EX'
+  ],
+  'ARV': [
+    'V9i Coating Inspection (CI)',
+    'V9i Final Inspection (FI)'
+  ],
+  'AOI': [
+    'V510i Optimus 3D',
+    'V510i XL',
+    'V510i XXL',
+    'V510i OP XXL',
+    'V510i XLW',
+    'V510i SE',
+    'V510i SE XXL',
+    'V510Ai ST',
+    'V510Ai DST',
+    'V510i R',
+    'AOI for Advanced Packaging and Microelectronics'
+  ],
+  'SPI': [
+    'V310i Optimus 3D',
+    'V310i XL',
+    'V310i XXL',
+    'V310i OP XXL',
+    'V310i SE',
+    'V310i SE XXL',
+    'SPI for Advanced Packaging and Microelectronics'
+  ],
+  'XC': [],
+  'XS': []
+};
+
 document.getElementById("productType").addEventListener("change", (e) => {
   const productType = e.target.value;
   const categoryGroup = document.getElementById("productCategoryGroup");
@@ -128,6 +171,20 @@ document.getElementById("productType").addEventListener("change", (e) => {
     categoryGroup.style.display = "none";
     categorySelect.required = false;
     categorySelect.innerHTML = '<option value="" disabled selected>Select Product Category</option>';
+  }
+
+    const eventNameSelect = document.getElementById("eventName");
+  if (productNameOptions[productType] && productNameOptions[productType].length > 0) {
+    eventNameSelect.innerHTML = `<option value="" disabled selected>Select ${productType} Product Name</option>`;
+    
+    productNameOptions[productType].forEach(name => {
+      const optionEl = document.createElement("option");
+      optionEl.value = name;
+      optionEl.textContent = name;
+      eventNameSelect.appendChild(optionEl);
+    });
+  } else {
+    eventNameSelect.innerHTML = `<option value="" disabled selected>Select ${productType} Product Name</option>`;
   }
 });
 
@@ -399,6 +456,7 @@ document.getElementById("eventForm").addEventListener("submit", async (e) => {
 
 </body>
 </html>
+
 
 
 
