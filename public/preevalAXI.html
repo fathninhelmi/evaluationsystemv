@@ -875,13 +875,8 @@ function toggleSectionsByProduct(productType) {
     });
     const attachmentSection = document.querySelector('.form-section:has(#attachmentInput)');
     if (attachmentSection) {
-        if (productType === 'AXI') {
-            attachmentSection.style.display = 'none';
-            attachmentSection.classList.add('hidden-section');
-        } else {
-            attachmentSection.style.display = '';
-            attachmentSection.classList.remove('hidden-section');
-        }
+        attachmentSection.style.display = '';
+        attachmentSection.classList.remove('hidden-section');
     }
     
     console.log("Sections toggled for product type:", productType);
