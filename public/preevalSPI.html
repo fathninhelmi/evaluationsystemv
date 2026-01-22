@@ -32,7 +32,7 @@
     
     <form id="preEvalForm" style="display: none;">
 
-        <!-- Section 1 -->
+<!-- Section 1 -->
 <div class="form-section two-column" data-section="1">
     <div class="section-title">GENERAL</div>
     <div class="form-group-evalxc-compact">
@@ -111,7 +111,7 @@
     </div>
 </div>
 
-        <!-- Section 3 --->
+<!-- Section 3 --->
 <div class="form-section two-column" data-section="3">
     <div class="section-title">TARGET INSPECTION PERFORMANCE</div>
     <div class="form-group-evalxc-compact">
@@ -123,16 +123,16 @@
         </select>
     </div>
     <div class="form-group-evalxc-compact">
-        <label>FPY target if any <span class="required-asterisk">*</span>:</label>
-        <select id="fpyTarget" name="fpyTarget" required>
+        <label>FPY target if any:</label>
+        <select id="fpyTarget" name="fpyTarget">
             <option value="">Select</option>
             <option value="95">≥ 95%</option>
             <option value="no_concern">No concern</option>
         </select>
     </div>
     <div class="form-group-evalxc-compact">
-        <label>Product segment <span class="required-asterisk">*</span>:</label>
-        <select id="prodseg" name="prodseg" required>
+        <label>Product segment:</label>
+        <select id="prodseg" name="prodseg">
             <option value="">Select</option>
             <option value="aerospace">Aerospace</option>
             <option value="medical">Medical</option>
@@ -144,32 +144,32 @@
         </select>
     </div>
     <div class="form-group-evalxc-compact">
-        <label>Require angular inspection <span class="required-asterisk">*</span>:</label>
-        <select id="reqinspect" name="reqinspect" required>
+        <label>Require angular inspection:</label>
+        <select id="reqinspect" name="reqinspect">
             <option value="">Select</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
         </select>
     </div>
     <div class="form-group-evalxc-compact">
-        <label>Cycle time requirement <span class="required-asterisk">*</span>:</label>
-        <input type="text" id="cycleTime" name="cycleTime" required>
+        <label>Cycle time requirement:</label>
+        <input type="text" id="cycleTime" name="cycleTime">
     </div>
     <div class="form-group-evalxc-compact">
-        <label>False call PPM <span class="required-asterisk">*</span>:</label>
-        <input type="text" id="falseCallppm" name="falseCallppm" required>
+        <label>False call PPM:</label>
+        <input type="text" id="falseCallppm" name="falseCallppm">
     </div>
     <div class="form-group-evalxc" style="grid-column: span 2;">
-        <label>Others <span class="required-asterisk">*</span>:</label>
-        <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;" required></textarea>
+        <label>Others:</label>
+        <textarea id="otherreq" name="otherreq" style="max-width: 100%; width: 100%;"></textarea>
     </div>
 </div>
 
-        <!-- Section 4 -->
+<!-- Section 4 -->
 <div class="form-section" data-section="4">
     <div class="section-title">PCB</div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Board thickness <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Board thickness:</div>
         <div class="checkbox-options-xc">
             <label><input type="checkbox" name="boardThickness" value="normal_0_5_4mm">Normal (0.5 - 4mm)</label>
             <label><input type="checkbox" name="boardThickness" value="0_2_4mm">0.2 - 4mm</label>
@@ -179,12 +179,12 @@
     </div>
     
     <div class="form-group-evalxc" style="grid-column: span 2;">
-        <label>Smallest Pad size <span class="required-asterisk">*</span>:</label>
-        <textarea id="smallestPadSize" name="smallestPadSize" style="max-width: 100%; width: 100%;" required></textarea>
+        <label>Smallest Pad size:</label>
+        <textarea id="smallestPadSize" name="smallestPadSize" style="max-width: 100%; width: 100%;"></textarea>
     </div>
 
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Inspection requirement <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Inspection requirement:</div>
         <div class="checkbox-options-xc">
             <label><input type="checkbox" name="inspectionRequirement" value="solder_paste">Solder Paste</label>
             <label><input type="checkbox" name="inspectionRequirement" value="glue">Glue</label>
@@ -194,7 +194,7 @@
     </div>
 
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Programming Input files <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Programming Input files:</div>
         <div class="checkbox-options-xc">
             <label><input type="checkbox" name="programmingInputFiles" value="pcb_cad">PCB CAD</label>
             <label><input type="checkbox" name="programmingInputFiles" value="gerber">Gerber</label>
@@ -208,7 +208,7 @@
         <div class="form-section" data-section="5">
             <div class="section-title">MACHINE TYPE</div>
                 <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Conveyor <span class="required-asterisk">*</span>:</div>
+                <div class="requirement-xc">Conveyor:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="conveyor" value="staging">Staging</label>
                     <label><input type="checkbox" name="conveyor" value="linear_guide_awa">Linear Guide AWA</label>
@@ -220,7 +220,7 @@
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Machine type selection by board size <span class="required-asterisk">*</span>:</div>
+                <div class="requirement-xc">Machine type selection by board size:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="machineTypeByBoardSize" value="standard">Standard</label>
                     <label><input type="checkbox" name="machineTypeByBoardSize" value="xl">XL</label>
@@ -232,7 +232,7 @@
             </div>
 
             <div class="checkbox-grid-xc">
-                <div class="requirement-xc">Board Flow Direction <span class="required-asterisk">*</span>:</div>
+                <div class="requirement-xc">Board Flow Direction:</div>
                 <div class="checkbox-options-xc">
                     <label><input type="checkbox" name="boardFlowDirection" value="l_r">L-R</label>
                     <label><input type="checkbox" name="boardFlowDirection" value="r_l">R-L</label>
@@ -242,8 +242,8 @@
             </div>
 
             <div class="form-group-evalxc">
-                <label>Board Stop Requirement <span class="required-asterisk">*</span>:</label>
-                <select id="boardStopRequirement" name="boardStopRequirement" required>
+                <label>Board Stop Requirement:</label>
+                <select id="boardStopRequirement" name="boardStopRequirement">
                     <option value="">Select</option>
                     <option value="hard_stop">Hard Stop</option>
                     <option value="sensor_stop">Sensor Stop</option>
@@ -255,8 +255,8 @@
 <div class="form-section" data-section="6">
     <div class="section-title">VISION</div>
     <div class="form-group-evalxc-compact">
-        <label>Camera Type<span class="required-asterisk">*</span>:</label>
-        <select id="camera" name="camera" required>
+        <label>Camera Type:</label>
+        <select id="camera" name="camera">
             <option value="">Select</option>
             <option value="12mp">12MP CXP</option>
             <option value="4mp">4MP Camera Link</option>
@@ -264,7 +264,7 @@
         </select>
     </div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Lens <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Lens:</div>
         <div class="checkbox-options-xc">
             <label><input type="checkbox" name="lens" value="20um">20um</label>
             <label><input type="checkbox" name="lens" value="15um">15um</label>
@@ -275,7 +275,7 @@
         </div>
     </div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Projector <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Projector:</div>
         <div class="checkbox-options-xc">
             <label><input type="checkbox" name="projector" value="x2_projectors">x2 Projectors</label>
             <label><input type="checkbox" name="projector" value="x4_projectors">x4 Projectors</label>
@@ -287,8 +287,8 @@
 <div class="form-section two-column" data-section="7">
     <div class="section-title">IPC SPECS</div>
     <div class="form-group-evalxc-compact">
-        <label>Operating System <span class="required-asterisk">*</span>:</label>
-        <select id="operatingSystem" name="operatingSystem" required>
+        <label>Operating System:</label>
+        <select id="operatingSystem" name="operatingSystem">
             <option value="">Select</option>
             <option value="windows_11">Window 11</option>
             <option value="windows_10">Window 10</option>
@@ -298,8 +298,8 @@
     </div>
 
     <div class="form-group-evalxc-compact">
-        <label>CPU <span class="required-asterisk">*</span>:</label>
-        <select id="cpu" name="cpu" required>
+        <label>CPU:</label>
+        <select id="cpu" name="cpu">
             <option value="">Select</option>
             <option value="i9">i9</option>
             <option value="i7">i7</option>
@@ -308,8 +308,8 @@
     </div>
 
     <div class="form-group-evalxc-compact">
-        <label>RAM <span class="required-asterisk">*</span>:</label>
-        <select id="ram" name="ram" required>
+        <label>RAM:</label>
+        <select id="ram" name="ram">
             <option value="">Select</option>
             <option value="lower_than_16gb">Lower than 16GB</option>
             <option value="16gb">16GB</option>
@@ -319,8 +319,8 @@
     </div>
 
     <div class="form-group-evalxc-compact">
-        <label>GPU <span class="required-asterisk">*</span>:</label>
-        <select id="gpu" name="gpu" required>
+        <label>GPU:</label>
+        <select id="gpu" name="gpu">
             <option value="">Select</option>
             <option value="rtx_50_series">RTX 50 series</option>
             <option value="rtx_40_series">RTX 40 series</option>
@@ -331,8 +331,8 @@
     </div>
 
     <div class="form-group-evalxc-compact">
-        <label>C Drive Storage <span class="required-asterisk">*</span>:</label>
-        <select id="cDriveStorage" name="cDriveStorage" required>
+        <label>C Drive Storage:</label>
+        <select id="cDriveStorage" name="cDriveStorage">
             <option value="">Select</option>
             <option value="lower_than_512gb">Lower than 512GB</option>
             <option value="512gb">512GB</option>
@@ -350,7 +350,7 @@
         <div class="header-evalpr">Software</div>
         <div class="header-evalpr">Hardware</div>
         
-        <div class="requirementpr">Offline Programming (OLP) <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">Offline Programming (OLP)</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="olpSoftware" value="license">
@@ -364,7 +364,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">Offline VVTS <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">Offline VVTS</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="offlineVvtsSoftware" value="license">
@@ -378,7 +378,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">VDSPC 2.0 <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">VDSPC 2.0</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="vdspcSoftware" value="license">
@@ -392,7 +392,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">V-One <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">V-One</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="voneSoftware" value="license">
@@ -406,7 +406,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">Job Converter Tool <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">Job Converter Tool</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="jobConverterSoftware" value="vayopro_spi_expert">
@@ -424,7 +424,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">V-Tune <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">V-Tune</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="vTuneSoftware" value="system_gt_32gb_ram">
@@ -436,7 +436,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">One-View <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">One-View</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="oneViewSoftware" value="license">
@@ -458,7 +458,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">Smart Manufacturing <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">Smart Manufacturing</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="smartManufacturingSoftware" value="secs_gem">
@@ -480,7 +480,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">MES <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">MES</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="mesSoftware" value="available_feature">
@@ -494,7 +494,7 @@
             </div>
         </div>
         
-        <div class="requirementpr">Barcode related <span class="required-asterisk">*</span></div>
+        <div class="requirementpr">Barcode related</div>
         <div class="checkbox-containerpr">
             <div class="checkbox-itempr">
                 <input type="checkbox" name="barcodeSoftware" value="available_feature">
@@ -514,13 +514,13 @@
 <div class="form-section" data-section="9">
     <div class="section-title">HARDWARE</div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">ESD Rubber Pads <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">ESD Rubber Pads:</div>
         <div class="checkbox-options-xc">
             <label><input type="checkbox" name="esdRubberPads" value="smaller_than_0201">Component smaller than 0201</label>
         </div>
     </div>
     <div class="checkbox-grid-xc">
-        <div class="requirement-xc">Cleanroom <span class="required-asterisk">*</span>:</div>
+        <div class="requirement-xc">Cleanroom:</div>
         <div class="checkbox-options-xc">
             <label><input type="checkbox" name="cleanroom" value="ionizer">Ionizer kit</label>
             <label><input type="checkbox" name="cleanroom" value="hepa">HEPA filter</label>
@@ -530,7 +530,7 @@
 
 <!-- Section 10 -->
 <div class="form-section" data-section="10">
-    <div class="section-title">TOOLS<span class="required-asterisk">*</span></div>
+    <div class="section-title">TOOLS</div>
     <div class="checkbox-options-xc">
         <label><input type="checkbox" name="tools" value="leveling_meter">Leveling meter</label>
         <label><input type="checkbox" name="tools" value="auto_3d_calibration_jig">Auto 3D Calibration Jig</label>
@@ -548,7 +548,7 @@
 
 <!-- Section 11 -->
 <div class="form-section" data-section="11">
-    <div class="section-title">Customers' Current Top Issues<span class="required-asterisk">*</span></div>
+    <div class="section-title">Customers' Current Top Issues</div>
     <div class="table-section">
         <table class="eval-table" id="custIssueTable">
             <thead>
@@ -697,18 +697,15 @@ function injectDynamicCategories() {
         const categoryData = dynamicCategories[categoryName];
         const features = categoryData.features;
         const formFields = categoryData.formFields || {};
-        
 
         const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
         const softwareFieldName = formFields.software || `${baseName}Software`;
         const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
         
-
         const categoryRow = document.createElement('div');
         categoryRow.className = 'requirementpr';
         categoryRow.textContent = categoryName + ' ';
         categoryRow.setAttribute('data-dynamic-category', categoryName);
-        
 
         const softwareColumn = document.createElement('div');
         softwareColumn.className = 'checkbox-containerpr';
@@ -753,9 +750,7 @@ async function initForm() {
         }
 
         await loadAllCategories();
-
         await loadExistingForm();
-
         injectDynamicCategories();
 
         const userRole = await checkUserRole();
@@ -854,8 +849,7 @@ function populateForm(preEvalData, referenceData) {
             customerCompanyElement.value = data.customerCompany;
         }
     }
-    
-    // Handle attachment
+
 if (data.attachmentId && Array.isArray(data.attachmentId) && data.attachmentId.length > 0) {
     uploadedFileId = data.attachmentId;
     let previewHtml = '';
@@ -1219,16 +1213,13 @@ function collectFormData() {
     Object.keys(dynamicCategories).forEach(categoryName => {
         const categoryData = dynamicCategories[categoryName];
         const formFields = categoryData.formFields || {};
-        
         const baseName = categoryName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
         const softwareFieldName = formFields.software || `${baseName}Software`;
         const hardwareFieldName = formFields.hardware || `${baseName}Hardware`;
-        
         const softwareBoxes = document.querySelectorAll(`input[name="${softwareFieldName}"]:checked`);
         if (softwareBoxes.length > 0) {
             data[softwareFieldName] = Array.from(softwareBoxes).map(cb => cb.value);
         }
-        
         const hardwareBoxes = document.querySelectorAll(`input[name="${hardwareFieldName}"]:checked`);
         if (hardwareBoxes.length > 0) {
             data[hardwareFieldName] = Array.from(hardwareBoxes).map(cb => cb.value);
@@ -1250,13 +1241,9 @@ async function saveForm(status = "draft") {
     try {
         const collectedData = collectFormData();
         const fileInput = document.getElementById('attachmentInput');
-        
-        // Handle new file uploads
         if (fileInput && fileInput.files.length > 0) {
             const newFileIds = [];
             const newFileNames = [];
-            
-            // Upload all selected files
             for (let i = 0; i < fileInput.files.length; i++) {
                 showToast(`Uploading file ${i + 1} of ${fileInput.files.length}...`);
                 const fileId = await uploadFile(fileInput.files[i]);
@@ -1265,15 +1252,11 @@ async function saveForm(status = "draft") {
                     newFileNames.push(fileInput.files[i].name);
                 }
             }
-            
-            // Merge with existing attachments
             if (uploadedFileId && Array.isArray(uploadedFileId) && uploadedFileId.length > 0) {
                 uploadedFileId = [...uploadedFileId, ...newFileIds];
             } else {
                 uploadedFileId = newFileIds;
             }
-            
-            // Update file names
             if (formData && formData.attachmentName && Array.isArray(formData.attachmentName)) {
                 const existingNames = formData.attachmentName;
                 collectedData.attachmentName = [...existingNames, ...newFileNames];
@@ -1285,12 +1268,11 @@ async function saveForm(status = "draft") {
         if (status === "complete") {
             const isAXI = referenceDocData && referenceDocData.productType === 'AXI';      
             const requiredFields = [
-        'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 'evalStartDate', 'endEstimateDate',
-        'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existcust', 'machineHealthChecked', 'venue',
-        'cycleTime', 'falseCallppm', 'otherreq', 'smallestPadSize', 'inspectionEnvironment', 
-        'fpyTarget', 'prodseg', 'reqinspect', 'boardStopRequirement', 
-        'camera', 'operatingSystem', 'cpu', 'ram', 'gpu', 'cDriveStorage' 
+                'customerCompany', 'custTechChamp', 'endCustomerName', 'competitor', 'compModel', 'evalStartDate', 'endEstimateDate',
+                'scpSalesChamp', 'scpTechChamp', 'vitroxSalesChamp', 'vitroxTechChamp', 'existcust', 'machineHealthChecked', 'venue',
+                'inspectionEnvironment'
             ];
+            
             if (!isAXI) {
                 requiredFields.push('falseCallppm');
             }
@@ -1488,7 +1470,7 @@ function handleFileSelect(event) {
 
 function displayFilePreview(files) {
     const preview = document.getElementById('attachmentPreview');
-    let previewHtml = preview.innerHTML; // Keep existing previews
+    let previewHtml = preview.innerHTML;
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -1521,20 +1503,14 @@ function removeExistingAttachment(index) {
     
     if (Array.isArray(uploadedFileId)) {
         uploadedFileId.splice(index, 1);
-        
-        // Also remove from attachmentName if it exists
         if (formData && formData.attachmentName && Array.isArray(formData.attachmentName)) {
             formData.attachmentName.splice(index, 1);
         }
-        
-        // Remove the preview element
         const previewDiv = document.getElementById('attachmentPreview');
         const fileItem = previewDiv.querySelector(`[data-file-index="${index}"]`);
         if (fileItem) {
             fileItem.remove();
         }
-        
-        // Update remaining indices
         const remainingItems = previewDiv.querySelectorAll('[data-file-index]');
         remainingItems.forEach((item, newIndex) => {
             item.setAttribute('data-file-index', newIndex);
@@ -1543,8 +1519,6 @@ function removeExistingAttachment(index) {
                 removeBtn.setAttribute('onclick', `removeExistingAttachment(${newIndex})`);
             }
         });
-        
-        // If all files removed, clear everything
         if (uploadedFileId.length === 0) {
             uploadedFileId = [];
             previewDiv.innerHTML = '';
@@ -1553,10 +1527,7 @@ function removeExistingAttachment(index) {
 }
 
 function removeNewFilePreview(button) {
-    // Remove the preview for files that haven't been uploaded yet
     button.closest('div[data-new-file="true"]').remove();
-    
-    // Clear the file input to remove the selected files
     const fileInput = document.getElementById('attachmentInput');
     fileInput.value = '';
 }
@@ -1591,7 +1562,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 </script>
-
 <footer class="footer">
     <span>© 2025 ViTrox. All rights reserved.</span>
 </footer>
